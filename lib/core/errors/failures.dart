@@ -1,5 +1,5 @@
 /// Clases Failure tipadas para manejo de errores.
-sealed class Failure {
+sealed class Failure implements Exception {
   const Failure({required this.message, this.code});
 
   final String message;

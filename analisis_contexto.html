@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Análisis del Contexto y Detección de Necesidades</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            color: #1a1a2e;
+            line-height: 1.8;
+            background: #f8f9fa;
+        }
+
+        @media print {
+            body { background: white; }
+            .page-break { page-break-before: always; }
+            .cover { page-break-after: always; }
+            section { page-break-inside: avoid; }
+        }
+
+        /* ─── PORTADA ─── */
+        .cover {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            color: white;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .cover-icon {
+            font-size: 5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .cover h1 {
+            font-size: 2.4rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.5px;
+        }
+
+        .cover h2 {
+            font-size: 1.3rem;
+            font-weight: 300;
+            color: #a8a8d0;
+            margin-bottom: 3rem;
+        }
+
+        .cover-meta {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            font-size: 1rem;
+            color: #c0c0e0;
+        }
+
+        .cover-meta strong {
+            color: white;
+        }
+
+        .cover-line {
+            width: 80px;
+            height: 3px;
+            background: linear-gradient(90deg, #6c63ff, #e94560);
+            border-radius: 2px;
+            margin: 2rem auto;
+        }
+
+        /* ─── CONTENIDO ─── */
+        .content {
+            max-width: 850px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+        }
+
+        section {
+            background: white;
+            border-radius: 12px;
+            padding: 2.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        }
+
+        h2 {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #302b63;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 3px solid #6c63ff;
+            display: inline-block;
+        }
+
+        h3 {
+            font-size: 1.15rem;
+            font-weight: 600;
+            color: #1a1a2e;
+            margin-top: 1.5rem;
+            margin-bottom: 0.8rem;
+        }
+
+        p {
+            margin-bottom: 1rem;
+            text-align: justify;
+            color: #333;
+        }
+
+        ul, ol {
+            margin: 0.8rem 0 1.2rem 1.5rem;
+            color: #333;
+        }
+
+        li {
+            margin-bottom: 0.4rem;
+        }
+
+        .highlight-box {
+            background: linear-gradient(135deg, #f0efff, #e8e6ff);
+            border-left: 4px solid #6c63ff;
+            padding: 1.2rem 1.5rem;
+            border-radius: 0 8px 8px 0;
+            margin: 1.2rem 0;
+        }
+
+        .highlight-box p {
+            margin: 0;
+            color: #302b63;
+            font-weight: 500;
+        }
+
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #302b63, #24243e);
+            color: white;
+            padding: 1.2rem;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-card .number {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #6c63ff;
+        }
+
+        .stat-card .label {
+            font-size: 0.8rem;
+            color: #a8a8d0;
+            margin-top: 0.3rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.2rem 0;
+            font-size: 0.9rem;
+        }
+
+        thead th {
+            background: #302b63;
+            color: white;
+            padding: 0.8rem 1rem;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        thead th:first-child {
+            border-radius: 8px 0 0 0;
+        }
+
+        thead th:last-child {
+            border-radius: 0 8px 0 0;
+        }
+
+        tbody td {
+            padding: 0.7rem 1rem;
+            border-bottom: 1px solid #eee;
+            color: #333;
+        }
+
+        tbody tr:hover {
+            background: #f8f7ff;
+        }
+
+        .tech-stack {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.6rem;
+            margin: 1rem 0;
+        }
+
+        .tech-badge {
+            background: #f0efff;
+            color: #302b63;
+            padding: 0.4rem 1rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            border: 1px solid #d0cfff;
+        }
+
+        .phase-timeline {
+            position: relative;
+            padding-left: 2rem;
+            margin: 1.5rem 0;
+        }
+
+        .phase-timeline::before {
+            content: '';
+            position: absolute;
+            left: 6px;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: linear-gradient(to bottom, #6c63ff, #e94560);
+            border-radius: 2px;
+        }
+
+        .phase-item {
+            position: relative;
+            margin-bottom: 1.5rem;
+            padding-left: 1rem;
+        }
+
+        .phase-item::before {
+            content: '';
+            position: absolute;
+            left: -1.65rem;
+            top: 0.4rem;
+            width: 12px;
+            height: 12px;
+            background: #6c63ff;
+            border-radius: 50%;
+            border: 3px solid white;
+            box-shadow: 0 0 0 2px #6c63ff;
+        }
+
+        .phase-item h4 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #302b63;
+            margin-bottom: 0.3rem;
+        }
+
+        .phase-item p {
+            font-size: 0.9rem;
+            margin-bottom: 0;
+            color: #555;
+        }
+
+        .conclusion-box {
+            background: linear-gradient(135deg, #302b63, #24243e);
+            color: white;
+            padding: 2rem;
+            border-radius: 12px;
+            margin-top: 1.5rem;
+        }
+
+        .conclusion-box h2 {
+            color: white;
+            border-bottom-color: #6c63ff;
+        }
+
+        .conclusion-box p {
+            color: #d0d0e8;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 2rem;
+            color: #999;
+            font-size: 0.8rem;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ═══════════════════════════════════════════ -->
+    <!-- PORTADA                                     -->
+    <!-- ═══════════════════════════════════════════ -->
+    <div class="cover">
+        <div class="cover-icon">🍽️</div>
+        <h1>Análisis del Contexto y Detección de Necesidades</h1>
+        <h2>Gestión integral de comida preparada y catering mediante aplicación multiplataforma</h2>
+        <div class="cover-line"></div>
+        <div class="cover-meta">
+            <span><strong>Proyecto Final</strong> — Desarrollo de Aplicaciones Multiplataforma (DAM)</span>
+            <span><strong>Sector:</strong> Hostelería — Comida preparada y Catering</span>
+            <span><strong>Alumno:</strong> [Nombre del alumno]</span>
+            <span><strong>Centro:</strong> [Nombre del centro formativo]</span>
+            <span><strong>Fecha:</strong> Abril 2026</span>
+        </div>
+    </div>
+
+    <div class="content">
+
+        <!-- ═══════════════════════════════════════════ -->
+        <!-- 1. INTRODUCCIÓN AL SECTOR                   -->
+        <!-- ═══════════════════════════════════════════ -->
+        <section>
+            <h2>1. Introducción al sector elegido</h2>
+
+            <p>El sector de la <strong>hostelería y la restauración</strong> constituye uno de los pilares fundamentales de la economía española, representando aproximadamente el 6,2% del PIB nacional y generando más de 1,7 millones de empleos directos. Dentro de este amplio sector, el segmento de <strong>comida preparada para llevar y catering</strong> ha experimentado un crecimiento sostenido en los últimos años, impulsado por cambios profundos en los hábitos de consumo de la población.</p>
+
+            <p>La pandemia de COVID-19 aceleró de forma irreversible la transformación digital del sector. Los consumidores adoptaron masivamente los pedidos a domicilio y la recogida de comida preparada, y estos hábitos se han mantenido y consolidado. Según datos de la Federación Española de Hostelería, el <strong>delivery y take-away</strong> representan ya más del 20% de la facturación del sector de restauración, una cifra que sigue en aumento.</p>
+
+            <div class="stat-grid">
+                <div class="stat-card">
+                    <div class="number">6,2%</div>
+                    <div class="label">Del PIB español proviene de la hostelería</div>
+                </div>
+                <div class="stat-card">
+                    <div class="number">1,7M</div>
+                    <div class="label">Empleos directos en el sector</div>
+                </div>
+                <div class="stat-card">
+                    <div class="number">+20%</div>
+                    <div class="label">Facturación ya es delivery/take-away</div>
+                </div>
+                <div class="stat-card">
+                    <div class="number">72%</div>
+                    <div class="label">De PYMES hosteleras sin digitalizar</div>
+                </div>
+            </div>
+
+            <p>Paralelamente, el <strong>sector del catering</strong> para eventos (bodas, comuniones, celebraciones corporativas) sigue siendo un mercado con alta demanda y márgenes significativos, pero que en su mayoría opera con procesos manuales, presupuestos por teléfono o WhatsApp, y una gestión de fechas basada en agendas físicas o simples hojas de cálculo.</p>
+
+            <h3>1.1 Tipos de empresas en el sector</h3>
+            <p>El sector de comida preparada y catering se compone de una variedad de modelos de negocio:</p>
+            <ul>
+                <li><strong>Restaurantes tradicionales con servicio de take-away:</strong> locales que, además de su servicio en sala, ofrecen comida para llevar y/o a domicilio.</li>
+                <li><strong>Obradores y cocinas de comida preparada:</strong> establecimientos especializados en la elaboración de platos para encargo previo, sin servicio en mesa. El cliente reserva con antelación y recoge en una fecha y hora determinadas.</li>
+                <li><strong>Empresas de catering:</strong> negocios dedicados a la preparación y servicio de comida para eventos (bodas, comuniones, celebraciones corporativas, etc.), con menús cerrados y personalización.</li>
+                <li><strong>Dark kitchens (cocinas fantasma):</strong> cocinas que operan exclusivamente para delivery, sin local de cara al público.</li>
+                <li><strong>Modelos híbridos:</strong> negocios que combinan varias de las modalidades anteriores. Este es precisamente el caso del proyecto que nos ocupa.</li>
+            </ul>
+
+            <h3>1.2 Estructura organizativa general</h3>
+            <p>Las empresas de comida preparada y catering de tamaño pequeño-mediano suelen seguir una estructura organizativa sencilla:</p>
+            <ul>
+                <li><strong>Gerente/propietario:</strong> responsable de la gestión integral, presupuestos, relación con clientes de eventos, y supervisión general.</li>
+                <li><strong>Equipo de cocina:</strong> cocineros encargados de la elaboración de los platos, tanto para pedidos diarios como para eventos.</li>
+                <li><strong>Personal de reparto:</strong> repartidores que gestionan las entregas a domicilio en la zona de influencia del local.</li>
+                <li><strong>Personal de eventos (eventual):</strong> trabajadores contratados puntualmente para la ejecución de servicios de catering.</li>
+            </ul>
+        </section>
+
+        <!-- ═══════════════════════════════════════════ -->
+        <!-- 2. ANÁLISIS DEL CONTEXTO Y NECESIDADES      -->
+        <!-- ═══════════════════════════════════════════ -->
+        <section class="page-break">
+            <h2>2. Análisis del contexto y detección de necesidades</h2>
+
+            <h3>2.1 Principales tendencias y retos del sector</h3>
+            <p>El sector de comida preparada y catering se enfrenta actualmente a varios retos significativos:</p>
+
+            <ol>
+                <li><strong>Digitalización insuficiente:</strong> según estudios recientes, más del 72% de las PYMES hosteleras en España carecen de herramientas digitales propias para gestionar pedidos. Dependen de plataformas de terceros (Glovo, Uber Eats, Just Eat) que cobran comisiones del 15-35% por pedido, reduciendo drásticamente sus márgenes.</li>
+                <li><strong>Gestión manual de encargos:</strong> la mayoría de los negocios de comida preparada gestionan sus encargos por teléfono, WhatsApp o presencialmente. Esto genera errores en los pedidos, falta de trazabilidad, pérdida de información del cliente y una gestión ineficiente del tiempo.</li>
+                <li><strong>Catering sin herramientas específicas:</strong> la gestión de eventos se realiza en la mayoría de casos con hojas de cálculo, documentos Word y agendas físicas. La comunicación de presupuestos, la selección de menús y la confirmación de fechas carecen de un flujo digital integrado.</li>
+                <li><strong>Cumplimiento normativo (alérgenos):</strong> la legislación europea (Reglamento UE 1169/2011) obliga a informar sobre los alérgenos presentes en cada plato. Muchos negocios pequeños incumplen esta normativa por falta de herramientas adecuadas para gestionar y mostrar esta información.</li>
+                <li><strong>Fidelización de clientes:</strong> sin un sistema digital propio, los negocios carecen de datos sobre sus clientes, historial de pedidos y preferencias. Esto impide estrategias de fidelización y personalización del servicio.</li>
+            </ol>
+
+            <h3>2.2 Uso actual de la tecnología en el sector</h3>
+            <p>El uso de tecnología en las PYMES de comida preparada presenta un panorama desigual:</p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Herramienta</th>
+                        <th>Uso actual</th>
+                        <th>Limitación</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>WhatsApp / Teléfono</td>
+                        <td>Recepción de pedidos y encargos</td>
+                        <td>Sin trazabilidad, errores, no escalable</td>
+                    </tr>
+                    <tr>
+                        <td>Plataformas de delivery (Glovo, etc.)</td>
+                        <td>Pedidos a domicilio</td>
+                        <td>Comisiones del 15-35%, sin datos del cliente</td>
+                    </tr>
+                    <tr>
+                        <td>Hojas de cálculo (Excel)</td>
+                        <td>Gestión de eventos y presupuestos</td>
+                        <td>Manual, propenso a errores, sin acceso móvil</td>
+                    </tr>
+                    <tr>
+                        <td>Redes sociales</td>
+                        <td>Marketing y carta del día</td>
+                        <td>No permite pedidos directos ni pagos</td>
+                    </tr>
+                    <tr>
+                        <td>TPV básico</td>
+                        <td>Cobro en local</td>
+                        <td>Sin integración con pedidos online</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>2.3 Necesidades detectadas</h3>
+            <p>A partir del análisis del contexto, se identifican las siguientes necesidades concretas:</p>
+
+            <div class="highlight-box">
+                <p><strong>Necesidad principal:</strong> Una plataforma integral que unifique la gestión de encargos de comida preparada, pedidos a domicilio, recogida en local y servicios de catering para eventos, todo desde una única aplicación accesible para clientes y personal del negocio.</p>
+            </div>
+
+            <ul>
+                <li><strong>N1 — Sistema de encargos con programación:</strong> los clientes necesitan poder encargar comida con antelación, eligiendo fecha y franja horaria de recogida o entrega, sin depender de una llamada telefónica.</li>
+                <li><strong>N2 — Gestión de pedidos en tiempo real:</strong> el equipo de cocina y reparto necesita ver los pedidos entrantes en tiempo real, con todos los detalles (platos, notas especiales, alérgenos, hora de entrega).</li>
+                <li><strong>N3 — Pago online integrado:</strong> ofrecer la posibilidad de pagar con tarjeta de forma segura desde la aplicación, reduciendo el manejo de efectivo y agilizando la operativa.</li>
+                <li><strong>N4 — Gestión de catering digitalizada:</strong> un sistema que permita a los clientes solicitar presupuestos para eventos, seleccionar menús cerrados con opciones por curso, elegir extras y ver disponibilidad de fechas. Todo sin llamadas ni emails.</li>
+                <li><strong>N5 — Información de alérgenos:</strong> mostrar los alérgenos de cada plato de forma clara y personalizada, cumpliendo la normativa vigente y permitiendo al usuario configurar sus alergias para recibir alertas automáticas.</li>
+                <li><strong>N6 — Seguimiento del pedido:</strong> el cliente debe conocer el estado de su pedido en todo momento (recibido, en preparación, listo, en camino, entregado) sin necesidad de llamar al local.</li>
+                <li><strong>N7 — Panel de administración:</strong> el propietario necesita una herramienta para gestionar la carta, los horarios, los empleados, los pedidos y los eventos desde cualquier dispositivo.</li>
+                <li><strong>N8 — Accesibilidad multiplataforma:</strong> la solución debe ser accesible tanto desde dispositivos móviles (Android) como desde navegador web, para cubrir diferentes perfiles de usuario.</li>
+            </ul>
+        </section>
+
+        <!-- ═══════════════════════════════════════════ -->
+        <!-- 3. OPORTUNIDADES Y PROPUESTA DE VALOR       -->
+        <!-- ═══════════════════════════════════════════ -->
+        <section class="page-break">
+            <h2>3. Oportunidades y propuesta de valor</h2>
+
+            <h3>3.1 Oportunidades de negocio identificadas</h3>
+            <p>El análisis del contexto revela varias oportunidades claras:</p>
+
+            <ol>
+                <li><strong>Eliminación de intermediarios:</strong> al disponer de una aplicación propia, el negocio deja de depender de plataformas de terceros como Glovo o Just Eat, evitando comisiones del 15-35% por pedido. Con un volumen medio de 30 pedidos diarios a un ticket medio de 25€, el ahorro anual puede superar los <strong>40.000€</strong>.</li>
+                <li><strong>Captación de datos de clientes:</strong> disponer de un registro de usuarios permite conocer historial de pedidos, preferencias, frecuencia de compra e información de contacto. Datos que hoy se pierden cuando el cliente pide por WhatsApp.</li>
+                <li><strong>Diferenciación en catering:</strong> ofrecer un sistema digital de solicitud de presupuestos con calendario de disponibilidad, selección visual de menús y extras es un diferenciador competitivo frente a empresas de catering que operan solo por teléfono y email.</li>
+                <li><strong>Optimización operativa:</strong> la automatización de la recepción y gestión de pedidos libera tiempo al personal, reduce errores y permite gestionar mayor volumen sin incrementar plantilla.</li>
+                <li><strong>Fidelización natural:</strong> funcionalidades como favoritos, historial de pedidos, repetición en un tap, y alertas personalizadas de alérgenos generan una experiencia superior que fideliza al cliente de forma orgánica.</li>
+            </ol>
+
+            <h3>3.2 Propuesta de solución</h3>
+            <p>Se propone el desarrollo de una <strong>aplicación multiplataforma</strong> (Android + Web) que actúe como sistema integral de gestión para un negocio de comida preparada y catering. La aplicación se denominará provisionalmente <strong>"[Nombre del negocio] App"</strong> y cubrirá tres áreas funcionales:</p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Área</th>
+                        <th>Funcionalidad</th>
+                        <th>Usuario</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Pedidos</strong></td>
+                        <td>Encargos programados, domicilio y recogida, con pago integrado y seguimiento en tiempo real</td>
+                        <td>Clientes</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Catering</strong></td>
+                        <td>Solicitud de presupuestos, selección de menús por curso, extras, calendario de disponibilidad</td>
+                        <td>Clientes + Admin</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Gestión</strong></td>
+                        <td>Administración de carta, pedidos, empleados, horarios, estadísticas y eventos</td>
+                        <td>Admin + Empleados</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>3.3 Elementos diferenciadores e innovadores</h3>
+            <p>Más allá de las funcionalidades estándar de gestión de pedidos, la aplicación incorporará las siguientes características innovadoras que la distinguen de las soluciones existentes en el mercado:</p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Feature</th>
+                        <th>Descripción</th>
+                        <th>Valor añadido</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Pedido por voz</strong></td>
+                        <td>El cliente dicta su pedido al micrófono y el sistema identifica los platos de la carta automáticamente</td>
+                        <td>Accesibilidad, innovación, UX diferencial</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Alertas de alérgenos personalizadas</strong></td>
+                        <td>El usuario configura sus alergias en su perfil y recibe avisos automáticos al navegar el menú o al intentar añadir un plato incompatible</td>
+                        <td>Cumplimiento legal, seguridad alimentaria, responsabilidad social</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Plato del día con stock en tiempo real</strong></td>
+                        <td>El admin marca un plato como "plato del día" con unidades limitadas. Un contador en tiempo real muestra las unidades restantes y se desactiva al agotarse</td>
+                        <td>Urgencia de compra, uso avanzado de Realtime, engagement</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Pedido grupal compartido</strong></td>
+                        <td>Un cliente genera un enlace y lo comparte con otras personas. Cada uno añade sus platos al mismo pedido, sincronizado en tiempo real</td>
+                        <td>Social, viral, demostración avanzada de WebSockets</td>
+                    </tr>
+                    <tr>
+                        <td><strong>QR de recogida</strong></td>
+                        <td>Al pagar un pedido de recogida, se genera un código QR único. El empleado lo escanea y el pedido se marca como entregado automáticamente</td>
+                        <td>Profesionalismo, seguridad, cierra el ciclo del pedido</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Estimación de tiempo de preparación</strong></td>
+                        <td>Cada plato tiene un tiempo de preparación asociado. El sistema calcula y muestra al cliente cuánto tardará su pedido</td>
+                        <td>Transparencia, expectativas claras, confianza</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Animaciones de estados del pedido</strong></td>
+                        <td>Animaciones Lottie para cada estado del pedido (cocinero animado, moto en camino, etc.) en lugar de texto plano</td>
+                        <td>UX premium, experiencia visual memorable</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Ticket digital PDF</strong></td>
+                        <td>Generación de ticket del pedido en formato PDF descargable y compartible, con logo, desglose de platos e IVA</td>
+                        <td>Profesionalismo, utilidad real, documentación fiscal</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>3.4 Viabilidad técnica y económica</h3>
+
+            <p><strong>Viabilidad técnica:</strong> el stack tecnológico seleccionado (Flutter + Supabase + Stripe) está maduro, cuenta con amplia documentación y comunidad, y permite desarrollar una solución multiplataforma desde un único código fuente. Todas las tecnologías disponen de planes gratuitos suficientes para el desarrollo y las primeras fases de producción.</p>
+
+            <div class="tech-stack">
+                <span class="tech-badge">Flutter 3.x</span>
+                <span class="tech-badge">Dart</span>
+                <span class="tech-badge">Supabase</span>
+                <span class="tech-badge">PostgreSQL</span>
+                <span class="tech-badge">Stripe</span>
+                <span class="tech-badge">Firebase (FCM)</span>
+                <span class="tech-badge">Brevo</span>
+                <span class="tech-badge">Riverpod</span>
+                <span class="tech-badge">Freezed</span>
+                <span class="tech-badge">GoRouter</span>
+                <span class="tech-badge">Vercel</span>
+            </div>
+
+            <p><strong>Viabilidad económica:</strong> el coste de desarrollo durante la fase académica es de <strong>0€</strong>, ya que todas las herramientas utilizadas ofrecen planes gratuitos. Para un despliegue en producción real, los costes serían mínimos:</p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Servicio</th>
+                        <th>Coste (desarrollo)</th>
+                        <th>Coste (producción)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Supabase (Auth, DB, Realtime, Storage, Edge Functions)</td>
+                        <td>0€</td>
+                        <td>~25€/mes (Plan Pro)</td>
+                    </tr>
+                    <tr>
+                        <td>Stripe (pagos con tarjeta)</td>
+                        <td>0€</td>
+                        <td>1,4% + 0,25€ por transacción</td>
+                    </tr>
+                    <tr>
+                        <td>Firebase Cloud Messaging (push)</td>
+                        <td>0€</td>
+                        <td>0€</td>
+                    </tr>
+                    <tr>
+                        <td>Brevo (emails transaccionales)</td>
+                        <td>0€</td>
+                        <td>0€ (hasta 300 emails/día)</td>
+                    </tr>
+                    <tr>
+                        <td>Vercel (hosting web)</td>
+                        <td>0€</td>
+                        <td>0€ (tier gratuito)</td>
+                    </tr>
+                    <tr>
+                        <td>GitHub (repositorio)</td>
+                        <td>0€</td>
+                        <td>0€</td>
+                    </tr>
+                    <tr>
+                        <td><strong>TOTAL</strong></td>
+                        <td><strong>0€</strong></td>
+                        <td><strong>~25€/mes + comisiones Stripe</strong></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <p>El retorno de inversión es inmediato: eliminando las comisiones de plataformas de terceros (15-35%), el negocio recupera la inversión en el primer mes de operación.</p>
+        </section>
+
+        <!-- ═══════════════════════════════════════════ -->
+        <!-- 4. GUION DE TRABAJO INICIAL                 -->
+        <!-- ═══════════════════════════════════════════ -->
+        <section class="page-break">
+            <h2>4. Guion de trabajo inicial</h2>
+
+            <h3>4.1 Objetivos del proyecto</h3>
+
+            <p><strong>Objetivo general:</strong> diseñar, desarrollar y documentar una aplicación multiplataforma funcional (Android + Web) para la gestión integral de un negocio de comida preparada y catering, aplicando los conocimientos adquiridos durante el ciclo formativo de Desarrollo de Aplicaciones Multiplataforma.</p>
+
+            <p><strong>Objetivos específicos:</strong></p>
+            <ol>
+                <li>Implementar un sistema de autenticación seguro con gestión de roles (cliente, empleado, administrador) mediante JWT persistente.</li>
+                <li>Desarrollar un módulo de gestión de carta con soporte para platos fijos y temporales, fotografías, precios y alérgenos.</li>
+                <li>Crear un flujo completo de pedidos con tres modalidades: encargo programado, domicilio en el día y recogida en local.</li>
+                <li>Integrar un sistema de pagos en línea (Stripe) junto con la opción de pago en efectivo.</li>
+                <li>Implementar un módulo de catering con menús cerrados, selección por cursos, extras y calendario de disponibilidad.</li>
+                <li>Desarrollar un panel de administración para la gestión completa del negocio (carta, pedidos, empleados, horarios, eventos y estadísticas).</li>
+                <li>Utilizar comunicación en tiempo real (WebSockets) para la actualización instantánea de pedidos y stock.</li>
+                <li>Aplicar patrones de arquitectura limpia con gestión de estado mediante Riverpod y modelos inmutables con Freezed.</li>
+                <li>Generar documentación técnica completa, manual de usuario y pruebas funcionales.</li>
+            </ol>
+
+            <h3>4.2 Recursos necesarios</h3>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Tipo</th>
+                        <th>Recurso</th>
+                        <th>Detalle</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Humanos</strong></td>
+                        <td>Desarrollador (alumno)</td>
+                        <td>Desarrollo, diseño, documentación y pruebas</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Humanos</strong></td>
+                        <td>Propietario del negocio</td>
+                        <td>Validación de requisitos, feedback y pruebas reales</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Humanos</strong></td>
+                        <td>Tutor</td>
+                        <td>Seguimiento, corrección y validación de entregables</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Técnicos</strong></td>
+                        <td>Ordenador con Windows</td>
+                        <td>Desarrollo con VS Code, Flutter SDK, Android Studio</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Técnicos</strong></td>
+                        <td>Dispositivo Android</td>
+                        <td>Pruebas en dispositivo real</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Técnicos</strong></td>
+                        <td>Cuentas en servicios cloud</td>
+                        <td>Supabase, Stripe, Firebase, Brevo, GitHub, Vercel</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Económicos</strong></td>
+                        <td>Presupuesto</td>
+                        <td>0€ (todos los servicios en planes gratuitos durante desarrollo)</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>4.3 Planificación por fases (11 semanas)</h3>
+
+            <div class="phase-timeline">
+                <div class="phase-item">
+                    <h4>Fase 1 — Análisis del contexto (Semanas 1-2)</h4>
+                    <p>Investigación del sector, detección de necesidades, análisis de competencia, definición del alcance del proyecto. <strong>Entregable:</strong> Documento de análisis (este documento).</p>
+                </div>
+                <div class="phase-item">
+                    <h4>Fase 2 — Diseño del proyecto (Semanas 3-4)</h4>
+                    <p>Definición de requisitos funcionales y no funcionales, diseño del modelo de datos (E-R), arquitectura técnica, wireframes de las pantallas principales, estudio de viabilidad técnica, requisitos legales (RGPD, alérgenos). <strong>Entregable:</strong> Memoria de diseño (8-12 páginas).</p>
+                </div>
+                <div class="phase-item">
+                    <h4>Fase 3 — Planificación de la ejecución (Semana 5)</h4>
+                    <p>Diagrama de Gantt detallado, secuenciación de tareas, asignación de recursos, análisis de riesgos y plan de contingencias. <strong>Entregable:</strong> Gantt + plan de ejecución + análisis de riesgos.</p>
+                </div>
+                <div class="phase-item">
+                    <h4>Fase 4 — Desarrollo Sprint 1 (Semanas 6-7)</h4>
+                    <p>Configuración del proyecto Flutter y Supabase. Implementación de: autenticación (Auth + JWT), módulo de carta (CRUD platos, categorías, alérgenos, fotos), carrito de compra, sistema de pedidos (encargo/domicilio/recogida), selección de franjas horarias, integración de Stripe y pago en efectivo.</p>
+                </div>
+                <div class="phase-item">
+                    <h4>Fase 5 — Desarrollo Sprint 2 (Semanas 8-9)</h4>
+                    <p>Panel de administración, vistas de empleado (cocina y reparto), Realtime (pedidos en tiempo real, plato del día con countdown), módulo de catering completo (menús, cursos, extras, calendario, presupuestos), notificaciones push (FCM) y emails (Brevo), features innovadoras (pedido por voz, QR recogida, alertas alérgenos, favoritos, animaciones Lottie, ticket PDF).</p>
+                </div>
+                <div class="phase-item">
+                    <h4>Fase 6 — Evaluación y documentación (Semana 10)</h4>
+                    <p>Pruebas funcionales y técnicas, corrección de errores, documentación técnica (manual de instalación y mantenimiento), manual de usuario, registro de incidencias, despliegue web en Vercel. <strong>Entregables:</strong> Manual técnico, manual de usuario, registro de incidencias.</p>
+                </div>
+                <div class="phase-item">
+                    <h4>Fase 7 — Defensa del proyecto (Semana 11)</h4>
+                    <p>Preparación de la presentación (diapositivas), ensayo de la exposición oral, defensa ante el tribunal. <strong>Entregable:</strong> Presentación final.</p>
+                </div>
+            </div>
+
+            <h3>4.4 Entregas parciales obligatorias</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Entrega</th>
+                        <th>Contenido</th>
+                        <th>Semana</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Entrega parcial 1</strong></td>
+                        <td>Documentos de análisis + diseño + planificación (Gantt)</td>
+                        <td>Semana 5</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Entrega parcial 2</strong></td>
+                        <td>Aplicación funcional con pedidos y pagos operativos</td>
+                        <td>Semana 9</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Entrega final</strong></td>
+                        <td>App completa + documentación + presentación</td>
+                        <td>Semana 10</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- ═══════════════════════════════════════════ -->
+        <!-- 5. CONCLUSIONES                             -->
+        <!-- ═══════════════════════════════════════════ -->
+        <section>
+            <div class="conclusion-box">
+                <h2>5. Conclusiones</h2>
+
+                <p>El análisis realizado demuestra que existe una necesidad clara y verificable en el sector de la hostelería y la comida preparada: la falta de herramientas digitales propias, accesibles y completas que permitan a las PYMES gestionar su operativa de pedidos y catering sin depender de plataformas de terceros con comisiones elevadas.</p>
+
+                <p>El proyecto propuesto aborda esta necesidad de forma integral, combinando la gestión de pedidos (encargos programados, domicilio y recogida) con un módulo completo de catering para eventos, todo ello dentro de una aplicación multiplataforma moderna desarrollada con Flutter, Supabase y Stripe.</p>
+
+                <p>La propuesta es técnicamente viable (todas las tecnologías son maduras y disponen de planes gratuitos), económicamente sostenible (coste cero en desarrollo, ~25€/mes en producción) y presenta un claro valor diferencial gracias a funcionalidades innovadoras como el pedido por voz, alertas personalizadas de alérgenos, pedidos grupales en tiempo real y verificación por QR.</p>
+
+                <p>El proyecto no solo satisface los requisitos académicos del módulo de Proyecto Final de DAM, sino que responde a una necesidad real de un negocio existente, lo que permite validar la solución con usuarios reales y obtener feedback que enriquecerá tanto el producto como la documentación del proyecto.</p>
+            </div>
+        </section>
+
+        <div class="footer">
+            <p>Proyecto Final — Desarrollo de Aplicaciones Multiplataforma (DAM) — Abril 2026</p>
+        </div>
+
+    </div>
+
+</body>
+</html>

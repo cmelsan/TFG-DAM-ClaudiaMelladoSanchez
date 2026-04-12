@@ -1,0 +1,1428 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diseño del Proyecto</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            color: #1a1a2e;
+            line-height: 1.8;
+            background: #f8f9fa;
+        }
+
+        @media print {
+            body { background: white; font-size: 11pt; }
+            .page-break { page-break-before: always; }
+            .cover { page-break-after: always; }
+            section { page-break-inside: avoid; }
+            .no-print { display: none; }
+        }
+
+        /* ─── PORTADA ─── */
+        .cover {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            color: white;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .cover-icon { font-size: 5rem; margin-bottom: 1.5rem; }
+
+        .cover h1 {
+            font-size: 2.4rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.5px;
+        }
+
+        .cover h2 {
+            font-size: 1.3rem;
+            font-weight: 300;
+            color: #a8a8d0;
+            margin-bottom: 3rem;
+        }
+
+        .cover-meta {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            font-size: 1rem;
+            color: #c0c0e0;
+        }
+
+        .cover-meta strong { color: white; }
+
+        .cover-line {
+            width: 80px;
+            height: 3px;
+            background: linear-gradient(90deg, #6c63ff, #e94560);
+            border-radius: 2px;
+            margin: 2rem auto;
+        }
+
+        /* ─── CONTENIDO ─── */
+        .content {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+        }
+
+        section {
+            background: white;
+            border-radius: 12px;
+            padding: 2.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        }
+
+        h2 {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #302b63;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 3px solid #6c63ff;
+            display: inline-block;
+        }
+
+        h3 {
+            font-size: 1.15rem;
+            font-weight: 600;
+            color: #1a1a2e;
+            margin-top: 1.5rem;
+            margin-bottom: 0.8rem;
+        }
+
+        h4 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #302b63;
+            margin-top: 1.2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        p {
+            margin-bottom: 1rem;
+            text-align: justify;
+            color: #333;
+        }
+
+        ul, ol {
+            margin: 0.8rem 0 1.2rem 1.5rem;
+            color: #333;
+        }
+
+        li { margin-bottom: 0.4rem; }
+
+        .highlight-box {
+            background: linear-gradient(135deg, #f0efff, #e8e6ff);
+            border-left: 4px solid #6c63ff;
+            padding: 1.2rem 1.5rem;
+            border-radius: 0 8px 8px 0;
+            margin: 1.2rem 0;
+        }
+
+        .highlight-box p {
+            margin: 0;
+            color: #302b63;
+            font-weight: 500;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.2rem 0;
+            font-size: 0.9rem;
+        }
+
+        thead th {
+            background: #302b63;
+            color: white;
+            padding: 0.7rem 1rem;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        tbody td {
+            padding: 0.6rem 1rem;
+            border-bottom: 1px solid #eee;
+        }
+
+        tbody tr:nth-child(even) { background: #f8f8ff; }
+        tbody tr:hover { background: #f0efff; }
+
+        code {
+            background: #f0efff;
+            padding: 0.15rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            color: #302b63;
+        }
+
+        /* ─── DIAGRAMAS MERMAID ─── */
+        .diagram-container {
+            background: #fcfcff;
+            border: 1px solid #e0e0f0;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            overflow-x: auto;
+            text-align: center;
+        }
+
+        .diagram-container .mermaid {
+            display: inline-block;
+            text-align: center;
+        }
+
+        .diagram-title {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #6c63ff;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 1rem;
+        }
+
+        /* ─── STATS ─── */
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #302b63, #24243e);
+            color: white;
+            padding: 1.2rem;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-card .number {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #6c63ff;
+        }
+
+        .stat-card .label {
+            font-size: 0.8rem;
+            color: #a8a8d0;
+            margin-top: 0.3rem;
+        }
+
+        /* ─── WIREFRAMES ─── */
+        .wireframe-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .wireframe-card {
+            border: 2px solid #e0e0f0;
+            border-radius: 12px;
+            overflow: hidden;
+            background: white;
+        }
+
+        .wireframe-header {
+            background: #302b63;
+            color: white;
+            padding: 0.6rem 1rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .wireframe-body {
+            padding: 1rem;
+            font-size: 0.75rem;
+            color: #666;
+            min-height: 180px;
+        }
+
+        .wf-elem {
+            background: #f0efff;
+            border: 1px solid #d0d0e0;
+            border-radius: 6px;
+            padding: 0.4rem 0.6rem;
+            margin-bottom: 0.5rem;
+            font-size: 0.75rem;
+            color: #302b63;
+        }
+
+        .wf-btn {
+            background: #6c63ff;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 0.4rem 0.8rem;
+            margin-top: 0.5rem;
+            font-size: 0.75rem;
+            display: inline-block;
+        }
+
+        .wf-search {
+            background: #f8f8ff;
+            border: 1px solid #ccc;
+            border-radius: 20px;
+            padding: 0.4rem 0.8rem;
+            width: 100%;
+            margin-bottom: 0.5rem;
+            font-size: 0.75rem;
+            color: #999;
+        }
+
+        .wf-card-mini {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+            background: #f8f8ff;
+            border: 1px solid #e0e0f0;
+            border-radius: 8px;
+            padding: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .wf-img-placeholder {
+            width: 40px;
+            height: 40px;
+            background: #e0e0f0;
+            border-radius: 6px;
+            flex-shrink: 0;
+        }
+
+        .toc a {
+            color: #302b63;
+            text-decoration: none;
+        }
+        .toc a:hover {
+            color: #6c63ff;
+        }
+        .toc ol {
+            list-style: decimal;
+        }
+        .toc li {
+            margin-bottom: 0.3rem;
+        }
+
+        .badge {
+            display: inline-block;
+            background: #6c63ff;
+            color: white;
+            padding: 0.15rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .badge-green { background: #27ae60; }
+        .badge-orange { background: #f39c12; }
+        .badge-red { background: #e94560; }
+    </style>
+</head>
+<body>
+
+<!-- ════════════════ PORTADA ════════════════ -->
+<div class="cover">
+    <div class="cover-icon">📐</div>
+    <h1>Diseño del Proyecto</h1>
+    <h2>Arquitectura, Modelo de Datos y Diagramas Técnicos</h2>
+    <div class="cover-line"></div>
+    <div class="cover-meta">
+        <span><strong>Proyecto:</strong> [Nombre de la App] — Gestión integral de comida para llevar</span>
+        <span><strong>Alumno:</strong> [Nombre del alumno]</span>
+        <span><strong>Centro:</strong> [Nombre del centro formativo]</span>
+        <span><strong>Ciclo:</strong> Desarrollo de Aplicaciones Multiplataforma (DAM)</span>
+        <span><strong>Fecha:</strong> Abril 2026</span>
+    </div>
+</div>
+
+<!-- ════════════════ CONTENIDO ════════════════ -->
+<div class="content">
+
+<!-- ─── ÍNDICE ─── -->
+<section>
+    <h2>Índice</h2>
+    <div class="toc">
+        <ol>
+            <li><a href="#sec1">Introducción al diseño</a></li>
+            <li><a href="#sec2">Arquitectura del sistema</a></li>
+            <li><a href="#sec3">Diagrama de casos de uso</a></li>
+            <li><a href="#sec4">Modelo Entidad-Relación (ER)</a></li>
+            <li><a href="#sec5">Modelo de datos — Tablas y campos</a></li>
+            <li><a href="#sec6">Diagramas de secuencia</a></li>
+            <li><a href="#sec7">Diagrama de navegación</a></li>
+            <li><a href="#sec8">Wireframes de pantallas principales</a></li>
+            <li><a href="#sec9">Decisiones de diseño y patrones</a></li>
+        </ol>
+    </div>
+</section>
+
+<!-- ─── 1. INTRODUCCIÓN ─── -->
+<section id="sec1">
+    <h2>1. Introducción al diseño</h2>
+    <p>Este documento describe la arquitectura técnica, el modelo de datos y los flujos de interacción de la aplicación multiplataforma para la gestión integral de un negocio de comida preparada para llevar. El sistema cubre cinco líneas de servicio: venta en mostrador, encargos programados, reparto a domicilio, recogida en local y catering de eventos, además de un canal de contacto para consultas generales, propuestas de colaboración y ofertas de empleo.</p>
+
+    <div class="stat-grid">
+        <div class="stat-card">
+            <div class="number">3</div>
+            <div class="label">Roles de usuario</div>
+        </div>
+        <div class="stat-card">
+            <div class="number">36</div>
+            <div class="label">Pantallas totales</div>
+        </div>
+        <div class="stat-card">
+            <div class="number">17</div>
+            <div class="label">Tablas en BD</div>
+        </div>
+        <div class="stat-card">
+            <div class="number">13</div>
+            <div class="label">Features novedosas</div>
+        </div>
+        <div class="stat-card">
+            <div class="number">4</div>
+            <div class="label">Tipos de pedido</div>
+        </div>
+    </div>
+
+    <div class="highlight-box">
+        <p>Principio de diseño: navegación libre sin registro. El usuario puede consultar el menú completo, usar el chatbot IA y añadir al carrito sin crear cuenta. El registro solo se solicita al tramitar el pedido.</p>
+    </div>
+</section>
+
+<div class="page-break"></div>
+
+<!-- ─── 2. ARQUITECTURA ─── -->
+<section id="sec2">
+    <h2>2. Arquitectura del sistema</h2>
+    <p>La aplicación sigue una arquitectura <strong>cliente-servidor</strong> con un frontend Flutter multiplataforma (Android + Web) que se comunica con Supabase como Backend-as-a-Service. Los servicios externos (pagos, notificaciones, emails, IA) se integran mediante Edge Functions serverless.</p>
+
+    <div class="diagram-container">
+        <div class="diagram-title">Diagrama de arquitectura general</div>
+        <div class="mermaid">
+graph TB
+    subgraph "👤 Cliente"
+        A1[Android APK]
+        A2[Web - Vercel]
+    end
+
+    subgraph "👨‍🍳 Empleado"
+        B1[Android APK]
+        B2[Web]
+    end
+
+    subgraph "🔑 Admin"
+        C1[Web - Panel Admin]
+        C2[Android APK]
+    end
+
+    subgraph "🔷 Supabase"
+        D1[Auth - JWT]
+        D2[PostgreSQL - BD]
+        D3[Realtime - WebSockets]
+        D4[Storage - Imágenes]
+        D5[Edge Functions - Deno/TS]
+    end
+
+    subgraph "🔗 Servicios externos"
+        E1[Stripe - Pagos]
+        E2[FCM - Push Notifications]
+        E3[Brevo - Emails]
+        E4[Gemini API - IA]
+    end
+
+    A1 & A2 --> D1
+    A1 & A2 --> D2
+    A1 & A2 --> D3
+    B1 & B2 --> D1
+    B1 & B2 --> D2
+    B1 & B2 --> D3
+    C1 & C2 --> D1
+    C1 & C2 --> D2
+
+    D5 --> E1
+    D5 --> E2
+    D5 --> E3
+    D5 --> E4
+    D2 -- "DB Trigger" --> D5
+        </div>
+    </div>
+
+    <h3>Stack tecnológico</h3>
+    <table>
+        <thead>
+            <tr><th>Capa</th><th>Tecnología</th><th>Justificación</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>Frontend</td><td>Flutter 3.x</td><td>Codebase único para Android + Web. Rendimiento nativo.</td></tr>
+            <tr><td>State management</td><td>Riverpod + riverpod_generator</td><td>Obligatorio por directiva del profesor. Reactivo y testable.</td></tr>
+            <tr><td>Modelos</td><td>Freezed + json_serializable</td><td>Obligatorio. Inmutabilidad, union types para estados.</td></tr>
+            <tr><td>Navegación</td><td>GoRouter</td><td>Deep links, typed routes, guards de autenticación.</td></tr>
+            <tr><td>Backend</td><td>Supabase</td><td>Auth, PostgreSQL, Realtime, Storage, Edge Functions. Todo en uno.</td></tr>
+            <tr><td>Pagos</td><td>Stripe (Payment Intents)</td><td>Estándar de la industria. Webhooks para confirmar pagos.</td></tr>
+            <tr><td>Push</td><td>Firebase Cloud Messaging</td><td>Gratis, fiable, integración nativa Flutter.</td></tr>
+            <tr><td>Email</td><td>Brevo</td><td>300 emails/día gratis. Transaccional: confirmaciones, presupuestos.</td></tr>
+            <tr><td>IA</td><td>Gemini API</td><td>Plan gratuito generoso. Chatbot + recomendaciones.</td></tr>
+            <tr><td>Hosting web</td><td>Vercel</td><td>Deploy automático Flutter Web, gratis.</td></tr>
+            <tr><td>Control versiones</td><td>Git + GitHub</td><td>Obligatorio. Ramas, commits limpios.</td></tr>
+        </tbody>
+    </table>
+</section>
+
+<div class="page-break"></div>
+
+<!-- ─── 3. CASOS DE USO ─── -->
+<section id="sec3">
+    <h2>3. Diagrama de casos de uso</h2>
+    <p>Se identifican tres actores principales y un actor externo (sistema). Los casos de uso se agrupan por módulo funcional.</p>
+
+    <div class="diagram-container">
+        <div class="diagram-title">Casos de uso — Cliente</div>
+        <div class="mermaid">
+graph LR
+    C((👤 Cliente))
+    C --> UC1[Consultar menú / catálogo]
+    C --> UC2[Buscar platos - texto/voz]
+    C --> UC3[Ver detalle de plato]
+    C --> UC4[Añadir al carrito]
+    C --> UC5[Realizar pedido - encargo/domicilio/recogida]
+    C --> UC6[Pagar con Stripe]
+    C --> UC7[Ver estado del pedido en tiempo real]
+    C --> UC8[Repetir último pedido]
+    C --> UC9[Crear pedido grupal]
+    C --> UC10[Solicitar catering de evento]
+    C --> UC11[Ver presupuesto y aceptar/rechazar]
+    C --> UC12[Consultar chatbot IA]
+    C --> UC13[Enviar consulta / contacto]
+    C --> UC14[Gestionar favoritos]
+    C --> UC15[Descargar ticket PDF]
+    C --> UC16[Valorar pedido]
+    C --> UC17[Gestionar perfil y alérgenos]
+    C --> UC18[Registrarse / Iniciar sesión]
+        </div>
+    </div>
+
+    <div class="diagram-container">
+        <div class="diagram-title">Casos de uso — Empleado</div>
+        <div class="mermaid">
+graph LR
+    E((👨‍🍳 Empleado))
+    E --> UE1[Ver pedidos en cocina - KDS]
+    E --> UE2[Cambiar estado de pedido]
+    E --> UE3[Ver entregas asignadas]
+    E --> UE4[Marcar entrega como completada]
+    E --> UE5[Registrar venta en mostrador - TPV]
+    E --> UE6[Cobrar efectivo o tarjeta física]
+    E --> UE7[Escanear QR de recogida]
+    E --> UE8[Llamar al cliente]
+        </div>
+    </div>
+
+    <div class="diagram-container">
+        <div class="diagram-title">Casos de uso — Admin</div>
+        <div class="mermaid">
+graph LR
+    A((🔑 Admin))
+    A --> UA1[Ver dashboard de ventas]
+    A --> UA2[CRUD categorías]
+    A --> UA3[CRUD platos + IA descripción]
+    A --> UA4[Establecer plato del día]
+    A --> UA5[Gestionar pedidos]
+    A --> UA6[Configurar franjas horarias]
+    A --> UA7[CRUD menús de evento]
+    A --> UA8[Gestionar solicitudes de catering]
+    A --> UA9[Ver calendario de eventos]
+    A --> UA10[Gestionar buzón de consultas]
+    A --> UA11[CRUD empleados]
+    A --> UA12[Gestionar usuarios/clientes]
+    A --> UA13[Configurar negocio]
+        </div>
+    </div>
+</section>
+
+<div class="page-break"></div>
+
+<!-- ─── 4. MODELO ENTIDAD-RELACIÓN ─── -->
+<section id="sec4">
+    <h2>4. Modelo Entidad-Relación</h2>
+    <p>El diagrama ER muestra las 17 entidades principales del sistema y sus relaciones. Se utiliza Supabase (PostgreSQL) como motor de base de datos con Row Level Security (RLS) activado en todas las tablas.</p>
+
+    <div class="diagram-container">
+        <div class="diagram-title">Diagrama Entidad-Relación</div>
+        <div class="mermaid">
+erDiagram
+    PROFILES ||--o{ ORDERS : "realiza"
+    PROFILES ||--o{ FAVORITES : "marca"
+    PROFILES ||--o{ ORDER_RATINGS : "valora"
+    PROFILES ||--o{ EVENT_REQUESTS : "solicita"
+    PROFILES ||--o{ PUSH_TOKENS : "registra"
+    PROFILES ||--o{ CONTACT_MESSAGES : "envía"
+    PROFILES ||--o{ ADDRESSES : "tiene"
+
+    CATEGORIES ||--o{ DISHES : "contiene"
+
+    DISHES ||--o{ ORDER_ITEMS : "incluido en"
+    DISHES ||--o{ FAVORITES : "favorito de"
+    DISHES ||--o{ EVENT_MENU_COURSES : "parte de"
+
+    ORDERS ||--o{ ORDER_ITEMS : "compuesto por"
+    ORDERS ||--o| ORDER_RATINGS : "tiene"
+
+    EVENT_MENUS ||--o{ EVENT_MENU_COURSES : "define"
+    EVENT_MENUS ||--o{ EVENT_EXTRAS : "ofrece"
+    EVENT_MENUS ||--o{ EVENT_REQUESTS : "solicita"
+
+    EVENT_REQUESTS ||--o{ EVENT_REQUEST_SELECTIONS : "personaliza"
+    EVENT_REQUESTS ||--o{ EVENT_REQUEST_EXTRAS : "añade"
+    EVENT_REQUESTS ||--o| EVENT_CALENDAR : "genera"
+
+    SCHEDULE }o--|| PROFILES : "gestiona"
+
+    DAILY_SPECIAL }o--|| DISHES : "destaca"
+        </div>
+    </div>
+</section>
+
+<div class="page-break"></div>
+
+<!-- ─── 5. MODELO DE DATOS ─── -->
+<section id="sec5">
+    <h2>5. Modelo de datos — Tablas y campos</h2>
+
+    <h3>5.1 profiles</h3>
+    <p>Extiende la tabla <code>auth.users</code> de Supabase. Almacena datos adicionales del usuario.</p>
+    <table>
+        <thead><tr><th>Campo</th><th>Tipo</th><th>Descripción</th></tr></thead>
+        <tbody>
+            <tr><td><code>id</code></td><td>UUID (PK, FK auth.users)</td><td>ID del usuario</td></tr>
+            <tr><td><code>full_name</code></td><td>TEXT</td><td>Nombre completo</td></tr>
+            <tr><td><code>phone</code></td><td>TEXT</td><td>Teléfono</td></tr>
+            <tr><td><code>role</code></td><td>ENUM ('client','employee','admin')</td><td>Rol del usuario</td></tr>
+            <tr><td><code>employee_role</code></td><td>ENUM ('cook','driver','both') NULL</td><td>Sub-rol si es empleado</td></tr>
+            <tr><td><code>allergens</code></td><td>TEXT[]</td><td>Array de alérgenos personales</td></tr>
+            <tr><td><code>avatar_url</code></td><td>TEXT</td><td>URL foto de perfil en Storage</td></tr>
+            <tr><td><code>is_active</code></td><td>BOOLEAN</td><td>Cuenta activa/inactiva</td></tr>
+            <tr><td><code>created_at</code></td><td>TIMESTAMPTZ</td><td>Fecha de registro</td></tr>
+        </tbody>
+    </table>
+
+    <h3>5.2 addresses</h3>
+    <p>Direcciones de entrega del cliente. Un cliente puede tener varias.</p>
+    <table>
+        <thead><tr><th>Campo</th><th>Tipo</th><th>Descripción</th></tr></thead>
+        <tbody>
+            <tr><td><code>id</code></td><td>UUID (PK)</td><td>ID dirección</td></tr>
+            <tr><td><code>user_id</code></td><td>UUID (FK profiles)</td><td>Propietario</td></tr>
+            <tr><td><code>label</code></td><td>TEXT</td><td>"Casa", "Trabajo", etc.</td></tr>
+            <tr><td><code>street</code></td><td>TEXT</td><td>Calle y número</td></tr>
+            <tr><td><code>city</code></td><td>TEXT</td><td>Ciudad</td></tr>
+            <tr><td><code>postal_code</code></td><td>TEXT</td><td>Código postal</td></tr>
+            <tr><td><code>notes</code></td><td>TEXT</td><td>Notas (portal, piso...)</td></tr>
+            <tr><td><code>is_default</code></td><td>BOOLEAN</td><td>Dirección predeterminada</td></tr>
+        </tbody>
+    </table>
+
+    <h3>5.3 categories</h3>
+    <table>
+        <thead><tr><th>Campo</th><th>Tipo</th><th>Descripción</th></tr></thead>
+        <tbody>
+            <tr><td><code>id</code></td><td>UUID (PK)</td><td>ID categoría</td></tr>
+            <tr><td><code>name</code></td><td>TEXT</td><td>Nombre ("Entrantes", "Principales"...)</td></tr>
+            <tr><td><code>image_url</code></td><td>TEXT</td><td>Imagen/icono de la categoría</td></tr>
+            <tr><td><code>sort_order</code></td><td>INT</td><td>Orden de aparición</td></tr>
+            <tr><td><code>is_active</code></td><td>BOOLEAN</td><td>Visible o no</td></tr>
+        </tbody>
+    </table>
+
+    <h3>5.4 dishes</h3>
+    <table>
+        <thead><tr><th>Campo</th><th>Tipo</th><th>Descripción</th></tr></thead>
+        <tbody>
+            <tr><td><code>id</code></td><td>UUID (PK)</td><td>ID plato</td></tr>
+            <tr><td><code>category_id</code></td><td>UUID (FK categories)</td><td>Categoría</td></tr>
+            <tr><td><code>name</code></td><td>TEXT</td><td>Nombre del plato</td></tr>
+            <tr><td><code>description</code></td><td>TEXT</td><td>Descripción</td></tr>
+            <tr><td><code>price</code></td><td>DECIMAL(8,2)</td><td>Precio en €</td></tr>
+            <tr><td><code>image_url</code></td><td>TEXT</td><td>Foto del plato (Storage)</td></tr>
+            <tr><td><code>allergens</code></td><td>TEXT[]</td><td>Lista de alérgenos</td></tr>
+            <tr><td><code>prep_time_min</code></td><td>INT</td><td>Tiempo estimado preparación (minutos)</td></tr>
+            <tr><td><code>is_available</code></td><td>BOOLEAN</td><td>Disponible para pedir</td></tr>
+            <tr><td><code>is_active</code></td><td>BOOLEAN</td><td>Activo en el sistema</td></tr>
+            <tr><td><code>created_at</code></td><td>TIMESTAMPTZ</td><td>Fecha de creación</td></tr>
+        </tbody>
+    </table>
+
+    <h3>5.5 daily_special</h3>
+    <p>Plato del día con countdown en tiempo real.</p>
+    <table>
+        <thead><tr><th>Campo</th><th>Tipo</th><th>Descripción</th></tr></thead>
+        <tbody>
+            <tr><td><code>id</code></td><td>UUID (PK)</td><td>ID</td></tr>
+            <tr><td><code>dish_id</code></td><td>UUID (FK dishes)</td><td>Plato destacado</td></tr>
+            <tr><td><code>date</code></td><td>DATE</td><td>Día del especial</td></tr>
+            <tr><td><code>starts_at</code></td><td>TIMESTAMPTZ</td><td>Inicio countdown</td></tr>
+            <tr><td><code>ends_at</code></td><td>TIMESTAMPTZ</td><td>Fin countdown</td></tr>
+        </tbody>
+    </table>
+
+    <h3>5.6 schedule</h3>
+    <p>Franjas horarias disponibles para encargos y domicilio.</p>
+    <table>
+        <thead><tr><th>Campo</th><th>Tipo</th><th>Descripción</th></tr></thead>
+        <tbody>
+            <tr><td><code>id</code></td><td>UUID (PK)</td><td>ID</td></tr>
+            <tr><td><code>day_of_week</code></td><td>INT (0-6)</td><td>Día de la semana</td></tr>
+            <tr><td><code>start_time</code></td><td>TIME</td><td>Hora inicio franja</td></tr>
+            <tr><td><code>end_time</code></td><td>TIME</td><td>Hora fin franja</td></tr>
+            <tr><td><code>max_orders</code></td><td>INT</td><td>Máximo pedidos en esta franja</td></tr>
+            <tr><td><code>is_active</code></td><td>BOOLEAN</td><td>Franja activa</td></tr>
+        </tbody>
+    </table>
+
+    <h3>5.7 orders</h3>
+    <p>Tabla central. Almacena los 4 tipos de pedido.</p>
+    <table>
+        <thead><tr><th>Campo</th><th>Tipo</th><th>Descripción</th></tr></thead>
+        <tbody>
+            <tr><td><code>id</code></td><td>UUID (PK)</td><td>ID pedido</td></tr>
+            <tr><td><code>user_id</code></td><td>UUID (FK profiles) NULL</td><td>NULL si venta mostrador anónima</td></tr>
+            <tr><td><code>type</code></td><td>ENUM ('mostrador','encargo','domicilio','recogida')</td><td>Tipo de pedido</td></tr>
+            <tr><td><code>status</code></td><td>ENUM ('pending','confirmed','preparing','ready','delivering','delivered','cancelled')</td><td>Estado actual</td></tr>
+            <tr><td><code>scheduled_at</code></td><td>TIMESTAMPTZ NULL</td><td>Fecha/hora de entrega programada</td></tr>
+            <tr><td><code>address_id</code></td><td>UUID (FK addresses) NULL</td><td>Solo para domicilio</td></tr>
+            <tr><td><code>notes</code></td><td>TEXT</td><td>Notas del cliente</td></tr>
+            <tr><td><code>subtotal</code></td><td>DECIMAL(10,2)</td><td>Subtotal</td></tr>
+            <tr><td><code>delivery_fee</code></td><td>DECIMAL(8,2)</td><td>Coste de envío</td></tr>
+            <tr><td><code>total</code></td><td>DECIMAL(10,2)</td><td>Total final</td></tr>
+            <tr><td><code>payment_method</code></td><td>ENUM ('stripe','cash','card_physical')</td><td>Método de pago</td></tr>
+            <tr><td><code>payment_status</code></td><td>ENUM ('pending','paid','refunded')</td><td>Estado del pago</td></tr>
+            <tr><td><code>stripe_payment_id</code></td><td>TEXT NULL</td><td>ID del Payment Intent de Stripe</td></tr>
+            <tr><td><code>qr_code</code></td><td>TEXT NULL</td><td>Código QR para recogida</td></tr>
+            <tr><td><code>assigned_driver_id</code></td><td>UUID (FK profiles) NULL</td><td>Repartidor asignado</td></tr>
+            <tr><td><code>group_order_id</code></td><td>UUID NULL</td><td>ID del pedido grupal padre</td></tr>
+            <tr><td><code>created_by</code></td><td>UUID (FK profiles)</td><td>Quien creó el pedido (empleado en mostrador)</td></tr>
+            <tr><td><code>created_at</code></td><td>TIMESTAMPTZ</td><td>Fecha de creación</td></tr>
+        </tbody>
+    </table>
+
+    <h3>5.8 order_items</h3>
+    <table>
+        <thead><tr><th>Campo</th><th>Tipo</th><th>Descripción</th></tr></thead>
+        <tbody>
+            <tr><td><code>id</code></td><td>UUID (PK)</td><td>ID línea</td></tr>
+            <tr><td><code>order_id</code></td><td>UUID (FK orders)</td><td>Pedido</td></tr>
+            <tr><td><code>dish_id</code></td><td>UUID (FK dishes)</td><td>Plato</td></tr>
+            <tr><td><code>quantity</code></td><td>INT</td><td>Cantidad</td></tr>
+            <tr><td><code>unit_price</code></td><td>DECIMAL(8,2)</td><td>Precio unitario en el momento</td></tr>
+            <tr><td><code>subtotal</code></td><td>DECIMAL(10,2)</td><td>quantity × unit_price</td></tr>
+        </tbody>
+    </table>
+
+    <h3>5.9 order_ratings</h3>
+    <table>
+        <thead><tr><th>Campo</th><th>Tipo</th><th>Descripción</th></tr></thead>
+        <tbody>
+            <tr><td><code>id</code></td><td>UUID (PK)</td><td>ID</td></tr>
+            <tr><td><code>order_id</code></td><td>UUID (FK orders) UNIQUE</td><td>Pedido valorado</td></tr>
+            <tr><td><code>user_id</code></td><td>UUID (FK profiles)</td><td>Quien valora</td></tr>
+            <tr><td><code>rating</code></td><td>INT (1-5)</td><td>Estrellas</td></tr>
+            <tr><td><code>comment</code></td><td>TEXT</td><td>Comentario opcional</td></tr>
+            <tr><td><code>created_at</code></td><td>TIMESTAMPTZ</td><td>Fecha</td></tr>
+        </tbody>
+    </table>
+
+    <h3>5.10 favorites</h3>
+    <table>
+        <thead><tr><th>Campo</th><th>Tipo</th><th>Descripción</th></tr></thead>
+        <tbody>
+            <tr><td><code>id</code></td><td>UUID (PK)</td><td>ID</td></tr>
+            <tr><td><code>user_id</code></td><td>UUID (FK profiles)</td><td>Usuario</td></tr>
+            <tr><td><code>dish_id</code></td><td>UUID (FK dishes)</td><td>Plato favorito</td></tr>
+            <tr><td><code>created_at</code></td><td>TIMESTAMPTZ</td><td>Fecha</td></tr>
+        </tbody>
+    </table>
+
+    <h3>5.11 event_menus</h3>
+    <p>Menús predefinidos para catering (Ej: "Menú Comunión Premium").</p>
+    <table>
+        <thead><tr><th>Campo</th><th>Tipo</th><th>Descripción</th></tr></thead>
+        <tbody>
+            <tr><td><code>id</code></td><td>UUID (PK)</td><td>ID</td></tr>
+            <tr><td><code>name</code></td><td>TEXT</td><td>Nombre del menú</td></tr>
+            <tr><td><code>description</code></td><td>TEXT</td><td>Descripción</td></tr>
+            <tr><td><code>price_per_person</code></td><td>DECIMAL(8,2)</td><td>Precio base por comensal</td></tr>
+            <tr><td><code>min_guests</code></td><td>INT</td><td>Mínimo de comensales</td></tr>
+            <tr><td><code>image_url</code></td><td>TEXT</td><td>Imagen del menú</td></tr>
+            <tr><td><code>is_active</code></td><td>BOOLEAN</td><td>Activo</td></tr>
+        </tbody>
+    </table>
+
+    <h3>5.12 event_menu_courses</h3>
+    <p>Cursos/platos que componen un menú de evento.</p>
+    <table>
+        <thead><tr><th>Campo</th><th>Tipo</th><th>Descripción</th></tr></thead>
+        <tbody>
+            <tr><td><code>id</code></td><td>UUID (PK)</td><td>ID</td></tr>
+            <tr><td><code>event_menu_id</code></td><td>UUID (FK event_menus)</td><td>Menú</td></tr>
+            <tr><td><code>course_type</code></td><td>ENUM ('starter','first','second','dessert')</td><td>Tipo de curso</td></tr>
+            <tr><td><code>dish_id</code></td><td>UUID (FK dishes)</td><td>Plato</td></tr>
+            <tr><td><code>is_default</code></td><td>BOOLEAN</td><td>Incluido por defecto o alternativa</td></tr>
+        </tbody>
+    </table>
+
+    <h3>5.13 event_extras</h3>
+    <table>
+        <thead><tr><th>Campo</th><th>Tipo</th><th>Descripción</th></tr></thead>
+        <tbody>
+            <tr><td><code>id</code></td><td>UUID (PK)</td><td>ID</td></tr>
+            <tr><td><code>event_menu_id</code></td><td>UUID (FK event_menus)</td><td>Menú</td></tr>
+            <tr><td><code>name</code></td><td>TEXT</td><td>Nombre del extra ("Barra libre", "Tarta")</td></tr>
+            <tr><td><code>price_per_person</code></td><td>DECIMAL(8,2)</td><td>Precio adicional por comensal</td></tr>
+        </tbody>
+    </table>
+
+    <h3>5.14 event_requests</h3>
+    <p>Solicitudes de catering enviadas por clientes.</p>
+    <table>
+        <thead><tr><th>Campo</th><th>Tipo</th><th>Descripción</th></tr></thead>
+        <tbody>
+            <tr><td><code>id</code></td><td>UUID (PK)</td><td>ID</td></tr>
+            <tr><td><code>user_id</code></td><td>UUID (FK profiles)</td><td>Cliente</td></tr>
+            <tr><td><code>event_menu_id</code></td><td>UUID (FK event_menus)</td><td>Menú seleccionado</td></tr>
+            <tr><td><code>event_type</code></td><td>TEXT</td><td>"Comunión", "Boda", "Empresa"...</td></tr>
+            <tr><td><code>event_date</code></td><td>DATE</td><td>Fecha del evento</td></tr>
+            <tr><td><code>event_location</code></td><td>TEXT</td><td>Lugar</td></tr>
+            <tr><td><code>num_guests</code></td><td>INT</td><td>Número de comensales</td></tr>
+            <tr><td><code>notes</code></td><td>TEXT</td><td>Observaciones</td></tr>
+            <tr><td><code>status</code></td><td>ENUM ('pending','quoted','accepted','rejected','completed')</td><td>Estado</td></tr>
+            <tr><td><code>quote_amount</code></td><td>DECIMAL(10,2) NULL</td><td>Presupuesto enviado</td></tr>
+            <tr><td><code>quote_pdf_url</code></td><td>TEXT NULL</td><td>PDF del presupuesto</td></tr>
+            <tr><td><code>created_at</code></td><td>TIMESTAMPTZ</td><td>Fecha solicitud</td></tr>
+        </tbody>
+    </table>
+
+    <h3>5.15 event_request_selections / event_request_extras</h3>
+    <p>Personalizaciones del cliente sobre el menú base (qué platos elige por curso) y extras seleccionados.</p>
+
+    <h3>5.16 event_calendar</h3>
+    <table>
+        <thead><tr><th>Campo</th><th>Tipo</th><th>Descripción</th></tr></thead>
+        <tbody>
+            <tr><td><code>id</code></td><td>UUID (PK)</td><td>ID</td></tr>
+            <tr><td><code>event_request_id</code></td><td>UUID (FK event_requests) UNIQUE</td><td>Solicitud aceptada</td></tr>
+            <tr><td><code>event_date</code></td><td>DATE</td><td>Fecha del evento</td></tr>
+            <tr><td><code>title</code></td><td>TEXT</td><td>Título para el calendario</td></tr>
+            <tr><td><code>notes</code></td><td>TEXT</td><td>Notas internas</td></tr>
+        </tbody>
+    </table>
+
+    <h3>5.17 contact_messages</h3>
+    <p>Mensajes del formulario de contacto/consultas.</p>
+    <table>
+        <thead><tr><th>Campo</th><th>Tipo</th><th>Descripción</th></tr></thead>
+        <tbody>
+            <tr><td><code>id</code></td><td>UUID (PK)</td><td>ID</td></tr>
+            <tr><td><code>user_id</code></td><td>UUID (FK profiles) NULL</td><td>Si está logueado</td></tr>
+            <tr><td><code>name</code></td><td>TEXT</td><td>Nombre</td></tr>
+            <tr><td><code>email</code></td><td>TEXT</td><td>Email de contacto</td></tr>
+            <tr><td><code>phone</code></td><td>TEXT NULL</td><td>Teléfono opcional</td></tr>
+            <tr><td><code>type</code></td><td>ENUM ('general','event_proposal','job_offer','collaboration','other')</td><td>Tipo de consulta</td></tr>
+            <tr><td><code>message</code></td><td>TEXT</td><td>Contenido</td></tr>
+            <tr><td><code>attachment_url</code></td><td>TEXT NULL</td><td>Foto/archivo adjunto</td></tr>
+            <tr><td><code>is_read</code></td><td>BOOLEAN</td><td>Leído por admin</td></tr>
+            <tr><td><code>is_archived</code></td><td>BOOLEAN</td><td>Archivado</td></tr>
+            <tr><td><code>created_at</code></td><td>TIMESTAMPTZ</td><td>Fecha</td></tr>
+        </tbody>
+    </table>
+
+    <h3>5.18 push_tokens</h3>
+    <table>
+        <thead><tr><th>Campo</th><th>Tipo</th><th>Descripción</th></tr></thead>
+        <tbody>
+            <tr><td><code>id</code></td><td>UUID (PK)</td><td>ID</td></tr>
+            <tr><td><code>user_id</code></td><td>UUID (FK profiles)</td><td>Usuario</td></tr>
+            <tr><td><code>token</code></td><td>TEXT</td><td>Token FCM del dispositivo</td></tr>
+            <tr><td><code>platform</code></td><td>ENUM ('android','web')</td><td>Plataforma</td></tr>
+            <tr><td><code>created_at</code></td><td>TIMESTAMPTZ</td><td>Fecha</td></tr>
+        </tbody>
+    </table>
+</section>
+
+<div class="page-break"></div>
+
+<!-- ─── 6. DIAGRAMAS DE SECUENCIA ─── -->
+<section id="sec6">
+    <h2>6. Diagramas de secuencia</h2>
+
+    <h3>6.1 Flujo: Cliente realiza un pedido online</h3>
+    <div class="diagram-container">
+        <div class="diagram-title">Secuencia — Pedido online (encargo / domicilio / recogida)</div>
+        <div class="mermaid">
+sequenceDiagram
+    participant C as 👤 Cliente
+    participant App as 📱 Flutter App
+    participant SB as 🔷 Supabase
+    participant EF as ⚡ Edge Function
+    participant ST as 💳 Stripe
+    participant FCM as 🔔 FCM
+
+    C->>App: Navega menú, añade platos al carrito
+    C->>App: Pulsa "Tramitar pedido"
+    App->>App: ¿Sesión activa?
+    alt No autenticado
+        App->>C: Muestra login/registro
+        C->>App: Se registra o inicia sesión
+        App->>SB: Auth - signUp/signIn
+        SB-->>App: JWT token
+    end
+    C->>App: Selecciona tipo, fecha/hora, dirección
+    C->>App: Pulsa "Pagar"
+    App->>EF: Crear Payment Intent (total, metadata)
+    EF->>ST: stripe.paymentIntents.create()
+    ST-->>EF: client_secret
+    EF-->>App: client_secret
+    App->>C: Muestra formulario tarjeta (Stripe Elements)
+    C->>App: Confirma pago
+    App->>ST: confirmPayment(client_secret)
+    ST-->>App: Pago exitoso
+    App->>SB: INSERT orders + order_items
+    SB-->>App: Pedido creado (id, qr_code)
+    ST->>EF: Webhook payment_intent.succeeded
+    EF->>SB: UPDATE orders SET payment_status = 'paid'
+    EF->>FCM: Push al empleado "Nuevo pedido"
+    EF->>C: Email confirmación (Brevo)
+    App->>C: Pantalla confirmación + QR
+        </div>
+    </div>
+
+    <h3>6.2 Flujo: Venta en mostrador (TPV)</h3>
+    <div class="diagram-container">
+        <div class="diagram-title">Secuencia — Venta en mostrador</div>
+        <div class="mermaid">
+sequenceDiagram
+    participant CL as 🧑 Cliente (físico)
+    participant E as 👨‍🍳 Empleado
+    participant App as 📱 TPV App
+    participant SB as 🔷 Supabase
+
+    CL->>E: "Quiero 2 croquetas y 1 lasaña"
+    E->>App: Toca platos en el grid TPV
+    App->>App: Añade al ticket, calcula total
+    E->>App: Pulsa "Cobrar"
+    App->>E: ¿Efectivo o tarjeta física?
+    E->>App: Selecciona método
+    App->>SB: INSERT order (type='mostrador', status='delivered', user_id=NULL)
+    SB-->>App: Pedido registrado
+    App->>E: Ticket confirmado ✅
+    Note over SB: Dashboard admin incluye esta venta
+        </div>
+    </div>
+
+    <h3>6.3 Flujo: Solicitud de catering</h3>
+    <div class="diagram-container">
+        <div class="diagram-title">Secuencia — Catering de evento</div>
+        <div class="mermaid">
+sequenceDiagram
+    participant C as 👤 Cliente
+    participant App as 📱 App
+    participant SB as 🔷 Supabase
+    participant EF as ⚡ Edge Function
+    participant A as 🔑 Admin
+
+    C->>App: Ve menús de evento disponibles
+    C->>App: Selecciona menú, personaliza cursos, extras
+    C->>App: Indica fecha, lugar, nº comensales
+    C->>App: Envía solicitud
+    App->>SB: INSERT event_requests + selections + extras
+    SB-->>App: Solicitud creada
+    EF->>A: Push + Email "Nueva solicitud de catering"
+    A->>App: Ve solicitud en panel admin
+    A->>App: Genera presupuesto (calculado o manual)
+    App->>SB: UPDATE event_requests SET quote_amount, status='quoted'
+    EF->>C: Push + Email "Presupuesto disponible"
+    C->>App: Ve presupuesto, acepta
+    App->>SB: UPDATE status='accepted'
+    App->>SB: INSERT event_calendar
+    EF->>A: Push "Catering confirmado"
+        </div>
+    </div>
+
+    <h3>6.4 Flujo: Chatbot IA</h3>
+    <div class="diagram-container">
+        <div class="diagram-title">Secuencia — Chatbot asistente</div>
+        <div class="mermaid">
+sequenceDiagram
+    participant C as 👤 Cliente
+    participant App as 📱 App
+    participant EF as ⚡ Edge Function
+    participant GM as 🤖 Gemini API
+    participant SB as 🔷 Supabase
+
+    C->>App: Abre chatbot (botón flotante)
+    C->>App: "¿Qué platos tenéis sin gluten?"
+    App->>EF: POST /chat {message, context}
+    EF->>SB: SELECT dishes, schedule, config
+    SB-->>EF: Datos del negocio
+    EF->>GM: Prompt con contexto + pregunta
+    GM-->>EF: Respuesta generada
+    EF-->>App: Texto de respuesta
+    App->>C: Muestra respuesta en el chat
+        </div>
+    </div>
+</section>
+
+<div class="page-break"></div>
+
+<!-- ─── 7. NAVEGACIÓN ─── -->
+<section id="sec7">
+    <h2>7. Diagrama de navegación</h2>
+
+    <h3>7.1 Navegación del Cliente</h3>
+    <div class="diagram-container">
+        <div class="diagram-title">Flujo de pantallas — Cliente</div>
+        <div class="mermaid">
+graph TD
+    START[Splash/Onboarding] --> HOME[🏠 Home]
+    HOME --> MENU[📋 Catálogo/Menú]
+    HOME --> SPECIAL[⭐ Plato del día]
+    HOME --> REPEAT[🔁 Repetir pedido]
+    HOME --> RECO[🤖 Para ti - IA]
+    HOME --> CHAT[💬 Chatbot IA]
+
+    MENU --> DETAIL[📖 Detalle plato]
+    DETAIL --> CART[🛒 Carrito]
+    SPECIAL --> DETAIL
+    RECO --> DETAIL
+
+    CART --> AUTH{¿Logueado?}
+    AUTH -- No --> LOGIN[🔐 Login/Registro]
+    LOGIN --> CART
+    AUTH -- Sí --> CHECKOUT[💳 Checkout/Pago]
+    CHECKOUT --> CONFIRM[✅ Confirmación]
+    CONFIRM --> ORDERS[📦 Mis pedidos]
+    ORDERS --> ORDER_DETAIL[📄 Detalle pedido]
+    ORDER_DETAIL --> RATE[⭐ Valorar]
+    ORDER_DETAIL --> PDF[📄 Ticket PDF]
+    ORDER_DETAIL --> QR[📱 QR Recogida]
+
+    HOME --> GROUP[👥 Pedido grupal]
+    HOME --> CATERING[🎉 Catering/Eventos]
+    CATERING --> CATERING_REQ[📝 Solicitar catering]
+    CATERING_REQ --> MY_CATERING[📋 Mis solicitudes]
+
+    HOME --> CONTACT[📨 Contacto/Consultas]
+    HOME --> FAVS[❤️ Favoritos]
+    HOME --> PROFILE[👤 Mi perfil]
+        </div>
+    </div>
+
+    <h3>7.2 Navegación del Empleado</h3>
+    <div class="diagram-container">
+        <div class="diagram-title">Flujo de pantallas — Empleado</div>
+        <div class="mermaid">
+graph TD
+    LOGIN_E[🔐 Login] --> ROLE{Rol asignado}
+    ROLE -- Cocinero --> KDS[👨‍🍳 Panel Cocina - KDS]
+    ROLE -- Repartidor --> DRIVER[🚗 Panel Repartidor]
+    ROLE -- Ambos --> KDS & DRIVER
+    
+    KDS --> |Cambiar estado| KDS
+    DRIVER --> |Marcar entregado| DRIVER
+    DRIVER --> CALL[📞 Llamar cliente]
+
+    LOGIN_E --> TPV[🏪 TPV Mostrador]
+    TPV --> |Cobrar| TPV
+
+    LOGIN_E --> SCAN[📷 Escáner QR]
+    SCAN --> VERIFY[✅ Verificar y entregar]
+
+    LOGIN_E --> PROF_E[👤 Mi perfil]
+        </div>
+    </div>
+
+    <h3>7.3 Navegación del Admin</h3>
+    <div class="diagram-container">
+        <div class="diagram-title">Flujo de pantallas — Admin</div>
+        <div class="mermaid">
+graph TD
+    LOGIN_A[🔐 Login] --> DASH[📊 Dashboard]
+    
+    DASH --> CAT_MGR[📁 Gestión Categorías]
+    DASH --> DISH_MGR[🍽️ Gestión Platos]
+    DASH --> DAILY[⭐ Plato del Día]
+    DASH --> ORD_MGR[📦 Gestión Pedidos]
+    DASH --> SCHED[🕐 Franjas Horarias]
+    
+    DASH --> EVT_MENU[🎉 Menús de Evento]
+    DASH --> EVT_REQ[📝 Solicitudes Catering]
+    DASH --> EVT_CAL[📅 Calendario Eventos]
+    
+    DASH --> INBOX[📨 Buzón Consultas]
+    DASH --> EMP_MGR[👥 Gestión Empleados]
+    DASH --> USR_MGR[👤 Gestión Usuarios]
+    DASH --> CONFIG[⚙️ Configuración]
+    DASH --> PROF_A[👤 Mi perfil]
+        </div>
+    </div>
+</section>
+
+<div class="page-break"></div>
+
+<!-- ─── 8. WIREFRAMES ─── -->
+<section id="sec8">
+    <h2>8. Wireframes de pantallas principales</h2>
+    <p>Representación esquemática de las interfaces clave. Los wireframes de baja fidelidad muestran la estructura y distribución de elementos sin diseño visual final.</p>
+
+    <h3>8.1 Pantallas del Cliente</h3>
+    <div class="wireframe-grid">
+        <!-- Home -->
+        <div class="wireframe-card">
+            <div class="wireframe-header">📱 1.3 Home</div>
+            <div class="wireframe-body">
+                <div class="wf-elem">🔔 Icono notificaciones &nbsp;&nbsp; 👤 Avatar</div>
+                <div class="wf-elem" style="text-align:center; font-weight:600;">⭐ PLATO DEL DÍA<br><small>Paella Valenciana — 02:45:30</small></div>
+                <div class="wf-search">🔍 Buscar platos... 🎤</div>
+                <div class="wf-elem">📁 Categorías (scroll horizontal)</div>
+                <div class="wf-elem">🤖 Para ti (recomendador IA)</div>
+                <div class="wf-elem">🔁 Repetir último pedido</div>
+                <div style="text-align:center; margin-top:0.5rem; font-size:0.7rem; color:#999;">
+                    🏠 · 📋 · 🛒 · 📦 · 👤
+                </div>
+            </div>
+        </div>
+
+        <!-- Catálogo -->
+        <div class="wireframe-card">
+            <div class="wireframe-header">📱 1.4 Catálogo</div>
+            <div class="wireframe-body">
+                <div class="wf-search">🔍 Buscar... 🎤</div>
+                <div class="wf-elem">Filtros: Sin gluten · Vegano · Entrantes...</div>
+                <div class="wf-card-mini">
+                    <div class="wf-img-placeholder"></div>
+                    <div><strong>Croquetas caseras</strong><br>€6.50 · 🥜⚠️</div>
+                </div>
+                <div class="wf-card-mini">
+                    <div class="wf-img-placeholder"></div>
+                    <div><strong>Lasaña boloñesa</strong><br>€9.80 · 🌾🥛</div>
+                </div>
+                <div class="wf-card-mini">
+                    <div class="wf-img-placeholder"></div>
+                    <div><strong>Ensalada César</strong><br>€7.20 · 🥚</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Carrito -->
+        <div class="wireframe-card">
+            <div class="wireframe-header">📱 1.6 Carrito</div>
+            <div class="wireframe-body">
+                <div class="wf-card-mini">
+                    <div class="wf-img-placeholder"></div>
+                    <div>Croquetas ×2 — €13.00<br>
+                        <span style="font-size:0.7rem;">➖ 2 ➕ &nbsp; 🗑️</span>
+                    </div>
+                </div>
+                <div class="wf-card-mini">
+                    <div class="wf-img-placeholder"></div>
+                    <div>Lasaña ×1 — €9.80<br>
+                        <span style="font-size:0.7rem;">➖ 1 ➕ &nbsp; 🗑️</span>
+                    </div>
+                </div>
+                <div class="wf-elem">📝 Notas: sin cebolla por favor</div>
+                <div class="wf-elem">🕐 Recogida · Viernes 14:00-14:30</div>
+                <hr style="margin:0.5rem 0; border-color:#e0e0f0;">
+                <div style="font-weight:600; text-align:right;">Total: €22.80</div>
+                <div class="wf-btn" style="width:100%; text-align:center;">Tramitar pedido →</div>
+            </div>
+        </div>
+
+        <!-- Detalle pedido -->
+        <div class="wireframe-card">
+            <div class="wireframe-header">📱 1.9 Detalle Pedido</div>
+            <div class="wireframe-body">
+                <div class="wf-elem" style="text-align:center;">Pedido #A3F2<br><span class="badge badge-green">Preparando</span></div>
+                <div style="text-align:center; font-size:2rem; margin:0.5rem 0;">🍳</div>
+                <div style="text-align:center; font-size:0.7rem; color:#999;">Animación Lottie del estado</div>
+                <div class="wf-elem">Croquetas ×2 — €13.00</div>
+                <div class="wf-elem">Lasaña ×1 — €9.80</div>
+                <div style="font-weight:600; text-align:right;">Total: €22.80</div>
+                <div style="display:flex; gap:0.3rem; margin-top:0.5rem;">
+                    <div class="wf-btn" style="flex:1; text-align:center; font-size:0.7rem;">📱 QR</div>
+                    <div class="wf-btn" style="flex:1; text-align:center; font-size:0.7rem;">📄 PDF</div>
+                    <div class="wf-btn" style="flex:1; text-align:center; font-size:0.7rem;">⭐ Valorar</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chatbot -->
+        <div class="wireframe-card">
+            <div class="wireframe-header">📱 1.13 Chatbot IA</div>
+            <div class="wireframe-body">
+                <div style="background:#f0efff; border-radius:8px; padding:0.4rem; margin-bottom:0.4rem; font-size:0.75rem;">
+                    🤖 ¡Hola! Soy el asistente de [Negocio]. ¿En qué puedo ayudarte?
+                </div>
+                <div style="background:#e8f5e9; border-radius:8px; padding:0.4rem; margin-bottom:0.4rem; font-size:0.75rem; text-align:right;">
+                    ¿Qué tenéis sin gluten?
+                </div>
+                <div style="background:#f0efff; border-radius:8px; padding:0.4rem; margin-bottom:0.4rem; font-size:0.75rem;">
+                    🤖 Tenemos varias opciones sin gluten: Ensalada César (€7.20), Pollo al horno (€11.50)...
+                </div>
+                <div style="display:flex; gap:0.3rem; margin-top:auto;">
+                    <div class="wf-search" style="flex:1; margin:0;">Escribe tu pregunta...</div>
+                    <div class="wf-btn" style="margin:0;">📤</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contacto -->
+        <div class="wireframe-card">
+            <div class="wireframe-header">📱 1.14 Contacto</div>
+            <div class="wireframe-body">
+                <div class="wf-elem">👤 Nombre</div>
+                <div class="wf-elem">📧 Email</div>
+                <div class="wf-elem">📱 Teléfono (opcional)</div>
+                <div class="wf-elem">📂 Tipo: Consulta ▾<br><small style="color:#999;">General · Evento · Trabajo · Otro</small></div>
+                <div class="wf-elem" style="min-height:40px;">💬 Mensaje...</div>
+                <div class="wf-elem">📎 Adjuntar archivo</div>
+                <div class="wf-btn" style="width:100%; text-align:center;">Enviar consulta</div>
+            </div>
+        </div>
+    </div>
+
+    <h3>8.2 Pantallas del Empleado</h3>
+    <div class="wireframe-grid">
+        <!-- KDS -->
+        <div class="wireframe-card">
+            <div class="wireframe-header">📱 2.2 Panel Cocina (KDS)</div>
+            <div class="wireframe-body">
+                <div class="wf-elem">Filtros: Todos · Nuevos · Preparando</div>
+                <div style="border:2px solid #f39c12; border-radius:8px; padding:0.5rem; margin-bottom:0.5rem;">
+                    <div style="font-size:0.7rem;"><span class="badge badge-orange">NUEVO</span> 🏪 Mostrador</div>
+                    <div style="font-size:0.75rem; font-weight:600;">Croquetas ×2, Lasaña ×1</div>
+                    <div style="font-size:0.7rem; color:#999;">Hace 2 min</div>
+                    <div class="wf-btn" style="font-size:0.7rem;">→ Preparando</div>
+                </div>
+                <div style="border:2px solid #27ae60; border-radius:8px; padding:0.5rem;">
+                    <div style="font-size:0.7rem;"><span class="badge badge-green">PREPARANDO</span> 📦 Encargo</div>
+                    <div style="font-size:0.75rem; font-weight:600;">Paella ×1 (10 pers)</div>
+                    <div style="font-size:0.7rem; color:#999;">Entrega: 14:00</div>
+                    <div class="wf-btn" style="font-size:0.7rem;">→ Listo</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TPV -->
+        <div class="wireframe-card">
+            <div class="wireframe-header">📱 2.4 TPV Mostrador</div>
+            <div class="wireframe-body">
+                <div class="wf-elem">📁 Entrantes · Principales · Postres</div>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.3rem; margin-bottom:0.5rem;">
+                    <div class="wf-elem" style="text-align:center; margin:0;">Croquetas<br>€6.50</div>
+                    <div class="wf-elem" style="text-align:center; margin:0;">Lasaña<br>€9.80</div>
+                    <div class="wf-elem" style="text-align:center; margin:0;">Ensalada<br>€7.20</div>
+                    <div class="wf-elem" style="text-align:center; margin:0;">Pollo<br>€11.50</div>
+                </div>
+                <hr style="border-color:#e0e0f0;">
+                <div style="font-size:0.75rem;">
+                    Croquetas ×2 — €13.00<br>
+                    Lasaña ×1 — €9.80
+                </div>
+                <div style="font-weight:600; text-align:right;">Total: €22.80</div>
+                <div style="display:flex; gap:0.3rem; margin-top:0.5rem;">
+                    <div class="wf-btn" style="flex:1; text-align:center; font-size:0.7rem;">💵 Efectivo</div>
+                    <div class="wf-btn" style="flex:1; text-align:center; font-size:0.7rem;">💳 Tarjeta</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- QR Scanner -->
+        <div class="wireframe-card">
+            <div class="wireframe-header">📱 2.5 Escáner QR</div>
+            <div class="wireframe-body">
+                <div style="background:#1a1a2e; border-radius:8px; height:100px; display:flex; align-items:center; justify-content:center; color:white; margin-bottom:0.5rem;">
+                    📷 Cámara<br><small>Apunta al QR del cliente</small>
+                </div>
+                <div class="wf-elem" style="text-align:center;">
+                    ✅ Pedido #A3F2 verificado<br>
+                    Croquetas ×2, Lasaña ×1<br>
+                    <strong>€22.80 — Pagado</strong>
+                </div>
+                <div class="wf-btn" style="width:100%; text-align:center;">Confirmar entrega</div>
+            </div>
+        </div>
+    </div>
+
+    <h3>8.3 Pantallas del Admin</h3>
+    <div class="wireframe-grid">
+        <!-- Dashboard -->
+        <div class="wireframe-card">
+            <div class="wireframe-header">🖥️ 3.1 Dashboard</div>
+            <div class="wireframe-body">
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.3rem; margin-bottom:0.5rem;">
+                    <div class="wf-elem" style="text-align:center; margin:0;">📦 28<br><small>Pedidos hoy</small></div>
+                    <div class="wf-elem" style="text-align:center; margin:0;">💰 €847<br><small>Ventas hoy</small></div>
+                    <div class="wf-elem" style="text-align:center; margin:0;">🏪 12<br><small>Mostrador</small></div>
+                    <div class="wf-elem" style="text-align:center; margin:0;">📱 16<br><small>Online</small></div>
+                </div>
+                <div class="wf-elem" style="text-align:center; min-height:50px;">📊 Gráfica ventas semanal</div>
+                <div class="wf-elem">🔥 Top: Croquetas (45), Lasaña (32)...</div>
+                <div class="wf-elem"><span class="badge badge-orange">3</span> Pedidos pendientes</div>
+            </div>
+        </div>
+
+        <!-- Gestión Platos -->
+        <div class="wireframe-card">
+            <div class="wireframe-header">🖥️ 3.3 Gestión Platos</div>
+            <div class="wireframe-body">
+                <div style="display:flex; justify-content:space-between; margin-bottom:0.5rem;">
+                    <div class="wf-search" style="width:60%; margin:0;">🔍 Buscar plato...</div>
+                    <div class="wf-btn" style="margin:0;">+ Nuevo plato</div>
+                </div>
+                <div class="wf-card-mini">
+                    <div class="wf-img-placeholder"></div>
+                    <div style="flex:1;"><strong>Croquetas</strong><br>€6.50 · Entrantes · ✅</div>
+                    <div style="font-size:0.7rem;">✏️ 🗑️</div>
+                </div>
+                <div class="wf-card-mini">
+                    <div class="wf-img-placeholder"></div>
+                    <div style="flex:1;"><strong>Lasaña</strong><br>€9.80 · Principales · ✅</div>
+                    <div style="font-size:0.7rem;">✏️ 🗑️</div>
+                </div>
+                <div class="wf-elem" style="text-align:center; font-size:0.7rem;">🤖 Subir foto → IA genera descripción</div>
+            </div>
+        </div>
+
+        <!-- Buzón consultas -->
+        <div class="wireframe-card">
+            <div class="wireframe-header">🖥️ 3.10 Buzón Consultas</div>
+            <div class="wireframe-body">
+                <div class="wf-elem">Filtros: Todos · General · Evento · Trabajo</div>
+                <div style="border-left:3px solid #e94560; padding-left:0.5rem; margin-bottom:0.5rem;">
+                    <div style="font-size:0.75rem; font-weight:600;">🔴 María López</div>
+                    <div style="font-size:0.7rem; color:#666;">Tipo: Propuesta evento</div>
+                    <div style="font-size:0.7rem;">"Tenemos un evento de empresa para 50..."</div>
+                </div>
+                <div style="border-left:3px solid #27ae60; padding-left:0.5rem; margin-bottom:0.5rem;">
+                    <div style="font-size:0.75rem; font-weight:600;">✅ Carlos Ruiz</div>
+                    <div style="font-size:0.7rem; color:#666;">Tipo: Oferta de trabajo</div>
+                    <div style="font-size:0.7rem;">"Soy repartidor con moto propia..."</div>
+                </div>
+                <div style="font-size:0.7rem; color:#999; text-align:center;">Marcar leído · Responder · Archivar</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="page-break"></div>
+
+<!-- ─── 9. DECISIONES DE DISEÑO ─── -->
+<section id="sec9">
+    <h2>9. Decisiones de diseño y patrones</h2>
+
+    <h3>9.1 Arquitectura de software</h3>
+    <table>
+        <thead><tr><th>Patrón</th><th>Aplicación</th><th>Justificación</th></tr></thead>
+        <tbody>
+            <tr><td><strong>Feature-first</strong></td><td>Estructura de carpetas</td><td>Cada feature (auth, orders, menu, catering, chat...) es un módulo autónomo con su UI, estado y datos</td></tr>
+            <tr><td><strong>Repository pattern</strong></td><td>Acceso a datos</td><td>Capa intermedia entre Riverpod y Supabase. Facilita testing y cambio de fuente de datos</td></tr>
+            <tr><td><strong>Freezed unions</strong></td><td>Estados de UI</td><td>Cada pantalla tiene estados: Initial, Loading, Data, Error como union types</td></tr>
+            <tr><td><strong>GoRouter guards</strong></td><td>Protección de rutas</td><td>Redirect basado en estado de autenticación y rol del usuario</td></tr>
+            <tr><td><strong>RLS (Row Level Security)</strong></td><td>Seguridad BD</td><td>Cada tabla tiene políticas que limitan acceso según JWT del usuario</td></tr>
+        </tbody>
+    </table>
+
+    <h3>9.2 Estructura de carpetas Flutter</h3>
+    <div class="highlight-box">
+        <p style="font-family: monospace; font-size: 0.8rem; white-space: pre;">lib/
+├── core/
+│   ├── config/          # Supabase, Stripe, theme
+│   ├── router/          # GoRouter config + guards
+│   ├── theme/           # AppTheme, colores, tipografía
+│   └── widgets/         # Widgets compartidos
+├── features/
+│   ├── auth/            # Login, registro, perfil
+│   ├── menu/            # Catálogo, detalle plato, búsqueda
+│   ├── cart/            # Carrito (local)
+│   ├── orders/          # Pedidos, checkout, historial
+│   ├── pos/             # TPV Mostrador (empleado)
+│   ├── kitchen/         # KDS cocina (empleado)
+│   ├── delivery/        # Panel repartidor
+│   ├── catering/        # Eventos, menús, solicitudes
+│   ├── chat/            # Chatbot IA
+│   ├── contact/         # Formulario contacto
+│   ├── admin/           # Dashboard, CRUD, config
+│   └── notifications/   # FCM, push tokens
+└── main.dart</p>
+    </div>
+
+    <h3>9.3 Seguridad</h3>
+    <ul>
+        <li><strong>Autenticación</strong>: JWT de Supabase, tokens persistentes, refresh automático</li>
+        <li><strong>Autorización</strong>: RLS en todas las tablas. Un cliente solo ve sus pedidos, un empleado ve todos los pedidos pero no puede modificar platos, etc.</li>
+        <li><strong>Pagos</strong>: El Payment Intent se crea en una Edge Function (servidor), nunca en el cliente. El client_secret se usa solo para confirmar el pago</li>
+        <li><strong>API keys</strong>: Las claves de Gemini, Stripe secret y Brevo se almacenan en las variables de entorno de Supabase Edge Functions, nunca en el código del cliente</li>
+        <li><strong>Validación</strong>: Doble validación — en el frontend (UX) y en la BD (constraints + triggers)</li>
+        <li><strong>Imágenes</strong>: Compresión antes de subir (flutter_image_compress). Bucket público para platos, privado para documentos</li>
+    </ul>
+
+    <h3>9.4 Rendimiento</h3>
+    <ul>
+        <li><strong>Caché local</strong>: Carrito en SharedPreferences/localStorage (sin necesidad de red)</li>
+        <li><strong>Realtime selectivo</strong>: Solo se suscriben a Realtime las pantallas que lo necesitan (KDS, estado pedido, plato del día, pedido grupal)</li>
+        <li><strong>Lazy loading</strong>: Imágenes de platos con CachedNetworkImage y placeholders</li>
+        <li><strong>Paginación</strong>: Listados de pedidos y platos con scroll infinito</li>
+    </ul>
+</section>
+
+<!-- ─── PIE ─── -->
+<section style="text-align: center; background: linear-gradient(135deg, #302b63, #24243e); color: white; border-radius: 12px;">
+    <p style="color: #a8a8d0; margin: 0;">Documento generado como parte del Proyecto Final de DAM</p>
+    <p style="color: #6c63ff; font-weight: 600; margin: 0.5rem 0 0 0;">Fase 2 — Diseño del Proyecto · Abril 2026</p>
+</section>
+
+</div>
+
+<!-- ─── MERMAID JS ─── -->
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>
+    mermaid.initialize({
+        startOnLoad: true,
+        theme: 'base',
+        themeVariables: {
+            primaryColor: '#6c63ff',
+            primaryTextColor: '#1a1a2e',
+            primaryBorderColor: '#302b63',
+            lineColor: '#6c63ff',
+            secondaryColor: '#f0efff',
+            tertiaryColor: '#f8f8ff',
+            fontSize: '14px'
+        },
+        flowchart: {
+            useMaxWidth: true,
+            htmlLabels: true,
+            curve: 'basis'
+        },
+        sequence: {
+            useMaxWidth: true,
+            actorMargin: 50,
+            messageMargin: 40
+        }
+    });
+</script>
+
+</body>
+</html>

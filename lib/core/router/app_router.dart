@@ -7,6 +7,8 @@ import 'package:sabor_de_casa/core/router/route_names.dart';
 import 'package:sabor_de_casa/features/auth/presentation/providers/auth_provider.dart';
 import 'package:sabor_de_casa/features/auth/presentation/screens/login_screen.dart';
 import 'package:sabor_de_casa/features/auth/presentation/screens/register_screen.dart';
+import 'package:sabor_de_casa/features/menu/presentation/screens/dish_detail_screen.dart';
+import 'package:sabor_de_casa/features/menu/presentation/screens/menu_screen.dart';
 
 part 'app_router.g.dart';
 
@@ -68,13 +70,14 @@ GoRouter appRouter(AppRouterRef ref) {
       GoRoute(
         path: '/menu',
         name: RouteNames.menu,
-        builder: (_, __) => const _PlaceholderScreen(name: 'Menú'),
+        builder: (_, __) => const MenuScreen(),
         routes: [
           GoRoute(
             path: ':dishId',
             name: RouteNames.dishDetail,
-            builder: (_, state) =>
-                const _PlaceholderScreen(name: 'Detalle plato'),
+            builder: (_, state) => DishDetailScreen(
+              dishId: state.pathParameters['dishId']!,
+            ),
           ),
         ],
       ),

@@ -1,6 +1,7 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:sabor_de_casa/features/auth/presentation/providers/auth_provider.dart';
 import 'package:sabor_de_casa/features/menu/data/repositories/menu_repository.dart';
+import 'package:sabor_de_casa/features/menu/domain/models/dish.dart';
 import 'package:sabor_de_casa/features/menu/domain/models/favorite.dart';
 
 part 'favorites_provider.g.dart';
@@ -11,6 +12,14 @@ Future<List<Favorite>> favorites(FavoritesRef ref) async {
   final user = ref.watch(authNotifierProvider).valueOrNull;
   if (user == null) return [];
   return ref.watch(menuRepositoryProvider).getFavorites(user.id);
+}
+
+@riverpod
+// ignore: deprecated_member_use_from_same_package, Riverpod 2.x typed Ref
+Future<List<Dish>> favoriteDishes(FavoriteDishesRef ref) async {
+  final user = ref.watch(authNotifierProvider).valueOrNull;
+  if (user == null) return [];
+  return ref.watch(menuRepositoryProvider).getFavoriteDishes(user.id);
 }
 
 @riverpod

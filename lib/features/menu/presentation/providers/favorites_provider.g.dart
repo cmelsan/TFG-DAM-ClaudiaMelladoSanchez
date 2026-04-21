@@ -23,6 +23,23 @@ final favoritesProvider = AutoDisposeFutureProvider<List<Favorite>>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef FavoritesRef = AutoDisposeFutureProviderRef<List<Favorite>>;
+String _$favoriteDishesHash() => r'477ea1c989f0333bee2bf1fefeea8c8d58c09c91';
+
+/// See also [favoriteDishes].
+@ProviderFor(favoriteDishes)
+final favoriteDishesProvider = AutoDisposeFutureProvider<List<Dish>>.internal(
+  favoriteDishes,
+  name: r'favoriteDishesProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$favoriteDishesHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef FavoriteDishesRef = AutoDisposeFutureProviderRef<List<Dish>>;
 String _$isFavoriteHash() => r'787f356c6055158a5dcdf06568847dfa472cab97';
 
 /// Copied from Dart SDK

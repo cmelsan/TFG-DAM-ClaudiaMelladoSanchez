@@ -111,6 +111,26 @@ class MenuRepository {
     }
   }
 
+  Future<List<Dish>> getFavoriteDishes(String userId) async {
+    try {
+      final data = await _client
+          .from(SupabaseConstants.favorites)
+          .select('dishes(*)')
+          .eq('user_id', userId)
+          .order('created_at', ascending: false);
+
+      return data
+          .map((json) => json['dishes'])
+          .whereType<Map<String, dynamic>>()
+          .map(Dish.fromJson)
+          .toList();
+    } on PostgrestException catch (e) {
+      throw DatabaseFailure(message: e.message, code: e.code);
+    } catch (e) {
+      throw UnexpectedFailure(message: e.toString());
+    }
+  }
+
   Future<void> addFavorite({
     required String userId,
     required String dishId,

@@ -1,5 +1,4 @@
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:sabor_de_casa/core/router/route_names.dart';
@@ -7,28 +6,19 @@ import 'package:sabor_de_casa/features/auth/presentation/providers/auth_provider
 import 'package:sabor_de_casa/features/auth/presentation/screens/login_screen.dart';
 import 'package:sabor_de_casa/features/auth/presentation/screens/register_screen.dart';
 import 'package:sabor_de_casa/features/cart/presentation/screens/cart_screen.dart';
+import 'package:sabor_de_casa/features/cart/presentation/screens/checkout_screen.dart';
+import 'package:sabor_de_casa/features/catering/presentation/screens/catering_screen.dart';
+import 'package:sabor_de_casa/features/chat/presentation/screens/chat_screen.dart';
+import 'package:sabor_de_casa/features/contact/presentation/screens/contact_screen.dart';
+import 'package:sabor_de_casa/features/home/presentation/screens/home_screen.dart';
 import 'package:sabor_de_casa/features/menu/presentation/screens/dish_detail_screen.dart';
+import 'package:sabor_de_casa/features/menu/presentation/screens/favorites_screen.dart';
 import 'package:sabor_de_casa/features/menu/presentation/screens/menu_screen.dart';
 import 'package:sabor_de_casa/features/orders/presentation/screens/order_detail_screen.dart';
 import 'package:sabor_de_casa/features/orders/presentation/screens/orders_screen.dart';
 import 'package:sabor_de_casa/features/profile/presentation/screens/profile_screen.dart';
 
 part 'app_router.g.dart';
-
-/// Pantalla temporal mientras se implementan las features.
-class _PlaceholderScreen extends StatelessWidget {
-  const _PlaceholderScreen({required this.name});
-
-  final String name;
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text(name)),
-      body: Center(child: Text('Pantalla: $name')),
-    );
-  }
-}
 
 /// Rutas que requieren autenticación.
 const _protectedPaths = [
@@ -68,7 +58,7 @@ GoRouter appRouter(AppRouterRef ref) {
       GoRoute(
         path: '/',
         name: RouteNames.home,
-        builder: (_, __) => const _PlaceholderScreen(name: 'Home'),
+        builder: (_, __) => const HomeScreen(),
       ),
       GoRoute(
         path: '/menu',
@@ -92,17 +82,17 @@ GoRouter appRouter(AppRouterRef ref) {
       GoRoute(
         path: '/contact',
         name: RouteNames.contact,
-        builder: (_, __) => const _PlaceholderScreen(name: 'Contacto'),
+        builder: (_, __) => const ContactScreen(),
       ),
       GoRoute(
         path: '/chat',
         name: RouteNames.chat,
-        builder: (_, __) => const _PlaceholderScreen(name: 'Chat IA'),
+        builder: (_, __) => const ChatScreen(),
       ),
       GoRoute(
         path: '/catering',
         name: RouteNames.catering,
-        builder: (_, __) => const _PlaceholderScreen(name: 'Catering'),
+        builder: (_, __) => const CateringScreen(),
       ),
 
       // --- Auth ---
@@ -121,7 +111,7 @@ GoRouter appRouter(AppRouterRef ref) {
       GoRoute(
         path: '/checkout',
         name: RouteNames.checkout,
-        builder: (_, __) => const _PlaceholderScreen(name: 'Checkout'),
+        builder: (_, __) => const CheckoutScreen(),
       ),
       GoRoute(
         path: '/orders',
@@ -145,8 +135,7 @@ GoRouter appRouter(AppRouterRef ref) {
       GoRoute(
         path: '/favorites',
         name: RouteNames.favorites,
-        builder: (_, __) =>
-            const _PlaceholderScreen(name: 'Favoritos'),
+        builder: (_, __) => const FavoritesScreen(),
       ),
     ],
   );

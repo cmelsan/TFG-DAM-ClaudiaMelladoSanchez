@@ -2,11 +2,11 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-
 import 'package:sabor_de_casa/core/router/route_names.dart';
 import 'package:sabor_de_casa/features/auth/presentation/providers/auth_provider.dart';
 import 'package:sabor_de_casa/features/auth/presentation/screens/login_screen.dart';
 import 'package:sabor_de_casa/features/auth/presentation/screens/register_screen.dart';
+import 'package:sabor_de_casa/features/cart/presentation/screens/cart_screen.dart';
 import 'package:sabor_de_casa/features/menu/presentation/screens/dish_detail_screen.dart';
 import 'package:sabor_de_casa/features/menu/presentation/screens/menu_screen.dart';
 
@@ -84,7 +84,7 @@ GoRouter appRouter(AppRouterRef ref) {
       GoRoute(
         path: '/cart',
         name: RouteNames.cart,
-        builder: (_, __) => const _PlaceholderScreen(name: 'Carrito'),
+        builder: (_, __) => const CartScreen(),
       ),
       GoRoute(
         path: '/contact',

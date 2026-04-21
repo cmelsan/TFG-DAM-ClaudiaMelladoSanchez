@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:sabor_de_casa/core/router/route_names.dart';
 import 'package:sabor_de_casa/core/widgets/error_view.dart';
 import 'package:sabor_de_casa/core/widgets/loading_indicator.dart';
+import 'package:sabor_de_casa/features/cart/presentation/providers/cart_provider.dart';
 import 'package:sabor_de_casa/features/menu/domain/models/category.dart';
 import 'package:sabor_de_casa/features/menu/presentation/providers/categories_provider.dart';
 import 'package:sabor_de_casa/features/menu/presentation/providers/daily_special_provider.dart';
@@ -29,9 +30,23 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
       dishesProvider(categoryId: _selectedCategoryId),
     );
     final dailySpecialAsync = ref.watch(todaySpecialProvider);
+    final cartCount = ref.watch(cartItemsCountProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Menú')),
+      appBar: AppBar(
+        title: const Text('Menú'),
+        actions: [
+          IconButton(
+            onPressed: () => context.pushNamed(RouteNames.cart),
+            icon: Badge.count(
+              count: cartCount,
+              isLabelVisible: cartCount > 0,
+              child: const Icon(Icons.shopping_cart_outlined),
+            ),
+            tooltip: 'Carrito',
+          ),
+        ],
+      ),
       body: RefreshIndicator(
         onRefresh: () async {
           ref
@@ -95,6 +110,19 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
                           RouteNames.dishDetail,
                           pathParameters: {'dishId': dishes[index].id},
                         ),
+                        onAddToCart: () {
+                          ref
+                              .read(cartNotifierProvider.notifier)
+                              .addDish(dishes[index]);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                '${dishes[index].name} añadido al carrito',
+                              ),
+                              duration: const Duration(seconds: 1),
+                            ),
+                          );
+                        },
                       ),
                       childCount: dishes.length,
                     ),

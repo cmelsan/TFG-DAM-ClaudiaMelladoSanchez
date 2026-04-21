@@ -11,11 +11,13 @@ class DishCard extends ConsumerWidget {
   const DishCard({
     required this.dish,
     required this.onTap,
+    this.onAddToCart,
     super.key,
   });
 
   final Dish dish;
   final VoidCallback onTap;
+  final VoidCallback? onAddToCart;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -107,6 +109,13 @@ class DishCard extends ConsumerWidget {
                         ),
                       ),
                       const Spacer(),
+                      if (dish.isAvailable && onAddToCart != null)
+                        IconButton(
+                          onPressed: onAddToCart,
+                          icon: const Icon(Icons.add_shopping_cart_outlined),
+                          visualDensity: VisualDensity.compact,
+                          tooltip: 'Añadir al carrito',
+                        ),
                       if (!dish.isAvailable)
                         Chip(
                           label: Text(

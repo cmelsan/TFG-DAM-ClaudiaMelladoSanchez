@@ -1,9 +1,12 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:sabor_de_casa/core/router/route_names.dart';
 import 'package:sabor_de_casa/core/utils/formatters.dart';
 import 'package:sabor_de_casa/core/widgets/error_view.dart';
 import 'package:sabor_de_casa/core/widgets/loading_indicator.dart';
+import 'package:sabor_de_casa/features/cart/presentation/providers/cart_provider.dart';
 import 'package:sabor_de_casa/features/menu/presentation/providers/favorites_provider.dart';
 import 'package:sabor_de_casa/features/menu/presentation/providers/menu_provider.dart';
 import 'package:sabor_de_casa/features/menu/presentation/widgets/allergen_badge.dart';
@@ -17,6 +20,7 @@ class DishDetailScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final dishAsync = ref.watch(dishDetailProvider(dishId));
     final isFavAsync = ref.watch(isFavoriteProvider(dishId));
+    final cartCount = ref.watch(cartItemsCountProvider);
     final theme = Theme.of(context);
 
     return Scaffold(
@@ -68,6 +72,15 @@ class DishDetailScreen extends ConsumerWidget {
                   ),
                   loading: () => const SizedBox.shrink(),
                   error: (_, __) => const SizedBox.shrink(),
+                ),
+                IconButton(
+                  onPressed: () => context.pushNamed(RouteNames.cart),
+                  icon: Badge.count(
+                    count: cartCount,
+                    isLabelVisible: cartCount > 0,
+                    child: const Icon(Icons.shopping_cart_outlined),
+                  ),
+                  tooltip: 'Carrito',
                 ),
               ],
             ),
@@ -149,6 +162,33 @@ class DishDetailScreen extends ConsumerWidget {
           message: error.toString(),
           onRetry: () => ref.invalidate(dishDetailProvider(dishId)),
         ),
+      ),
+      bottomNavigationBar: dishAsync.when(
+        data: (dish) {
+          if (!dish.isAvailable) return null;
+
+          return SafeArea(
+            minimum: const EdgeInsets.all(12),
+            child: FilledButton.icon(
+              onPressed: () {
+                ref.read(cartNotifierProvider.notifier).addDish(dish);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('${dish.name} añadido al carrito'),
+                    action: SnackBarAction(
+                      label: 'Ver carrito',
+                      onPressed: () => context.pushNamed(RouteNames.cart),
+                    ),
+                  ),
+                );
+              },
+              icon: const Icon(Icons.add_shopping_cart_outlined),
+              label: const Text('Añadir al carrito'),
+            ),
+          );
+        },
+        loading: () => null,
+        error: (_, __) => null,
       ),
     );
   }

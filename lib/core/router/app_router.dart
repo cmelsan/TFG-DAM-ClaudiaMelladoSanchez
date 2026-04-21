@@ -15,6 +15,7 @@ import 'package:sabor_de_casa/features/auth/presentation/screens/login_screen.da
 import 'package:sabor_de_casa/features/auth/presentation/screens/register_screen.dart';
 import 'package:sabor_de_casa/features/cart/presentation/screens/cart_screen.dart';
 import 'package:sabor_de_casa/features/cart/presentation/screens/checkout_screen.dart';
+import 'package:sabor_de_casa/features/catering/presentation/screens/catering_request_screen.dart';
 import 'package:sabor_de_casa/features/catering/presentation/screens/catering_screen.dart';
 import 'package:sabor_de_casa/features/chat/presentation/screens/chat_screen.dart';
 import 'package:sabor_de_casa/features/contact/presentation/screens/contact_screen.dart';
@@ -169,6 +170,11 @@ GoRouter appRouter(AppRouterRef ref) {
         path: '/favorites',
         name: RouteNames.favorites,
         builder: (_, __) => const FavoritesScreen(),
+      ),
+      GoRoute(
+        path: '/catering/request',
+        name: RouteNames.cateringRequest,
+        builder: (_, __) => const CateringRequestScreen(),
       ),
 
       // --- Empleado ---

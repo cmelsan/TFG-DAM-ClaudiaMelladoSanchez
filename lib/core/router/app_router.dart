@@ -11,6 +11,7 @@ import 'package:sabor_de_casa/features/menu/presentation/screens/dish_detail_scr
 import 'package:sabor_de_casa/features/menu/presentation/screens/menu_screen.dart';
 import 'package:sabor_de_casa/features/orders/presentation/screens/order_detail_screen.dart';
 import 'package:sabor_de_casa/features/orders/presentation/screens/orders_screen.dart';
+import 'package:sabor_de_casa/features/profile/presentation/screens/profile_screen.dart';
 
 part 'app_router.g.dart';
 
@@ -139,7 +140,7 @@ GoRouter appRouter(AppRouterRef ref) {
       GoRoute(
         path: '/profile',
         name: RouteNames.profile,
-        builder: (_, __) => const _PlaceholderScreen(name: 'Perfil'),
+        builder: (_, __) => const ProfileScreen(),
       ),
       GoRoute(
         path: '/favorites',

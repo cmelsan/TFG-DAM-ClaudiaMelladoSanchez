@@ -4,8 +4,8 @@ part 'admin_user.freezed.dart';
 part 'admin_user.g.dart';
 
 @freezed
-@JsonSerializable(fieldRename: FieldRename.snake)
 class AdminUser with _$AdminUser {
+  @JsonSerializable(fieldRename: FieldRename.snake)
   const factory AdminUser({
     required String id,
     required String email,

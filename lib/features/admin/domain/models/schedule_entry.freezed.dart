@@ -168,7 +168,8 @@ class __$$ScheduleEntryImplCopyWithImpl<$Res>
 }
 
 /// @nodoc
-@JsonSerializable()
+
+@JsonSerializable(fieldRename: FieldRename.snake)
 class _$ScheduleEntryImpl implements _ScheduleEntry {
   const _$ScheduleEntryImpl({
     required this.id,

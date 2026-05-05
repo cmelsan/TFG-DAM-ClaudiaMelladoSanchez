@@ -6,7 +6,7 @@ part of 'checkout_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$checkoutSubmitHash() => r'1f523c77db27a85f20082a919f73e3f58ec19655';
+String _$checkoutSubmitHash() => r'23257581bdd51ecc50aaec14b5baf607145032a7';
 
 /// See also [CheckoutSubmit].
 @ProviderFor(CheckoutSubmit)

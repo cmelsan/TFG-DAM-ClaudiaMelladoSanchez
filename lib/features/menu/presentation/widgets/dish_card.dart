@@ -4,8 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:sabor_de_casa/core/utils/formatters.dart';
 import 'package:sabor_de_casa/features/menu/domain/models/dish.dart';
-import 'package:sabor_de_casa/features/menu/presentation/providers/favorites_provider.dart';
-import 'package:sabor_de_casa/features/menu/presentation/widgets/allergen_badge.dart';
 
 class DishCard extends ConsumerWidget {
   const DishCard({
@@ -21,21 +19,25 @@ class DishCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final isFavAsync = ref.watch(isFavoriteProvider(dish.id));
+    // Ya no usamos el Theme isFavAsync para pintar el icono de favorito tan en medio
     final theme = Theme.of(context);
 
     return Card(
       clipBehavior: Clip.antiAlias,
+      margin: EdgeInsets.zero,
       child: InkWell(
         onTap: onTap,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Imagen
-            AspectRatio(
-              aspectRatio: 16 / 10,
-              child: dish.imageUrl != null
-                  ? CachedNetworkImage(
+            // Imagen ocupando buena parte superior
+            Expanded(
+              flex: 5,
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  if (dish.imageUrl != null)
+                    CachedNetworkImage(
                       imageUrl: dish.imageUrl!,
                       fit: BoxFit.cover,
                       placeholder: (_, __) => const Center(
@@ -43,108 +45,98 @@ class DishCard extends ConsumerWidget {
                       ),
                       errorWidget: (_, __, ___) => const _PlaceholderImage(),
                     )
-                  : const _PlaceholderImage(),
+                  else
+                    const _PlaceholderImage(),
+                  // Disponibilidad badge encima de la imagen si está agotado
+                  if (!dish.isAvailable)
+                    Positioned(
+                      top: 8,
+                      left: 8,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: theme.colorScheme.error,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: const Text(
+                          'Agotado',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
             ),
 
-            Padding(
-              padding: const EdgeInsets.all(12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Nombre + favorito
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          dish.name,
-                          style: theme.textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w600,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      isFavAsync.when(
-                        data: (isFav) => IconButton(
-                          icon: Icon(
-                            isFav ? Icons.favorite : Icons.favorite_border,
-                            color: isFav ? Colors.red : null,
-                          ),
-                          iconSize: 20,
-                          visualDensity: VisualDensity.compact,
-                          onPressed: () => ref
-                              .read(favoriteToggleProvider.notifier)
-                              .toggle(dish.id),
-                        ),
-                        loading: () => const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        ),
-                        error: (_, __) => const SizedBox.shrink(),
-                      ),
-                    ],
-                  ),
-
-                  if (dish.description.isNotEmpty) ...[
-                    const SizedBox(height: 4),
+            // Info del Plato
+            Expanded(
+              flex: 4,
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
                     Text(
-                      dish.description,
-                      style: theme.textTheme.bodySmall,
-                      maxLines: 2,
+                      dish.name,
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                      maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                  ],
-
-                  const SizedBox(height: 8),
-
-                  // Precio + disponibilidad
-                  Row(
-                    children: [
+                    const SizedBox(height: 4),
+                    if (dish.description.isNotEmpty)
                       Text(
-                        Formatters.price(dish.price),
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: theme.colorScheme.primary,
+                        dish.description,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: Colors.black54,
                         ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                      const Spacer(),
-                      if (dish.isAvailable && onAddToCart != null)
-                        IconButton(
-                          onPressed: onAddToCart,
-                          icon: const Icon(Icons.add_shopping_cart_outlined),
-                          visualDensity: VisualDensity.compact,
-                          tooltip: 'Añadir al carrito',
+
+                    const Spacer(),
+
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                          Formatters.price(dish.price),
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: theme.colorScheme.primary,
+                          ),
                         ),
-                      if (!dish.isAvailable)
-                        Chip(
-                          label: Text(
-                            'Agotado',
-                            style: theme.textTheme.labelSmall?.copyWith(
-                              color: theme.colorScheme.error,
+                        if (dish.isAvailable && onAddToCart != null)
+                          GestureDetector(
+                            onTap: onAddToCart,
+                            child: Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: theme.colorScheme.primary.withValues(
+                                  alpha: 0.1,
+                                ),
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(
+                                Icons.add,
+                                color: theme.colorScheme.primary,
+                                size: 20,
+                              ),
                             ),
                           ),
-                          visualDensity: VisualDensity.compact,
-                          materialTapTargetSize:
-                              MaterialTapTargetSize.shrinkWrap,
-                          padding: EdgeInsets.zero,
-                          side: BorderSide(color: theme.colorScheme.error),
-                        ),
-                    ],
-                  ),
-
-                  // Alérgenos
-                  if (dish.allergens.isNotEmpty) ...[
-                    const SizedBox(height: 8),
-                    Wrap(
-                      spacing: 4,
-                      runSpacing: 4,
-                      children: dish.allergens
-                          .map((a) => AllergenBadge(allergen: a))
-                          .toList(),
+                      ],
                     ),
                   ],
-                ],
+                ),
               ),
             ),
           ],
@@ -161,9 +153,7 @@ class _PlaceholderImage extends StatelessWidget {
   Widget build(BuildContext context) {
     return ColoredBox(
       color: Theme.of(context).colorScheme.surfaceContainerHighest,
-      child: const Center(
-        child: Icon(Icons.restaurant, size: 40),
-      ),
+      child: const Center(child: Icon(Icons.restaurant, size: 40)),
     );
   }
 }

@@ -96,4 +96,50 @@ class OrdersRepository {
       throw UnexpectedFailure(message: e.toString());
     }
   }
+
+  /// Devuelve la valoración existente del pedido o null si no ha sido valorado.
+  Future<Map<String, dynamic>?> getOrderRating(String orderId) async {
+    try {
+      final userId = _client.auth.currentUser?.id;
+      if (userId == null) return null;
+      final data = await _client
+          .from(SupabaseConstants.orderRatings)
+          .select()
+          .eq('order_id', orderId)
+          .eq('user_id', userId)
+          .maybeSingle();
+      return data;
+    } on PostgrestException {
+      return null;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// Envía o actualiza la valoración de un pedido.
+  Future<void> rateOrder({
+    required String orderId,
+    required int rating,
+    String? comment,
+  }) async {
+    try {
+      final userId = _client.auth.currentUser?.id;
+      if (userId == null) {
+        throw const AuthFailure(message: 'Debes iniciar sesión');
+      }
+      await _client.from(SupabaseConstants.orderRatings).upsert({
+        'order_id': orderId,
+        'user_id': userId,
+        'rating': rating,
+        'comment': comment,
+        'created_at': DateTime.now().toIso8601String(),
+      });
+    } on Failure {
+      rethrow;
+    } on PostgrestException catch (e) {
+      throw DatabaseFailure(message: e.message, code: e.code);
+    } catch (e) {
+      throw UnexpectedFailure(message: e.toString());
+    }
+  }
 }

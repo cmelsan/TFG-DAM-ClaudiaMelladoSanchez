@@ -25,6 +25,12 @@ Future<List<Order>> posOrders(PosOrdersRef ref) {
 }
 
 @riverpod
+// ignore: deprecated_member_use_from_same_package, Riverpod 2.x typed Ref
+Future<List<Order>> encargoKitchenOrders(EncargoKitchenOrdersRef ref) {
+  return ref.watch(employeeOrdersRepositoryProvider).getEncargoKitchenOrders();
+}
+
+@riverpod
 class EmployeeOrderAction extends _$EmployeeOrderAction {
   @override
   FutureOr<void> build() {}
@@ -35,10 +41,9 @@ class EmployeeOrderAction extends _$EmployeeOrderAction {
   }) async {
     state = const AsyncLoading();
     state = await AsyncValue.guard(
-      () => ref.read(employeeOrdersRepositoryProvider).updateOrderStatus(
-            orderId: orderId,
-            newStatus: newStatus,
-          ),
+      () => ref
+          .read(employeeOrdersRepositoryProvider)
+          .updateOrderStatus(orderId: orderId, newStatus: newStatus),
     );
     _refreshLists();
   }
@@ -53,10 +58,30 @@ class EmployeeOrderAction extends _$EmployeeOrderAction {
     _refreshLists();
   }
 
+  Future<void> markPaymentPaid(String orderId) async {
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(
+      () => ref.read(employeeOrdersRepositoryProvider).markPaymentPaid(orderId),
+    );
+    _refreshLists();
+  }
+
+  /// Para domicilio + efectivo: entrega y cobra en un solo paso.
+  Future<void> markDeliveredAndPaid(String orderId) async {
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(
+      () => ref
+          .read(employeeOrdersRepositoryProvider)
+          .markDeliveredAndPaid(orderId),
+    );
+    _refreshLists();
+  }
+
   void _refreshLists() {
     ref
       ..invalidate(kitchenOrdersProvider)
       ..invalidate(deliveryOrdersProvider)
-      ..invalidate(posOrdersProvider);
+      ..invalidate(posOrdersProvider)
+      ..invalidate(encargoKitchenOrdersProvider);
   }
 }

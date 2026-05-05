@@ -138,10 +138,7 @@ class CartNotifier extends _$CartNotifier {
       return;
     }
 
-    state = CartState.active(
-      items: items,
-      total: _calculateTotal(items),
-    );
+    state = CartState.active(items: items, total: _calculateTotal(items));
   }
 
   double _calculateTotal(List<CartItem> items) {

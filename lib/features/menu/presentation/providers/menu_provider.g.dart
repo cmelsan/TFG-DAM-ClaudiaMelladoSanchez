@@ -144,6 +144,40 @@ class _DishesProviderElement
   String? get categoryId => (origin as DishesProvider).categoryId;
 }
 
+String _$offerDishesHash() => r'f0cebca38ea6c0ece968801609344c390ec15236';
+
+/// See also [offerDishes].
+@ProviderFor(offerDishes)
+final offerDishesProvider = AutoDisposeFutureProvider<List<Dish>>.internal(
+  offerDishes,
+  name: r'offerDishesProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$offerDishesHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef OfferDishesRef = AutoDisposeFutureProviderRef<List<Dish>>;
+String _$seasonalDishesHash() => r'123bd64000069c4f0d6cfe5c1abacafc13c7525a';
+
+/// See also [seasonalDishes].
+@ProviderFor(seasonalDishes)
+final seasonalDishesProvider = AutoDisposeFutureProvider<List<Dish>>.internal(
+  seasonalDishes,
+  name: r'seasonalDishesProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$seasonalDishesHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef SeasonalDishesRef = AutoDisposeFutureProviderRef<List<Dish>>;
 String _$dishDetailHash() => r'f4deb27b82f958f45fa06ef6e2c6f79196c8c656';
 
 /// See also [dishDetail].
@@ -262,5 +296,38 @@ class _DishDetailProviderElement extends AutoDisposeFutureProviderElement<Dish>
   String get dishId => (origin as DishDetailProvider).dishId;
 }
 
+String _$menuSearchQueryHash() => r'0c0574c92e1c2e2db208b364fd9b3de0b6ee292d';
+
+/// See also [MenuSearchQuery].
+@ProviderFor(MenuSearchQuery)
+final menuSearchQueryProvider =
+    AutoDisposeNotifierProvider<MenuSearchQuery, String>.internal(
+      MenuSearchQuery.new,
+      name: r'menuSearchQueryProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$menuSearchQueryHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
+
+typedef _$MenuSearchQuery = AutoDisposeNotifier<String>;
+String _$menuAllergenFilterHash() =>
+    r'b9e4b21615d9bb0d0722caa253ea1b19730d3fd0';
+
+/// See also [MenuAllergenFilter].
+@ProviderFor(MenuAllergenFilter)
+final menuAllergenFilterProvider =
+    AutoDisposeNotifierProvider<MenuAllergenFilter, List<String>>.internal(
+      MenuAllergenFilter.new,
+      name: r'menuAllergenFilterProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$menuAllergenFilterHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
+
+typedef _$MenuAllergenFilter = AutoDisposeNotifier<List<String>>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

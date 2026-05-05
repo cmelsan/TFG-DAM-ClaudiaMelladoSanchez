@@ -4,8 +4,8 @@ part 'business_config_item.freezed.dart';
 part 'business_config_item.g.dart';
 
 @freezed
-@JsonSerializable(fieldRename: FieldRename.snake)
 class BusinessConfigItem with _$BusinessConfigItem {
+  @JsonSerializable(fieldRename: FieldRename.snake)
   const factory BusinessConfigItem({
     required String id,
     required String key,

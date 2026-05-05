@@ -33,10 +33,7 @@ class AllergenBadge extends StatelessWidget {
       message: label,
       child: Chip(
         avatar: Icon(icon, size: 16),
-        label: Text(
-          label,
-          style: Theme.of(context).textTheme.labelSmall,
-        ),
+        label: Text(label, style: Theme.of(context).textTheme.labelSmall),
         visualDensity: VisualDensity.compact,
         materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
         padding: EdgeInsets.zero,

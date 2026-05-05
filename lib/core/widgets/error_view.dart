@@ -2,11 +2,7 @@ import 'package:flutter/material.dart';
 
 /// Vista de error reutilizable con botón de reintentar.
 class ErrorView extends StatelessWidget {
-  const ErrorView({
-    required this.message,
-    super.key,
-    this.onRetry,
-  });
+  const ErrorView({required this.message, super.key, this.onRetry});
 
   final String message;
   final VoidCallback? onRetry;

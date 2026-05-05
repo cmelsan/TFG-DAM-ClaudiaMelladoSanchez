@@ -4,8 +4,8 @@ part 'daily_special.freezed.dart';
 part 'daily_special.g.dart';
 
 @freezed
-@JsonSerializable(fieldRename: FieldRename.snake)
 class DailySpecial with _$DailySpecial {
+  @JsonSerializable(fieldRename: FieldRename.snake)
   const factory DailySpecial({
     required String id,
     required String dishId,

@@ -68,4 +68,85 @@ class ProfileRepository {
       throw UnexpectedFailure(message: e.toString());
     }
   }
+
+  // ─────────────────────── Direcciones de entrega ───────────────────────
+
+  Future<List<Map<String, dynamic>>> getAddresses() async {
+    try {
+      final userId = _client.auth.currentUser?.id;
+      if (userId == null) {
+        throw const AuthFailure(message: 'No hay sesión activa');
+      }
+      final data = await _client
+          .from(SupabaseConstants.addresses)
+          .select()
+          .eq('user_id', userId)
+          .order('is_default', ascending: false)
+          .order('created_at', ascending: false);
+      return List<Map<String, dynamic>>.from(data as List);
+    } on Failure {
+      rethrow;
+    } on PostgrestException catch (e) {
+      throw DatabaseFailure(message: e.message, code: e.code);
+    } catch (e) {
+      throw UnexpectedFailure(message: e.toString());
+    }
+  }
+
+  Future<void> addAddress({
+    required String label,
+    required String street,
+    required String city,
+    required String postalCode,
+    String? notes,
+    bool isDefault = false,
+  }) async {
+    try {
+      final userId = _client.auth.currentUser?.id;
+      if (userId == null) {
+        throw const AuthFailure(message: 'No hay sesión activa');
+      }
+      if (isDefault) {
+        await _client
+            .from(SupabaseConstants.addresses)
+            .update({'is_default': false})
+            .eq('user_id', userId);
+      }
+      await _client.from(SupabaseConstants.addresses).insert({
+        'user_id': userId,
+        'label': label.trim(),
+        'street': street.trim(),
+        'city': city.trim(),
+        'postal_code': postalCode.trim(),
+        if (notes != null && notes.isNotEmpty) 'notes': notes.trim(),
+        'is_default': isDefault,
+      });
+    } on Failure {
+      rethrow;
+    } on PostgrestException catch (e) {
+      throw DatabaseFailure(message: e.message, code: e.code);
+    } catch (e) {
+      throw UnexpectedFailure(message: e.toString());
+    }
+  }
+
+  Future<void> deleteAddress(String id) async {
+    try {
+      final userId = _client.auth.currentUser?.id;
+      if (userId == null) {
+        throw const AuthFailure(message: 'No hay sesión activa');
+      }
+      await _client
+          .from(SupabaseConstants.addresses)
+          .delete()
+          .eq('id', id)
+          .eq('user_id', userId);
+    } on Failure {
+      rethrow;
+    } on PostgrestException catch (e) {
+      throw DatabaseFailure(message: e.message, code: e.code);
+    } catch (e) {
+      throw UnexpectedFailure(message: e.toString());
+    }
+  }
 }

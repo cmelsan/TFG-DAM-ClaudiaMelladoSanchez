@@ -15,8 +15,8 @@ enum UserRole {
 
 /// Modelo correspondiente a la tabla `profiles` de Supabase.
 @freezed
-@JsonSerializable(fieldRename: FieldRename.snake)
 class UserProfile with _$UserProfile {
+  @JsonSerializable(fieldRename: FieldRename.snake)
   const factory UserProfile({
     required String id,
     required String email,

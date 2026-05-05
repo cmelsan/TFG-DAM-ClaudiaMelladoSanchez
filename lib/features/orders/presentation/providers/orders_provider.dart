@@ -22,3 +22,9 @@ Future<Order> orderDetail(OrderDetailRef ref, String orderId) {
 Future<List<OrderItem>> orderItems(OrderItemsRef ref, String orderId) {
   return ref.watch(ordersRepositoryProvider).getOrderItems(orderId);
 }
+
+@riverpod
+// ignore: deprecated_member_use_from_same_package, Riverpod 2.x typed Ref
+Future<Map<String, dynamic>?> orderRating(OrderRatingRef ref, String orderId) {
+  return ref.watch(ordersRepositoryProvider).getOrderRating(orderId);
+}

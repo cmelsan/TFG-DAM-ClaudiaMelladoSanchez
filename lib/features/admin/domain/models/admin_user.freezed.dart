@@ -192,7 +192,8 @@ class __$$AdminUserImplCopyWithImpl<$Res>
 }
 
 /// @nodoc
-@JsonSerializable()
+
+@JsonSerializable(fieldRename: FieldRename.snake)
 class _$AdminUserImpl implements _AdminUser {
   const _$AdminUserImpl({
     required this.id,

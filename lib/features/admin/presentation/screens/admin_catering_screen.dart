@@ -4,6 +4,7 @@ import 'package:sabor_de_casa/core/utils/formatters.dart';
 import 'package:sabor_de_casa/core/widgets/error_view.dart';
 import 'package:sabor_de_casa/core/widgets/loading_indicator.dart';
 import 'package:sabor_de_casa/features/admin/presentation/providers/admin_provider.dart';
+import 'package:sabor_de_casa/features/admin/presentation/widgets/admin_shell.dart';
 
 class AdminCateringScreen extends ConsumerWidget {
   const AdminCateringScreen({super.key});
@@ -12,9 +13,9 @@ class AdminCateringScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final requestsAsync = ref.watch(adminEventRequestsProvider);
 
-    return Scaffold(
-      appBar: AppBar(title: const Text('Admin Catering')),
-      body: requestsAsync.when(
+    return AdminShell(
+      title: 'Catering',
+      child: requestsAsync.when(
         data: (requests) => ListView.builder(
           padding: const EdgeInsets.all(12),
           itemCount: requests.length,

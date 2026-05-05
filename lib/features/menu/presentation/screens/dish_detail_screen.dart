@@ -2,7 +2,6 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:sabor_de_casa/core/router/route_names.dart';
 import 'package:sabor_de_casa/core/utils/formatters.dart';
 import 'package:sabor_de_casa/core/widgets/error_view.dart';
 import 'package:sabor_de_casa/core/widgets/loading_indicator.dart';
@@ -11,46 +10,55 @@ import 'package:sabor_de_casa/features/menu/presentation/providers/favorites_pro
 import 'package:sabor_de_casa/features/menu/presentation/providers/menu_provider.dart';
 import 'package:sabor_de_casa/features/menu/presentation/widgets/allergen_badge.dart';
 
-class DishDetailScreen extends ConsumerWidget {
+class DishDetailScreen extends ConsumerStatefulWidget {
   const DishDetailScreen({required this.dishId, super.key});
 
   final String dishId;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final dishAsync = ref.watch(dishDetailProvider(dishId));
-    final isFavAsync = ref.watch(isFavoriteProvider(dishId));
-    final cartCount = ref.watch(cartItemsCountProvider);
+  ConsumerState<DishDetailScreen> createState() => _DishDetailScreenState();
+}
+
+class _DishDetailScreenState extends ConsumerState<DishDetailScreen> {
+  int _quantity = 1;
+
+  @override
+  Widget build(BuildContext context) {
+    final dishAsync = ref.watch(dishDetailProvider(widget.dishId));
+    final isFavAsync = ref.watch(isFavoriteProvider(widget.dishId));
     final theme = Theme.of(context);
 
     return Scaffold(
+      backgroundColor: Colors.white,
       body: dishAsync.when(
         data: (dish) => CustomScrollView(
           slivers: [
             // App bar con imagen
             SliverAppBar(
-              expandedHeight: 280,
+              expandedHeight: 320,
               pinned: true,
-              flexibleSpace: FlexibleSpaceBar(
-                title: Text(
-                  dish.name,
-                  style: const TextStyle(
-                    shadows: [
-                      Shadow(blurRadius: 8),
-                    ],
+              backgroundColor: Colors.white,
+              iconTheme: const IconThemeData(color: Color(0xFF111111)),
+              leading: Padding(
+                padding: const EdgeInsets.all(8),
+                child: CircleAvatar(
+                  backgroundColor: Colors.white.withValues(alpha: 0.8),
+                  child: IconButton(
+                    icon: const Icon(Icons.arrow_back),
+                    onPressed: () => context.pop(),
                   ),
                 ),
+              ),
+              flexibleSpace: FlexibleSpaceBar(
                 background: dish.imageUrl != null
                     ? CachedNetworkImage(
                         imageUrl: dish.imageUrl!,
                         fit: BoxFit.cover,
                         placeholder: (_, __) => ColoredBox(
-                          color:
-                              theme.colorScheme.surfaceContainerHighest,
+                          color: theme.colorScheme.surfaceContainerHighest,
                         ),
                         errorWidget: (_, __, ___) => ColoredBox(
-                          color:
-                              theme.colorScheme.surfaceContainerHighest,
+                          color: theme.colorScheme.surfaceContainerHighest,
                           child: const Icon(Icons.restaurant, size: 64),
                         ),
                       )
@@ -60,90 +68,119 @@ class DishDetailScreen extends ConsumerWidget {
                       ),
               ),
               actions: [
-                isFavAsync.when(
-                  data: (isFav) => IconButton(
-                    icon: Icon(
-                      isFav ? Icons.favorite : Icons.favorite_border,
-                      color: isFav ? Colors.red : null,
+                Padding(
+                  padding: const EdgeInsets.all(8),
+                  child: CircleAvatar(
+                    backgroundColor: Colors.white.withValues(alpha: 0.8),
+                    child: isFavAsync.when(
+                      data: (isFav) => IconButton(
+                        icon: Icon(
+                          isFav ? Icons.favorite : Icons.favorite_border,
+                          color: isFav ? Colors.red : const Color(0xFF111111),
+                        ),
+                        onPressed: () => ref
+                            .read(favoriteToggleProvider.notifier)
+                            .toggle(widget.dishId),
+                      ),
+                      loading: () => const SizedBox.shrink(),
+                      error: (_, __) => const SizedBox.shrink(),
                     ),
-                    onPressed: () => ref
-                        .read(favoriteToggleProvider.notifier)
-                        .toggle(dishId),
                   ),
-                  loading: () => const SizedBox.shrink(),
-                  error: (_, __) => const SizedBox.shrink(),
-                ),
-                IconButton(
-                  onPressed: () => context.pushNamed(RouteNames.cart),
-                  icon: Badge.count(
-                    count: cartCount,
-                    isLabelVisible: cartCount > 0,
-                    child: const Icon(Icons.shopping_cart_outlined),
-                  ),
-                  tooltip: 'Carrito',
                 ),
               ],
             ),
 
             SliverPadding(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(20),
               sliver: SliverList(
                 delegate: SliverChildListDelegate([
+                  Text(
+                    dish.name,
+                    style: theme.textTheme.headlineMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: const Color(0xFF111111),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+
                   // Precio + disponibilidad
                   Row(
                     children: [
                       Text(
                         Formatters.price(dish.price),
-                        style: theme.textTheme.headlineSmall?.copyWith(
+                        style: theme.textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.bold,
                           color: theme.colorScheme.primary,
                         ),
                       ),
-                      const Spacer(),
+                      const SizedBox(width: 12),
                       if (!dish.isAvailable)
-                        Chip(
-                          label: Text(
-                            'No disponible',
-                            style: TextStyle(color: theme.colorScheme.error),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
                           ),
-                          side:
-                              BorderSide(color: theme.colorScheme.error),
+                          decoration: BoxDecoration(
+                            color: theme.colorScheme.error.withValues(
+                              alpha: 0.1,
+                            ),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Text(
+                            'Agotado',
+                            style: TextStyle(
+                              color: theme.colorScheme.error,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                         )
                       else
-                        Chip(
-                          avatar:
-                              const Icon(Icons.access_time, size: 16),
-                          label: Text('${dish.prepTimeMin} min'),
+                        Row(
+                          children: [
+                            const Icon(
+                              Icons.access_time,
+                              size: 16,
+                              color: Colors.black54,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              '${dish.prepTimeMin} min',
+                              style: const TextStyle(color: Colors.black54),
+                            ),
+                          ],
                         ),
                     ],
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 24),
 
                   // Descripción
                   if (dish.description.isNotEmpty) ...[
                     Text(
                       'Descripción',
-                      style: theme.textTheme.titleSmall?.copyWith(
+                      style: theme.textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 8),
                     Text(
                       dish.description,
-                      style: theme.textTheme.bodyMedium,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: Colors.black87,
+                        height: 1.5,
+                      ),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 24),
                   ],
 
                   // Alérgenos
                   if (dish.allergens.isNotEmpty) ...[
                     Text(
                       'Alérgenos',
-                      style: theme.textTheme.titleSmall?.copyWith(
+                      style: theme.textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 12),
                     Wrap(
                       spacing: 8,
                       runSpacing: 8,
@@ -152,6 +189,9 @@ class DishDetailScreen extends ConsumerWidget {
                           .toList(),
                     ),
                   ],
+                  const SizedBox(
+                    height: 100,
+                  ), // Espacio para el fixed bottom bar
                 ]),
               ),
             ),
@@ -160,35 +200,86 @@ class DishDetailScreen extends ConsumerWidget {
         loading: () => const LoadingIndicator(),
         error: (error, _) => ErrorView(
           message: error.toString(),
-          onRetry: () => ref.invalidate(dishDetailProvider(dishId)),
+          onRetry: () => ref.invalidate(dishDetailProvider(widget.dishId)),
         ),
       ),
-      bottomNavigationBar: dishAsync.when(
-        data: (dish) {
-          if (!dish.isAvailable) return null;
-
-          return SafeArea(
-            minimum: const EdgeInsets.all(12),
-            child: FilledButton.icon(
-              onPressed: () {
-                ref.read(cartNotifierProvider.notifier).addDish(dish);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('${dish.name} añadido al carrito'),
-                    action: SnackBarAction(
-                      label: 'Ver carrito',
-                      onPressed: () => context.pushNamed(RouteNames.cart),
+      bottomNavigationBar: dishAsync.whenOrNull(
+        data: (dish) => dish.isAvailable
+            ? Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 16,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.05),
+                      blurRadius: 10,
+                      offset: const Offset(0, -5),
                     ),
+                  ],
+                ),
+                child: SafeArea(
+                  child: Row(
+                    children: [
+                      // Controlador de cantidad
+                      Container(
+                        decoration: BoxDecoration(
+                          border: Border.all(color: const Color(0xFFE5E5E3)),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Row(
+                          children: [
+                            IconButton(
+                              icon: const Icon(Icons.remove),
+                              onPressed: _quantity > 1
+                                  ? () => setState(() => _quantity--)
+                                  : null,
+                            ),
+                            Text(
+                              '$_quantity',
+                              style: theme.textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.add),
+                              onPressed: () => setState(() => _quantity++),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      // Botón añadir
+                      Expanded(
+                        child: FilledButton(
+                          onPressed: () {
+                            for (var i = 0; i < _quantity; i++) {
+                              ref
+                                  .read(cartNotifierProvider.notifier)
+                                  .addDish(dish);
+                            }
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  '$_quantity ${dish.name} añadido al carrito',
+                                ),
+                                behavior: SnackBarBehavior.floating,
+                              ),
+                            );
+                            context.pop();
+                          },
+                          child: Text(
+                            'Añadir  ·  ${Formatters.price(dish.price * _quantity)}',
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                );
-              },
-              icon: const Icon(Icons.add_shopping_cart_outlined),
-              label: const Text('Añadir al carrito'),
-            ),
-          );
-        },
-        loading: () => null,
-        error: (_, __) => null,
+                ),
+              )
+            : const SizedBox.shrink(),
       ),
     );
   }

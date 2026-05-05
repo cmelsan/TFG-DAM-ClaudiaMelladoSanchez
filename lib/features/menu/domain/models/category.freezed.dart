@@ -192,7 +192,8 @@ class __$$CategoryImplCopyWithImpl<$Res>
 }
 
 /// @nodoc
-@JsonSerializable()
+
+@JsonSerializable(fieldRename: FieldRename.snake)
 class _$CategoryImpl implements _Category {
   const _$CategoryImpl({
     required this.id,

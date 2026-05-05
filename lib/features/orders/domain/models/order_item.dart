@@ -4,8 +4,8 @@ part 'order_item.freezed.dart';
 part 'order_item.g.dart';
 
 @freezed
-@JsonSerializable(fieldRename: FieldRename.snake)
 class OrderItem with _$OrderItem {
+  @JsonSerializable(fieldRename: FieldRename.snake)
   const factory OrderItem({
     required String id,
     required String orderId,

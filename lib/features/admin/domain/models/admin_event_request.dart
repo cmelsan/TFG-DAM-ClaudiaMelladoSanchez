@@ -4,8 +4,8 @@ part 'admin_event_request.freezed.dart';
 part 'admin_event_request.g.dart';
 
 @freezed
-@JsonSerializable(fieldRename: FieldRename.snake)
 class AdminEventRequest with _$AdminEventRequest {
+  @JsonSerializable(fieldRename: FieldRename.snake)
   const factory AdminEventRequest({
     required String id,
     required String userId,

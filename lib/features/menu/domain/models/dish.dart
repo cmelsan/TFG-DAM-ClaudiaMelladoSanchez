@@ -4,8 +4,8 @@ part 'dish.freezed.dart';
 part 'dish.g.dart';
 
 @freezed
-@JsonSerializable(fieldRename: FieldRename.snake)
 class Dish with _$Dish {
+  @JsonSerializable(fieldRename: FieldRename.snake)
   const factory Dish({
     required String id,
     required String categoryId,
@@ -17,6 +17,9 @@ class Dish with _$Dish {
     @Default(15) int prepTimeMin,
     @Default(true) bool isAvailable,
     @Default(true) bool isActive,
+    @Default(false) bool isOffer,
+    @Default(false) bool isSeasonal,
+    double? offerPrice,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) = _Dish;

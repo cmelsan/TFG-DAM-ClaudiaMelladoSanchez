@@ -9,3 +9,11 @@ part 'catering_provider.g.dart';
 Future<List<EventMenu>> cateringMenus(CateringMenusRef ref) {
   return ref.watch(cateringRepositoryProvider).getActiveMenus();
 }
+
+@riverpod
+Future<List<Map<String, dynamic>>> myCateringRequests(
+  // ignore: deprecated_member_use_from_same_package
+  MyCateringRequestsRef ref,
+) {
+  return ref.watch(cateringRepositoryProvider).getMyRequests();
+}

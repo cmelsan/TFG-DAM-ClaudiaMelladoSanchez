@@ -33,4 +33,48 @@ class CateringRepository {
       throw UnexpectedFailure(message: e.toString());
     }
   }
+
+  Future<void> sendRequest({
+    required String menuId,
+    required int guestCount,
+    required DateTime eventDate,
+    required String location,
+    String? notes,
+  }) async {
+    final userId = _client.auth.currentUser?.id;
+    if (userId == null) throw const AuthFailure(message: 'No autenticado');
+    try {
+      await _client.from(SupabaseConstants.eventRequests).insert({
+        'user_id': userId,
+        'menu_id': menuId,
+        'guest_count': guestCount,
+        'event_date': eventDate.toIso8601String(),
+        'location': location,
+        if (notes != null && notes.isNotEmpty) 'notes': notes,
+        'status': 'pending',
+        'created_at': DateTime.now().toIso8601String(),
+      });
+    } on PostgrestException catch (e) {
+      throw DatabaseFailure(message: e.message, code: e.code);
+    } catch (e) {
+      throw UnexpectedFailure(message: e.toString());
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> getMyRequests() async {
+    final userId = _client.auth.currentUser?.id;
+    if (userId == null) throw const AuthFailure(message: 'No autenticado');
+    try {
+      final data = await _client
+          .from(SupabaseConstants.eventRequests)
+          .select('*, ${SupabaseConstants.eventMenus}(name, price_per_person)')
+          .eq('user_id', userId)
+          .order('created_at', ascending: false);
+      return List<Map<String, dynamic>>.from(data);
+    } on PostgrestException catch (e) {
+      throw DatabaseFailure(message: e.message, code: e.code);
+    } catch (e) {
+      throw UnexpectedFailure(message: e.toString());
+    }
+  }
 }

@@ -4,8 +4,8 @@ part 'favorite.freezed.dart';
 part 'favorite.g.dart';
 
 @freezed
-@JsonSerializable(fieldRename: FieldRename.snake)
 class Favorite with _$Favorite {
+  @JsonSerializable(fieldRename: FieldRename.snake)
   const factory Favorite({
     required String id,
     required String userId,

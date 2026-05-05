@@ -20,19 +20,47 @@ class FavoritesScreen extends ConsumerWidget {
       body: dishesAsync.when(
         data: (dishes) {
           if (dishes.isEmpty) {
-            return const Center(
-              child: Text('No tienes platos favoritos todavía'),
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(
+                    Icons.favorite_border,
+                    size: 64,
+                    color: Color(0xFFE5E5E3),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Aún no tienes favoritos',
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Marca tus platos preferidos para pedirlos rápido.',
+                    style: Theme.of(
+                      context,
+                    ).textTheme.bodyMedium?.copyWith(color: Colors.black54),
+                  ),
+                  const SizedBox(height: 24),
+                  FilledButton(
+                    onPressed: () => context.goNamed(RouteNames.menu),
+                    child: const Text('Ver el menú'),
+                  ),
+                ],
+              ),
             );
           }
 
           return GridView.builder(
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
             itemCount: dishes.length,
             gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
               maxCrossAxisExtent: 400,
-              mainAxisSpacing: 12,
-              crossAxisSpacing: 12,
-              childAspectRatio: 0.72,
+              mainAxisSpacing: 16,
+              crossAxisSpacing: 16,
+              childAspectRatio: 0.8,
             ),
             itemBuilder: (_, index) {
               final dish = dishes[index];
@@ -45,7 +73,10 @@ class FavoritesScreen extends ConsumerWidget {
                 onAddToCart: () {
                   ref.read(cartNotifierProvider.notifier).addDish(dish);
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('${dish.name} añadido al carrito')),
+                    SnackBar(
+                      content: Text('${dish.name} añadido al carrito'),
+                      behavior: SnackBarBehavior.floating,
+                    ),
                   );
                 },
               );

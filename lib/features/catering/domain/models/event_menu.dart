@@ -4,8 +4,8 @@ part 'event_menu.freezed.dart';
 part 'event_menu.g.dart';
 
 @freezed
-@JsonSerializable(fieldRename: FieldRename.snake)
 class EventMenu with _$EventMenu {
+  @JsonSerializable(fieldRename: FieldRename.snake)
   const factory EventMenu({
     required String id,
     required String name,

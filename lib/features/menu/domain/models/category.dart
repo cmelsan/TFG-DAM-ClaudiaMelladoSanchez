@@ -4,8 +4,8 @@ part 'category.freezed.dart';
 part 'category.g.dart';
 
 @freezed
-@JsonSerializable(fieldRename: FieldRename.snake)
 class Category with _$Category {
+  @JsonSerializable(fieldRename: FieldRename.snake)
   const factory Category({
     required String id,
     required String name,

@@ -4,8 +4,8 @@ part 'schedule_entry.freezed.dart';
 part 'schedule_entry.g.dart';
 
 @freezed
-@JsonSerializable(fieldRename: FieldRename.snake)
 class ScheduleEntry with _$ScheduleEntry {
+  @JsonSerializable(fieldRename: FieldRename.snake)
   const factory ScheduleEntry({
     required String id,
     required int dayOfWeek,

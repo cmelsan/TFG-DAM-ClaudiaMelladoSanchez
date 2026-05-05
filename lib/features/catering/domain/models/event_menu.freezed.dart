@@ -218,7 +218,8 @@ class __$$EventMenuImplCopyWithImpl<$Res>
 }
 
 /// @nodoc
-@JsonSerializable()
+
+@JsonSerializable(fieldRename: FieldRename.snake)
 class _$EventMenuImpl implements _EventMenu {
   const _$EventMenuImpl({
     required this.id,

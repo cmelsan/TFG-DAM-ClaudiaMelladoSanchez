@@ -145,7 +145,8 @@ class __$$BusinessConfigItemImplCopyWithImpl<$Res>
 }
 
 /// @nodoc
-@JsonSerializable()
+
+@JsonSerializable(fieldRename: FieldRename.snake)
 class _$BusinessConfigItemImpl implements _BusinessConfigItem {
   const _$BusinessConfigItemImpl({
     required this.id,

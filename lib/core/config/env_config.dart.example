@@ -1,0 +1,18 @@
+/// Configuración de entorno.
+/// Copia este archivo como env_config.dart y rellena los valores reales.
+/// NUNCA subas env_config.dart al repositorio (está en .gitignore).
+class EnvConfig {
+  const EnvConfig._();
+
+  // ignore: do_not_use_environment
+  static const supabaseUrl = String.fromEnvironment(
+    'SUPABASE_URL',
+    defaultValue: 'https://TU_PROYECTO.supabase.co',
+  );
+
+  // ignore: do_not_use_environment
+  static const supabaseAnonKey = String.fromEnvironment(
+    'SUPABASE_ANON_KEY',
+    defaultValue: 'eyTU_ANON_KEY',
+  );
+}

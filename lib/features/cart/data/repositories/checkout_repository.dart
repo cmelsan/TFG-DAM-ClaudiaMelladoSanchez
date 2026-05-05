@@ -23,6 +23,8 @@ class CheckoutRepository {
     required String orderType,
     String? notes,
     String paymentMethod = 'cash',
+    DateTime? scheduledAt,
+    String paymentStatus = 'pending',
   }) async {
     try {
       final userId = _client.auth.currentUser?.id;
@@ -45,12 +47,14 @@ class CheckoutRepository {
             'user_id': userId,
             'order_type': orderType,
             'status': 'pending',
-            'payment_status': 'pending',
+            'payment_status': paymentStatus,
             'payment_method': paymentMethod,
             'subtotal': subtotal,
             'delivery_fee': deliveryFee,
             'total': total,
             'notes': notes?.trim().isEmpty ?? true ? null : notes?.trim(),
+            if (scheduledAt != null)
+              'scheduled_at': scheduledAt.toIso8601String(),
           })
           .select('id')
           .single();

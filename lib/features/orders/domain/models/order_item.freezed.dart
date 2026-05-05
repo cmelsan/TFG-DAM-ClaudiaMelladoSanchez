@@ -218,7 +218,8 @@ class __$$OrderItemImplCopyWithImpl<$Res>
 }
 
 /// @nodoc
-@JsonSerializable()
+
+@JsonSerializable(fieldRename: FieldRename.snake)
 class _$OrderItemImpl implements _OrderItem {
   const _$OrderItemImpl({
     required this.id,

@@ -10,3 +10,9 @@ analyzer:
 linter:
   rules:
     public_member_api_docs: false
+    lines_longer_than_80_chars: false
+    avoid_print: false
+    flutter_style_todos: false
+    sort_pub_dependencies: false
+    document_ignores: false
+    avoid_catches_without_on_clauses: false

@@ -43,6 +43,7 @@ class AuthRepository {
   }
 
   /// Registrarse con email y contraseña + datos de perfil.
+  /// Requiere que en Supabase → Auth → Settings esté desactivado "Confirm email".
   Future<UserProfile> signUp({
     required String email,
     required String password,
@@ -50,7 +51,7 @@ class AuthRepository {
     String? phone,
   }) async {
     try {
-      await _client.auth.signUp(
+      final response = await _client.auth.signUp(
         email: email,
         password: password,
         data: {
@@ -58,9 +59,21 @@ class AuthRepository {
           if (phone != null) 'phone': phone,
         },
       );
-      // El trigger handle_new_user crea el perfil automáticamente.
-      // Actualizamos full_name y phone si los proporcionaron.
-      final user = _client.auth.currentUser;
+
+      // Si no hay sesión, Supabase requiere confirmación de email.
+      // En ese caso no podemos continuar sin que el usuario confirme.
+      if (response.session == null) {
+        throw const AuthFailure(
+          message:
+              'Revisa tu correo y confirma tu cuenta para poder iniciar sesión.',
+        );
+      }
+
+      // Esperar a que el trigger handle_new_user cree la fila en profiles.
+      await Future<void>.delayed(const Duration(milliseconds: 500));
+
+      // Actualizar full_name y phone si los proporcionaron.
+      final user = response.user;
       if (user != null && (fullName != null || phone != null)) {
         await _client
             .from(SupabaseConstants.profiles)
@@ -71,6 +84,8 @@ class AuthRepository {
             .eq('id', user.id);
       }
       return _fetchProfile();
+    } on AuthFailure {
+      rethrow;
     } on AuthException catch (e) {
       throw AuthFailure(message: e.message, code: e.code);
     } catch (e) {

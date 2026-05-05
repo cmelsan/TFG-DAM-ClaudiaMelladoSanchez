@@ -48,6 +48,9 @@ app.*.map.json
 .env.*
 .env
 
+# Configuración local con credenciales (usar env_config.dart.example como plantilla)
+lib/core/config/env_config.dart
+
 # Keys & signing
 *.jks
 *.keystore

@@ -143,7 +143,8 @@ class __$$FavoriteImplCopyWithImpl<$Res>
 }
 
 /// @nodoc
-@JsonSerializable()
+
+@JsonSerializable(fieldRename: FieldRename.snake)
 class _$FavoriteImpl implements _Favorite {
   const _$FavoriteImpl({
     required this.id,

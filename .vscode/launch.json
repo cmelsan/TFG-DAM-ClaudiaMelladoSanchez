@@ -1,0 +1,27 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Sabor de Casa (Flutter)",
+            "request": "launch",
+            "type": "dart",
+            "program": "lib/main.dart",
+            "args": [
+                "--dart-define-from-file",
+                ".env.development"
+            ]
+        },
+        {
+            "name": "Sabor de Casa Web (Flutter)",
+            "request": "launch",
+            "type": "dart",
+            "program": "lib/main.dart",
+            "args": [
+                "-d",
+                "chrome",
+                "--dart-define-from-file",
+                ".env.development"
+            ]
+        }
+    ]
+}

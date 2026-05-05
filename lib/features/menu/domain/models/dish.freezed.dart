@@ -31,6 +31,9 @@ mixin _$Dish {
   int get prepTimeMin => throw _privateConstructorUsedError;
   bool get isAvailable => throw _privateConstructorUsedError;
   bool get isActive => throw _privateConstructorUsedError;
+  bool get isOffer => throw _privateConstructorUsedError;
+  bool get isSeasonal => throw _privateConstructorUsedError;
+  double? get offerPrice => throw _privateConstructorUsedError;
   DateTime? get createdAt => throw _privateConstructorUsedError;
   DateTime? get updatedAt => throw _privateConstructorUsedError;
 
@@ -59,6 +62,9 @@ abstract class $DishCopyWith<$Res> {
     int prepTimeMin,
     bool isAvailable,
     bool isActive,
+    bool isOffer,
+    bool isSeasonal,
+    double? offerPrice,
     DateTime? createdAt,
     DateTime? updatedAt,
   });
@@ -89,6 +95,9 @@ class _$DishCopyWithImpl<$Res, $Val extends Dish>
     Object? prepTimeMin = null,
     Object? isAvailable = null,
     Object? isActive = null,
+    Object? isOffer = null,
+    Object? isSeasonal = null,
+    Object? offerPrice = freezed,
     Object? createdAt = freezed,
     Object? updatedAt = freezed,
   }) {
@@ -134,6 +143,18 @@ class _$DishCopyWithImpl<$Res, $Val extends Dish>
                 ? _value.isActive
                 : isActive // ignore: cast_nullable_to_non_nullable
                       as bool,
+            isOffer: null == isOffer
+                ? _value.isOffer
+                : isOffer // ignore: cast_nullable_to_non_nullable
+                      as bool,
+            isSeasonal: null == isSeasonal
+                ? _value.isSeasonal
+                : isSeasonal // ignore: cast_nullable_to_non_nullable
+                      as bool,
+            offerPrice: freezed == offerPrice
+                ? _value.offerPrice
+                : offerPrice // ignore: cast_nullable_to_non_nullable
+                      as double?,
             createdAt: freezed == createdAt
                 ? _value.createdAt
                 : createdAt // ignore: cast_nullable_to_non_nullable
@@ -167,6 +188,9 @@ abstract class _$$DishImplCopyWith<$Res> implements $DishCopyWith<$Res> {
     int prepTimeMin,
     bool isAvailable,
     bool isActive,
+    bool isOffer,
+    bool isSeasonal,
+    double? offerPrice,
     DateTime? createdAt,
     DateTime? updatedAt,
   });
@@ -194,6 +218,9 @@ class __$$DishImplCopyWithImpl<$Res>
     Object? prepTimeMin = null,
     Object? isAvailable = null,
     Object? isActive = null,
+    Object? isOffer = null,
+    Object? isSeasonal = null,
+    Object? offerPrice = freezed,
     Object? createdAt = freezed,
     Object? updatedAt = freezed,
   }) {
@@ -239,6 +266,18 @@ class __$$DishImplCopyWithImpl<$Res>
             ? _value.isActive
             : isActive // ignore: cast_nullable_to_non_nullable
                   as bool,
+        isOffer: null == isOffer
+            ? _value.isOffer
+            : isOffer // ignore: cast_nullable_to_non_nullable
+                  as bool,
+        isSeasonal: null == isSeasonal
+            ? _value.isSeasonal
+            : isSeasonal // ignore: cast_nullable_to_non_nullable
+                  as bool,
+        offerPrice: freezed == offerPrice
+            ? _value.offerPrice
+            : offerPrice // ignore: cast_nullable_to_non_nullable
+                  as double?,
         createdAt: freezed == createdAt
             ? _value.createdAt
             : createdAt // ignore: cast_nullable_to_non_nullable
@@ -253,7 +292,8 @@ class __$$DishImplCopyWithImpl<$Res>
 }
 
 /// @nodoc
-@JsonSerializable()
+
+@JsonSerializable(fieldRename: FieldRename.snake)
 class _$DishImpl implements _Dish {
   const _$DishImpl({
     required this.id,
@@ -266,6 +306,9 @@ class _$DishImpl implements _Dish {
     this.prepTimeMin = 15,
     this.isAvailable = true,
     this.isActive = true,
+    this.isOffer = false,
+    this.isSeasonal = false,
+    this.offerPrice,
     this.createdAt,
     this.updatedAt,
   }) : _allergens = allergens;
@@ -305,13 +348,21 @@ class _$DishImpl implements _Dish {
   @JsonKey()
   final bool isActive;
   @override
+  @JsonKey()
+  final bool isOffer;
+  @override
+  @JsonKey()
+  final bool isSeasonal;
+  @override
+  final double? offerPrice;
+  @override
   final DateTime? createdAt;
   @override
   final DateTime? updatedAt;
 
   @override
   String toString() {
-    return 'Dish(id: $id, categoryId: $categoryId, name: $name, price: $price, description: $description, imageUrl: $imageUrl, allergens: $allergens, prepTimeMin: $prepTimeMin, isAvailable: $isAvailable, isActive: $isActive, createdAt: $createdAt, updatedAt: $updatedAt)';
+    return 'Dish(id: $id, categoryId: $categoryId, name: $name, price: $price, description: $description, imageUrl: $imageUrl, allergens: $allergens, prepTimeMin: $prepTimeMin, isAvailable: $isAvailable, isActive: $isActive, isOffer: $isOffer, isSeasonal: $isSeasonal, offerPrice: $offerPrice, createdAt: $createdAt, updatedAt: $updatedAt)';
   }
 
   @override
@@ -338,6 +389,11 @@ class _$DishImpl implements _Dish {
                 other.isAvailable == isAvailable) &&
             (identical(other.isActive, isActive) ||
                 other.isActive == isActive) &&
+            (identical(other.isOffer, isOffer) || other.isOffer == isOffer) &&
+            (identical(other.isSeasonal, isSeasonal) ||
+                other.isSeasonal == isSeasonal) &&
+            (identical(other.offerPrice, offerPrice) ||
+                other.offerPrice == offerPrice) &&
             (identical(other.createdAt, createdAt) ||
                 other.createdAt == createdAt) &&
             (identical(other.updatedAt, updatedAt) ||
@@ -358,6 +414,9 @@ class _$DishImpl implements _Dish {
     prepTimeMin,
     isAvailable,
     isActive,
+    isOffer,
+    isSeasonal,
+    offerPrice,
     createdAt,
     updatedAt,
   );
@@ -388,6 +447,9 @@ abstract class _Dish implements Dish {
     final int prepTimeMin,
     final bool isAvailable,
     final bool isActive,
+    final bool isOffer,
+    final bool isSeasonal,
+    final double? offerPrice,
     final DateTime? createdAt,
     final DateTime? updatedAt,
   }) = _$DishImpl;
@@ -414,6 +476,12 @@ abstract class _Dish implements Dish {
   bool get isAvailable;
   @override
   bool get isActive;
+  @override
+  bool get isOffer;
+  @override
+  bool get isSeasonal;
+  @override
+  double? get offerPrice;
   @override
   DateTime? get createdAt;
   @override

@@ -6,6 +6,26 @@ part of 'profile_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
+String _$addressesNotifierHash() => r'89dd3126a27a61872a1a5870af8f96ea1043c7bd';
+
+/// See also [AddressesNotifier].
+@ProviderFor(AddressesNotifier)
+final addressesNotifierProvider =
+    AutoDisposeAsyncNotifierProvider<
+      AddressesNotifier,
+      List<Map<String, dynamic>>
+    >.internal(
+      AddressesNotifier.new,
+      name: r'addressesNotifierProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$addressesNotifierHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
+
+typedef _$AddressesNotifier =
+    AutoDisposeAsyncNotifier<List<Map<String, dynamic>>>;
 String _$profileNotifierHash() => r'aa81eb18929bde4540407d33be6930c0e73b743c';
 
 /// See also [ProfileNotifier].

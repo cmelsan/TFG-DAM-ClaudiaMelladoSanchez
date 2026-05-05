@@ -16,14 +16,20 @@ class CheckoutSubmit extends _$CheckoutSubmit {
     required String orderType,
     required String paymentMethod,
     String? notes,
+    DateTime? scheduledAt,
+    String paymentStatus = 'pending',
   }) async {
     state = const AsyncLoading();
     state = await AsyncValue.guard(
-      () => ref.read(checkoutRepositoryProvider).createOrder(
+      () => ref
+          .read(checkoutRepositoryProvider)
+          .createOrder(
             items: items,
             orderType: orderType,
             notes: notes,
             paymentMethod: paymentMethod,
+            scheduledAt: scheduledAt,
+            paymentStatus: paymentStatus,
           ),
     );
   }

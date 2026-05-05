@@ -19,7 +19,9 @@ class ContactSubmit extends _$ContactSubmit {
   }) async {
     state = const AsyncLoading();
     state = await AsyncValue.guard(
-      () => ref.read(contactRepositoryProvider).sendMessage(
+      () => ref
+          .read(contactRepositoryProvider)
+          .sendMessage(
             name: name,
             email: email,
             phone: phone,

@@ -4,8 +4,8 @@ part 'cart_item.freezed.dart';
 part 'cart_item.g.dart';
 
 @freezed
-@JsonSerializable(fieldRename: FieldRename.snake)
 class CartItem with _$CartItem {
+  @JsonSerializable(fieldRename: FieldRename.snake)
   const factory CartItem({
     required String dishId,
     required String name,

@@ -205,7 +205,8 @@ class __$$CartItemImplCopyWithImpl<$Res>
 }
 
 /// @nodoc
-@JsonSerializable()
+
+@JsonSerializable(fieldRename: FieldRename.snake)
 class _$CartItemImpl implements _CartItem {
   const _$CartItemImpl({
     required this.dishId,

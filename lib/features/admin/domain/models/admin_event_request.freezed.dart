@@ -220,7 +220,8 @@ class __$$AdminEventRequestImplCopyWithImpl<$Res>
 }
 
 /// @nodoc
-@JsonSerializable()
+
+@JsonSerializable(fieldRename: FieldRename.snake)
 class _$AdminEventRequestImpl implements _AdminEventRequest {
   const _$AdminEventRequestImpl({
     required this.id,

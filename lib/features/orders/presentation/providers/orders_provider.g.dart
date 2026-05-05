@@ -282,5 +282,125 @@ class _OrderItemsProviderElement
   String get orderId => (origin as OrderItemsProvider).orderId;
 }
 
+String _$orderRatingHash() => r'4fb818b0267262f718f3d1e96d0bbe4056e6e3e7';
+
+/// See also [orderRating].
+@ProviderFor(orderRating)
+const orderRatingProvider = OrderRatingFamily();
+
+/// See also [orderRating].
+class OrderRatingFamily extends Family<AsyncValue<Map<String, dynamic>?>> {
+  /// See also [orderRating].
+  const OrderRatingFamily();
+
+  /// See also [orderRating].
+  OrderRatingProvider call(String orderId) {
+    return OrderRatingProvider(orderId);
+  }
+
+  @override
+  OrderRatingProvider getProviderOverride(
+    covariant OrderRatingProvider provider,
+  ) {
+    return call(provider.orderId);
+  }
+
+  static const Iterable<ProviderOrFamily>? _dependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
+
+  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
+      _allTransitiveDependencies;
+
+  @override
+  String? get name => r'orderRatingProvider';
+}
+
+/// See also [orderRating].
+class OrderRatingProvider
+    extends AutoDisposeFutureProvider<Map<String, dynamic>?> {
+  /// See also [orderRating].
+  OrderRatingProvider(String orderId)
+    : this._internal(
+        (ref) => orderRating(ref as OrderRatingRef, orderId),
+        from: orderRatingProvider,
+        name: r'orderRatingProvider',
+        debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+            ? null
+            : _$orderRatingHash,
+        dependencies: OrderRatingFamily._dependencies,
+        allTransitiveDependencies: OrderRatingFamily._allTransitiveDependencies,
+        orderId: orderId,
+      );
+
+  OrderRatingProvider._internal(
+    super._createNotifier, {
+    required super.name,
+    required super.dependencies,
+    required super.allTransitiveDependencies,
+    required super.debugGetCreateSourceHash,
+    required super.from,
+    required this.orderId,
+  }) : super.internal();
+
+  final String orderId;
+
+  @override
+  Override overrideWith(
+    FutureOr<Map<String, dynamic>?> Function(OrderRatingRef provider) create,
+  ) {
+    return ProviderOverride(
+      origin: this,
+      override: OrderRatingProvider._internal(
+        (ref) => create(ref as OrderRatingRef),
+        from: from,
+        name: null,
+        dependencies: null,
+        allTransitiveDependencies: null,
+        debugGetCreateSourceHash: null,
+        orderId: orderId,
+      ),
+    );
+  }
+
+  @override
+  AutoDisposeFutureProviderElement<Map<String, dynamic>?> createElement() {
+    return _OrderRatingProviderElement(this);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is OrderRatingProvider && other.orderId == orderId;
+  }
+
+  @override
+  int get hashCode {
+    var hash = _SystemHash.combine(0, runtimeType.hashCode);
+    hash = _SystemHash.combine(hash, orderId.hashCode);
+
+    return _SystemHash.finish(hash);
+  }
+}
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+mixin OrderRatingRef on AutoDisposeFutureProviderRef<Map<String, dynamic>?> {
+  /// The parameter `orderId` of this provider.
+  String get orderId;
+}
+
+class _OrderRatingProviderElement
+    extends AutoDisposeFutureProviderElement<Map<String, dynamic>?>
+    with OrderRatingRef {
+  _OrderRatingProviderElement(super.provider);
+
+  @override
+  String get orderId => (origin as OrderRatingProvider).orderId;
+}
+
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

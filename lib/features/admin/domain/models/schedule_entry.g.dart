@@ -6,8 +6,8 @@ part of 'schedule_entry.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-ScheduleEntry _$ScheduleEntryFromJson(Map<String, dynamic> json) =>
-    ScheduleEntry(
+_$ScheduleEntryImpl _$$ScheduleEntryImplFromJson(Map<String, dynamic> json) =>
+    _$ScheduleEntryImpl(
       id: json['id'] as String,
       dayOfWeek: (json['day_of_week'] as num).toInt(),
       openTime: json['open_time'] as String,
@@ -15,29 +15,11 @@ ScheduleEntry _$ScheduleEntryFromJson(Map<String, dynamic> json) =>
       isOpen: json['is_open'] as bool,
     );
 
-Map<String, dynamic> _$ScheduleEntryToJson(ScheduleEntry instance) =>
+Map<String, dynamic> _$$ScheduleEntryImplToJson(_$ScheduleEntryImpl instance) =>
     <String, dynamic>{
       'id': instance.id,
       'day_of_week': instance.dayOfWeek,
       'open_time': instance.openTime,
       'close_time': instance.closeTime,
       'is_open': instance.isOpen,
-    };
-
-_$ScheduleEntryImpl _$$ScheduleEntryImplFromJson(Map<String, dynamic> json) =>
-    _$ScheduleEntryImpl(
-      id: json['id'] as String,
-      dayOfWeek: (json['dayOfWeek'] as num).toInt(),
-      openTime: json['openTime'] as String,
-      closeTime: json['closeTime'] as String,
-      isOpen: json['isOpen'] as bool,
-    );
-
-Map<String, dynamic> _$$ScheduleEntryImplToJson(_$ScheduleEntryImpl instance) =>
-    <String, dynamic>{
-      'id': instance.id,
-      'dayOfWeek': instance.dayOfWeek,
-      'openTime': instance.openTime,
-      'closeTime': instance.closeTime,
-      'isOpen': instance.isOpen,
     };

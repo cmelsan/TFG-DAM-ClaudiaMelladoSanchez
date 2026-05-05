@@ -181,7 +181,8 @@ class __$$DailySpecialImplCopyWithImpl<$Res>
 }
 
 /// @nodoc
-@JsonSerializable()
+
+@JsonSerializable(fieldRename: FieldRename.snake)
 class _$DailySpecialImpl implements _DailySpecial {
   const _$DailySpecialImpl({
     required this.id,

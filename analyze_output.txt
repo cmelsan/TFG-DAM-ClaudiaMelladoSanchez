@@ -1,0 +1,39 @@
+﻿Analyzing lib...
+
+   info - bootstrap.dart:48:12 - The value of the argument is redundant because it matches the default value. Try removing the argument. - avoid_redundant_argument_values
+   info - bootstrap.dart:49:12 - The value of the argument is redundant because it matches the default value. Try removing the argument. - avoid_redundant_argument_values
+   info - bootstrap.dart:50:12 - The value of the argument is redundant because it matches the default value. Try removing the argument. - avoid_redundant_argument_values
+   info - core\router\app_router.dart:24:1 - Sort directive sections alphabetically. Try sorting the directives. - directives_ordering
+   info - core\router\app_router.dart:39:1 - Sort directive sections alphabetically. Try sorting the directives. - directives_ordering
+   info - core\utils\web_storage.dart:1:1 - Dangling library doc comment. Add a 'library' directive after the library comment. - dangling_library_doc_comments
+   info - core\utils\web_storage_web.dart:2:1 - 'dart:html' is deprecated and shouldn't be used. Use package:web and dart:js_interop instead. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - core\utils\web_storage_web.dart:17:15 - The method is used to change a property. Try converting the method to a setter. - use_setters_to_change_properties
+   info - features\auth\presentation\providers\auth_provider.dart:4:42 - Sort combinator names alphabetically. Try sorting the combinator names alphabetically. - combinators_ordering
+   info - features\cart\presentation\screens\checkout_screen.dart:16:1 - Sort directive sections alphabetically. Try sorting the directives. - directives_ordering
+   info - features\cart\presentation\screens\checkout_screen.dart:304:71 - Missing an 'await' for the 'Future' computed by this expression. Try adding an 'await' or wrapping the expression with 'unawaited'. - unawaited_futures
+   info - features\cart\presentation\screens\checkout_screen.dart:347:28 - Method invocation or property access on a 'dynamic' target. Try giving the target a type. - avoid_dynamic_calls
+   info - features\cart\presentation\screens\checkout_screen.dart:349:25 - Method invocation or property access on a 'dynamic' target. Try giving the target a type. - avoid_dynamic_calls
+   info - features\cart\presentation\screens\checkout_screen.dart:357:27 - Don't use 'BuildContext's across async gaps. Try rewriting the code to not use the 'BuildContext', or guard the use with a 'mounted' check. - use_build_context_synchronously
+   info - features\cart\presentation\screens\checkout_screen.dart:368:49 - Missing an 'await' for the 'Future' computed by this expression. Try adding an 'await' or wrapping the expression with 'unawaited'. - unawaited_futures
+   info - features\cart\presentation\screens\checkout_screen.dart:426:19 - Method invocation or property access on a 'dynamic' target. Try giving the target a type. - avoid_dynamic_calls
+   info - features\cart\presentation\screens\checkout_screen.dart:428:21 - Method invocation or property access on a 'dynamic' target. Try giving the target a type. - avoid_dynamic_calls
+   info - features\cart\presentation\screens\payment_success_screen.dart:10:1 - Sort directive sections alphabetically. Try sorting the directives. - directives_ordering
+   info - features\cart\presentation\screens\payment_success_screen.dart:23:9 - Constructor declarations should be before non-constructor declarations. Try moving the constructor declaration before all other members. - sort_constructors_first
+   info - features\cart\presentation\screens\payment_success_screen.dart:173:2 - Missing a newline at the end of the file. Try adding a newline at the end of the file. - eol_at_end_of_file
+   info - features\catering\presentation\screens\catering_request_screen.dart:83:15 - Use an 'if' element to conditionally add elements. Try using an 'if' element rather than a conditional expression. - prefer_if_elements_to_conditional_expressions
+   info - features\catering\presentation\screens\catering_request_screen.dart:251:20 - The value of the argument is redundant because it matches the default value. Try removing the argument. - avoid_redundant_argument_values
+   info - features\contact\presentation\screens\contact_screen.dart:142:21 - 'value' is deprecated and shouldn't be used. Use initialValue instead. This will set the initial value for the form field. This feature was deprecated after v3.33.0-1.0.pre. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - features\kitchen\data\repositories\employee_orders_repository.dart:140:48 - The value of the argument is redundant because it matches the default value. Try removing the argument. - avoid_redundant_argument_values
+   info - features\menu\presentation\providers\menu_provider.dart:25:8 - The method is used to change a property. Try converting the method to a setter. - use_setters_to_change_properties
+   info - features\menu\presentation\screens\menu_screen.dart:480:2 - Missing a newline at the end of the file. Try adding a newline at the end of the file. - eol_at_end_of_file
+   info - features\orders\presentation\screens\order_confirmation_screen.dart:130:5 - Use 'const' for final variables initialized to a constant value. Try replacing 'final' with 'const'. - prefer_const_declarations
+   info - features\orders\presentation\screens\order_confirmation_screen.dart:164:31 - The value of the argument is redundant because it matches the default value. Try removing the argument. - avoid_redundant_argument_values
+   info - features\orders\presentation\screens\order_confirmation_screen.dart:377:34 - The value of the argument is redundant because it matches the default value. Try removing the argument. - avoid_redundant_argument_values
+   info - features\orders\presentation\screens\order_detail_screen.dart:186:5 - Unnecessary duplication of receiver. Try using a cascade to avoid the duplication. - cascade_invocations
+   info - features\orders\presentation\screens\order_detail_screen.dart:352:22 - The value of the argument is redundant because it matches the default value. Try removing the argument. - avoid_redundant_argument_values
+   info - features\profile\presentation\screens\profile_screen.dart:311:25 - 'activeColor' is deprecated and shouldn't be used. Use activeThumbColor instead. This feature was deprecated after v3.31.0-2.0.pre. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - features\profile\presentation\screens\profile_screen.dart:396:29 - 'activeColor' is deprecated and shouldn't be used. Use activeThumbColor instead. This feature was deprecated after v3.31.0-2.0.pre. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - features\profile\presentation\screens\profile_screen.dart:417:29 - 'activeColor' is deprecated and shouldn't be used. Use activeThumbColor instead. This feature was deprecated after v3.31.0-2.0.pre. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - features\profile\presentation\screens\profile_screen.dart:653:29 - Use an if-null operator to convert a 'null' to a 'bool'. Try using an if-null operator. - use_if_null_to_convert_nulls_to_bools
+
+35 issues found.

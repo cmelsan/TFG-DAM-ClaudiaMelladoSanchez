@@ -454,44 +454,31 @@ class _WebBrandPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [AppTokens.brandDark, AppTokens.brandPrimary],
-        ),
-      ),
+      clipBehavior: Clip.hardEdge,
+      decoration: const BoxDecoration(),
       child: Stack(
         children: [
-          Positioned(
-            top: -60,
-            right: -60,
-            child: Container(
-              width: 220,
-              height: 220,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.white.withValues(alpha: 0.06),
-              ),
+          // ── Foto de fondo
+          Positioned.fill(
+            child: Image.network(
+              'https://images.unsplash.com/photo-1547592180-85f173990554?q=80&w=1200&auto=format&fit=crop',
+              fit: BoxFit.cover,
             ),
           ),
-          Positioned(
-            bottom: -80,
-            left: -50,
-            child: Container(
-              width: 280,
-              height: 280,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.white.withValues(alpha: 0.05),
-              ),
+          // ── Overlay verde oscuro
+          Positioned.fill(
+            child: ColoredBox(
+              color: const Color(0xFF0D3B2E).withValues(alpha: 0.88),
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.all(56),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
+          // ── Contenido
+          Positioned.fill(
+            child: SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.all(56),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
                 TextButton.icon(
                   onPressed: onBack,
                   icon: const Icon(
@@ -504,10 +491,12 @@ class _WebBrandPanel extends StatelessWidget {
                     style: TextStyle(color: Colors.white70, fontSize: 13),
                   ),
                 ),
+                const SizedBox(height: 32),
                 const Spacer(),
                 const AppLogoText(
                   color: Colors.white,
                   fontSize: 56,
+                  showImage: true,
                 ),
                 const SizedBox(height: 20),
                 const Text(
@@ -535,6 +524,8 @@ class _WebBrandPanel extends StatelessWidget {
                 ),
                 const Spacer(),
               ],
+            ),
+          ),
             ),
           ),
         ],

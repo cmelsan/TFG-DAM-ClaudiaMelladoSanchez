@@ -1,4 +1,4 @@
-import 'package:cached_network_image/cached_network_image.dart';
+﻿import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -7,6 +7,7 @@ import 'package:sabor_de_casa/core/router/route_names.dart';
 import 'package:sabor_de_casa/core/theme/app_tokens.dart';
 import 'package:sabor_de_casa/core/utils/formatters.dart';
 import 'package:sabor_de_casa/core/widgets/app_logo_text.dart';
+import 'package:sabor_de_casa/core/widgets/location_section.dart';
 import 'package:sabor_de_casa/features/admin/presentation/providers/admin_provider.dart';
 import 'package:sabor_de_casa/features/auth/presentation/providers/auth_provider.dart';
 import 'package:sabor_de_casa/features/cart/presentation/providers/cart_provider.dart';
@@ -49,10 +50,6 @@ class _HomeScreenWebState extends ConsumerState<HomeScreenWeb> {
 
             // â”€â”€ Hero section â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
             _WebHero(),
-            // Seccion informativa local
-            const _WebLocalInfoSection(),
-
-
             // â”€â”€ Contenido centrado (max 1200px) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
             Center(
               child: ConstrainedBox(
@@ -69,6 +66,11 @@ class _HomeScreenWebState extends ConsumerState<HomeScreenWeb> {
 
                       const SizedBox(height: 56),
 
+                      // Banner catering
+                      const _WebCateringBanner(),
+
+                      const SizedBox(height: 56),
+
                       // En oferta
                       const _WebOffersSection(),
 
@@ -78,12 +80,6 @@ class _HomeScreenWebState extends ConsumerState<HomeScreenWeb> {
                       const _WebSeasonalSection(),
 
                       const SizedBox(height: 56),
-
-                      // â”€â”€ Banner catering â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-                      const _WebCateringBanner(),
-
-                      const SizedBox(height: 56),
-
                       // â”€â”€ Iconos de categoría â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
                       _WebCategoryIcons(
                         selectedId: _selectedCategoryId,
@@ -228,6 +224,9 @@ class _HomeScreenWebState extends ConsumerState<HomeScreenWeb> {
               ),
             ),
 
+            // ── Ubicación del local ──────────────────────────────────────────
+            const LocationSection(),
+
             // ── Footer ──────────────────────────────────────────────────────
             const _WebFooter(),
           ],
@@ -261,11 +260,17 @@ class _WebNavbar extends ConsumerWidget {
                 // Logo
                 GestureDetector(
                   onTap: () => context.goNamed(RouteNames.home),
-                  child: const Row(
+                  child: Row(
                     children: [
-                      AppLogoText(
+                      const AppLogoText(
                         color: AppTokens.brandPrimary,
                         fontSize: 28,
+                      ),
+                      const SizedBox(width: 3),
+                      Image.asset(
+                        'assets/images/logo_bueno.png',
+                        height: 250,
+                        fit: BoxFit.contain,
                       ),
                     ],
                   ),
@@ -1892,554 +1897,83 @@ class _WebCateringBanner extends StatelessWidget {
     );
   }
 }
-
-// ── Sección filosofía ─────────────────────────────────────────────────────────
-
-class _WebPhilosophySection extends StatelessWidget {
-  const _WebPhilosophySection();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      color: const Color(0xFF0D3B2E),
-      padding: const EdgeInsets.symmetric(vertical: 80),
-      child: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 1200),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 32),
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                final isWide = constraints.maxWidth >= 720;
-                if (isWide) {
-                  return const Row(
-                    children: [
-                      // ── Texto principal ─────────────────────────────
-                      Expanded(
-                        flex: 5,
-                        child: _PhilosophyText(),
-                      ),
-                      SizedBox(width: 64),
-                      // ── Pilares ─────────────────────────────────────
-                      Expanded(
-                        flex: 4,
-                        child: _PhilosophyPillars(),
-                      ),
-                    ],
-                  );
-                }
-                return const Column(
-                  children: [
-                    _PhilosophyText(),
-                    SizedBox(height: 48),
-                    _PhilosophyPillars(),
-                  ],
-                );
-              },
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _PhilosophyText extends StatelessWidget {
-  const _PhilosophyText();
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Badge origen
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
-          decoration: BoxDecoration(
-            border: Border.all(
-              color: Colors.white.withValues(alpha: 0.30),
-            ),
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: const Text(
-            'SANLÚCAR DE BARRAMEDA · CÁDIZ',
-            style: TextStyle(
-              color: Colors.white70,
-              fontSize: 10,
-              fontWeight: FontWeight.w600,
-              letterSpacing: 1.6,
-            ),
-          ),
-        ),
-        const SizedBox(height: 20),
-        // Headline
-        Text(
-          'COCINA DE\nMERCADO,\nALMA DE CASA',
-          style: GoogleFonts.bebasNeue(
-            fontSize: 62,
-            color: Colors.white,
-            height: 0.95,
-            letterSpacing: 1.5,
-          ),
-        ),
-        const SizedBox(height: 24),
-        // Cuerpo
-        Text(
-          'Somos un local familiar en el corazón de Sanlúcar de Barrameda. '
-          'Cada día cocinamos platos de cuchara, guisos y recetas de siempre '
-          'con productos frescos del mercado y del campo gaditano. '
-          'Sin conservantes, sin atajos: solo el sabor de siempre.',
-          style: TextStyle(
-            fontSize: 16,
-            color: Colors.white.withValues(alpha: 0.75),
-            height: 1.7,
-          ),
-        ),
-        const SizedBox(height: 32),
-        // Cita destacada
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-          decoration: const BoxDecoration(
-            border: Border(
-              left: BorderSide(
-                color: AppTokens.brandPrimary,
-                width: 3,
-              ),
-            ),
-          ),
-          child: Text(
-            '"De la huerta sanluqueña a tu mesa, con el cariño de siempre."',
-            style: TextStyle(
-              fontSize: 15,
-              color: Colors.white.withValues(alpha: 0.65),
-              fontStyle: FontStyle.italic,
-              height: 1.5,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _PhilosophyPillars extends StatelessWidget {
-  const _PhilosophyPillars();
-
-  @override
-  Widget build(BuildContext context) {
-    const pillars = [
-      (
-        icon: Icons.storefront_rounded,
-        title: 'PRODUCTO LOCAL',
-        body:
-            'Trabajamos con proveedores de Sanlúcar y el entorno gaditano. '
-            'Fruta, verdura, carne y pescado de temporada.',
-      ),
-      (
-        icon: Icons.soup_kitchen_rounded,
-        title: 'RECETAS DE SIEMPRE',
-        body:
-            'Cocina tradicional elaborada a diario. Potajes, guisos, arroces '
-            'y postres caseros como los de toda la vida.',
-      ),
-      (
-        icon: Icons.celebration_rounded,
-        title: 'CATERING PARA EVENTOS',
-        body:
-            'Bodas, comuniones, cumpleaños y reuniones de empresa. '
-            'Diseñamos el menú perfecto con ingredientes de la tierra.',
-      ),
-    ];
-
-    return Column(
-      children: [
-        for (int i = 0; i < pillars.length; i++) ...[
-          if (i > 0)
-            Divider(
-              color: Colors.white.withValues(alpha: 0.10),
-              height: 36,
-            ),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  color: AppTokens.brandPrimary.withValues(alpha: 0.20),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(
-                  pillars[i].icon,
-                  color: AppTokens.brandPrimary,
-                  size: 22,
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      pillars[i].title,
-                      style: GoogleFonts.bebasNeue(
-                        fontSize: 18,
-                        color: Colors.white,
-                        letterSpacing: 1.2,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      pillars[i].body,
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: Colors.white.withValues(alpha: 0.60),
-                        height: 1.6,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ],
-      ],
-    );
-  }
-}
-
-// ── Sección informativa local ─────────────────────────────────────────────────
-
-class _WebLocalInfoSection extends StatelessWidget {
-  const _WebLocalInfoSection();
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        // ── Sección filosofía ──────────────────────────────────────────
-        const _WebPhilosophySection(),
-
-        // ── Sección servicios ──────────────────────────────────────────
-        Container(
-          color: AppTokens.brandLight,
-          padding: const EdgeInsets.symmetric(vertical: 72),
-          child: Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 1200),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 32),
-                child: Column(
-                  children: [
-                    // Encabezado
-                    Text(
-                      'ELIGE CÓMO DISFRUTARLO',
-                      style: GoogleFonts.bebasNeue(
-                        fontSize: 46,
-                        letterSpacing: 1.5,
-                        color: const Color(0xFF1A1A1A),
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Pide a domicilio, recoge en local o déjanos organizar tu evento.',
-                      style: TextStyle(
-                        fontSize: 15,
-                        color: Colors.grey.shade600,
-                        height: 1.5,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 40),
-
-                    // 3 tarjetas
-                    LayoutBuilder(
-                      builder: (context, constraints) {
-                        final isWide = constraints.maxWidth >= 640;
-                        if (isWide) {
-                          return Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Expanded(
-                                child: _ServiceCard(
-                                  icon: Icons.delivery_dining_rounded,
-                                  label: 'A DOMICILIO',
-                                  title: 'TE LO LLEVAMOS\nA CASA',
-                                  description:
-                                      'Reparto en Sanlúcar de Barrameda el mismo día. '
-                                      'Pide antes de las 13:00 y lo tienes a mediodía.',
-                                  buttonLabel: 'Pedir ahora',
-                                  onTap: () => GoRouter.of(context)
-                                      .goNamed(RouteNames.menu),
-                                ),
-                              ),
-                              const SizedBox(width: 20),
-                              Expanded(
-                                child: _ServiceCard(
-                                  icon: Icons.schedule_rounded,
-                                  label: 'ENCARGOS',
-                                  title: 'RESERVA CON\nANTELACIÓN',
-                                  description:
-                                      'Programa tu pedido para el día y hora exactos. '
-                                      'Ideal para llevar al trabajo o para toda la semana.',
-                                  buttonLabel: 'Ver carta',
-                                  onTap: () => GoRouter.of(context)
-                                      .goNamed(RouteNames.menu),
-                                  highlighted: true,
-                                ),
-                              ),
-                              const SizedBox(width: 20),
-                              Expanded(
-                                child: _ServiceCard(
-                                  icon: Icons.celebration_rounded,
-                                  label: 'CATERING',
-                                  title: 'TU EVENTO,\nNUESTRA COCINA',
-                                  description:
-                                      'Bodas, cumpleaños, reuniones y eventos de empresa. '
-                                      'Presupuesto personalizado sin compromiso.',
-                                  buttonLabel: 'Solicitar presupuesto',
-                                  onTap: () => GoRouter.of(context)
-                                      .goNamed(RouteNames.catering),
-                                ),
-                              ),
-                            ],
-                          );
-                        }
-                        return Column(
-                          children: [
-                            _ServiceCard(
-                              icon: Icons.delivery_dining_rounded,
-                              label: 'A DOMICILIO',
-                              title: 'TE LO LLEVAMOS\nA CASA',
-                              description:
-                                  'Reparto en Sanlúcar de Barrameda el mismo día. '
-                                  'Pide antes de las 13:00 y lo tienes a mediodía.',
-                              buttonLabel: 'Pedir ahora',
-                              onTap: () =>
-                                  GoRouter.of(context).goNamed(RouteNames.menu),
-                            ),
-                            const SizedBox(height: 20),
-                            _ServiceCard(
-                              icon: Icons.schedule_rounded,
-                              label: 'ENCARGOS',
-                              title: 'RESERVA CON\nANTELACIÓN',
-                              description:
-                                  'Programa tu pedido para el día y hora exactos. '
-                                  'Ideal para llevar al trabajo o para toda la semana.',
-                              buttonLabel: 'Ver carta',
-                              onTap: () =>
-                                  GoRouter.of(context).goNamed(RouteNames.menu),
-                              highlighted: true,
-                            ),
-                            const SizedBox(height: 20),
-                            _ServiceCard(
-                              icon: Icons.celebration_rounded,
-                              label: 'CATERING',
-                              title: 'TU EVENTO,\nNUESTRA COCINA',
-                              description:
-                                  'Bodas, cumpleaños, reuniones y eventos de empresa. '
-                                  'Presupuesto personalizado sin compromiso.',
-                              buttonLabel: 'Solicitar presupuesto',
-                              onTap: () => GoRouter.of(context)
-                                  .goNamed(RouteNames.catering),
-                            ),
-                          ],
-                        );
-                      },
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _ServiceCard extends StatelessWidget {
-  const _ServiceCard({
-    required this.icon,
-    required this.label,
-    required this.title,
-    required this.description,
-    required this.buttonLabel,
-    required this.onTap,
-    this.highlighted = false,
-  });
-
-  final IconData icon;
-  final String label;
-  final String title;
-  final String description;
-  final String buttonLabel;
-  final VoidCallback onTap;
-  final bool highlighted;
-
-  @override
-  Widget build(BuildContext context) {
-    final bg = highlighted ? AppTokens.brandPrimary : Colors.white;
-    final subtitleColor = highlighted
-        ? Colors.white.withValues(alpha: 0.80)
-        : Colors.grey.shade600;
-    final chipBg = highlighted
-        ? Colors.white.withValues(alpha: 0.18)
-        : AppTokens.brandLight;
-    final chipFg = highlighted ? Colors.white : AppTokens.brandDark;
-
-    return Container(
-      decoration: BoxDecoration(
-        color: bg,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.07),
-            blurRadius: 20,
-            offset: const Offset(0, 6),
-          ),
-        ],
-      ),
-      padding: const EdgeInsets.all(32),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Chip etiqueta
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-            decoration: BoxDecoration(
-              color: chipBg,
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Text(
-              label,
-              style: TextStyle(
-                color: chipFg,
-                fontSize: 10,
-                fontWeight: FontWeight.w700,
-                letterSpacing: 1.4,
-              ),
-            ),
-          ),
-          const SizedBox(height: 20),
-
-          // Icono
-          Icon(
-            icon,
-            color: highlighted ? Colors.white : AppTokens.brandPrimary,
-            size: 38,
-          ),
-          const SizedBox(height: 16),
-
-          // Título Bebas Neue
-          Text(
-            title,
-            style: GoogleFonts.bebasNeue(
-              fontSize: 26,
-              color: highlighted ? Colors.white : const Color(0xFF1A1A1A),
-              height: 1,
-              letterSpacing: 1.2,
-            ),
-          ),
-          const SizedBox(height: 12),
-
-          // Descripción
-          Text(
-            description,
-            style: TextStyle(
-              color: subtitleColor,
-              fontSize: 14,
-              height: 1.65,
-            ),
-          ),
-          const SizedBox(height: 28),
-
-          // Botón
-          SizedBox(
-            width: double.infinity,
-            child: highlighted
-                ? OutlinedButton(
-                    onPressed: onTap,
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: Colors.white,
-                      side: const BorderSide(color: Colors.white, width: 1.5),
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                    ),
-                    child: Text(
-                      buttonLabel,
-                      style: const TextStyle(fontWeight: FontWeight.w700),
-                    ),
-                  )
-                : FilledButton(
-                    onPressed: onTap,
-                    style: FilledButton.styleFrom(
-                      backgroundColor: AppTokens.brandPrimary,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                    ),
-                    child: Text(
-                      buttonLabel,
-                      style: const TextStyle(fontWeight: FontWeight.w700),
-                    ),
-                  ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// ── Footer Web ────────────────────────────────────────────────────────────────
-
 class _WebFooter extends StatelessWidget {
   const _WebFooter();
 
+  static const _bg = Color(0xFF0D3B2E);
+  static const _cream = Color(0xFFF2EBD9);
+  static const _muted = Color(0xFF8FBFB0);
+
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: AppTokens.brandDark,
-      padding: const EdgeInsets.symmetric(vertical: 56),
-      child: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 1200),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 32),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // ── Columnas ────────────────────────────────────────────
-                const Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+    return ColoredBox(
+      color: _bg,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Top: logo + navegacion + redes
+          Padding(
+            padding: const EdgeInsets.fromLTRB(48, 56, 48, 40),
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 1200),
+                child: Row(
                   children: [
-                    // Marca + redes sociales
+                    // Logo izquierda
+                    const SizedBox(
+                      width: 160,
+                      child: AppLogoText(
+                        color: Colors.white,
+                        fontSize: 22,
+                      ),
+                    ),
+
+                    // Centro: nav + redes
                     Expanded(
-                      flex: 2,
                       child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            'Sabor de Casa',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 18,
-                            ),
-                          ),
-                          SizedBox(height: 16),
                           Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              _SocialIcon(
+                              _FooterNavLink(
+                                label: 'MENU',
+                                onTap: () => context.goNamed(RouteNames.menu),
+                              ),
+                              const SizedBox(width: 36),
+                              _FooterNavLink(
+                                label: 'CATERING',
+                                onTap: () =>
+                                    context.goNamed(RouteNames.catering),
+                              ),
+                              const SizedBox(width: 36),
+                              _FooterNavLink(
+                                label: 'MIS PEDIDOS',
+                                onTap: () =>
+                                    context.goNamed(RouteNames.orders),
+                              ),
+                              const SizedBox(width: 36),
+                              _FooterNavLink(
+                                label: 'CONTACTO',
+                                onTap: () =>
+                                    context.goNamed(RouteNames.contact),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 20),
+                          const Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              _FooterSocial(
                                 icon: Icons.facebook,
                                 tooltip: 'Facebook',
                               ),
-                              SizedBox(width: 12),
-                              _SocialIcon(
+                              SizedBox(width: 24),
+                              _FooterSocial(
                                 icon: Icons.camera_alt_outlined,
                                 tooltip: 'Instagram',
                               ),
-                              SizedBox(width: 12),
-                              _SocialIcon(
+                              SizedBox(width: 24),
+                              _FooterSocial(
                                 icon: Icons.alternate_email,
                                 tooltip: 'X / Twitter',
                               ),
@@ -2448,76 +1982,83 @@ class _WebFooter extends StatelessWidget {
                         ],
                       ),
                     ),
-                    // Empresa
-                    Expanded(
-                      flex: 2,
-                      child: _FooterColumn(
-                        title: 'Empresa',
-                        links: [
-                          '¿Cómo funciona?',
-                          '¿Quiénes somos?',
-                          'Trabaja con nosotros',
-                        ],
-                      ),
-                    ),
-                    // Productos y servicios
-                    Expanded(
-                      flex: 3,
-                      child: _FooterColumn(
-                        title: 'Productos y servicios',
-                        links: [
-                          'Menú del día',
-                          'Encargos',
-                          'Catering para eventos',
-                          'Pedido a domicilio',
-                          'Recogida en local',
-                        ],
-                      ),
-                    ),
-                    // Información
-                    Expanded(
-                      flex: 3,
-                      child: _FooterColumn(
-                        title: 'Información',
-                        links: [
-                          'Preguntas frecuentes',
-                          'Política de privacidad',
-                          'Términos y condiciones',
-                          'Aviso legal',
-                          'Devoluciones',
-                          'Centro de ayuda',
-                        ],
-                      ),
-                    ),
-                    // Contacto
-                    Expanded(
-                      flex: 2,
-                      child: _FooterColumn(
-                        title: 'Contacto',
-                        links: [
-                          'Contacta con nosotros',
-                          'info@sabordecasa.es',
-                        ],
-                      ),
-                    ),
+
+                    // Espejo del logo (para centrar la columna central)
+                    const SizedBox(width: 160),
                   ],
                 ),
+              ),
+            ),
+          ),
 
-                // ── Línea separadora ─────────────────────────────────────
-                const SizedBox(height: 40),
-                const Divider(color: Color(0xFF1B7A60), height: 1),
-                const SizedBox(height: 20),
+          // Nombre de marca gigante a todo ancho
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: FittedBox(
+              fit: BoxFit.fitWidth,
+              child: Text(
+                'SABOR DE CASA',
+                style: GoogleFonts.bebasNeue(
+                  color: _cream,
+                  letterSpacing: 6,
+                  height: 0.85,
+                ),
+              ),
+            ),
+          ),
 
-                // ── Copyright ────────────────────────────────────────────
+          // Legal + copyright
+          Padding(
+            padding: const EdgeInsets.fromLTRB(48, 28, 48, 40),
+            child: Column(
+              children: [
+                const Wrap(
+                  alignment: WrapAlignment.center,
+                  spacing: 32,
+                  runSpacing: 10,
+                  children: [
+                    _FooterLegalLink(label: 'Aviso legal'),
+                    _FooterLegalLink(label: 'Privacidad'),
+                    _FooterLegalLink(label: 'Cookies'),
+                    _FooterLegalLink(label: 'Terminos y condiciones'),
+                    _FooterLegalLink(label: 'Preguntas frecuentes'),
+                    _FooterLegalLink(label: 'Contacto'),
+                  ],
+                ),
+                const SizedBox(height: 12),
                 Text(
-                  '© ${DateTime.now().year} Sabor de Casa. Todos los derechos reservados.',
-                  style: const TextStyle(
-                    color: Color(0xFFB2DDD4),
-                    fontSize: 13,
-                  ),
+                  'Copyright \u00a9 ${DateTime.now().year} Sabor de Casa. Todos los derechos reservados.',
+                  style: const TextStyle(color: _muted, fontSize: 13),
+                  textAlign: TextAlign.center,
                 ),
               ],
             ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _FooterNavLink extends StatelessWidget {
+  const _FooterNavLink({required this.label, required this.onTap});
+
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        onTap: onTap,
+        child: Text(
+          label,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 13,
+            fontWeight: FontWeight.w700,
+            letterSpacing: 1.4,
           ),
         ),
       ),
@@ -2525,48 +2066,8 @@ class _WebFooter extends StatelessWidget {
   }
 }
 
-class _FooterColumn extends StatelessWidget {
-  const _FooterColumn({required this.title, required this.links});
-
-  final String title;
-  final List<String> links;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          title,
-          style: const TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-            fontSize: 14,
-          ),
-        ),
-        const SizedBox(height: 16),
-        ...links.map(
-          (link) => Padding(
-            padding: const EdgeInsets.only(bottom: 10),
-            child: MouseRegion(
-              cursor: SystemMouseCursors.click,
-              child: Text(
-                link,
-                style: const TextStyle(
-                  color: Color(0xFFB2DDD4),
-                  fontSize: 13,
-                ),
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _SocialIcon extends StatelessWidget {
-  const _SocialIcon({required this.icon, required this.tooltip});
+class _FooterSocial extends StatelessWidget {
+  const _FooterSocial({required this.icon, required this.tooltip});
 
   final IconData icon;
   final String tooltip;
@@ -2577,14 +2078,26 @@ class _SocialIcon extends StatelessWidget {
       message: tooltip,
       child: MouseRegion(
         cursor: SystemMouseCursors.click,
-        child: Container(
-          width: 36,
-          height: 36,
-          decoration: const BoxDecoration(
-            color: Color(0xFF1B7A60),
-            shape: BoxShape.circle,
-          ),
-          child: Icon(icon, color: Colors.white, size: 18),
+        child: Icon(icon, color: Colors.white, size: 22),
+      ),
+    );
+  }
+}
+
+class _FooterLegalLink extends StatelessWidget {
+  const _FooterLegalLink({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      child: Text(
+        label,
+        style: const TextStyle(
+          color: _WebFooter._muted,
+          fontSize: 13,
         ),
       ),
     );

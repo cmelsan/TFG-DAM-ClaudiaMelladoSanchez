@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:sabor_de_casa/core/theme/app_tokens.dart';
 import 'package:sabor_de_casa/core/utils/validators.dart';
+import 'package:sabor_de_casa/core/widgets/location_section.dart';
 import 'package:sabor_de_casa/features/contact/presentation/providers/contact_provider.dart';
 
 class ContactScreen extends ConsumerStatefulWidget {
@@ -104,6 +105,9 @@ class _ContactScreenState extends ConsumerState<ContactScreen> {
               ],
             ),
           ),
+          const SizedBox(height: 24),
+          // Mapa de ubicación del local
+          const LocationSection(),
           const SizedBox(height: 24),
           const Text(
             'Envíanos un mensaje',

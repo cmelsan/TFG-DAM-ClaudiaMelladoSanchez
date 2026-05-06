@@ -70,6 +70,12 @@ class _SplashScreenState extends State<SplashScreen>
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
+                Image.asset(
+                  'assets/images/logo_white.png',
+                  width: 300,
+                  height: 300,
+                ),
+                const SizedBox(height: 24),
                 const AppLogoText(
                   color: Colors.white,
                   fontSize: 72,

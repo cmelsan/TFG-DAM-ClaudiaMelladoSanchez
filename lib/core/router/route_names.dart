@@ -52,4 +52,5 @@ class RouteNames {
   static const adminSchedule = 'admin-schedule';
   static const adminStats = 'admin-stats';
   static const adminCategories = 'admin-categories';
+  static const adminDailySpecial = 'admin-daily-special';
 }

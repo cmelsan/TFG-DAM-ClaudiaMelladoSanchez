@@ -65,6 +65,11 @@ const _kItems = [
     route: '/admin/schedule',
   ),
   _SidebarItem(
+    icon: Icons.today_outlined,
+    label: 'Menú del día',
+    route: '/admin/daily-special',
+  ),
+  _SidebarItem(
     icon: Icons.settings_outlined,
     label: 'Configuración',
     route: '/admin/config',

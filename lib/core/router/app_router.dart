@@ -5,8 +5,8 @@ import 'package:sabor_de_casa/core/router/route_names.dart';
 import 'package:sabor_de_casa/core/widgets/scaffold_with_nav_bar.dart';
 import 'package:sabor_de_casa/features/admin/presentation/screens/admin_categories_screen.dart';
 import 'package:sabor_de_casa/features/admin/presentation/screens/admin_catering_screen.dart';
-
 import 'package:sabor_de_casa/features/admin/presentation/screens/admin_config_screen.dart';
+import 'package:sabor_de_casa/features/admin/presentation/screens/admin_daily_special_screen.dart';
 import 'package:sabor_de_casa/features/admin/presentation/screens/admin_dashboard_screen.dart';
 import 'package:sabor_de_casa/features/admin/presentation/screens/admin_dishes_screen.dart';
 import 'package:sabor_de_casa/features/admin/presentation/screens/admin_encargos_screen.dart';
@@ -66,7 +66,7 @@ GoRouter appRouter(AppRouterRef ref) {
     ..onDispose(authNotifier.dispose);
 
   return GoRouter(
-    initialLocation: '/splash',
+    initialLocation: kIsWeb ? '/' : '/splash',
     debugLogDiagnostics: kDebugMode,
     refreshListenable: authNotifier,
     redirect: (context, state) {
@@ -304,6 +304,11 @@ GoRouter appRouter(AppRouterRef ref) {
         path: '/admin/categories',
         name: RouteNames.adminCategories,
         builder: (_, __) => const AdminCategoriesScreen(),
+      ),
+      GoRoute(
+        path: '/admin/daily-special',
+        name: RouteNames.adminDailySpecial,
+        builder: (_, __) => const AdminDailySpecialScreen(),
       ),
 
       // --- Pago web (retorno desde Stripe Checkout) ---

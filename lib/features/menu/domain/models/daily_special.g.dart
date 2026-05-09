@@ -16,6 +16,11 @@ _$DailySpecialImpl _$$DailySpecialImplFromJson(Map<String, dynamic> json) =>
       createdAt: json['created_at'] == null
           ? null
           : DateTime.parse(json['created_at'] as String),
+      primeroText: json['primero_text'] as String?,
+      segundoText: json['segundo_text'] as String?,
+      postreText: json['postre_text'] as String?,
+      bebidaText: json['bebida_text'] as String?,
+      menuPrice: (json['menu_price'] as num?)?.toDouble(),
     );
 
 Map<String, dynamic> _$$DailySpecialImplToJson(_$DailySpecialImpl instance) =>
@@ -26,4 +31,9 @@ Map<String, dynamic> _$$DailySpecialImplToJson(_$DailySpecialImpl instance) =>
       'discount_percent': instance.discountPercent,
       'note': instance.note,
       'created_at': instance.createdAt?.toIso8601String(),
+      'primero_text': instance.primeroText,
+      'segundo_text': instance.segundoText,
+      'postre_text': instance.postreText,
+      'bebida_text': instance.bebidaText,
+      'menu_price': instance.menuPrice,
     };

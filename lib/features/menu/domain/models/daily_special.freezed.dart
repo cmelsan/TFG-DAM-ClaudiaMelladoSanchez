@@ -27,6 +27,11 @@ mixin _$DailySpecial {
   int? get discountPercent => throw _privateConstructorUsedError;
   String? get note => throw _privateConstructorUsedError;
   DateTime? get createdAt => throw _privateConstructorUsedError;
+  String? get primeroText => throw _privateConstructorUsedError;
+  String? get segundoText => throw _privateConstructorUsedError;
+  String? get postreText => throw _privateConstructorUsedError;
+  String? get bebidaText => throw _privateConstructorUsedError;
+  double? get menuPrice => throw _privateConstructorUsedError;
 
   /// Serializes this DailySpecial to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -52,6 +57,11 @@ abstract class $DailySpecialCopyWith<$Res> {
     int? discountPercent,
     String? note,
     DateTime? createdAt,
+    String? primeroText,
+    String? segundoText,
+    String? postreText,
+    String? bebidaText,
+    double? menuPrice,
   });
 }
 
@@ -76,6 +86,11 @@ class _$DailySpecialCopyWithImpl<$Res, $Val extends DailySpecial>
     Object? discountPercent = freezed,
     Object? note = freezed,
     Object? createdAt = freezed,
+    Object? primeroText = freezed,
+    Object? segundoText = freezed,
+    Object? postreText = freezed,
+    Object? bebidaText = freezed,
+    Object? menuPrice = freezed,
   }) {
     return _then(
       _value.copyWith(
@@ -103,6 +118,26 @@ class _$DailySpecialCopyWithImpl<$Res, $Val extends DailySpecial>
                 ? _value.createdAt
                 : createdAt // ignore: cast_nullable_to_non_nullable
                       as DateTime?,
+            primeroText: freezed == primeroText
+                ? _value.primeroText
+                : primeroText // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            segundoText: freezed == segundoText
+                ? _value.segundoText
+                : segundoText // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            postreText: freezed == postreText
+                ? _value.postreText
+                : postreText // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            bebidaText: freezed == bebidaText
+                ? _value.bebidaText
+                : bebidaText // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            menuPrice: freezed == menuPrice
+                ? _value.menuPrice
+                : menuPrice // ignore: cast_nullable_to_non_nullable
+                      as double?,
           )
           as $Val,
     );
@@ -125,6 +160,11 @@ abstract class _$$DailySpecialImplCopyWith<$Res>
     int? discountPercent,
     String? note,
     DateTime? createdAt,
+    String? primeroText,
+    String? segundoText,
+    String? postreText,
+    String? bebidaText,
+    double? menuPrice,
   });
 }
 
@@ -148,6 +188,11 @@ class __$$DailySpecialImplCopyWithImpl<$Res>
     Object? discountPercent = freezed,
     Object? note = freezed,
     Object? createdAt = freezed,
+    Object? primeroText = freezed,
+    Object? segundoText = freezed,
+    Object? postreText = freezed,
+    Object? bebidaText = freezed,
+    Object? menuPrice = freezed,
   }) {
     return _then(
       _$DailySpecialImpl(
@@ -175,6 +220,26 @@ class __$$DailySpecialImplCopyWithImpl<$Res>
             ? _value.createdAt
             : createdAt // ignore: cast_nullable_to_non_nullable
                   as DateTime?,
+        primeroText: freezed == primeroText
+            ? _value.primeroText
+            : primeroText // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        segundoText: freezed == segundoText
+            ? _value.segundoText
+            : segundoText // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        postreText: freezed == postreText
+            ? _value.postreText
+            : postreText // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        bebidaText: freezed == bebidaText
+            ? _value.bebidaText
+            : bebidaText // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        menuPrice: freezed == menuPrice
+            ? _value.menuPrice
+            : menuPrice // ignore: cast_nullable_to_non_nullable
+                  as double?,
       ),
     );
   }
@@ -191,6 +256,11 @@ class _$DailySpecialImpl implements _DailySpecial {
     this.discountPercent,
     this.note,
     this.createdAt,
+    this.primeroText,
+    this.segundoText,
+    this.postreText,
+    this.bebidaText,
+    this.menuPrice,
   });
 
   factory _$DailySpecialImpl.fromJson(Map<String, dynamic> json) =>
@@ -208,10 +278,20 @@ class _$DailySpecialImpl implements _DailySpecial {
   final String? note;
   @override
   final DateTime? createdAt;
+  @override
+  final String? primeroText;
+  @override
+  final String? segundoText;
+  @override
+  final String? postreText;
+  @override
+  final String? bebidaText;
+  @override
+  final double? menuPrice;
 
   @override
   String toString() {
-    return 'DailySpecial(id: $id, dishId: $dishId, date: $date, discountPercent: $discountPercent, note: $note, createdAt: $createdAt)';
+    return 'DailySpecial(id: $id, dishId: $dishId, date: $date, discountPercent: $discountPercent, note: $note, createdAt: $createdAt, primeroText: $primeroText, segundoText: $segundoText, postreText: $postreText, bebidaText: $bebidaText, menuPrice: $menuPrice)';
   }
 
   @override
@@ -226,7 +306,17 @@ class _$DailySpecialImpl implements _DailySpecial {
                 other.discountPercent == discountPercent) &&
             (identical(other.note, note) || other.note == note) &&
             (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt));
+                other.createdAt == createdAt) &&
+            (identical(other.primeroText, primeroText) ||
+                other.primeroText == primeroText) &&
+            (identical(other.segundoText, segundoText) ||
+                other.segundoText == segundoText) &&
+            (identical(other.postreText, postreText) ||
+                other.postreText == postreText) &&
+            (identical(other.bebidaText, bebidaText) ||
+                other.bebidaText == bebidaText) &&
+            (identical(other.menuPrice, menuPrice) ||
+                other.menuPrice == menuPrice));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -239,6 +329,11 @@ class _$DailySpecialImpl implements _DailySpecial {
     discountPercent,
     note,
     createdAt,
+    primeroText,
+    segundoText,
+    postreText,
+    bebidaText,
+    menuPrice,
   );
 
   /// Create a copy of DailySpecial
@@ -263,6 +358,11 @@ abstract class _DailySpecial implements DailySpecial {
     final int? discountPercent,
     final String? note,
     final DateTime? createdAt,
+    final String? primeroText,
+    final String? segundoText,
+    final String? postreText,
+    final String? bebidaText,
+    final double? menuPrice,
   }) = _$DailySpecialImpl;
 
   factory _DailySpecial.fromJson(Map<String, dynamic> json) =
@@ -280,6 +380,16 @@ abstract class _DailySpecial implements DailySpecial {
   String? get note;
   @override
   DateTime? get createdAt;
+  @override
+  String? get primeroText;
+  @override
+  String? get segundoText;
+  @override
+  String? get postreText;
+  @override
+  String? get bebidaText;
+  @override
+  double? get menuPrice;
 
   /// Create a copy of DailySpecial
   /// with the given fields replaced by the non-null parameter values.

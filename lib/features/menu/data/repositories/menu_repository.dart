@@ -168,6 +168,43 @@ class MenuRepository {
     }
   }
 
+  Future<DailySpecial> upsertTodaySpecial({
+    required String dishId,
+    int? discountPercent,
+    String? note,
+    String? primeroText,
+    String? segundoText,
+    String? postreText,
+    String? bebidaText,
+    double? menuPrice,
+  }) async {
+    try {
+      final today = DateTime.now().toIso8601String().substring(0, 10);
+      final payload = <String, dynamic>{
+        'dish_id': dishId,
+        'date': today,
+        if (discountPercent != null) 'discount_percent': discountPercent,
+        if (note != null) 'note': note,
+        if (primeroText != null) 'primero_text': primeroText,
+        if (segundoText != null) 'segundo_text': segundoText,
+        if (postreText != null) 'postre_text': postreText,
+        if (bebidaText != null) 'bebida_text': bebidaText,
+        if (menuPrice != null) 'menu_price': menuPrice,
+      };
+      final res = await _client
+          .from(SupabaseConstants.dailySpecial)
+          .upsert(payload, onConflict: 'date')
+          .select()
+          .single();
+      final dynamic data = res;
+      return DailySpecial.fromJson(data as Map<String, dynamic>);
+    } on PostgrestException catch (e) {
+      throw DatabaseFailure(message: e.message, code: e.code);
+    } catch (e) {
+      throw UnexpectedFailure(message: e.toString());
+    }
+  }
+
   // ──── Favoritos ────
 
   Future<List<Favorite>> getFavorites(String userId) async {

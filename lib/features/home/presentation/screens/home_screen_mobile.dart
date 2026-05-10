@@ -194,7 +194,7 @@ class _HeroBanner extends StatelessWidget {
                 children: [
                   Text(
                     'LA COMIDA CASERA\nQUE TE MERECES',
-                    style: GoogleFonts.bebasNeue(
+                    style: GoogleFonts.inter(fontWeight: FontWeight.w900, 
                       fontSize: 36,
                       color: Colors.white,
                       height: 0.95,
@@ -230,7 +230,7 @@ class _HeroBanner extends StatelessWidget {
                         ),
                         child: Text(
                           'VER EL MENÚ',
-                          style: GoogleFonts.bebasNeue(
+                          style: GoogleFonts.inter(fontWeight: FontWeight.w900, 
                             fontSize: 14,
                             letterSpacing: 1.2,
                           ),
@@ -251,7 +251,7 @@ class _HeroBanner extends StatelessWidget {
                         ),
                         child: Text(
                           'CATERING',
-                          style: GoogleFonts.bebasNeue(
+                          style: GoogleFonts.inter(fontWeight: FontWeight.w900, 
                             fontSize: 14,
                             letterSpacing: 1.2,
                             color: Colors.white,
@@ -404,7 +404,7 @@ class _MobileTopDishesSection extends ConsumerWidget {
                 children: [
                   Text(
                     'MÁS PEDIDOS DEL MES',
-                    style: GoogleFonts.bebasNeue(
+                    style: GoogleFonts.inter(fontWeight: FontWeight.w900, 
                       fontSize: 22,
                       letterSpacing: 1.5,
                       color: const Color(0xFF111111),
@@ -619,7 +619,7 @@ class _MobileCateringBanner extends StatelessWidget {
               const SizedBox(height: 8),
               Text(
                 'ORGANIZA TU\nEVENTO CON NOSOTROS',
-                style: GoogleFonts.bebasNeue(
+                style: GoogleFonts.inter(fontWeight: FontWeight.w900, 
                   fontSize: 24,
                   color: const Color(0xFFF2EBD9),
                   height: 1.1,
@@ -702,7 +702,7 @@ class _MobileEncargosBanner extends StatelessWidget {
               const SizedBox(height: 8),
               Text(
                 'ENCARGA CON\nANTELACIÓN',
-                style: GoogleFonts.bebasNeue(
+                style: GoogleFonts.inter(fontWeight: FontWeight.w900, 
                   fontSize: 24,
                   color: const Color(0xFFF2EBD9),
                   height: 1.1,
@@ -762,7 +762,7 @@ class _MobileOffersSection extends ConsumerWidget {
                 children: [
                   Text(
                     'EN OFERTA',
-                    style: GoogleFonts.bebasNeue(
+                    style: GoogleFonts.inter(fontWeight: FontWeight.w900, 
                       fontSize: 22,
                       letterSpacing: 1.5,
                       color: const Color(0xFF111111),
@@ -990,7 +990,7 @@ class _MobileSeasonalSection extends ConsumerWidget {
                       const SizedBox(width: 6),
                       Text(
                         'DE TEMPORADA',
-                        style: GoogleFonts.bebasNeue(
+                        style: GoogleFonts.inter(fontWeight: FontWeight.w900, 
                           fontSize: 22,
                           letterSpacing: 1.5,
                           color: const Color(0xFF111111),

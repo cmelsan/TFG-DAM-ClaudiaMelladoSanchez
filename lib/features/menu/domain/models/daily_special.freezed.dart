@@ -32,6 +32,7 @@ mixin _$DailySpecial {
   String? get postreText => throw _privateConstructorUsedError;
   String? get bebidaText => throw _privateConstructorUsedError;
   double? get menuPrice => throw _privateConstructorUsedError;
+  String? get imageUrl => throw _privateConstructorUsedError;
 
   /// Serializes this DailySpecial to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -62,6 +63,7 @@ abstract class $DailySpecialCopyWith<$Res> {
     String? postreText,
     String? bebidaText,
     double? menuPrice,
+    String? imageUrl,
   });
 }
 
@@ -91,6 +93,7 @@ class _$DailySpecialCopyWithImpl<$Res, $Val extends DailySpecial>
     Object? postreText = freezed,
     Object? bebidaText = freezed,
     Object? menuPrice = freezed,
+    Object? imageUrl = freezed,
   }) {
     return _then(
       _value.copyWith(
@@ -138,6 +141,10 @@ class _$DailySpecialCopyWithImpl<$Res, $Val extends DailySpecial>
                 ? _value.menuPrice
                 : menuPrice // ignore: cast_nullable_to_non_nullable
                       as double?,
+            imageUrl: freezed == imageUrl
+                ? _value.imageUrl
+                : imageUrl // ignore: cast_nullable_to_non_nullable
+                      as String?,
           )
           as $Val,
     );
@@ -165,6 +172,7 @@ abstract class _$$DailySpecialImplCopyWith<$Res>
     String? postreText,
     String? bebidaText,
     double? menuPrice,
+    String? imageUrl,
   });
 }
 
@@ -193,6 +201,7 @@ class __$$DailySpecialImplCopyWithImpl<$Res>
     Object? postreText = freezed,
     Object? bebidaText = freezed,
     Object? menuPrice = freezed,
+    Object? imageUrl = freezed,
   }) {
     return _then(
       _$DailySpecialImpl(
@@ -240,6 +249,10 @@ class __$$DailySpecialImplCopyWithImpl<$Res>
             ? _value.menuPrice
             : menuPrice // ignore: cast_nullable_to_non_nullable
                   as double?,
+        imageUrl: freezed == imageUrl
+            ? _value.imageUrl
+            : imageUrl // ignore: cast_nullable_to_non_nullable
+                  as String?,
       ),
     );
   }
@@ -261,6 +274,7 @@ class _$DailySpecialImpl implements _DailySpecial {
     this.postreText,
     this.bebidaText,
     this.menuPrice,
+    this.imageUrl,
   });
 
   factory _$DailySpecialImpl.fromJson(Map<String, dynamic> json) =>
@@ -288,10 +302,12 @@ class _$DailySpecialImpl implements _DailySpecial {
   final String? bebidaText;
   @override
   final double? menuPrice;
+  @override
+  final String? imageUrl;
 
   @override
   String toString() {
-    return 'DailySpecial(id: $id, dishId: $dishId, date: $date, discountPercent: $discountPercent, note: $note, createdAt: $createdAt, primeroText: $primeroText, segundoText: $segundoText, postreText: $postreText, bebidaText: $bebidaText, menuPrice: $menuPrice)';
+    return 'DailySpecial(id: $id, dishId: $dishId, date: $date, discountPercent: $discountPercent, note: $note, createdAt: $createdAt, primeroText: $primeroText, segundoText: $segundoText, postreText: $postreText, bebidaText: $bebidaText, menuPrice: $menuPrice, imageUrl: $imageUrl)';
   }
 
   @override
@@ -316,7 +332,9 @@ class _$DailySpecialImpl implements _DailySpecial {
             (identical(other.bebidaText, bebidaText) ||
                 other.bebidaText == bebidaText) &&
             (identical(other.menuPrice, menuPrice) ||
-                other.menuPrice == menuPrice));
+                other.menuPrice == menuPrice) &&
+            (identical(other.imageUrl, imageUrl) ||
+                other.imageUrl == imageUrl));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -334,6 +352,7 @@ class _$DailySpecialImpl implements _DailySpecial {
     postreText,
     bebidaText,
     menuPrice,
+    imageUrl,
   );
 
   /// Create a copy of DailySpecial
@@ -363,6 +382,7 @@ abstract class _DailySpecial implements DailySpecial {
     final String? postreText,
     final String? bebidaText,
     final double? menuPrice,
+    final String? imageUrl,
   }) = _$DailySpecialImpl;
 
   factory _DailySpecial.fromJson(Map<String, dynamic> json) =
@@ -390,6 +410,8 @@ abstract class _DailySpecial implements DailySpecial {
   String? get bebidaText;
   @override
   double? get menuPrice;
+  @override
+  String? get imageUrl;
 
   /// Create a copy of DailySpecial
   /// with the given fields replaced by the non-null parameter values.

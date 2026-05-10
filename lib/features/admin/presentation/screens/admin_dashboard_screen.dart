@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -151,7 +151,7 @@ class _PageHeader extends StatelessWidget {
       children: [
         Text(
           greeting.toUpperCase(),
-          style: GoogleFonts.bebasNeue(
+          style: GoogleFonts.inter(fontWeight: FontWeight.w900, 
             fontSize: 32,
             letterSpacing: 1.5,
             color: const Color(0xFF111111),

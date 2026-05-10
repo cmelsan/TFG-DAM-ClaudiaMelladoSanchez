@@ -7,7 +7,7 @@ part of 'daily_special_notifier.dart';
 // **************************************************************************
 
 String _$dailySpecialNotifierHash() =>
-    r'604000fa08d770ee4ccb9cc5b4d2d143d26b9c0a';
+    r'494b2751d7f4c1b7f29c9f2770b745029ff992bd';
 
 /// Notifier para gestionar el menú del día desde el panel de admin.
 /// Expone el estado actual y un método [upsert] para crear/actualizar.

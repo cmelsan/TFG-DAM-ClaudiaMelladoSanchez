@@ -12,6 +12,12 @@ Future<List<Dish>> dishes(DishesRef ref, {String? categoryId}) {
 
 @riverpod
 // ignore: deprecated_member_use_from_same_package, Riverpod 2.x typed Ref
+Future<List<Dish>> topOrderedDishes(TopOrderedDishesRef ref) {
+  return ref.watch(menuRepositoryProvider).getTopOrderedDishes();
+}
+
+@riverpod
+// ignore: deprecated_member_use_from_same_package, Riverpod 2.x typed Ref
 Future<List<Dish>> offerDishes(OfferDishesRef ref) {
   return ref.watch(menuRepositoryProvider).getOfferDishes();
 }

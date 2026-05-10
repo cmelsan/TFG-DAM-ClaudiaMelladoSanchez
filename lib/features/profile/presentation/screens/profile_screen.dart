@@ -461,7 +461,7 @@ class _ProfileHero extends StatelessWidget {
                 alignment: Alignment.center,
                 child: Text(
                   _initials,
-                  style: GoogleFonts.bebasNeue(
+                  style: GoogleFonts.inter(fontWeight: FontWeight.w900, 
                     fontSize: 32,
                     color: _kCream,
                     letterSpacing: 2,
@@ -475,7 +475,7 @@ class _ProfileHero extends StatelessWidget {
                   children: [
                     Text(
                       (name?.isNotEmpty ?? false) ? name! : 'Bienvenido',
-                      style: GoogleFonts.bebasNeue(
+                      style: GoogleFonts.inter(fontWeight: FontWeight.w900, 
                         fontSize: 26,
                         color: _kCream,
                         letterSpacing: 1.2,

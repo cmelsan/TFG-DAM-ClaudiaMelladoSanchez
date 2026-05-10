@@ -1,4 +1,4 @@
-import 'package:cached_network_image/cached_network_image.dart';
+﻿import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -98,7 +98,7 @@ class _EmptyCart extends StatelessWidget {
             const SizedBox(height: 24),
             Text(
               'TU CARRITO ESTÁ VACÍO',
-              style: GoogleFonts.bebasNeue(
+              style: GoogleFonts.inter(fontWeight: FontWeight.w900, 
                 fontSize: 30,
                 letterSpacing: 1.5,
                 color: const Color(0xFF111111),

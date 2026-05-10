@@ -1,7 +1,9 @@
-﻿import 'package:flutter/material.dart';
+﻿import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:sabor_de_casa/core/theme/app_tokens.dart';
 import 'package:sabor_de_casa/core/widgets/error_view.dart';
 import 'package:sabor_de_casa/core/widgets/loading_indicator.dart';
@@ -24,14 +26,17 @@ class _AdminDailySpecialScreenState
     extends ConsumerState<AdminDailySpecialScreen> {
   final _formKey = GlobalKey<FormState>();
 
-  String? _selectedDishId;
+  String? _selectedDishId;  // gestionado internamente, no expuesto en UI
   final _primeroCtrl = TextEditingController();
   final _segundoCtrl = TextEditingController();
   final _postreCtrl = TextEditingController();
   final _bebidaCtrl = TextEditingController();
   final _menuPriceCtrl = TextEditingController();
   final _noteCtrl = TextEditingController();
-  final _discountCtrl = TextEditingController();
+
+  // Imagen del menú del día
+  String? _currentImageUrl; // URL guardada en BD
+  bool _uploadingImage = false;
 
   bool _populated = false;
 
@@ -43,7 +48,6 @@ class _AdminDailySpecialScreenState
     _bebidaCtrl.dispose();
     _menuPriceCtrl.dispose();
     _noteCtrl.dispose();
-    _discountCtrl.dispose();
     super.dispose();
   }
 
@@ -60,8 +64,7 @@ class _AdminDailySpecialScreenState
           ? special.menuPrice!.toStringAsFixed(2)
           : '';
       _noteCtrl.text = special.note ?? '';
-      _discountCtrl.text =
-          special.discountPercent != null ? '${special.discountPercent}' : '';
+      _currentImageUrl = special.imageUrl;
     });
   }
 
@@ -69,7 +72,7 @@ class _AdminDailySpecialScreenState
     if (!(_formKey.currentState?.validate() ?? false)) return;
     if (_selectedDishId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Selecciona un plato destacado')),
+        const SnackBar(content: Text('No hay platos disponibles. Crea un plato primero.')),
       );
       return;
     }
@@ -94,15 +97,41 @@ class _AdminDailySpecialScreenState
                   _menuPriceCtrl.text.trim().replaceAll(',', '.'),
                 ),
           note: _noteCtrl.text.trim().isEmpty ? null : _noteCtrl.text.trim(),
-          discountPercent: _discountCtrl.text.trim().isEmpty
-              ? null
-              : int.tryParse(_discountCtrl.text.trim()),
+          imageUrl: _currentImageUrl,
         );
 
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Menu del dia guardado')),
       );
+    }
+  }
+
+  Future<void> _pickAndUploadImage() async {
+    final picker = ImagePicker();
+    final xFile = await picker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 90,
+    );
+    if (xFile == null || !mounted) return;
+
+    setState(() => _uploadingImage = true);
+    try {
+      final bytes = await xFile.readAsBytes();
+      final mimeType = xFile.mimeType ?? 'image/jpeg';
+      final url = await ref.read(menuRepositoryProvider).uploadDailySpecialImage(
+            bytes: bytes,
+            mimeType: mimeType,
+          );
+      if (mounted) setState(() => _currentImageUrl = url);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error al subir imagen: $e')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _uploadingImage = false);
     }
   }
 
@@ -113,18 +142,20 @@ class _AdminDailySpecialScreenState
       (_, next) => next.whenOrNull(data: _populateFromSpecial),
     );
 
+    // Auto-selecciona el primer plato disponible si aún no hay ninguno.
+    ref.listen<AsyncValue<List<Dish>>>(_allDishesProvider, (_, next) {
+      next.whenOrNull(data: (dishes) {
+        if (_selectedDishId == null && dishes.isNotEmpty) {
+          setState(() => _selectedDishId = dishes.first.id);
+        }
+      });
+    });
+
     final specialAsync = ref.watch(dailySpecialNotifierProvider);
-    final allDishesAsync = ref.watch(_allDishesProvider);
 
     return AdminShell(
       title: 'Menu del dia',
-      child: allDishesAsync.when(
-        loading: () => const LoadingIndicator(),
-        error: (e, _) => ErrorView(
-          message: e.toString(),
-          onRetry: () => ref.invalidate(_allDishesProvider),
-        ),
-        data: (dishes) => SingleChildScrollView(
+      child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
           child: Center(
             child: ConstrainedBox(
@@ -134,34 +165,6 @@ class _AdminDailySpecialScreenState
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const _SectionTitle('Plato destacado del dia'),
-                    const SizedBox(height: 12),
-                    _DishDropdown(
-                      dishes: dishes,
-                      selectedId: _selectedDishId,
-                      onChanged: (id) => setState(() => _selectedDishId = id),
-                    ),
-                    const SizedBox(height: 8),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _NumberField(
-                            controller: _discountCtrl,
-                            label: 'Descuento (%)',
-                            hint: 'ej. 10',
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: _PriceField(
-                            controller: _menuPriceCtrl,
-                            label: 'Precio menu completo (EUR)',
-                            hint: 'ej. 9.90',
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 24),
                     const _SectionTitle('Composicion del menu'),
                     const SizedBox(height: 12),
                     _FormTextField(
@@ -188,6 +191,12 @@ class _AdminDailySpecialScreenState
                       hint: 'ej. Agua, refresco o vino de la casa',
                     ),
                     const SizedBox(height: 24),
+                    _PriceField(
+                      controller: _menuPriceCtrl,
+                      label: 'Precio menu completo (EUR)',
+                      hint: 'ej. 9.90',
+                    ),
+                    const SizedBox(height: 24),
                     const _SectionTitle('Nota adicional (opcional)'),
                     const SizedBox(height: 12),
                     _FormTextField(
@@ -195,6 +204,15 @@ class _AdminDailySpecialScreenState
                       label: 'Nota',
                       hint: 'ej. Disponible hasta las 15:30',
                       maxLines: 2,
+                    ),
+                    const SizedBox(height: 24),
+                    const _SectionTitle('Imagen del menú del día (opcional)'),
+                    const SizedBox(height: 12),
+                    _DailySpecialImagePicker(
+                      currentUrl: _currentImageUrl,
+                      isUploading: _uploadingImage,
+                      onPickImage: _pickAndUploadImage,
+                      onClear: () => setState(() => _currentImageUrl = null),
                     ),
                     const SizedBox(height: 32),
                     SizedBox(
@@ -231,7 +249,6 @@ class _AdminDailySpecialScreenState
             ),
           ),
         ),
-      ),
     );
   }
 }
@@ -257,39 +274,6 @@ class _SectionTitle extends StatelessWidget {
         fontWeight: FontWeight.w700,
         color: Colors.black87,
       ),
-    );
-  }
-}
-
-class _DishDropdown extends StatelessWidget {
-  const _DishDropdown({
-    required this.dishes,
-    required this.selectedId,
-    required this.onChanged,
-  });
-
-  final List<Dish> dishes;
-  final String? selectedId;
-  final ValueChanged<String?> onChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    return DropdownButtonFormField<String>(
-      // ignore: deprecated_member_use
-      initialValue: selectedId,
-      decoration: const InputDecoration(
-        labelText: 'Plato',
-        border: OutlineInputBorder(),
-      ),
-      items: dishes
-          .map(
-            (d) => DropdownMenuItem(
-              value: d.id,
-              child: Text(d.name, overflow: TextOverflow.ellipsis),
-            ),
-          )
-          .toList(),
-      onChanged: onChanged,
     );
   }
 }
@@ -380,6 +364,118 @@ class _PriceField extends StatelessWidget {
         if (n == null || n < 0) return 'Precio no valido';
         return null;
       },
+    );
+  }
+}
+
+// ─── Widget para seleccionar/previsualizar imagen del menú del día ───────────
+
+class _DailySpecialImagePicker extends StatelessWidget {
+  const _DailySpecialImagePicker({
+    required this.currentUrl,
+    required this.isUploading,
+    required this.onPickImage,
+    required this.onClear,
+  });
+
+  final String? currentUrl;
+  final bool isUploading;
+  final VoidCallback onPickImage;
+  final VoidCallback onClear;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (currentUrl != null && currentUrl!.isNotEmpty) ...[
+          ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: CachedNetworkImage(
+              imageUrl: currentUrl!,
+              height: 200,
+              width: double.infinity,
+              fit: BoxFit.cover,
+              placeholder: (_, __) => Container(
+                height: 200,
+                color: Colors.grey[200],
+                child: const Center(child: CircularProgressIndicator()),
+              ),
+              errorWidget: (_, __, ___) => Container(
+                height: 200,
+                color: Colors.grey[200],
+                child: const Icon(Icons.broken_image, size: 48, color: Colors.grey),
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              TextButton.icon(
+                style: TextButton.styleFrom(
+                  minimumSize: const Size(0, 36),
+                ),
+                onPressed: isUploading ? null : onPickImage,
+                icon: const Icon(Icons.edit, size: 18),
+                label: const Text('Cambiar imagen'),
+              ),
+              TextButton.icon(
+                style: TextButton.styleFrom(
+                  minimumSize: const Size(0, 36),
+                  foregroundColor: Colors.red,
+                ),
+                onPressed: isUploading ? null : onClear,
+                icon: const Icon(Icons.delete_outline, size: 18),
+                label: const Text('Eliminar imagen'),
+              ),
+            ],
+          ),
+        ] else ...[
+          InkWell(
+            onTap: isUploading ? null : onPickImage,
+            borderRadius: BorderRadius.circular(12),
+            child: Container(
+              height: 140,
+              width: double.infinity,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: AppTokens.brandPrimary.withValues(alpha: 0.4),
+                  width: 2,
+                  style: BorderStyle.solid,
+                ),
+                color: AppTokens.brandLight,
+              ),
+              child: isUploading
+                  ? const Center(child: CircularProgressIndicator())
+                  : Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.add_photo_alternate_outlined,
+                          size: 40,
+                          color: AppTokens.brandPrimary,
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Seleccionar imagen',
+                          style: TextStyle(
+                            color: AppTokens.brandPrimary,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'Si no se selecciona ninguna se usará\nla imagen del plato seleccionado',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                        ),
+                      ],
+                    ),
+            ),
+          ),
+        ],
+      ],
     );
   }
 }

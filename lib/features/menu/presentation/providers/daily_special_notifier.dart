@@ -23,6 +23,7 @@ class DailySpecialNotifier extends _$DailySpecialNotifier {
     String? postreText,
     String? bebidaText,
     double? menuPrice,
+    String? imageUrl,
   }) async {
     state = const AsyncLoading();
     state = await AsyncValue.guard(
@@ -35,6 +36,7 @@ class DailySpecialNotifier extends _$DailySpecialNotifier {
             postreText: postreText,
             bebidaText: bebidaText,
             menuPrice: menuPrice,
+            imageUrl: imageUrl,
           ),
     );
     // Invalida el provider de consulta para que la home refresque.

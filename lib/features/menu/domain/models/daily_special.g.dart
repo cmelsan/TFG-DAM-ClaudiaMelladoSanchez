@@ -21,6 +21,7 @@ _$DailySpecialImpl _$$DailySpecialImplFromJson(Map<String, dynamic> json) =>
       postreText: json['postre_text'] as String?,
       bebidaText: json['bebida_text'] as String?,
       menuPrice: (json['menu_price'] as num?)?.toDouble(),
+      imageUrl: json['image_url'] as String?,
     );
 
 Map<String, dynamic> _$$DailySpecialImplToJson(_$DailySpecialImpl instance) =>
@@ -36,4 +37,5 @@ Map<String, dynamic> _$$DailySpecialImplToJson(_$DailySpecialImpl instance) =>
       'postre_text': instance.postreText,
       'bebida_text': instance.bebidaText,
       'menu_price': instance.menuPrice,
+      'image_url': instance.imageUrl,
     };

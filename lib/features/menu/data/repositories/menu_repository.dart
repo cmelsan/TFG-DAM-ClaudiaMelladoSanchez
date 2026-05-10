@@ -1,4 +1,7 @@
-import 'package:flutter/foundation.dart' show debugPrint;
+import 'dart:typed_data';
+
+import 'package:flutter/foundation.dart' show debugPrint, kIsWeb;
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:sabor_de_casa/core/constants/supabase_constants.dart';
 import 'package:sabor_de_casa/core/errors/failures.dart';
@@ -84,6 +87,63 @@ class MenuRepository {
     }
   }
 
+  /// Devuelve los platos más pedidos contando ocurrencias en order_items.
+  /// Si no hay datos de pedidos, cae al listado general de platos activos.
+  Future<List<Dish>> getTopOrderedDishes({int limit = 8}) async {
+    try {
+      // 1. Obtener todos los dish_id de order_items
+      final res = await _client
+          .from(SupabaseConstants.orderItems)
+          .select('dish_id');
+      final raw = res;
+      final items = (raw as List).cast<Map<String, dynamic>>();
+
+      // 2. Contar por dish_id en Dart
+      final counts = <String, int>{};
+      for (final item in items) {
+        final id = item['dish_id'] as String?;
+        if (id != null) counts[id] = (counts[id] ?? 0) + 1;
+      }
+
+      if (counts.isEmpty) {
+        // Fallback: platos activos ordenados por nombre
+        return getDishes();
+      }
+
+      // 3. Top IDs ordenados por frecuencia
+      final sortedEntries = counts.entries.toList()
+        ..sort((a, b) => b.value.compareTo(a.value));
+      final topIds = sortedEntries.take(limit).map((e) => e.key).toList();
+
+      // 4. Obtener los platos por esos IDs
+      final dishRes = await _client
+          .from(SupabaseConstants.dishes)
+          .select()
+          .inFilter('id', topIds)
+          .eq('is_active', true)
+          .eq('is_available', true);
+      final dishRaw = dishRes;
+      final dishList = (dishRaw as List).cast<Map<String, dynamic>>();
+
+      final dishes = dishList
+          .map(Dish.fromJson)
+          .toList()
+        ..sort((a, b) {
+          final countA = counts[a.id] ?? 0;
+          final countB = counts[b.id] ?? 0;
+          return countB.compareTo(countA);
+        });
+
+      return dishes;
+    } on PostgrestException catch (e) {
+      throw DatabaseFailure(message: e.message, code: e.code);
+    } catch (e, st) {
+      debugPrint('getTopOrderedDishes ERROR: $e');
+      debugPrint('getTopOrderedDishes STACKTRACE: $st');
+      throw UnexpectedFailure(message: e.toString());
+    }
+  }
+
   Future<List<Dish>> getSeasonalDishes() async {
     try {
       final res = await _client
@@ -150,13 +210,61 @@ class MenuRepository {
 
   // ──── Plato del día ────
 
+  /// Sube una imagen al bucket `dish-images` (carpeta daily-special/) y
+  /// devuelve la URL pública. En web sube sin comprimir; en móvil comprime a WebP.
+  Future<String> uploadDailySpecialImage({
+    required Uint8List bytes,
+    String mimeType = 'image/jpeg',
+  }) async {
+    try {
+      Uint8List toUpload;
+      String contentType;
+      String ext;
+
+      if (!kIsWeb) {
+        final compressed = await FlutterImageCompress.compressWithList(
+          bytes,
+          minWidth: 800,
+          minHeight: 600,
+          quality: 85,
+          format: CompressFormat.webp,
+        );
+        toUpload = compressed;
+        contentType = 'image/webp';
+        ext = 'webp';
+      } else {
+        toUpload = bytes;
+        contentType = mimeType;
+        ext = mimeType.contains('png') ? 'png' : 'jpg';
+      }
+
+      final ts = DateTime.now().millisecondsSinceEpoch;
+      final path = 'daily-special/$ts.$ext';
+      await _client.storage
+          .from(SupabaseConstants.dishImagesBucket)
+          .uploadBinary(
+            path,
+            toUpload,
+            fileOptions: FileOptions(upsert: false, contentType: contentType),
+          );
+      return _client.storage
+          .from(SupabaseConstants.dishImagesBucket)
+          .getPublicUrl(path);
+    } on StorageException catch (e) {
+      throw UnexpectedFailure(message: 'Storage error: ${e.message}');
+    } catch (e) {
+      throw UnexpectedFailure(message: e.toString());
+    }
+  }
+
   Future<DailySpecial?> getTodaySpecial() async {
     try {
-      final today = DateTime.now().toIso8601String().substring(0, 10);
+      // Devuelve el menú más reciente disponible (hoy o días anteriores).
       final res = await _client
           .from(SupabaseConstants.dailySpecial)
           .select()
-          .eq('date', today)
+          .order('date', ascending: false)
+          .limit(1)
           .maybeSingle();
       final dynamic data = res;
       if (data == null) return null;
@@ -177,6 +285,7 @@ class MenuRepository {
     String? postreText,
     String? bebidaText,
     double? menuPrice,
+    String? imageUrl,
   }) async {
     try {
       final today = DateTime.now().toIso8601String().substring(0, 10);
@@ -190,6 +299,7 @@ class MenuRepository {
         if (postreText != null) 'postre_text': postreText,
         if (bebidaText != null) 'bebida_text': bebidaText,
         if (menuPrice != null) 'menu_price': menuPrice,
+        if (imageUrl != null) 'image_url': imageUrl,
       };
       final res = await _client
           .from(SupabaseConstants.dailySpecial)

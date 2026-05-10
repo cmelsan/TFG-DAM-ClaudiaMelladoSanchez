@@ -63,8 +63,12 @@ class _HomeScreenWebState extends ConsumerState<HomeScreenWeb> {
               children: [
                 const SizedBox(height: 120), // offset navbar fija
                 _WebHero(),
-            const _WebHowItWorksSection(),
             const _WebDailyMenuSection(),
+            const _WebCateringBanner(),
+            const _WebTopDishesCarousel(),
+            const _WebSaborBanner(),
+            const _WebOffersSection(),
+            const _WebHowItWorksSection(),
             Center(
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 1200),
@@ -73,12 +77,6 @@ class _HomeScreenWebState extends ConsumerState<HomeScreenWeb> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      SizedBox(height: 56),
-                      _WebTopDishesSection(),
-                      SizedBox(height: 56),
-                      _WebOffersSection(),
-                      SizedBox(height: 56),
-                      _WebCateringBanner(),
                       SizedBox(height: 56),
                       _WebTestimonialsSection(),
                       SizedBox(height: 56),
@@ -159,23 +157,19 @@ class _WebNavbar extends ConsumerWidget {
                   onTap: () => context.goNamed(RouteNames.home),
                   child: Row(
                     children: [
-                      Image.asset(
-                        'assets/images/logo_bueno.png',
-                        height: 96,
-                        fit: BoxFit.contain,
-                      ),
-                      const SizedBox(width: 14),
                       Column(
                         mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'SABOR DE CASA',
-                            style: GoogleFonts.bebasNeue(
-                              fontSize: 38,
-                              letterSpacing: 2.5,
+                            'Sabor de Casa',
+                            style: GoogleFonts.syne(
+                              fontWeight: FontWeight.w800,
+                              fontStyle: FontStyle.italic,
+                              fontSize: 32,
+                              letterSpacing: 0,
                               height: 1,
-                              color: AppTokens.brandPrimary,
+                              color:AppTokens.brandPrimary,
                             ),
                           ),
                           const SizedBox(height: 4),
@@ -246,14 +240,13 @@ class _WebNavbar extends ConsumerWidget {
                       foregroundColor: AppTokens.brandPrimary,
                       side: const BorderSide(color: AppTokens.brandPrimary),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(24),
+                        borderRadius: BorderRadius.circular(8),
                       ),
                       minimumSize: const Size(0, 38),
                       padding: const EdgeInsets.symmetric(horizontal: 20),
                       textStyle: GoogleFonts.inter(
                         fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        letterSpacing: 0.2,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
                     child: const Text('Iniciar sesión'),
@@ -264,14 +257,13 @@ class _WebNavbar extends ConsumerWidget {
                     style: FilledButton.styleFrom(
                       backgroundColor: AppTokens.brandPrimary,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(24),
+                        borderRadius: BorderRadius.circular(8),
                       ),
                       minimumSize: const Size(0, 38),
                       padding: const EdgeInsets.symmetric(horizontal: 20),
                       textStyle: GoogleFonts.inter(
                         fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        letterSpacing: 0.2,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
                     child: const Text('Registrarse'),
@@ -380,7 +372,7 @@ class _WebHero extends StatelessWidget {
   Widget build(BuildContext context) {
     final screenW = MediaQuery.sizeOf(context).width;
     final heroH = screenW < 480 ? 340.0 : screenW < 768 ? 480.0 : 600.0;
-    final heroFont = screenW < 768 ? 60.0 : 88.0;
+    final heroFont = screenW < 768 ? 40.0 : 58.0;
     final isMobile = screenW < 768;
     return SizedBox(
       height: heroH,
@@ -413,33 +405,22 @@ class _WebHero extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 5,
-                          ),
-                          decoration: BoxDecoration(
-                            color: AppTokens.brandPrimary.withValues(alpha: 0.35),
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: const Text(
-                            'COCINA DE VERDAD',
-                            style: TextStyle(
+                        Text.rich(
+                          TextSpan(
+                            style: GoogleFonts.inter(
+                              fontWeight: FontWeight.w900,
+                              fontSize: heroFont,
                               color: Colors.white,
-                              fontSize: 11,
-                              fontWeight: FontWeight.w700,
-                              letterSpacing: 2,
+                              height: 0.92,
                             ),
+                            children: const [
+                              TextSpan(text: 'Sabor de casa\n'),
+                               TextSpan(
+                            text: 'como tú quieras',
+                            style: TextStyle(fontStyle: FontStyle.italic),
                           ),
-                        ),
-                        const SizedBox(height: 20),
-                        Text(
-                          'SABOR DE CASA\nCOMO TU QUIERAS',
-                          style: GoogleFonts.bebasNeue(
-                            fontSize: heroFont,
-                            color: Colors.white,
-                            letterSpacing: 2,
-                            height: 0.92,
+                              
+                            ],
                           ),
                         ),
                         const SizedBox(height: 20),
@@ -453,58 +434,6 @@ class _WebHero extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(height: 36),
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            FilledButton(
-                              onPressed: () =>
-                                  context.goNamed(RouteNames.menu),
-                              style: FilledButton.styleFrom(
-                                backgroundColor: Colors.white,
-                                foregroundColor: const Color(0xFF0D3B2E),
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 32,
-                                  vertical: 16,
-                                ),
-                                shape: const StadiumBorder(),
-                                minimumSize: Size.zero,
-                              ),
-                              child: Text(
-                                'VER EL MENU',
-                                style: GoogleFonts.bebasNeue(
-                                  fontSize: 18,
-                                  letterSpacing: 1.5,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            OutlinedButton(
-                              onPressed: () =>
-                                  context.goNamed(RouteNames.catering),
-                              style: OutlinedButton.styleFrom(
-                                foregroundColor: Colors.white,
-                                side: const BorderSide(
-                                  color: Colors.white,
-                                  width: 2,
-                                ),
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 32,
-                                  vertical: 16,
-                                ),
-                                shape: const StadiumBorder(),
-                                minimumSize: Size.zero,
-                              ),
-                              child: Text(
-                                'CATERING',
-                                style: GoogleFonts.bebasNeue(
-                                  fontSize: 18,
-                                  letterSpacing: 1.5,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
                       ],
                     ),
                   ),
@@ -604,128 +533,351 @@ class _HoverCardState extends State<_HoverCard> {
 
 // â”€â”€ Los más pedidos del mes â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-class _WebTopDishesSection extends ConsumerWidget {
-  const _WebTopDishesSection();
+
+// ── Platos de la semana ──────────────────────────────────────────────────────
+
+// ── Banner "El sabor de casa" ─────────────────────────────────────────────────
+
+class _WebSaborBanner extends StatelessWidget {
+  const _WebSaborBanner();
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final dishesAsync = ref.watch(dishesProvider());
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Cabecera
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-          decoration: BoxDecoration(
-            color: const Color(0xFFFFF3E0),
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: const Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                Icons.trending_up_rounded,
-                color: Color(0xFFE65100),
-                size: 13,
-              ),
-              SizedBox(width: 5),
-              Text(
-                'TENDENCIA',
-                style: TextStyle(
-                  color: Color(0xFFE65100),
-                  fontWeight: FontWeight.w700,
-                  fontSize: 11,
-                  letterSpacing: 0.8,
-                ),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 10),
-        Row(
+  Widget build(BuildContext context) {
+    return ColoredBox(
+      color: AppTokens.brandPrimary,
+      child: SizedBox(
+        height: 420,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(
-              'LOS MÁS PEDIDOS DEL MES',
-              style: GoogleFonts.bebasNeue(
-                fontSize: 38,
-                letterSpacing: 1.5,
-                color: const Color(0xFF111111),
+            // Imagen ocupa la mitad exacta
+            Expanded(
+              child: Image.network(
+                'https://images.unsplash.com/photo-1574484284002-952d92456975'
+                '?q=80&w=1200&auto=format&fit=crop',
+                fit: BoxFit.cover,
               ),
             ),
-            const Spacer(),
-            OutlinedButton(
-              onPressed: () => context.goNamed(RouteNames.menu),
-              style: OutlinedButton.styleFrom(
-                foregroundColor: AppTokens.brandPrimary,
-                side: const BorderSide(color: AppTokens.brandPrimary),
-                minimumSize: Size.zero,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 8,
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
+            // Texto derecho sobre fondo verde
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 64, vertical: 48),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text.rich(
+                      TextSpan(
+                        style: GoogleFonts.inter(
+                          fontSize: 48,
+                          fontWeight: FontWeight.w800,
+                          color: Colors.white,
+                          height: 1.1,
+                        ),
+                        children: const [
+                          TextSpan(text: 'El sabor de '),
+                          TextSpan(
+                            text: 'casa',
+                            style: TextStyle(fontStyle: FontStyle.italic),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    const Text(
+                      'Cocinamos para que disfrutes comiendo comida casera,\nnatural y variada cada semana.',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.white70,
+                        height: 1.6,
+                      ),
+                    ),
+                    const SizedBox(height: 32),
+                    FilledButton(
+                      onPressed: () => context.goNamed(RouteNames.menu),
+                      style: FilledButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        foregroundColor: AppTokens.brandPrimary,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 28,
+                          vertical: 16,
+                        ),
+                        shape: const StadiumBorder(),
+                        textStyle: GoogleFonts.inter(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      child: const Text('Pruébalo hoy: 30% Dto.'),
+                    ),
+                  ],
                 ),
               ),
-              child: const Text('Ver todo →'),
             ),
           ],
         ),
-        const SizedBox(height: 24),
+      ),
+    );
+  }
+}
+// ── Más pedidos — sección independiente con carrusel ────────────────────────
+class _WebTopDishesCarousel extends ConsumerStatefulWidget {
+  const _WebTopDishesCarousel();
 
-        // Tarjetas
-        dishesAsync.when(
-          data: (dishes) {
-            final top = dishes.where((d) => d.isAvailable).take(4).toList();
-            if (top.isEmpty) return const SizedBox.shrink();
-            return LayoutBuilder(
-              builder: (_, constraints) {
-                final cols = constraints.maxWidth < 450
-                    ? 2
-                    : constraints.maxWidth < 750
-                        ? 3
-                        : 4;
-                final cardW =
-                    (constraints.maxWidth - (cols - 1) * 16) / cols;
-                return Wrap(
-                  spacing: 16,
-                  runSpacing: 16,
-                  children: List.generate(
-                    top.length,
-                    (i) => _HoverCard(
-                      child: SizedBox(
-                        width: cardW,
-                        child: _TopDishCard(dish: top[i], rank: i + 1),
-                      ),
+  @override
+  ConsumerState<_WebTopDishesCarousel> createState() =>
+      _WebTopDishesCarouselState();
+}
+
+class _WebTopDishesCarouselState
+    extends ConsumerState<_WebTopDishesCarousel> {
+  late final PageController _pageCtrl;
+  int _page = 0;
+
+  /// Cuántas tarjetas se ven a la vez según ancho
+  int _visibleCards(double width) {
+    if (width >= 1100) return 4;
+    if (width >= 800) return 3;
+    if (width >= 500) return 2;
+    return 1;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _pageCtrl = PageController();
+  }
+
+  @override
+  void dispose() {
+    _pageCtrl.dispose();
+    super.dispose();
+  }
+
+  void _prev() {
+    if (_page > 0) {
+      setState(() => _page--);
+      _pageCtrl.animateToPage(
+        _page,
+        duration: const Duration(milliseconds: 350),
+        curve: Curves.easeInOut,
+      );
+    }
+  }
+
+  void _next(int total) {
+    if (_page < total - 1) {
+      setState(() => _page++);
+      _pageCtrl.animateToPage(
+        _page,
+        duration: const Duration(milliseconds: 350),
+        curve: Curves.easeInOut,
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final dishesAsync = ref.watch(topOrderedDishesProvider);
+
+    return ColoredBox(
+      color: Colors.white,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 80),
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 1400),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 40),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // ── Título estilo display serif ──────────────────────
+                  Text(
+                    'Los más pedidos del mes',
+                    style: GoogleFonts.inter(
+                      fontWeight: FontWeight.w900,
+                      fontSize: 38,
+                      letterSpacing: 1.5,
+                      color: AppTokens.brandPrimary,
                     ),
                   ),
-                );
-              },
-            );
-          },
-          loading: () => SizedBox(
-            height: 280,
-            child: Row(
-              children: List.generate(
-                4,
-                (i) => Expanded(
-                  child: Padding(
-                    padding: EdgeInsets.only(right: i < 3 ? 16 : 0),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(16),
+                  const SizedBox(height: 40),
+
+                  // ── Carrusel ─────────────────────────────────────────
+                  dishesAsync.when(
+                    data: (dishes) {
+                      if (dishes.isEmpty) return const SizedBox.shrink();
+                      return LayoutBuilder(builder: (_, constraints) {
+                        final visible = _visibleCards(constraints.maxWidth);
+                        // Páginas = número de grupos de `visible` tarjetas
+                        final pageCount =
+                            (dishes.length / visible).ceil();
+                        final canPrev = _page > 0;
+                        final canNext = _page < pageCount - 1;
+
+                        return Column(
+                          children: [
+                            Stack(
+                              children: [
+                                SizedBox(
+                                  height: 330,
+                                  child: PageView.builder(
+                                    controller: _pageCtrl,
+                                    physics:
+                                        const NeverScrollableScrollPhysics(),
+                                    itemCount: pageCount,
+                                    itemBuilder: (_, pageIdx) {
+                                      final start = pageIdx * visible;
+                                      final end = (start + visible)
+                                          .clamp(0, dishes.length);
+                                      final pageDishes =
+                                          dishes.sublist(start, end);
+                                      return Row(
+                                        children: [
+                                          for (int i = 0;
+                                              i < pageDishes.length;
+                                              i++) ...
+                                            [
+                                              Expanded(
+                                                child: _HoverCard(
+                                                  child: _TopDishCard(
+                                                    dish: pageDishes[i],
+                                                    rank: start + i + 1,
+                                                  ),
+                                                ),
+                                              ),
+                                              if (i < pageDishes.length - 1)
+                                                const SizedBox(width: 20),
+                                            ],
+                                          // Relleno si última página incompleta
+                                          for (int i = pageDishes.length;
+                                              i < visible;
+                                              i++) ...
+                                            [
+                                              const Expanded(
+                                                  child: SizedBox.shrink()),
+                                              if (i < visible - 1)
+                                                const SizedBox(width: 20),
+                                            ],
+                                        ],
+                                      );
+                                    },
+                                  ),
+                                ),
+                                // Flecha izquierda — discreta, dentro del padding
+                                if (canPrev)
+                                  Positioned(
+                                    left: 8,
+                                    top: 0,
+                                    bottom: 0,
+                                    child: Center(
+                                      child: _CarouselArrow(
+                                        icon: Icons.arrow_back_ios_new_rounded,
+                                        enabled: true,
+                                        onTap: _prev,
+                                      ),
+                                    ),
+                                  ),
+                                // Flecha derecha — discreta, dentro del padding
+                                if (canNext)
+                                  Positioned(
+                                    right: 8,
+                                    top: 0,
+                                    bottom: 0,
+                                    child: Center(
+                                      child: _CarouselArrow(
+                                        icon: Icons.arrow_forward_ios_rounded,
+                                        enabled: true,
+                                        onTap: () => _next(pageCount),
+                                      ),
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ],
+                        );
+                      });
+                    },
+                    loading: () => SizedBox(
+                      height: 330,
+                      child: Row(
+                        children: List.generate(
+                          4,
+                          (i) => Expanded(
+                            child: Padding(
+                              padding:
+                                  EdgeInsets.only(right: i < 3 ? 20 : 0),
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFF5F5F5),
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
                       ),
                     ),
+                    error: (_, __) => const SizedBox.shrink(),
                   ),
-                ),
+                ],
               ),
             ),
           ),
-          error: (_, __) => const SizedBox.shrink(),
         ),
-      ],
+      ),
+    );
+  }
+}
+
+class _CarouselArrow extends StatelessWidget {
+  const _CarouselArrow({
+    required this.icon,
+    required this.enabled,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final bool enabled;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: enabled ? onTap : null,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        width: 32,
+        height: 32,
+        decoration: BoxDecoration(
+          color: enabled
+              ? Colors.white.withValues(alpha: 0.9)
+              : const Color(0xFFF5F5F5),
+          shape: BoxShape.circle,
+          border: Border.all(
+            color: enabled
+                ? AppTokens.brandPrimary.withValues(alpha: 0.5)
+                : const Color(0xFFEEEEEE),
+          ),
+          boxShadow: enabled
+              ? [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.06),
+                    blurRadius: 6,
+                    offset: const Offset(0, 2),
+                  )
+                ]
+              : [],
+        ),
+        child: Icon(
+          icon,
+          size: 13,
+          color: enabled
+              ? AppTokens.brandPrimary
+              : const Color(0xFFCCCCCC),
+        ),
+      ),
     );
   }
 }
@@ -735,13 +887,6 @@ class _TopDishCard extends ConsumerWidget {
 
   final Dish dish;
   final int rank;
-
-  static const _rankColors = [
-    Color(0xFFFFD700), // oro
-    Color(0xFFC0C0C0), // plata
-    Color(0xFFCD7F32), // bronce
-    Color(0xFFE5E5E3), // 4.Âº
-  ];
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -769,7 +914,7 @@ class _TopDishCard extends ConsumerWidget {
             Stack(
               children: [
                 SizedBox(
-                  height: 200,
+                  height: 155,
                   child: ClipRRect(
                     borderRadius: const BorderRadius.only(
                       topLeft: Radius.circular(16),
@@ -808,70 +953,6 @@ class _TopDishCard extends ConsumerWidget {
                     ),
                   ),
                 ),
-                // Badge de rango
-                Positioned(
-                  top: 12,
-                  left: 12,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 5,
-                    ),
-                    decoration: BoxDecoration(
-                      color: _rankColors[rank - 1],
-                      borderRadius: BorderRadius.circular(20),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.15),
-                          blurRadius: 6,
-                        ),
-                      ],
-                    ),
-                    child: Text(
-                      '#$rank',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w800,
-                        fontSize: 12,
-                        color: rank == 1
-                            ? const Color(0xFF7B5000)
-                            : rank == 4
-                            ? const Color(0xFF111111)
-                            : Colors.white,
-                      ),
-                    ),
-                  ),
-                ),
-                // Badge "Más pedido" sólo para el #1
-                if (rank == 1)
-                  Positioned(
-                    bottom: 10,
-                    right: 10,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: AppTokens.brandPrimary,
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: const Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(Icons.star, color: Colors.white, size: 11),
-                          SizedBox(width: 3),
-                          Text(
-                            'Favorito',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 11,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
               ],
             ),
 
@@ -993,255 +1074,291 @@ class _WebEncargosBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: const Color(0xFF1B4332),
-        borderRadius: BorderRadius.circular(20),
-      ),
-      clipBehavior: Clip.hardEdge,
-      child: Stack(
-        children: [
-          // Fondo decorativo
-          Positioned(
-            right: 0,
-            top: 0,
-            bottom: 0,
-            width: 360,
-            child: Opacity(
-              opacity: 0.12,
+    return ColoredBox(
+      color: const Color(0xFF1B4332),
+      child: SizedBox(
+        height: 420,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Imagen ocupa la mitad exacta
+            Expanded(
               child: Image.network(
-                'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?q=80&w=800&auto=format&fit=crop',
+                'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=1200&q=80&auto=format&fit=crop',
                 fit: BoxFit.cover,
               ),
             ),
-          ),
-          // Contenido
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 44),
-            child: Row(
-              children: [
-                // Texto + CTA
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 5,
-                        ),
-                        decoration: BoxDecoration(
-                          color: AppTokens.brandPrimary.withValues(alpha: 0.5),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: const Text(
-                          'ENCARGOS',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 11,
-                            fontWeight: FontWeight.w700,
-                            letterSpacing: 1.2,
-                          ),
-                        ),
+            // Texto derecho sobre fondo verde oscuro
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 64, vertical: 48),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+                      decoration: BoxDecoration(
+                        color: AppTokens.brandPrimary.withValues(alpha: 0.5),
+                        borderRadius: BorderRadius.circular(20),
                       ),
-                      const SizedBox(height: 16),
-                      Text(
-                        'ENCARGA CON\nANTELACIÓN',
-                        style: GoogleFonts.bebasNeue(
-                          fontSize: 48,
-                          letterSpacing: 1.5,
+                      child: const Text(
+                        'ENCARGOS',
+                        style: TextStyle(
                           color: Colors.white,
-                          height: 0.95,
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      Text(
-                        'Reserva tus platos con antelación y recoge cuando quieras.\nSin esperas, con garantía de disponibilidad.',
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Colors.white.withValues(alpha: 0.80),
-                          height: 1.6,
-                        ),
-                      ),
-                      const SizedBox(height: 28),
-                      Row(
-                        children: [
-                          FilledButton(
-                            onPressed: () =>
-                                context.goNamed(RouteNames.orders),
-                            style: FilledButton.styleFrom(
-                              backgroundColor: Colors.white,
-                              foregroundColor: const Color(0xFF1B4332),
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 28,
-                                vertical: 16,
-                              ),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              minimumSize: Size.zero,
-                            ),
-                            child: Text(
-                              'Ver mis encargos',
-                              style: GoogleFonts.bebasNeue(
-                                fontSize: 16,
-                                letterSpacing: 1.5,
-                                color: const Color(0xFF1B4332),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-
-                // Imagen decorativa - solo en pantallas anchas
-                if (MediaQuery.sizeOf(context).width >= 700)
-                  Padding(
-                    padding: const EdgeInsets.only(left: 48),
-                    child: SizedBox(
-                      width: 280,
-                      height: 200,
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(16),
-                        child: Image.network(
-                          'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?q=80&w=800&auto=format&fit=crop',
-                          fit: BoxFit.cover,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 1.2,
                         ),
                       ),
                     ),
-                  ),
-              ],
+                    const SizedBox(height: 16),
+                    Text(
+                      'Encarga con\nantelación',
+                      style: GoogleFonts.inter(
+                        fontWeight: FontWeight.w800,
+                        fontSize: 40,
+                        color: Colors.white,
+                        height: 1.1,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    const Text(
+                      'Reserva tus platos con antelación y recoge cuando quieras.\nSin esperas, con garantía de disponibilidad.',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.white70,
+                        height: 1.6,
+                      ),
+                    ),
+                    const SizedBox(height: 32),
+                    Row(
+                      children: [
+                        FilledButton(
+                          onPressed: () => context.goNamed(RouteNames.orders),
+                          style: FilledButton.styleFrom(
+                            backgroundColor: Colors.white,
+                            foregroundColor: const Color(0xFF1B4332),
+                            padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 16),
+                            shape: const StadiumBorder(),
+                            minimumSize: const Size(0, 48),
+                            textStyle: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w700),
+                          ),
+                          child: const Text('Ver mis encargos'),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 }
-class _WebOffersSection extends ConsumerWidget {
+
+class _WebOffersSection extends ConsumerStatefulWidget {
   const _WebOffersSection();
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    // Respeta el toggle global del admin
-    final sectionEnabled = ref.watch(showOffersSectionProvider).valueOrNull ?? true;
+  ConsumerState<_WebOffersSection> createState() => _WebOffersSectionState();
+}
+
+class _WebOffersSectionState extends ConsumerState<_WebOffersSection> {
+  late final PageController _pageCtrl;
+  int _page = 0;
+
+  int _visibleCards(double width) {
+    if (width >= 1100) return 4;
+    if (width >= 800) return 3;
+    if (width >= 500) return 2;
+    return 1;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _pageCtrl = PageController();
+  }
+
+  @override
+  void dispose() {
+    _pageCtrl.dispose();
+    super.dispose();
+  }
+
+  void _prev() {
+    if (_page > 0) {
+      setState(() => _page--);
+      _pageCtrl.animateToPage(
+        _page,
+        duration: const Duration(milliseconds: 350),
+        curve: Curves.easeInOut,
+      );
+    }
+  }
+
+  void _next(int total) {
+    if (_page < total - 1) {
+      setState(() => _page++);
+      _pageCtrl.animateToPage(
+        _page,
+        duration: const Duration(milliseconds: 350),
+        curve: Curves.easeInOut,
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final sectionEnabled =
+        ref.watch(showOffersSectionProvider).valueOrNull ?? true;
     if (!sectionEnabled) return const SizedBox.shrink();
 
     final offersAsync = ref.watch(offerDishesProvider);
 
-    return offersAsync.when(
-      data: (dishes) {
-        final offers = dishes.take(4).toList();
-        if (offers.isEmpty) return const SizedBox.shrink();
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-              decoration: BoxDecoration(
-                color: const Color(0xFFFFEBEE),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: const Row(
-                mainAxisSize: MainAxisSize.min,
+    return ColoredBox(
+      color: Colors.white,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 80),
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 1400),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 40),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(
-                    Icons.local_offer_rounded,
-                    color: Color(0xFFB71C1C),
-                    size: 13,
-                  ),
-                  SizedBox(width: 5),
                   Text(
-                    'OFERTAS',
-                    style: TextStyle(
-                      color: Color(0xFFB71C1C),
-                      fontWeight: FontWeight.w700,
-                      fontSize: 11,
-                      letterSpacing: 0.8,
+                    'En oferta',
+                    style: GoogleFonts.inter(
+                      fontWeight: FontWeight.w900,
+                      fontSize: 38,
+                      letterSpacing: 1.5,
+                      color: AppTokens.brandPrimary,
                     ),
                   ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 10),
-            Row(
-              children: [
-                Text(
-                  'EN OFERTA',
-                  style: GoogleFonts.bebasNeue(
-                    fontSize: 38,
-                    letterSpacing: 1.5,
-                    color: const Color(0xFF111111),
-                  ),
-                ),
-                const Spacer(),
-                OutlinedButton(
-                  onPressed: () => context.goNamed(RouteNames.menu),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: const Color(0xFFE53935),
-                    side: const BorderSide(color: Color(0xFFE53935)),
-                    minimumSize: Size.zero,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 8,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                  ),
-                  child: const Text('Ver todo u2192'),
-                ),
-              ],
-            ),
-            const SizedBox(height: 24),
-            LayoutBuilder(
-              builder: (_, constraints) {
-                final cols = constraints.maxWidth < 450
-                    ? 2
-                    : constraints.maxWidth < 750
-                        ? 3
-                        : 4;
-                final cardW =
-                    (constraints.maxWidth - (cols - 1) * 16) / cols;
-                return Wrap(
-                  spacing: 16,
-                  runSpacing: 16,
-                  children: List.generate(
-                    offers.length,
-                    (i) => _HoverCard(
-                      child: SizedBox(
-                        width: cardW,
-                        child: _OfferDishCard(dish: offers[i]),
+                  const SizedBox(height: 40),
+                  offersAsync.when(
+                    data: (dishes) {
+                      final offers = dishes.take(8).toList();
+                      if (offers.isEmpty) return const SizedBox.shrink();
+                      return LayoutBuilder(builder: (_, constraints) {
+                        final visible = _visibleCards(constraints.maxWidth);
+                        final pageCount =
+                            (offers.length / visible).ceil();
+                        final canPrev = _page > 0;
+                        final canNext = _page < pageCount - 1;
+
+                        return Column(
+                          children: [
+                            Stack(
+                              children: [
+                                SizedBox(
+                                  height: 330,
+                                  child: PageView.builder(
+                                    controller: _pageCtrl,
+                                    physics:
+                                        const NeverScrollableScrollPhysics(),
+                                    itemCount: pageCount,
+                                    itemBuilder: (_, pageIdx) {
+                                      final start = pageIdx * visible;
+                                      final end = (start + visible)
+                                          .clamp(0, offers.length);
+                                      final pageOffers =
+                                          offers.sublist(start, end);
+                                      return Row(
+                                        children: [
+                                          for (int i = 0;
+                                              i < pageOffers.length;
+                                              i++) ...[
+                                            Expanded(
+                                              child: _HoverCard(
+                                                child: _OfferDishCard(
+                                                  dish: pageOffers[i],
+                                                ),
+                                              ),
+                                            ),
+                                            if (i < pageOffers.length - 1)
+                                              const SizedBox(width: 20),
+                                          ],
+                                          for (int i = pageOffers.length;
+                                              i < visible;
+                                              i++) ...[
+                                            const Expanded(
+                                                child: SizedBox.shrink()),
+                                            if (i < visible - 1)
+                                              const SizedBox(width: 20),
+                                          ],
+                                        ],
+                                      );
+                                    },
+                                  ),
+                                ),
+                                if (canPrev)
+                                  Positioned(
+                                    left: 8,
+                                    top: 0,
+                                    bottom: 0,
+                                    child: Center(
+                                      child: _CarouselArrow(
+                                        icon:
+                                            Icons.arrow_back_ios_new_rounded,
+                                        enabled: true,
+                                        onTap: _prev,
+                                      ),
+                                    ),
+                                  ),
+                                if (canNext)
+                                  Positioned(
+                                    right: 8,
+                                    top: 0,
+                                    bottom: 0,
+                                    child: Center(
+                                      child: _CarouselArrow(
+                                        icon:
+                                            Icons.arrow_forward_ios_rounded,
+                                        enabled: true,
+                                        onTap: () => _next(pageCount),
+                                      ),
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ],
+                        );
+                      });
+                    },
+                    loading: () => SizedBox(
+                      height: 330,
+                      child: Row(
+                        children: List.generate(
+                          4,
+                          (i) => Expanded(
+                            child: Padding(
+                              padding:
+                                  EdgeInsets.only(right: i < 3 ? 20 : 0),
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFF5F5F5),
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
                       ),
                     ),
+                    error: (_, __) => const SizedBox.shrink(),
                   ),
-                );
-              },
-            ),
-          ],
-        );
-      },
-      loading: () => SizedBox(
-        height: 280,
-        child: Row(
-          children: List.generate(
-            4,
-            (i) => Expanded(
-              child: Padding(
-                padding: EdgeInsets.only(right: i < 3 ? 16 : 0),
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                ),
+                ],
               ),
             ),
           ),
         ),
       ),
-      error: (_, __) => const SizedBox.shrink(),
     );
   }
 }
@@ -1278,7 +1395,7 @@ class _OfferDishCard extends ConsumerWidget {
             Stack(
               children: [
                 SizedBox(
-                  height: 200,
+                  height: 155,
                   child: ClipRRect(
                     borderRadius: const BorderRadius.only(
                       topLeft: Radius.circular(16),
@@ -1317,60 +1434,6 @@ class _OfferDishCard extends ConsumerWidget {
                     ),
                   ),
                 ),
-                // Badge "OFERTA"
-                Positioned(
-                  top: 12,
-                  left: 12,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 5,
-                    ),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFE53935),
-                      borderRadius: BorderRadius.circular(20),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.15),
-                          blurRadius: 6,
-                        ),
-                      ],
-                    ),
-                    child: const Text(
-                      'OFERTA',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w800,
-                        fontSize: 11,
-                        color: Colors.white,
-                        letterSpacing: 0.5,
-                      ),
-                    ),
-                  ),
-                ),
-                // Badge de descuento si hay precio de oferta
-                if (hasOfferPrice)
-                  Positioned(
-                    bottom: 10,
-                    right: 10,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFFF4444),
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: const Text(
-                        '-%',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 11,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ),
-                  ),
               ],
             ),
             // Info
@@ -1464,9 +1527,9 @@ class _OfferDishCard extends ConsumerWidget {
                         onPressed: () {
                           ref.read(cartNotifierProvider.notifier).addDish(dish);
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text(' aÃ±adido'),
-                              duration: Duration(seconds: 1),
+                            SnackBar(
+                              content: Text('${dish.name} añadido'),
+                              duration: const Duration(seconds: 1),
                               behavior: SnackBarBehavior.floating,
                             ),
                           );
@@ -1480,7 +1543,7 @@ class _OfferDishCard extends ConsumerWidget {
                           ),
                         ),
                         child: const Text(
-                          'AÃ±adir',
+                          'Añadir',
                           style: TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.w600,
@@ -1551,7 +1614,7 @@ class _WebSeasonalSection extends ConsumerWidget {
               children: [
                 Text(
                   'PLATOS DE TEMPORADA',
-                  style: GoogleFonts.bebasNeue(
+                  style: GoogleFonts.inter(fontWeight: FontWeight.w900, 
                     fontSize: 38,
                     letterSpacing: 1.5,
                     color: const Color(0xFF111111),
@@ -1668,7 +1731,7 @@ class _SeasonalDishCard extends ConsumerWidget {
             Stack(
               children: [
                 SizedBox(
-                  height: 200,
+                  height: 155,
                   child: ClipRRect(
                     borderRadius: const BorderRadius.only(
                       topLeft: Radius.circular(16),
@@ -1858,307 +1921,191 @@ class _WebCateringBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: const Color(0xFF1B4332),
-        borderRadius: BorderRadius.circular(20),
-      ),
-      clipBehavior: Clip.hardEdge,
-      child: Stack(
-        children: [
-          // Fondo decorativo
-          Positioned(
-            right: 0,
-            top: 0,
-            bottom: 0,
-            width: 360,
-            child: Opacity(
-              opacity: 0.12,
+    return ColoredBox(
+      color: const Color(0xFF1B4332),
+      child: SizedBox(
+        height: 420,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Imagen ocupa la mitad exacta
+            Expanded(
               child: Image.network(
-                'https://images.unsplash.com/photo-1555244162-803834f70033?q=80&w=800&auto=format&fit=crop',
+                'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?q=80&w=1200&auto=format&fit=crop',
                 fit: BoxFit.cover,
               ),
             ),
-          ),
-          // Contenido
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 44),
-            child: Row(
-              children: [
-                // Texto + CTA
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 5,
-                        ),
-                        decoration: BoxDecoration(
-                          color: AppTokens.brandPrimary.withValues(alpha: 0.5),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: const Text(
-                          'CATERING & EVENTOS',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 11,
-                            fontWeight: FontWeight.w700,
-                            letterSpacing: 1.2,
-                          ),
-                        ),
+            // Texto derecho sobre fondo verde oscuro
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 64, vertical: 48),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+                      decoration: BoxDecoration(
+                        color: AppTokens.brandPrimary.withValues(alpha: 0.5),
+                        borderRadius: BorderRadius.circular(20),
                       ),
-                      const SizedBox(height: 16),
-                      Text(
-                        'ORGANIZA TU EVENTO\nCON NOSOTROS',
-                        style: GoogleFonts.bebasNeue(
-                          fontSize: 48,
-                          letterSpacing: 1.5,
+                      child: const Text(
+                        'CATERING & EVENTOS',
+                        style: TextStyle(
                           color: Colors.white,
-                          height: 0.95,
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      Text(
-                        'Bodas, cumpleaños, reuniones de empresa y mucho más.\nPresupuesto personalizado sin compromiso.',
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Colors.white.withValues(alpha: 0.80),
-                          height: 1.6,
-                        ),
-                      ),
-                      const SizedBox(height: 28),
-                      Row(
-                        children: [
-                          FilledButton(
-                            onPressed: () =>
-                                context.goNamed(RouteNames.cateringRequest),
-                            style: FilledButton.styleFrom(
-                              backgroundColor: Colors.white,
-                              foregroundColor: const Color(0xFF1B4332),
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 28,
-                                vertical: 16,
-                              ),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              minimumSize: Size.zero,
-                            ),
-                            child: Text(
-                              'Solicitar presupuesto',
-                              style: GoogleFonts.bebasNeue(
-                                fontSize: 16,
-                                letterSpacing: 1.5,
-                                color: const Color(0xFF1B4332),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          OutlinedButton(
-                            onPressed: () =>
-                                context.goNamed(RouteNames.catering),
-                            style: OutlinedButton.styleFrom(
-                              foregroundColor: Colors.white,
-                              side: const BorderSide(
-                                color: Colors.white,
-                                width: 1.5,
-                              ),
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 24,
-                                vertical: 16,
-                              ),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              minimumSize: Size.zero,
-                            ),
-                            child: Text(
-                              'Ver más',
-                              style: GoogleFonts.bebasNeue(
-                                fontSize: 16,
-                                letterSpacing: 1.5,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-
-                // Imagen plato decorativa - solo en pantallas anchas
-                if (MediaQuery.sizeOf(context).width >= 700)
-                  Padding(
-                    padding: const EdgeInsets.only(left: 48),
-                    child: SizedBox(
-                      width: 280,
-                      height: 200,
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(16),
-                        child: Image.network(
-                          'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?q=80&w=800&auto=format&fit=crop',
-                          fit: BoxFit.cover,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 1.2,
                         ),
                       ),
                     ),
-                  ),
-              ],
+                    const SizedBox(height: 16),
+                    Text(
+                      'Organiza tu evento\ncon nosotros',
+                      style: GoogleFonts.inter(
+                        fontWeight: FontWeight.w800,
+                        fontSize: 40,
+                        color: Colors.white,
+                        height: 1.1,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    const Text(
+                      'Bodas, cumpleaños, reuniones de empresa y mucho más.\nPresupuesto personalizado sin compromiso.',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.white70,
+                        height: 1.6,
+                      ),
+                    ),
+                    const SizedBox(height: 32),
+                    Row(
+                      children: [
+                        FilledButton(
+                          onPressed: () => context.goNamed(RouteNames.cateringRequest),
+                          style: FilledButton.styleFrom(
+                            backgroundColor: Colors.white,
+                            foregroundColor: const Color(0xFF1B4332),
+                            padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 16),
+                            shape: const StadiumBorder(),
+                            minimumSize: const Size(0, 48),
+                            textStyle: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w700),
+                          ),
+                          child: const Text('Solicitar presupuesto'),
+                        ),
+                        const SizedBox(width: 12),
+                        OutlinedButton(
+                          onPressed: () => context.goNamed(RouteNames.catering),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: Colors.white,
+                            side: const BorderSide(color: Colors.white, width: 1.5),
+                            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                            shape: const StadiumBorder(),
+                            minimumSize: const Size(0, 48),
+                            textStyle: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w600),
+                          ),
+                          child: const Text('Ver más'),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 }
+// ── Cómo funciona (rediseñada) ─────────────────────────────────────────────
+typedef _StepData = ({
+  IconData icon,
+  String title,
+  String body,
+  Color accent,
+});
+
 class _WebHowItWorksSection extends StatelessWidget {
   const _WebHowItWorksSection();
 
-  static const _steps = [
+  static const List<_StepData> _steps = [
     (
-      icon: Icons.restaurant_menu_rounded,
-      title: 'Elige tus platos',
-      body: 'Explora el menu y filtra por categoria, recetas de toda la vida.',
-      color: Color(0xFF1D9E75),
+      icon: Icons.restaurant_menu,
+      title: 'Mira qué hay hoy',
+      body:
+          'Cada día cocinamos platos nuevos. Filtra por categoría, consulta ingredientes y alérgenos, y añade lo que te apetezca al carrito.',
+      accent: Color(0xFF1D9E75),
     ),
     (
-      icon: Icons.soup_kitchen_rounded,
-      title: 'Cocinamos para ti',
-      body: 'Ingredientes frescos, sin conservantes ni aditivos. Como en casa.',
-      color: Color(0xFF0F6E56),
+      icon: Icons.storefront,
+      title: 'Recógelo en el local',
+      body:
+          'Ven a nuestro local en Sanlúcar de Barrameda y te lo entregamos recién hecho. Puedes reservar con antelación o venir directamente.',
+      accent: Color(0xFF1D9E75),
     ),
     (
-      icon: Icons.storefront_rounded,
-      title: 'Recoge o enviamos',
-      body: 'Pasa por el local, encargalo para llevar o pedimos que llegue a tu puerta.',
-      color: Color(0xFF1D9E75),
+      icon: Icons.delivery_dining,
+      title: 'O te lo llevamos',
+      body:
+          'Si prefieres no salir de casa, hacemos envío a domicilio. Elige la franja horaria que mejor te venga y lo recibes caliente.',
+      accent: Color(0xFF1D9E75),
     ),
     (
-      icon: Icons.sentiment_very_satisfied_rounded,
-      title: 'A disfrutar',
-      body: 'Comida de verdad lista en minutos. Sabor de casa en cada bocado.',
-      color: Color(0xFF0F6E56),
+      icon: Icons.cake,
+      title: 'Encargos y catering',
+      body:
+          'Pide para una fecha concreta o solicita un menú completo para tu evento: bodas, comuniones, celebraciones de empresa… lo preparamos todo.',
+      accent: Color(0xFF1D9E75),
     ),
   ];
 
   @override
   Widget build(BuildContext context) {
     final w = MediaQuery.sizeOf(context).width;
-    final compact = w < 860;
+    final isDesktop = w >= 860;
 
-    return DecoratedBox(
-      decoration: const BoxDecoration(color: Color(0xFFF7F7F5)),
+    return ColoredBox(
+      color: Colors.white,
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 80),
+        padding: const EdgeInsets.symmetric(vertical: 96),
         child: Center(
           child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 1200),
+            constraints: const BoxConstraints(maxWidth: 1400),
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 32),
+              padding: const EdgeInsets.symmetric(horizontal: 40),
               child: Column(
                 children: [
                   // ── Cabecera ───────────────────────────────────────
-                  Column(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 14,
-                          vertical: 6,
-                        ),
-                        decoration: BoxDecoration(
-                          color: AppTokens.brandPrimary.withValues(alpha: 0.12),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Text(
-                          'ASI DE FACIL',
-                          style: GoogleFonts.inter(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w700,
-                            letterSpacing: 2,
-                            color: AppTokens.brandPrimary,
+                  Text.rich(
+                    TextSpan(
+                      style: GoogleFonts.inter(
+                        fontWeight: FontWeight.w900,
+                        fontSize: isDesktop ? 54 : 36,
+                        height: 1,
+                        color: const Color(0xFF111111),
+                      ),
+                      children: const [
+                        TextSpan(text: '¿Cómo '),
+                        TextSpan(
+                          text: 'funciona',
+                          style: TextStyle(
+                            fontStyle: FontStyle.italic,
+                            color: Color(0xFF1D9E75),
                           ),
                         ),
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        'Como funciona',
-                        style: GoogleFonts.bebasNeue(
-                          fontSize: 52,
-                          letterSpacing: 1.5,
-                          height: 1,
-                          color: const Color(0xFF111111),
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      Text(
-                        'Del pedido a tu mesa en cuatro pasos.',
-                        style: GoogleFonts.inter(
-                          fontSize: 16,
-                          color: const Color(0xFF888888),
-                          fontWeight: FontWeight.w400,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 56),
-
-                  // ── Pasos ─────────────────────────────────────────
-                  if (compact)
-                    Column(
-                      children: List.generate(_steps.length, (i) {
-                        return Padding(
-                          padding: const EdgeInsets.only(bottom: 16),
-                          child: _HowItWorksCard(
-                            step: _steps[i],
-                            index: i,
-                            compact: true,
-                          ),
-                        );
-                      }),
-                    )
-                  else
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: List.generate(_steps.length * 2 - 1, (i) {
-                        // Conectores alternos
-                        if (i.isOdd) {
-                          return Expanded(
-                            child: Padding(
-                              padding: const EdgeInsets.only(top: 44),
-                              child: Row(
-                                children: List.generate(
-                                  6,
-                                  (_) => Expanded(
-                                    child: Container(
-                                      height: 2,
-                                      margin: const EdgeInsets.symmetric(
-                                        horizontal: 2,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: AppTokens.brandPrimary
-                                            .withValues(alpha: 0.25),
-                                        borderRadius:
-                                            BorderRadius.circular(1),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          );
-                        }
-                        final idx = i ~/ 2;
-                        return Expanded(
-                          flex: 5,
-                          child: _HowItWorksCard(
-                            step: _steps[idx],
-                            index: idx,
-                            compact: false,
-                          ),
-                        );
-                      }),
+                        TextSpan(text: '?'),
+                      ],
                     ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 64),
+
+                  // ── Stepper ──────────────────────────────────────
+                  if (isDesktop)
+                    const _DesktopStepper(steps: _steps)
+                  else
+                    const _MobileStepper(steps: _steps),
                 ],
               ),
             ),
@@ -2169,341 +2116,243 @@ class _WebHowItWorksSection extends StatelessWidget {
   }
 }
 
-class _HowItWorksCard extends StatelessWidget {
-  const _HowItWorksCard({
-    required this.step,
-    required this.index,
-    required this.compact,
-  });
+// ── Stepper desktop ───────────────────────────────────────────────────────────
+class _DesktopStepper extends StatelessWidget {
+  const _DesktopStepper({required this.steps});
 
-  final ({
-    IconData icon,
-    String title,
-    String body,
-    Color color,
-  }) step;
+  final List<_StepData> steps;
+
+  @override
+  Widget build(BuildContext context) {
+    return IntrinsicHeight(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          for (int i = 0; i < steps.length; i++) ...[
+            Expanded(
+              child: _StepFeatureCard(step: steps[i], index: i),
+            ),
+            if (i < steps.length - 1) const SizedBox(width: 32),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+// Tarjeta estilo feature card (icono cuadrado redondeado + título + texto)
+class _StepFeatureCard extends StatelessWidget {
+  const _StepFeatureCard({required this.step, required this.index});
+
+  final _StepData step;
   final int index;
-  final bool compact;
 
   @override
   Widget build(BuildContext context) {
     return TweenAnimationBuilder<double>(
       tween: Tween(begin: 0, end: 1),
       duration: Duration(milliseconds: 400 + index * 120),
-      curve: Curves.easeOut,
+      curve: Curves.easeOutCubic,
       builder: (_, v, child) => Opacity(
         opacity: v,
-        child: Transform.translate(offset: Offset(0, 20 * (1 - v)), child: child),
+        child: Transform.translate(offset: Offset(0, 18 * (1 - v)), child: child),
       ),
-      child: compact
-          ? _CompactCard(step: step, index: index)
-          : _DesktopCard(step: step, index: index),
+      child: Container(
+        padding: const EdgeInsets.all(32),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: const Color(0xFFEAEAE8)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.05),
+              blurRadius: 16,
+              offset: const Offset(0, 6),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // ── Icono cuadrado redondeado ──────────────────────────
+            Container(
+              width: 56,
+              height: 56,
+              decoration: BoxDecoration(
+                color: step.accent.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: Icon(step.icon, color: step.accent, size: 28),
+            ),
+            const SizedBox(height: 24),
+            // ── Título ─────────────────────────────────────────────
+            Text(
+              step.title,
+              style: GoogleFonts.inter(
+                fontWeight: FontWeight.w700,
+                fontSize: 16,
+                color: const Color(0xFF111111),
+                height: 1.25,
+              ),
+            ),
+            const SizedBox(height: 10),
+            // ── Descripción ────────────────────────────────────────
+            Text(
+              step.body,
+              textAlign: TextAlign.left,
+              style: GoogleFonts.inter(
+                fontSize: 13.5,
+                color: const Color(0xFF666666),
+                height: 1.6,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
 
-class _DesktopCard extends StatelessWidget {
-  const _DesktopCard({required this.step, required this.index});
+// ── Stepper mobile ────────────────────────────────────────────────────────────
+class _MobileStepper extends StatelessWidget {
+  const _MobileStepper({required this.steps});
 
-  final ({IconData icon, String title, String body, Color color}) step;
-  final int index;
+  final List<_StepData> steps;
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        // Icono circular
-        Container(
-          width: 88,
-          height: 88,
-          decoration: BoxDecoration(
-            color: step.color,
-            shape: BoxShape.circle,
-            boxShadow: [
-              BoxShadow(
-                color: step.color.withValues(alpha: 0.35),
-                blurRadius: 20,
-                offset: const Offset(0, 8),
-              ),
-            ],
-          ),
-          child: Icon(step.icon, color: Colors.white, size: 38),
-        ),
-        const SizedBox(height: 6),
-        // Numero
-        Text(
-          '0${index + 1}',
-          style: GoogleFonts.bebasNeue(
-            fontSize: 13,
-            letterSpacing: 2,
-            color: AppTokens.brandPrimary.withValues(alpha: 0.5),
-          ),
-        ),
-        const SizedBox(height: 16),
-        // Titulo
-        Text(
-          step.title,
-          textAlign: TextAlign.center,
-          style: GoogleFonts.inter(
-            fontSize: 15,
-            fontWeight: FontWeight.w700,
-            color: const Color(0xFF111111),
-            height: 1.2,
-          ),
-        ),
-        const SizedBox(height: 8),
-        // Cuerpo
-        Text(
-          step.body,
-          textAlign: TextAlign.center,
-          style: const TextStyle(
-            fontSize: 13,
-            color: Color(0xFF777777),
-            height: 1.55,
-          ),
-        ),
+        for (int i = 0; i < steps.length; i++) ...[
+          _StepFeatureMobile(step: steps[i], index: i),
+          if (i < steps.length - 1) const SizedBox(height: 12),
+        ],
       ],
     );
   }
 }
 
-class _CompactCard extends StatelessWidget {
-  const _CompactCard({required this.step, required this.index});
+class _StepFeatureMobile extends StatelessWidget {
+  const _StepFeatureMobile({required this.step, required this.index});
 
-  final ({IconData icon, String title, String body, Color color}) step;
+  final _StepData step;
   final int index;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE8E8E6)),
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0, end: 1),
+      duration: Duration(milliseconds: 400 + index * 100),
+      curve: Curves.easeOutCubic,
+      builder: (_, v, child) => Opacity(
+        opacity: v,
+        child: Transform.translate(offset: Offset(0, 14 * (1 - v)), child: child),
       ),
-      child: Row(
-        children: [
-          Container(
-            width: 56,
-            height: 56,
-            decoration: BoxDecoration(
-              color: step.color,
-              shape: BoxShape.circle,
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: const Color(0xFFEAEAE8)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.04),
+              blurRadius: 10,
+              offset: const Offset(0, 3),
             ),
-            child: Icon(step.icon, color: Colors.white, size: 26),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  step.title,
-                  style: GoogleFonts.inter(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w700,
-                    color: const Color(0xFF111111),
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  step.body,
-                  style: const TextStyle(
-                    fontSize: 13,
-                    color: Color(0xFF777777),
-                    height: 1.5,
-                  ),
-                ),
-              ],
+          ],
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: step.accent.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(step.icon, color: step.accent, size: 22),
             ),
-          ),
-        ],
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    step.title,
+                    style: GoogleFonts.inter(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 15,
+                      color: const Color(0xFF111111),
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    step.body,
+                    style: GoogleFonts.inter(
+                      fontSize: 13,
+                      color: const Color(0xFF666666),
+                      height: 1.55,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 }
-class _WebDailyMenuSection extends ConsumerWidget {
+
+class _WebDailyMenuSection extends ConsumerStatefulWidget {
   const _WebDailyMenuSection();
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_WebDailyMenuSection> createState() =>
+      _WebDailyMenuSectionState();
+}
+
+class _WebDailyMenuSectionState extends ConsumerState<_WebDailyMenuSection>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _ctrl;
+  late final Animation<double> _opacity;
+  late final Animation<Offset> _slide;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 600),
+    );
+    _opacity = CurvedAnimation(parent: _ctrl, curve: Curves.easeOut);
+    _slide = Tween<Offset>(
+      begin: const Offset(0, 0.06),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeOutCubic));
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final specialAsync = ref.watch(dailySpecialNotifierProvider);
     return specialAsync.when(
       data: (special) {
         if (special == null) return const SizedBox.shrink();
-        return _WebDailyMenuBody(special: special);
-      },
-      loading: () => const SizedBox.shrink(),
-      error: (_, __) => const SizedBox.shrink(),
-    );
-  }
-}
-
-class _WebDailyMenuBody extends ConsumerWidget {
-  const _WebDailyMenuBody({required this.special});
-
-  final DailySpecial special;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final dishAsync = ref.watch(dishDetailProvider(special.dishId));
-    return dishAsync.when(
-      data: (dish) {
-        return ColoredBox(
-          color: AppTokens.brandDark,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 72),
-            child: Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 1200),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 40),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        flex: 3,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                                vertical: 5,
-                              ),
-                              decoration: BoxDecoration(
-                                color: AppTokens.brandPrimary,
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              child: const Text(
-                                'MENU DEL DIA',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w700,
-                                  letterSpacing: 1.2,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 16),
-                            Text(
-                              dish.name.toUpperCase(),
-                              style: GoogleFonts.bebasNeue(
-                                fontSize: 48,
-                                color: Colors.white,
-                                height: 0.95,
-                                letterSpacing: 1.5,
-                              ),
-                            ),
-                            if (special.note != null) ...[
-                              const SizedBox(height: 8),
-                              Text(
-                                special.note!,
-                                style: const TextStyle(
-                                  color: Colors.white70,
-                                  fontSize: 14,
-                                  height: 1.5,
-                                ),
-                              ),
-                            ],
-                            const SizedBox(height: 28),
-                            if (special.primeroText != null)
-                              _MenuCourseRow(
-                                label: 'Primero',
-                                value: special.primeroText!,
-                              ),
-                            if (special.segundoText != null)
-                              _MenuCourseRow(
-                                label: 'Segundo',
-                                value: special.segundoText!,
-                              ),
-                            if (special.postreText != null)
-                              _MenuCourseRow(
-                                label: 'Postre',
-                                value: special.postreText!,
-                              ),
-                            if (special.bebidaText != null)
-                              _MenuCourseRow(
-                                label: 'Bebida',
-                                value: special.bebidaText!,
-                              ),
-                            const SizedBox(height: 28),
-                            Row(
-                              children: [
-                                if (special.menuPrice != null) ...[
-                                  Text(
-                                    Formatters.price(special.menuPrice!),
-                                    style: GoogleFonts.bebasNeue(
-                                      fontSize: 42,
-                                      color: Colors.white,
-                                      letterSpacing: 1,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 24),
-                                ],
-                                FilledButton(
-                                  onPressed: () =>
-                                      context.goNamed(RouteNames.menu),
-                                  style: FilledButton.styleFrom(
-                                    backgroundColor: Colors.white,
-                                    foregroundColor: AppTokens.brandDark,
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 28,
-                                      vertical: 14,
-                                    ),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(10),
-                                    ),
-                                    minimumSize: Size.zero,
-                                  ),
-                                  child: Text(
-                                    'PEDIR AHORA',
-                                    style: GoogleFonts.bebasNeue(
-                                      fontSize: 16,
-                                      letterSpacing: 1.5,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                      if (MediaQuery.sizeOf(context).width >= 700)
-                        Expanded(
-                          flex: 2,
-                          child: Padding(
-                            padding: const EdgeInsets.only(left: 48),
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(16),
-                              child: AspectRatio(
-                                aspectRatio: 4 / 3,
-                                child: dish.imageUrl != null
-                                    ? CachedNetworkImage(
-                                        imageUrl: dish.imageUrl!,
-                                        fit: BoxFit.cover,
-                                        placeholder: (_, __) =>
-                                            const ColoredBox(
-                                          color: Color(0xFF0D4A3D),
-                                        ),
-                                        errorWidget: (_, __, ___) =>
-                                            const ColoredBox(
-                                          color: Color(0xFF0D4A3D),
-                                        ),
-                                      )
-                                    : const ColoredBox(
-                                        color: Color(0xFF0D4A3D),
-                                      ),
-                              ),
-                            ),
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
+        // Arranca la animación la primera vez que hay datos.
+        if (!_ctrl.isCompleted && !_ctrl.isAnimating) _ctrl.forward();
+        return FadeTransition(
+          opacity: _opacity,
+          child: SlideTransition(
+            position: _slide,
+            child: _DailyMenuLayout(special: special),
           ),
         );
       },
@@ -2513,44 +2362,367 @@ class _WebDailyMenuBody extends ConsumerWidget {
   }
 }
 
-class _MenuCourseRow extends StatelessWidget {
-  const _MenuCourseRow({required this.label, required this.value});
+class _DailyMenuLayout extends StatelessWidget {
+  const _DailyMenuLayout({required this.special});
 
-  final String label;
-  final String value;
+  final DailySpecial special;
+
+  static const _accent = Color(0xFF7BC8A4);
+  static const _defaultPhoto =
+      'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=900&q=80';
+
+  @override
+  Widget build(BuildContext context) {
+    final imageUrl = special.imageUrl ?? _defaultPhoto;
+
+    return ColoredBox(
+      color: AppTokens.pageBg,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 56, horizontal: 32),
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 1100),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                // ── Título FUERA del marco ────────────────────────────
+                const _DailyMenuHeader(),
+                const SizedBox(height: 16),
+                // ── Tarjeta con marco verde ───────────────────────────
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: _accent, width: 2.5),
+                    boxShadow: [
+                      BoxShadow(
+                        color: _accent.withValues(alpha: 0.12),
+                        blurRadius: 32,
+                        offset: const Offset(0, 8),
+                      ),
+                    ],
+                  ),
+                  clipBehavior: Clip.antiAlias,
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      final isWide = constraints.maxWidth >= 640;
+                      if (isWide) {
+                        return IntrinsicHeight(
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              Expanded(
+                                flex: 55,
+                                child: _MenuPanel(special: special),
+                              ),
+                              Expanded(
+                                flex: 45,
+                                child: _DailyFoodImage(imageUrl: imageUrl),
+                              ),
+                            ],
+                          ),
+                        );
+                      }
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          SizedBox(
+                            height: 260,
+                            child: _DailyFoodImage(imageUrl: imageUrl),
+                          ),
+                          _MenuPanel(special: special),
+                        ],
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ── Encabezado FUERA del marco ────────────────────────────────────────────────
+
+class _DailyMenuHeader extends StatelessWidget {
+  const _DailyMenuHeader();
+
+  static const _accent = Color(0xFF7BC8A4);
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        // Día de la semana en pequeño
+        Text(
+          _todayLabel(),
+          style: GoogleFonts.inter(
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+            color: AppTokens.brandPrimary,
+            letterSpacing: 1.4,
+          ),
+        ),
+        const SizedBox(height: 8),
+        // Título principal
+        Text(
+          'Menú del Día',
+          textAlign: TextAlign.center,
+          style: GoogleFonts.inter(
+            fontSize: 52,
+            fontWeight: FontWeight.w800,
+            color: const Color(0xFF1A1A1A),
+            height: 1.05,
+          ),
+        ),
+        const SizedBox(height: 12),
+        // Lema
+        Text(
+          'Cocinado hoy, para disfrutar hoy.',
+          textAlign: TextAlign.center,
+          style: GoogleFonts.inter(
+            fontSize: 16,
+            fontWeight: FontWeight.w400,
+            color: const Color(0xFF757575),
+            fontStyle: FontStyle.italic,
+          ),
+        ),
+      ],
+    );
+  }
+
+  static String _todayLabel() {
+    const dias = [
+      'LUNES',
+      'MARTES',
+      'MIÉRCOLES',
+      'JUEVES',
+      'VIERNES',
+      'SÁBADO',
+      'DOMINGO',
+    ];
+    const meses = [
+      'ENERO', 'FEBRERO', 'MARZO', 'ABRIL', 'MAYO', 'JUNIO',
+      'JULIO', 'AGOSTO', 'SEPTIEMBRE', 'OCTUBRE', 'NOVIEMBRE', 'DICIEMBRE',
+    ];
+    final now = DateTime.now();
+    return '${dias[now.weekday - 1]}, ${now.day} DE ${meses[now.month - 1]}';
+  }
+}
+
+// ── Panel de menú (izquierda) ─────────────────────────────────────────────────
+
+class _MenuPanel extends StatelessWidget {
+  const _MenuPanel({required this.special});
+
+  final DailySpecial special;
+
+  static const _accent = Color(0xFF7BC8A4);
+  static const _labelColor = Color(0xFF9E9E9E);
+  static const _valueColor = Color(0xFF1A1A1A);
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      padding: const EdgeInsets.symmetric(horizontal: 36, vertical: 36),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
         children: [
-          SizedBox(
-            width: 72,
-            child: Text(
-              label,
-              style: const TextStyle(
-                color: Colors.white54,
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                letterSpacing: 0.5,
+          // ── Platos ───────────────────────────────────────────────────
+          if (special.primeroText != null)
+            _MenuCourse(label: 'Primer plato', value: special.primeroText!),
+          if (special.segundoText != null)
+            _MenuCourse(label: 'Segundo plato', value: special.segundoText!),
+          if (special.postreText != null)
+            _MenuCourse(label: 'Postre', value: special.postreText!),
+          if (special.bebidaText != null)
+            _MenuCourse(label: 'Bebida', value: special.bebidaText!),
+          const SizedBox(height: 20),
+          Divider(color: Colors.grey[200]!, thickness: 1),
+          const SizedBox(height: 20),
+          // ── Nota adicional ────────────────────────────────────────────
+          if (special.note != null && special.note!.trim().isNotEmpty) ...[
+            Container(
+              margin: const EdgeInsets.only(bottom: 20),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              decoration: BoxDecoration(
+                color: _accent.withValues(alpha: 0.08),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(
+                    Icons.info_outline_rounded,
+                    size: 16,
+                    color: AppTokens.brandPrimary,
+                  ),
+                  const SizedBox(width: 8),
+                  Flexible(
+                    child: Text(
+                      special.note!.trim(),
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.inter(
+                        fontSize: 13,
+                        color: AppTokens.brandDark,
+                        height: 1.4,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              value,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 14,
-                height: 1.4,
+          ],
+          // ── Precio + botón ───────────────────────────────────────────
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              if (special.menuPrice != null) ...[
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      Formatters.price(special.menuPrice!),
+                      style: GoogleFonts.inter(
+                        fontSize: 30,
+                        fontWeight: FontWeight.w900,
+                        color: AppTokens.brandPrimary,
+                        height: 1,
+                      ),
+                    ),
+                    Text(
+                      'por persona',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: _labelColor,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(width: 20),
+              ],
+              FilledButton(
+                onPressed: () => context.goNamed(RouteNames.menu),
+                style: FilledButton.styleFrom(
+                  backgroundColor: AppTokens.brandPrimary,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 26,
+                    vertical: 14,
+                  ),
+                  shape: const StadiumBorder(),
+                  minimumSize: const Size(0, 46),
+                ),
+                child: Text(
+                  'Pedir ahora',
+                  style: GoogleFonts.inter(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
               ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          // ── CTA secundario ────────────────────────────────────────────
+          TextButton(
+            onPressed: () => context.goNamed(RouteNames.menu),
+            style: TextButton.styleFrom(
+              foregroundColor: AppTokens.brandPrimary,
+              padding: EdgeInsets.zero,
+              minimumSize: const Size(0, 32),
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Ver menú completo',
+                  style: GoogleFonts.inter(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                    decoration: TextDecoration.underline,
+                    decorationColor: AppTokens.brandPrimary,
+                  ),
+                ),
+                const SizedBox(width: 4),
+                const Icon(Icons.arrow_forward_rounded, size: 15),
+              ],
             ),
           ),
         ],
       ),
+    );
+  }
+}
+
+class _MenuCourse extends StatelessWidget {
+  const _MenuCourse({required this.label, required this.value});
+
+  final String label;
+  final String value;
+
+  static const _accent = Color(0xFF7BC8A4);
+  static const _labelColor = Color(0xFF9E9E9E);
+  static const _valueColor = Color(0xFF1A1A1A);
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 14, left: 16, right: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Text(
+            label.toUpperCase(),
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.w700,
+              color: _labelColor,
+              letterSpacing: 1.2,
+              height: 1,
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            value,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+              color: _valueColor,
+              height: 1.4,
+            ),
+          ),
+          const SizedBox(height: 10),
+          Divider(color: Colors.grey[100]!, thickness: 1),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Foto (derecha) ────────────────────────────────────────────────────────────
+
+class _DailyFoodImage extends StatelessWidget {
+  const _DailyFoodImage({required this.imageUrl});
+
+  final String imageUrl;
+
+  @override
+  Widget build(BuildContext context) {
+    return CachedNetworkImage(
+      imageUrl: imageUrl,
+      fit: BoxFit.contain,
+      placeholder: (_, __) => const SizedBox.shrink(),
+      errorWidget: (_, __, ___) => const SizedBox.shrink(),
     );
   }
 }

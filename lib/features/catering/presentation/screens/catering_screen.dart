@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -47,7 +47,7 @@ class CateringScreen extends ConsumerWidget {
                       const SizedBox(height: 24),
                       Text(
                         'HAZ TU EVENTO INOLVIDABLE',
-                        style: GoogleFonts.bebasNeue(
+                        style: GoogleFonts.inter(fontWeight: FontWeight.w900, 
                           fontSize: 30,
                           letterSpacing: 1.5,
                           color: const Color(0xFF111111),

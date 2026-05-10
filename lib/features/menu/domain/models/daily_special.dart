@@ -18,6 +18,7 @@ class DailySpecial with _$DailySpecial {
     String? postreText,
     String? bebidaText,
     double? menuPrice,
+    String? imageUrl,
   }) = _DailySpecial;
 
   factory DailySpecial.fromJson(Map<String, dynamic> json) =>

@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:sabor_de_casa/core/theme/app_tokens.dart';
 
@@ -32,7 +32,7 @@ class ChatScreen extends StatelessWidget {
               const SizedBox(height: 32),
               Text(
                 'TU ASISTENTE GASTRONÓMICO',
-                style: GoogleFonts.bebasNeue(
+                style: GoogleFonts.inter(fontWeight: FontWeight.w900, 
                   fontSize: 28,
                   letterSpacing: 1.5,
                   color: const Color(0xFF111111),

@@ -144,6 +144,23 @@ class _DishesProviderElement
   String? get categoryId => (origin as DishesProvider).categoryId;
 }
 
+String _$topOrderedDishesHash() => r'434bbde77dd91ada3aa6634a7d8f02fd1543aa28';
+
+/// See also [topOrderedDishes].
+@ProviderFor(topOrderedDishes)
+final topOrderedDishesProvider = AutoDisposeFutureProvider<List<Dish>>.internal(
+  topOrderedDishes,
+  name: r'topOrderedDishesProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$topOrderedDishesHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef TopOrderedDishesRef = AutoDisposeFutureProviderRef<List<Dish>>;
 String _$offerDishesHash() => r'f0cebca38ea6c0ece968801609344c390ec15236';
 
 /// See also [offerDishes].

@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:sabor_de_casa/core/router/route_names.dart';
@@ -170,7 +170,7 @@ class _PageContent extends StatelessWidget {
           const SizedBox(height: 40),
           Text(
             page.title,
-            style: GoogleFonts.bebasNeue(
+            style: GoogleFonts.inter(fontWeight: FontWeight.w900, 
               fontSize: 32,
               letterSpacing: 1.5,
               color: const Color(0xFF111111),

@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 /// Logo de la marca como texto con tipografía de display pesada.
@@ -24,7 +24,7 @@ class AppLogoText extends StatelessWidget {
     final text = Text(
       'SABOR\nDE CASA',
       textAlign: textAlign,
-      style: GoogleFonts.bebasNeue(
+      style: GoogleFonts.inter(fontWeight: FontWeight.w900, 
         fontSize: fontSize,
         color: color,
         height: 0.95,

@@ -1,4 +1,4 @@
-import 'package:flutter/foundation.dart' show kIsWeb;
+﻿import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -184,7 +184,7 @@ class _ConfirmationBodyState extends State<_ConfirmationBody>
             // â”€â”€ Título â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
             Text(
               '¡Pedido Confirmado!',
-              style: GoogleFonts.bebasNeue(
+              style: GoogleFonts.inter(fontWeight: FontWeight.w900, 
                 fontSize: 38,
                 letterSpacing: 1.5,
                 color: const Color(0xFF111111),

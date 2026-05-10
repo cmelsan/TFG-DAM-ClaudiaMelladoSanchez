@@ -457,7 +457,6 @@ class _WebBrandPanel extends StatelessWidget {
                 const AppLogoText(
                   color: Colors.white,
                   fontSize: 56,
-                  showImage: true,
                 ),
                 const SizedBox(height: 20),
                 const Text(

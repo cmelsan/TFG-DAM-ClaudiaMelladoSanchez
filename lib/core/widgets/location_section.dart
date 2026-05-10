@@ -1,4 +1,4 @@
-import 'dart:async';
+﻿import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -86,7 +86,7 @@ class _InfoPanel extends StatelessWidget {
       children: [
         Text(
           'DÓNDE\nENCONTRARNOS',
-          style: GoogleFonts.bebasNeue(
+          style: GoogleFonts.inter(fontWeight: FontWeight.w900, 
             fontSize: 38,
             color: const Color(0xFFF2EBD9),
             letterSpacing: 2,

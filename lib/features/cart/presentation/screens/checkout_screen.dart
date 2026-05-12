@@ -41,12 +41,17 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   Widget build(BuildContext context) {
     final items = ref.watch(cartItemsProvider);
     final submitState = ref.watch(checkoutSubmitProvider);
+    final isEligible =
+        ref.watch(isEligibleForFirstOrderDiscountProvider).valueOrNull ?? false;
     final subtotal = items.fold<double>(
       0,
       (sum, item) => sum + (item.unitPrice * item.quantity),
     );
+    final discountAmount = isEligible
+        ? double.parse((subtotal * 0.30).toStringAsFixed(2))
+        : 0.0;
     final deliveryFee = _orderType == 'domicilio' ? 2.50 : 0.0;
-    final total = subtotal + deliveryFee;
+    final total = subtotal - discountAmount + deliveryFee;
 
     ref.listen(checkoutSubmitProvider, (prev, next) {
       if ((prev?.isLoading ?? false) && next.hasValue && next.value != null) {
@@ -313,6 +318,28 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                 ],
               ),
               const SizedBox(height: 8),
+              if (isEligible) ...[
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      '🎉 Dto. primer pedido (30%)',
+                      style: TextStyle(
+                        color: AppTokens.brandPrimary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    Text(
+                      '- ${Formatters.price(discountAmount)}',
+                      style: const TextStyle(
+                        color: AppTokens.brandPrimary,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+              ],
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [

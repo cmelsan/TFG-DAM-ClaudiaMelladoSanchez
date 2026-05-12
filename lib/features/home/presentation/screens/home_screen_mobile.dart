@@ -9,9 +9,8 @@ import 'package:sabor_de_casa/core/utils/formatters.dart';
 import 'package:sabor_de_casa/core/widgets/location_section.dart';
 import 'package:sabor_de_casa/features/admin/presentation/providers/admin_provider.dart';
 import 'package:sabor_de_casa/features/menu/domain/models/dish.dart';
-import 'package:sabor_de_casa/features/menu/presentation/providers/daily_special_provider.dart';
+import 'package:sabor_de_casa/features/menu/presentation/providers/daily_special_notifier.dart';
 import 'package:sabor_de_casa/features/menu/presentation/providers/menu_provider.dart';
-import 'package:sabor_de_casa/features/menu/presentation/widgets/daily_special_banner.dart';
 
 class HomeScreenMobile extends ConsumerStatefulWidget {
   const HomeScreenMobile({super.key});
@@ -23,8 +22,6 @@ class HomeScreenMobile extends ConsumerStatefulWidget {
 class _HomeScreenMobileState extends ConsumerState<HomeScreenMobile> {
   @override
   Widget build(BuildContext context) {
-    final dailySpecialAsync = ref.watch(todaySpecialProvider);
-
     return Scaffold(
       backgroundColor: AppTokens.pageBg,
       body: SafeArea(
@@ -52,23 +49,8 @@ class _HomeScreenMobileState extends ConsumerState<HomeScreenMobile> {
               ),
             ),
             // Ã¢â€â‚¬Ã¢â€â‚¬ Plato del dÃ­a Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
-            SliverToBoxAdapter(
-              child: dailySpecialAsync.when(
-                data: (data) {
-                  if (data == null) return const SizedBox.shrink();
-                  return DailySpecialBanner(
-                    dish: data.dish,
-                    discountPercent: data.special.discountPercent,
-                    note: data.special.note,
-                    onTap: () => context.pushNamed(
-                      RouteNames.dishDetail,
-                      pathParameters: {'dishId': data.dish.id},
-                    ),
-                  );
-                },
-                loading: () => const SizedBox.shrink(),
-                error: (_, __) => const SizedBox.shrink(),
-              ),
+            const SliverToBoxAdapter(
+              child: _MobileDailyMenuSection(),
             ),
             // Los más pedidos del mes
             const SliverToBoxAdapter(
@@ -175,7 +157,7 @@ class _HeroBanner extends StatelessWidget {
     return ClipRRect(
       borderRadius: BorderRadius.circular(20),
       child: SizedBox(
-        height: 270,
+        height: 285,
         child: Stack(
           fit: StackFit.expand,
           children: [
@@ -955,6 +937,234 @@ class _MobileOfferCard extends ConsumerWidget {
   }
 }
 
+// ── Menú del Día (mobile) ────────────────────────────────────────────────────
+
+class _MobileDailyMenuSection extends ConsumerWidget {
+  const _MobileDailyMenuSection();
+
+  static const _accent = Color(0xFF1D9E75);
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final specialAsync = ref.watch(dailySpecialNotifierProvider);
+    return specialAsync.when(
+      data: (special) {
+        if (special == null) return const SizedBox.shrink();
+        final hasMenu = special.primeroText != null ||
+            special.segundoText != null ||
+            special.postreText != null;
+        if (!hasMenu) return const SizedBox.shrink();
+
+        final now = DateTime.now();
+        final weekdays = [
+          'Lunes', 'Martes', 'Miércoles', 'Jueves',
+          'Viernes', 'Sábado', 'Domingo',
+        ];
+        final months = [
+          'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+          'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre',
+        ];
+        final dateLabel =
+            '${weekdays[now.weekday - 1]}, ${now.day} de ${months[now.month - 1]}';
+
+        return Padding(
+          padding: const EdgeInsets.fromLTRB(16, 24, 16, 0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Cabecera
+              Center(
+                child: Column(
+                  children: [
+                    Text(
+                      dateLabel.toUpperCase(),
+                      style: GoogleFonts.inter(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                        color: _accent,
+                        letterSpacing: 1.5,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Menú del Día',
+                      style: GoogleFonts.inter(
+                        fontSize: 28,
+                        fontWeight: FontWeight.w900,
+                        color: const Color(0xFF111111),
+                        height: 1.1,
+                      ),
+                    ),
+                    if (special.note != null && special.note!.isNotEmpty) ...[
+                      const SizedBox(height: 4),
+                      Text(
+                        special.note!,
+                        style: GoogleFonts.inter(
+                          fontSize: 13,
+                          color: Colors.black45,
+                          fontStyle: FontStyle.italic,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+              // Tarjeta del menú
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(18),
+                  border: Border.all(
+                    color: _accent.withValues(alpha: 0.25),
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.05),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    children: [
+                      if (special.primeroText != null)
+                        _MobileDailyMenuRow(
+                          label: 'PRIMER PLATO',
+                          value: special.primeroText!,
+                        ),
+                      if (special.segundoText != null)
+                        _MobileDailyMenuRow(
+                          label: 'SEGUNDO PLATO',
+                          value: special.segundoText!,
+                        ),
+                      if (special.postreText != null)
+                        _MobileDailyMenuRow(
+                          label: 'POSTRE',
+                          value: special.postreText!,
+                        ),
+                      if (special.bebidaText != null)
+                        _MobileDailyMenuRow(
+                          label: 'BEBIDA',
+                          value: special.bebidaText!,
+                          isLast: true,
+                        ),
+                      const SizedBox(height: 16),
+                      // Precio + botón
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          if (special.menuPrice != null) ...[
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  Formatters.price(special.menuPrice!),
+                                  style: GoogleFonts.inter(
+                                    fontSize: 26,
+                                    fontWeight: FontWeight.w900,
+                                    color: _accent,
+                                  ),
+                                ),
+                                Text(
+                                  'por persona',
+                                  style: GoogleFonts.inter(
+                                    fontSize: 11,
+                                    color: Colors.black38,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                          FilledButton(
+                            onPressed: () => context.goNamed(RouteNames.menu),
+                            style: FilledButton.styleFrom(
+                              backgroundColor: _accent,
+                              shape: const StadiumBorder(),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 22,
+                                vertical: 12,
+                              ),
+                            ),
+                            child: Text(
+                              'Pedir ahora',
+                              style: GoogleFonts.inter(
+                                fontWeight: FontWeight.w700,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+      loading: () => const SizedBox.shrink(),
+      error: (_, __) => const SizedBox.shrink(),
+    );
+  }
+}
+
+class _MobileDailyMenuRow extends StatelessWidget {
+  const _MobileDailyMenuRow({
+    required this.label,
+    required this.value,
+    this.isLast = false,
+  });
+
+  final String label;
+  final String value;
+  final bool isLast;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 10),
+          child: Column(
+            children: [
+              Text(
+                label,
+                style: GoogleFonts.inter(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.black38,
+                  letterSpacing: 1.2,
+                ),
+              ),
+              const SizedBox(height: 3),
+              Text(
+                value,
+                style: GoogleFonts.inter(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w500,
+                  color: const Color(0xFF111111),
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
+        if (!isLast)
+          Divider(
+            height: 1,
+            color: Colors.black.withValues(alpha: 0.07),
+          ),
+      ],
+    );
+  }
+}
+
 // Platos de temporada (horizontal scroll)
 
 class _MobileSeasonalSection extends ConsumerWidget {
@@ -971,6 +1181,7 @@ class _MobileSeasonalSection extends ConsumerWidget {
       data: (dishes) {
         if (dishes.isEmpty) return const SizedBox.shrink();
         final seasonal = dishes.take(6).toList();
+        if (seasonal.length < 2) return const SizedBox.shrink();
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

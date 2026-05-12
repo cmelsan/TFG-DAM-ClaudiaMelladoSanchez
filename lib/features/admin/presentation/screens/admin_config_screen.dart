@@ -70,6 +70,7 @@ class AdminConfigScreen extends ConsumerWidget {
       'encargo_min_days_advance': 'Días mín. antelación encargos',
       'show_offers_section': 'Mostrar sección "En oferta" en la home',
       'show_seasonal_section': 'Mostrar sección "Platos de temporada" en la home',
+      'first_order_discount_enabled': 'Descuento 30% en el primer pedido',
     };
     return labels[key] ?? key;
   }

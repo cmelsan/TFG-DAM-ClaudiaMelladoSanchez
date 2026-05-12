@@ -1,12 +1,9 @@
 ﻿import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:sabor_de_casa/core/theme/app_tokens.dart';
-import 'package:sabor_de_casa/core/widgets/error_view.dart';
-import 'package:sabor_de_casa/core/widgets/loading_indicator.dart';
 import 'package:sabor_de_casa/features/admin/presentation/widgets/admin_shell.dart';
 import 'package:sabor_de_casa/features/menu/data/repositories/menu_repository.dart';
 import 'package:sabor_de_casa/features/menu/domain/models/daily_special.dart';
@@ -137,13 +134,13 @@ class _AdminDailySpecialScreenState
 
   @override
   Widget build(BuildContext context) {
-    ref.listen<AsyncValue<DailySpecial?>>(
-      dailySpecialNotifierProvider,
-      (_, next) => next.whenOrNull(data: _populateFromSpecial),
-    );
-
-    // Auto-selecciona el primer plato disponible si aún no hay ninguno.
-    ref.listen<AsyncValue<List<Dish>>>(_allDishesProvider, (_, next) {
+    ref
+      ..listen<AsyncValue<DailySpecial?>>(
+        dailySpecialNotifierProvider,
+        (_, next) => next.whenOrNull(data: _populateFromSpecial),
+      )
+      // Auto-selecciona el primer plato disponible si aún no hay ninguno.
+      ..listen<AsyncValue<List<Dish>>>(_allDishesProvider, (_, next) {
       next.whenOrNull(data: (dishes) {
         if (_selectedDishId == null && dishes.isNotEmpty) {
           setState(() => _selectedDishId = dishes.first.id);
@@ -305,38 +302,6 @@ class _FormTextField extends StatelessWidget {
   }
 }
 
-class _NumberField extends StatelessWidget {
-  const _NumberField({
-    required this.controller,
-    required this.label,
-    required this.hint,
-  });
-
-  final TextEditingController controller;
-  final String label;
-  final String hint;
-
-  @override
-  Widget build(BuildContext context) {
-    return TextFormField(
-      controller: controller,
-      keyboardType: TextInputType.number,
-      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-      decoration: InputDecoration(
-        labelText: label,
-        hintText: hint,
-        border: const OutlineInputBorder(),
-      ),
-      validator: (v) {
-        if (v == null || v.isEmpty) return null;
-        final n = int.tryParse(v);
-        if (n == null || n < 0 || n > 100) return 'Valor no valido (0-100)';
-        return null;
-      },
-    );
-  }
-}
-
 class _PriceField extends StatelessWidget {
   const _PriceField({
     required this.controller,
@@ -442,7 +407,6 @@ class _DailySpecialImagePicker extends StatelessWidget {
                 border: Border.all(
                   color: AppTokens.brandPrimary.withValues(alpha: 0.4),
                   width: 2,
-                  style: BorderStyle.solid,
                 ),
                 color: AppTokens.brandLight,
               ),
@@ -451,13 +415,13 @@ class _DailySpecialImagePicker extends StatelessWidget {
                   : Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(
+                        const Icon(
                           Icons.add_photo_alternate_outlined,
                           size: 40,
                           color: AppTokens.brandPrimary,
                         ),
                         const SizedBox(height: 8),
-                        Text(
+                        const Text(
                           'Seleccionar imagen',
                           style: TextStyle(
                             color: AppTokens.brandPrimary,

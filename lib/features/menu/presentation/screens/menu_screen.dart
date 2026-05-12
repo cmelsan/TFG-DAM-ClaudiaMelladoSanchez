@@ -1,18 +1,24 @@
+﻿import 'dart:ui';
+
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:sabor_de_casa/core/router/route_names.dart';
 import 'package:sabor_de_casa/core/theme/app_tokens.dart';
-import 'package:sabor_de_casa/core/widgets/error_view.dart';
-import 'package:sabor_de_casa/core/widgets/loading_indicator.dart';
+import 'package:sabor_de_casa/core/utils/formatters.dart';
+import 'package:sabor_de_casa/features/auth/presentation/providers/auth_provider.dart';
 import 'package:sabor_de_casa/features/cart/presentation/providers/cart_provider.dart';
 import 'package:sabor_de_casa/features/menu/domain/models/category.dart';
+import 'package:sabor_de_casa/features/menu/domain/models/dish.dart';
 import 'package:sabor_de_casa/features/menu/presentation/providers/categories_provider.dart';
-import 'package:sabor_de_casa/features/menu/presentation/providers/daily_special_provider.dart';
 import 'package:sabor_de_casa/features/menu/presentation/providers/menu_provider.dart';
-import 'package:sabor_de_casa/features/menu/presentation/widgets/daily_special_banner.dart';
-import 'package:sabor_de_casa/features/menu/presentation/widgets/dish_card.dart';
 import 'package:speech_to_text/speech_to_text.dart';
+
+const _heroImageUrl =
+    'https://images.unsplash.com/photo-1414235077428-338989a2e8c0'
+    '?q=80&w=1400&auto=format&fit=crop';
 
 const _allergenOptions = [
   'Gluten',
@@ -25,6 +31,7 @@ const _allergenOptions = [
   'Mostaza',
 ];
 
+// ─────────────────────────────────────────────────────────────────────────────
 class MenuScreen extends ConsumerStatefulWidget {
   const MenuScreen({super.key});
 
@@ -32,21 +39,36 @@ class MenuScreen extends ConsumerStatefulWidget {
   ConsumerState<MenuScreen> createState() => _MenuScreenState();
 }
 
-class _MenuScreenState extends ConsumerState<MenuScreen> {
+class _MenuScreenState extends ConsumerState<MenuScreen>
+    with SingleTickerProviderStateMixin {
   String? _selectedCategoryId;
   late final TextEditingController _searchCtrl;
+  late final AnimationController _heroFade;
+  late final ScrollController _scrollCtrl;
   final SpeechToText _speech = SpeechToText();
   bool _isListening = false;
+  bool _isScrolled = false;
 
   @override
   void initState() {
     super.initState();
     _searchCtrl = TextEditingController();
+    _heroFade = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 800),
+    )..forward();
+    _scrollCtrl = ScrollController()
+      ..addListener(() {
+        final scrolled = _scrollCtrl.offset > 10;
+        if (scrolled != _isScrolled) setState(() => _isScrolled = scrolled);
+      });
   }
 
   @override
   void dispose() {
     _searchCtrl.dispose();
+    _heroFade.dispose();
+    _scrollCtrl.dispose();
     super.dispose();
   }
 
@@ -83,16 +105,18 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Centra el contenido a 1200 px en pantallas anchas (web)
+    final screenW = MediaQuery.sizeOf(context).width;
+    const maxContentW = 1200.0;
+    final sidePad = screenW > maxContentW ? (screenW - maxContentW) / 2 : 0.0;
+
     final categoriesAsync = ref.watch(categoriesProvider);
-    final dishesAsync = ref.watch(
-      dishesProvider(categoryId: _selectedCategoryId),
-    );
-    final dailySpecialAsync = ref.watch(todaySpecialProvider);
-    final cartCount = ref.watch(cartItemsCountProvider);
+    final dishesAsync =
+        ref.watch(dishesProvider(categoryId: _selectedCategoryId));
     final searchQuery = ref.watch(menuSearchQueryProvider);
     final allergenFilter = ref.watch(menuAllergenFilterProvider);
 
-    // Filtrar localmente
+    // Filtrado local
     final filteredDishes = dishesAsync.whenData((dishes) {
       var result = dishes;
       if (searchQuery.isNotEmpty) {
@@ -120,206 +144,278 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
     });
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Menú'),
-        centerTitle: false,
-        actions: [
-          if (allergenFilter.isNotEmpty)
-            IconButton(
-              onPressed: () =>
-                  ref.read(menuAllergenFilterProvider.notifier).clear(),
-              icon: Badge.count(
-                count: allergenFilter.length,
-                backgroundColor: Colors.orange,
-                child: const Icon(Icons.filter_alt_outlined),
-              ),
-              tooltip: 'Quitar filtros de alérgenos',
-            ),
-          IconButton(
-            onPressed: () => _showAllergenFilterSheet(context),
-            icon: const Icon(Icons.tune_outlined),
-            tooltip: 'Filtrar por alérgenos',
-          ),
-          IconButton(
-            onPressed: () => context.pushNamed(RouteNames.cart),
-            icon: Badge.count(
-              count: cartCount,
-              isLabelVisible: cartCount > 0,
-              backgroundColor: Theme.of(context).colorScheme.primary,
-              child: const Icon(Icons.shopping_bag_outlined),
-            ),
-            tooltip: 'Carrito',
-          ),
-          const SizedBox(width: 8),
-        ],
-      ),
+      backgroundColor: Colors.white,
       body: RefreshIndicator(
         onRefresh: () async {
           ref
             ..invalidate(categoriesProvider)
-            ..invalidate(dishesProvider(categoryId: _selectedCategoryId))
-            ..invalidate(todaySpecialProvider);
+            ..invalidate(dishesProvider(categoryId: _selectedCategoryId));
         },
         child: CustomScrollView(
+          controller: _scrollCtrl,
           slivers: [
-            // Búsqueda por texto y voz
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 8,
-                ),
-                child: TextField(
-                  controller: _searchCtrl,
-                  decoration: InputDecoration(
-                    hintText: _isListening
-                        ? 'Escuchando...'
-                        : '¿Qué te apetece hoy?',
-                    prefixIcon: const Icon(Icons.search),
-                    suffixIcon: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        if (_searchCtrl.text.isNotEmpty)
-                          IconButton(
-                            icon: const Icon(Icons.clear, size: 18),
-                            onPressed: () {
-                              _searchCtrl.clear();
-                              ref
-                                  .read(menuSearchQueryProvider.notifier)
-                                  .clear();
-                            },
-                          ),
-                        IconButton(
-                          icon: Icon(
-                            _isListening ? Icons.mic : Icons.mic_none,
-                            color: _isListening ? Colors.red : null,
-                          ),
-                          onPressed: _isListening
-                              ? _stopVoiceSearch
-                              : _startVoiceSearch,
-                          tooltip: 'Buscar por voz',
-                        ),
-                      ],
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide.none,
-                    ),
-                    filled: true,
-                  ),
-                  onChanged: (value) {
-                    ref.read(menuSearchQueryProvider.notifier).setQuery(value);
-                  },
+            // -- Navbar web --------------------------------------------------
+            SliverAppBar(
+              pinned: true,
+              backgroundColor: Colors.transparent,
+              surfaceTintColor: Colors.transparent,
+              elevation: 0,
+              scrolledUnderElevation: 0,
+              toolbarHeight: 0,
+              automaticallyImplyLeading: false,
+              bottom: PreferredSize(
+                preferredSize: const Size.fromHeight(80),
+                child: _MenuWebNavbar(
+                  isScrolled: _isScrolled,
+                  onAllergenTap: () => _showAllergenFilterSheet(context),
                 ),
               ),
             ),
 
-            // Plato del día
+            // ── Hero ──────────────────────────────────────────────────────────
             SliverToBoxAdapter(
-              child: dailySpecialAsync.when(
-                data: (data) {
-                  if (data == null) return const SizedBox.shrink();
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 8,
-                    ),
-                    child: DailySpecialBanner(
-                      dish: data.dish,
-                      discountPercent: data.special.discountPercent,
-                      note: data.special.note,
-                      onTap: () => context.pushNamed(
-                        RouteNames.dishDetail,
-                        pathParameters: {'dishId': data.dish.id},
-                      ),
-                    ),
-                  );
-                },
-                loading: () => const SizedBox.shrink(),
-                error: (_, __) => const SizedBox.shrink(),
-              ),
-            ),
-
-            // Filtro activo de alérgenos
-            if (allergenFilter.isNotEmpty)
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 4,
-                  ),
-                  child: Row(
+              child: FadeTransition(
+                opacity: CurvedAnimation(
+                  parent: _heroFade,
+                  curve: Curves.easeOut,
+                ),
+                child: SizedBox(
+                  height: 220,
+                  child: Stack(
+                    fit: StackFit.expand,
                     children: [
-                      const Icon(
-                        Icons.filter_alt,
-                        size: 16,
-                        color: Colors.orange,
+                      Image.network(
+                        _heroImageUrl,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) =>
+                            const ColoredBox(color: Color(0xFF0D3B2E)),
                       ),
-                      const SizedBox(width: 6),
-                      Expanded(
-                        child: Text(
-                          'Sin: ${allergenFilter.join(', ')}',
-                          style: const TextStyle(
-                            color: Colors.orange,
-                            fontSize: 13,
+                      DecoratedBox(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              const Color(0xFF0D3B2E).withValues(alpha: 0.93),
+                              const Color(0xFF0D3B2E).withValues(alpha: 0.35),
+                            ],
                           ),
                         ),
                       ),
-                      TextButton(
-                        onPressed: () => ref
-                            .read(menuAllergenFilterProvider.notifier)
-                            .clear(),
-                        child: const Text(
-                          'Quitar',
-                          style: TextStyle(fontSize: 12),
+                      Positioned(
+                        left: sidePad + 48,
+                        right: sidePad + 48,
+                        top: 0,
+                        bottom: 0,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            SlideTransition(
+                              position: Tween<Offset>(
+                                begin: const Offset(-0.08, 0),
+                                end: Offset.zero,
+                              ).animate(
+                                CurvedAnimation(
+                                  parent: _heroFade,
+                                  curve: Curves.easeOut,
+                                ),
+                              ),
+                              child: Text(
+                                'Nuestro Menú',
+                                style: GoogleFonts.inter(
+                                  fontSize: 46,
+                                  fontWeight: FontWeight.w900,
+                                  color: Colors.white,
+                                  height: 1,
+                                  letterSpacing: 1.5,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              'Cocina casera de verdad, hecha con cariño cada día.',
+                              style: GoogleFonts.inter(
+                                fontSize: 15,
+                                color: Colors.white.withValues(alpha: 0.80),
+                                height: 1.5,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ],
                   ),
                 ),
               ),
-
-            // Título categorías
-            const SliverToBoxAdapter(
-              child: Padding(
-                padding: EdgeInsets.fromLTRB(16, 24, 16, 12),
-                child: Text(
-                  'Categorías',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                ),
-              ),
             ),
 
-            // Chips de categorías
+            // ── Barra de búsqueda ──────────────────────────────────────────
             SliverToBoxAdapter(
-              child: categoriesAsync.when(
-                data: (categories) => _CategoryBar(
-                  categories: categories,
-                  selectedId: _selectedCategoryId,
-                  onSelected: (id) => setState(() => _selectedCategoryId = id),
-                ),
-                loading: () => const SizedBox(height: 48),
-                error: (_, __) => const SizedBox.shrink(),
-              ),
-            ),
-
-            // Título platos
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 24, 16, 8),
-                child: Text(
-                  searchQuery.isNotEmpty
-                      ? 'Resultados para "$searchQuery"'
-                      : 'Todos los platos',
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
+              child: ColoredBox(
+                color: Colors.white,
+                child: Padding(
+                  padding: EdgeInsets.fromLTRB(sidePad + 16, 16, sidePad + 16, 14),
+                  child: TextField(
+                    controller: _searchCtrl,
+                    decoration: InputDecoration(
+                      hintText: _isListening
+                          ? 'Escuchando...'
+                          : '¿Qué te apetece hoy?',
+                      hintStyle: GoogleFonts.inter(
+                        fontSize: 14,
+                        color: Colors.black38,
+                      ),
+                      prefixIcon: const Icon(
+                        Icons.search,
+                        color: Colors.black38,
+                        size: 20,
+                      ),
+                      suffixIcon: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          if (_searchCtrl.text.isNotEmpty)
+                            IconButton(
+                              icon: const Icon(Icons.clear, size: 18),
+                              onPressed: () {
+                                _searchCtrl.clear();
+                                ref
+                                    .read(menuSearchQueryProvider.notifier)
+                                    .clear();
+                              },
+                            ),
+                          IconButton(
+                            icon: Icon(
+                              _isListening ? Icons.mic : Icons.mic_none,
+                              color: _isListening
+                                  ? Colors.red
+                                  : Colors.black38,
+                              size: 20,
+                            ),
+                            onPressed: _isListening
+                                ? _stopVoiceSearch
+                                : _startVoiceSearch,
+                          ),
+                        ],
+                      ),
+                      filled: true,
+                      fillColor: AppTokens.pageBg,
+                      contentPadding: const EdgeInsets.symmetric(
+                        vertical: 12,
+                        horizontal: 16,
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(14),
+                        borderSide: BorderSide.none,
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(14),
+                        borderSide: BorderSide.none,
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(14),
+                        borderSide: const BorderSide(
+                          color: AppTokens.brandPrimary,
+                          width: 1.5,
+                        ),
+                      ),
+                    ),
+                    style: GoogleFonts.inter(fontSize: 14),
+                    onChanged: (v) =>
+                        ref.read(menuSearchQueryProvider.notifier).setQuery(v),
                   ),
                 ),
               ),
             ),
 
-            // Grid de platos (filtrado)
+            // ── Categorías (sticky) ────────────────────────────────────────────
+            SliverAppBar(
+              pinned: true,
+              toolbarHeight: 0,
+              automaticallyImplyLeading: false,
+              backgroundColor: Colors.white,
+              surfaceTintColor: Colors.transparent,
+              elevation: 0,
+              scrolledUnderElevation: 3,
+              shadowColor: Colors.black.withValues(alpha: 0.06),
+              bottom: PreferredSize(
+                preferredSize: const Size.fromHeight(64),
+                child: _CategoryBar(
+                  categories: categoriesAsync.valueOrNull ?? [],
+                  selectedId: _selectedCategoryId,
+                  onSelected: (id) => setState(() => _selectedCategoryId = id),
+                  sidePad: sidePad + 16,
+                ),
+              ),
+            ),
+
+            // ── Chips de alérgenos activos ────────────────────────────────────
+            if (allergenFilter.isNotEmpty)
+              SliverToBoxAdapter(
+                child: Container(
+                  color: Colors.white,
+                  padding:
+                      EdgeInsets.fromLTRB(sidePad + 16, 12, sidePad + 16, 4),
+                  child: Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: allergenFilter
+                        .map(
+                          (a) => Chip(
+                            label: Text(
+                              'Sin $a',
+                              style: GoogleFonts.inter(fontSize: 12),
+                            ),
+                            backgroundColor:
+                                Colors.orange.withValues(alpha: 0.10),
+                            labelStyle:
+                                TextStyle(color: Colors.orange.shade800),
+                            deleteIcon: const Icon(Icons.close, size: 14),
+                            deleteIconColor: Colors.orange.shade700,
+                            onDeleted: () => ref
+                                .read(menuAllergenFilterProvider.notifier)
+                                .toggle(a),
+                            side: BorderSide.none,
+                          ),
+                        )
+                        .toList(),
+                  ),
+                ),
+              ),
+
+
+
+            // ── Título sección platos ──────────────────────────────────────
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(sidePad + 16, 20, sidePad + 16, 12),
+                child: Row(
+                  children: [
+                    Text(
+                      searchQuery.isNotEmpty
+                          ? 'Resultados para "$searchQuery"'
+                          : 'Todos los platos',
+                      style: GoogleFonts.inter(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w800,
+                        color: const Color(0xFF1A1A1A),
+                      ),
+                    ),
+                    const Spacer(),
+                    filteredDishes.maybeWhen(
+                      data: (d) => Text(
+                        '${d.length} platos',
+                        style: GoogleFonts.inter(
+                          fontSize: 13,
+                          color: Colors.black38,
+                        ),
+                      ),
+                      orElse: () => const SizedBox.shrink(),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            // ── Grid de platos ─────────────────────────────────────────────
             filteredDishes.when(
               data: (dishes) {
                 if (dishes.isEmpty) {
@@ -328,20 +424,23 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(
+                          Icon(
                             Icons.search_off,
-                            size: 48,
-                            color: Colors.black26,
+                            size: 52,
+                            color: Colors.black.withValues(alpha: 0.12),
                           ),
-                          const SizedBox(height: 12),
+                          const SizedBox(height: 14),
                           Text(
                             searchQuery.isNotEmpty
                                 ? 'No hay platos para "$searchQuery"'
                                 : allergenFilter.isNotEmpty
-                                ? 'No hay platos sin esos alérgenos'
-                                : 'No hay platos disponibles en esta categoría.',
+                                    ? 'No hay platos sin esos alérgenos'
+                                    : 'No hay platos disponibles',
                             textAlign: TextAlign.center,
-                            style: const TextStyle(color: Colors.black54),
+                            style: GoogleFonts.inter(
+                              color: Colors.black45,
+                              fontSize: 15,
+                            ),
                           ),
                         ],
                       ),
@@ -349,27 +448,23 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
                   );
                 }
                 return SliverPadding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
-                  ),
+                  padding: EdgeInsets.fromLTRB(sidePad + 16, 4, sidePad + 16, 4),
                   sliver: SliverGrid(
                     delegate: SliverChildBuilderDelegate(
-                      (context, index) => DishCard(
-                        dish: dishes[index],
+                      (context, i) => _MenuDishCard(
+                        dish: dishes[i],
+                        index: i,
                         onTap: () => context.pushNamed(
                           RouteNames.dishDetail,
-                          pathParameters: {'dishId': dishes[index].id},
+                          pathParameters: {'dishId': dishes[i].id},
                         ),
                         onAddToCart: () {
                           ref
                               .read(cartNotifierProvider.notifier)
-                              .addDish(dishes[index]);
+                              .addDish(dishes[i]);
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                              content: Text(
-                                '${dishes[index].name} añadido al carrito',
-                              ),
+                              content: Text('${dishes[i].name} añadido'),
                               duration: const Duration(seconds: 1),
                               behavior: SnackBarBehavior.floating,
                             ),
@@ -380,26 +475,55 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
                     ),
                     gridDelegate:
                         const SliverGridDelegateWithMaxCrossAxisExtent(
-                          maxCrossAxisExtent: 400,
-                          mainAxisSpacing: 16,
-                          crossAxisSpacing: 16,
-                          childAspectRatio: 0.8,
-                        ),
+                      maxCrossAxisExtent: 290,
+                      mainAxisExtent: 310,
+                      mainAxisSpacing: 16,
+                      crossAxisSpacing: 16,
+                    ),
                   ),
                 );
               },
-              loading: () =>
-                  const SliverFillRemaining(child: LoadingIndicator()),
+              loading: () => const SliverFillRemaining(
+                child: Center(
+                  child: CircularProgressIndicator(
+                    color: AppTokens.brandPrimary,
+                    strokeWidth: 2,
+                  ),
+                ),
+              ),
               error: (error, _) => SliverFillRemaining(
-                child: ErrorView(
-                  message: error.toString(),
-                  onRetry: () => ref.invalidate(
-                    dishesProvider(categoryId: _selectedCategoryId),
+                child: Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(
+                        Icons.error_outline,
+                        size: 40,
+                        color: Colors.black26,
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        error.toString(),
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(color: Colors.black45),
+                      ),
+                      const SizedBox(height: 12),
+                      FilledButton(
+                        onPressed: () => ref.invalidate(
+                          dishesProvider(categoryId: _selectedCategoryId),
+                        ),
+                        style: FilledButton.styleFrom(
+                          backgroundColor: AppTokens.brandPrimary,
+                        ),
+                        child: const Text('Reintentar'),
+                      ),
+                    ],
                   ),
                 ),
               ),
             ),
-            const SliverToBoxAdapter(child: SizedBox(height: 100)),
+
+            const SliverToBoxAdapter(child: SizedBox(height: 80)),
           ],
         ),
       ),
@@ -410,12 +534,347 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
     showModalBottomSheet<void>(
       context: context,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       builder: (ctx) => _AllergenFilterSheet(),
     );
   }
 }
+
+// ─── Category bar delegate (sticky) ──────────────────────────────────────────
+
+class _CategoryBar extends StatelessWidget {
+  const _CategoryBar({
+    required this.categories,
+    required this.selectedId,
+    required this.onSelected,
+    required this.sidePad,
+  });
+
+  final List<Category> categories;
+  final String? selectedId;
+  final ValueChanged<String?> onSelected;
+  final double sidePad;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        border: Border(
+          bottom: BorderSide(color: Color(0xFFEEEEEE)),
+        ),
+      ),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        padding: EdgeInsets.symmetric(horizontal: sidePad, vertical: 12),
+        child: Row(
+          children: [
+            _CategoryTab(
+              label: 'Todo',
+              selected: selectedId == null,
+              onTap: () => onSelected(null),
+            ),
+            ...categories.map(
+              (cat) => Padding(
+                padding: const EdgeInsets.only(left: 8),
+                child: _CategoryTab(
+                  label: cat.name,
+                  selected: selectedId == cat.id,
+                  onTap: () => onSelected(cat.id),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ─── Category tab chip ─────────────────────────────────────────────────────
+
+class _CategoryTab extends StatefulWidget {
+  const _CategoryTab({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  State<_CategoryTab> createState() => _CategoryTabState();
+}
+
+class _CategoryTabState extends State<_CategoryTab> {
+  bool _hovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      onEnter: (_) => setState(() => _hovered = true),
+      onExit: (_) => setState(() => _hovered = false),
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        onTap: widget.onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+          decoration: BoxDecoration(
+            color: widget.selected
+                ? AppTokens.brandPrimary
+                : _hovered
+                    ? AppTokens.brandPrimary.withValues(alpha: 0.08)
+                    : Colors.transparent,
+            borderRadius: BorderRadius.circular(8),
+            border: widget.selected
+                ? null
+                : Border.all(color: const Color(0xFFDDDDDD)),
+          ),
+          child: Text(
+            widget.label,
+            style: GoogleFonts.inter(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: widget.selected
+                  ? Colors.white
+                  : _hovered
+                      ? AppTokens.brandPrimary
+                      : const Color(0xFF555555),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ─── Dish card con animación y hover ─────────────────────────────────────────
+
+class _MenuDishCard extends StatefulWidget {
+  const _MenuDishCard({
+    required this.dish,
+    required this.index,
+    required this.onTap,
+    required this.onAddToCart,
+  });
+
+  final Dish dish;
+  final int index;
+  final VoidCallback onTap;
+  final VoidCallback onAddToCart;
+
+  @override
+  State<_MenuDishCard> createState() => _MenuDishCardState();
+}
+
+class _MenuDishCardState extends State<_MenuDishCard>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _enter;
+  late final Animation<double> _opacity;
+  late final Animation<Offset> _slide;
+  bool _hovered = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _enter = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 420),
+    );
+    _opacity = CurvedAnimation(parent: _enter, curve: Curves.easeOut);
+    _slide = Tween<Offset>(
+      begin: const Offset(0, 0.06),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(parent: _enter, curve: Curves.easeOut));
+    Future.delayed(
+      Duration(milliseconds: 40 * (widget.index % 12)),
+      () {
+        if (mounted) _enter.forward();
+      },
+    );
+  }
+
+  @override
+  void dispose() {
+    _enter.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FadeTransition(
+      opacity: _opacity,
+      child: SlideTransition(
+        position: _slide,
+        child: MouseRegion(
+          onEnter: (_) => setState(() => _hovered = true),
+          onExit: (_) => setState(() => _hovered = false),
+          cursor: SystemMouseCursors.click,
+          child: GestureDetector(
+            onTap: widget.onTap,
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              curve: Curves.easeOut,
+              transform: Matrix4.translationValues(0, _hovered ? -6.0 : 0.0, 0),
+              transformAlignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black
+                        .withValues(alpha: _hovered ? 0.13 : 0.07),
+                    blurRadius: _hovered ? 28 : 12,
+                    offset: Offset(0, _hovered ? 10 : 3),
+                  ),
+                ],
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // ── Imagen ────────────────────────────────────────────────
+                  ClipRRect(
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(16),
+                    ),
+                    child: SizedBox(
+                      height: 190,
+                      width: double.infinity,
+                      child: widget.dish.imageUrl != null
+                          ? CachedNetworkImage(
+                              imageUrl: widget.dish.imageUrl!,
+                              fit: BoxFit.cover,
+                              placeholder: (_, __) => const ColoredBox(
+                                color: Color(0xFFF0F0F0),
+                              ),
+                              errorWidget: (_, __, ___) =>
+                                  const _PlaceholderImg(),
+                            )
+                          : const _PlaceholderImg(),
+                    ),
+                  ),
+
+                  // ── Info ──────────────────────────────────────────────────
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            widget.dish.name,
+                            style: GoogleFonts.inter(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w700,
+                              color: const Color(0xFF1A1A1A),
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          if (widget.dish.description.isNotEmpty) ...[
+                            const SizedBox(height: 4),
+                            Text(
+                              widget.dish.description,
+                              style: GoogleFonts.inter(
+                                fontSize: 12,
+                                color: Colors.black45,
+                                height: 1.4,
+                              ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                          const Spacer(),
+                          Row(
+                            children: [
+                              Text(
+                                Formatters.price(widget.dish.price),
+                                style: GoogleFonts.inter(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w800,
+                                  color: AppTokens.brandPrimary,
+                                ),
+                              ),
+                              const Spacer(),
+                              if (widget.dish.isAvailable)
+                                GestureDetector(
+                                  onTap: widget.onAddToCart,
+                                  child: AnimatedContainer(
+                                    duration:
+                                        const Duration(milliseconds: 150),
+                                    width: 36,
+                                    height: 36,
+                                    decoration: BoxDecoration(
+                                      color: _hovered
+                                          ? AppTokens.brandDark
+                                          : AppTokens.brandPrimary,
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    child: const Icon(
+                                      Icons.add,
+                                      color: Colors.white,
+                                      size: 20,
+                                    ),
+                                  ),
+                                )
+                              else
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 10,
+                                    vertical: 4,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Colors.black
+                                        .withValues(alpha: 0.07),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Text(
+                                    'Agotado',
+                                    style: GoogleFonts.inter(
+                                      fontSize: 11,
+                                      color: Colors.black38,
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _PlaceholderImg extends StatelessWidget {
+  const _PlaceholderImg();
+
+  @override
+  Widget build(BuildContext context) {
+    return ColoredBox(
+      color: AppTokens.brandLight,
+      child: Center(
+        child: Icon(
+          Icons.restaurant_menu,
+          color: AppTokens.brandPrimary.withValues(alpha: 0.35),
+          size: 30,
+        ),
+      ),
+    );
+  }
+}
+
+// ─── Allergen filter sheet ─────────────────────────────────────────────────
 
 class _AllergenFilterSheet extends ConsumerWidget {
   @override
@@ -430,9 +889,12 @@ class _AllergenFilterSheet extends ConsumerWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
-                'Filtrar alérgenos (sin)',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              Text(
+                'Filtrar alérgenos',
+                style: GoogleFonts.inter(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
               if (active.isNotEmpty)
                 TextButton(
@@ -442,10 +904,10 @@ class _AllergenFilterSheet extends ConsumerWidget {
                 ),
             ],
           ),
-          const SizedBox(height: 8),
-          const Text(
+          const SizedBox(height: 6),
+          Text(
             'Solo se mostrarán platos que NO contengan los alérgenos seleccionados.',
-            style: TextStyle(color: Colors.black54, fontSize: 13),
+            style: GoogleFonts.inter(color: Colors.black45, fontSize: 13),
           ),
           const SizedBox(height: 16),
           Wrap(
@@ -464,7 +926,8 @@ class _AllergenFilterSheet extends ConsumerWidget {
                   color: selected
                       ? Colors.orange.shade800
                       : const Color(0xFF111111),
-                  fontWeight: selected ? FontWeight.bold : FontWeight.normal,
+                  fontWeight:
+                      selected ? FontWeight.bold : FontWeight.normal,
                 ),
               );
             }).toList(),
@@ -474,7 +937,17 @@ class _AllergenFilterSheet extends ConsumerWidget {
             width: double.infinity,
             child: FilledButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Aplicar filtros'),
+              style: FilledButton.styleFrom(
+                backgroundColor: AppTokens.brandPrimary,
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              child: Text(
+                'Aplicar filtros',
+                style: GoogleFonts.inter(fontWeight: FontWeight.w600),
+              ),
             ),
           ),
         ],
@@ -482,62 +955,286 @@ class _AllergenFilterSheet extends ConsumerWidget {
     );
   }
 }
+// ── Navbar web del menú ──────────────────────────────────────────────────────
 
-class _CategoryBar extends StatelessWidget {
-  const _CategoryBar({
-    required this.categories,
-    required this.selectedId,
-    required this.onSelected,
+class _MenuWebNavbar extends ConsumerWidget {
+  const _MenuWebNavbar({
+    required this.isScrolled,
+    required this.onAllergenTap,
   });
 
-  final List<Category> categories;
-  final String? selectedId;
-  final ValueChanged<String?> onSelected;
+  final bool isScrolled;
+  final VoidCallback onAllergenTap;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final cartCount = ref.watch(cartItemsCountProvider);
+    final allergenFilter = ref.watch(menuAllergenFilterProvider);
+    final authState = ref.watch(authNotifierProvider);
+    final profile = authState.valueOrNull;
+    final screenW = MediaQuery.sizeOf(context).width;
+
+    return ClipRect(
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 220),
+          curve: Curves.easeOut,
+          decoration: BoxDecoration(
+            color: isScrolled
+                ? Colors.white.withValues(alpha: 0.92)
+                : Colors.white,
+            border: const Border(
+              top: BorderSide(color: AppTokens.brandPrimary, width: 4),
+            ),
+            boxShadow: [
+              BoxShadow(
+                color:
+                    Colors.black.withValues(alpha: isScrolled ? 0.12 : 0.07),
+                blurRadius: isScrolled ? 24 : 12,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 40),
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 1280),
+              child: SizedBox(
+                height: 76,
+                child: Row(
+                  children: [
+                    // Logo
+                    MouseRegion(
+                      cursor: SystemMouseCursors.click,
+                      child: GestureDetector(
+                        onTap: () => context.goNamed(RouteNames.home),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Sabor de Casa',
+                              style: GoogleFonts.syne(
+                                fontWeight: FontWeight.w800,
+                                fontStyle: FontStyle.italic,
+                                fontSize: 26,
+                                height: 1,
+                                color: AppTokens.brandPrimary,
+                              ),
+                            ),
+                            const SizedBox(height: 3),
+                            Text(
+                              'Sanlúcar de Barrameda',
+                              style: GoogleFonts.inter(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w500,
+                                letterSpacing: 0.8,
+                                color: const Color(0xFF888888),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+
+                    const Spacer(),
+
+                    // Nav links (solo en pantallas anchas)
+                    if (screenW >= 700) ...[
+                      _MenuNavLink(
+                        label: 'Inicio',
+                        isActive: false,
+                        onTap: () => context.goNamed(RouteNames.home),
+                      ),
+                      const SizedBox(width: 4),
+                      _MenuNavLink(
+                        label: 'Menú',
+                        isActive: true,
+                        onTap: () {},
+                      ),
+                      const SizedBox(width: 4),
+                      _MenuNavLink(
+                        label: 'Catering',
+                        isActive: false,
+                        onTap: () => context.goNamed(RouteNames.catering),
+                      ),
+                      const SizedBox(width: 4),
+                      _MenuNavLink(
+                        label: 'Contacto',
+                        isActive: false,
+                        onTap: () => context.goNamed(RouteNames.contact),
+                      ),
+                      const SizedBox(width: 12),
+                    ],
+
+                    // Botón alérgenos
+                    IconButton(
+                      onPressed: onAllergenTap,
+                      tooltip: 'Filtrar por alérgenos',
+                      icon: Badge.count(
+                        count: allergenFilter.length,
+                        isLabelVisible: allergenFilter.isNotEmpty,
+                        backgroundColor: Colors.orange,
+                        child: Icon(
+                          Icons.tune_outlined,
+                          size: 22,
+                          color: allergenFilter.isNotEmpty
+                              ? Colors.orange.shade700
+                              : const Color(0xFF444444),
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(width: 6),
+
+                    // Carrito
+                    MouseRegion(
+                      cursor: SystemMouseCursors.click,
+                      child: GestureDetector(
+                        onTap: () => context.pushNamed(RouteNames.cart),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 9,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppTokens.brandPrimary,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(
+                                Icons.shopping_bag_outlined,
+                                color: Colors.white,
+                                size: 18,
+                              ),
+                              if (cartCount > 0) ...[
+                                const SizedBox(width: 6),
+                                Text(
+                                  '$cartCount',
+                                  style: GoogleFonts.inter(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 13,
+                                  ),
+                                ),
+                              ],
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(width: 12),
+
+                    // Auth
+                    if (profile == null)
+                      OutlinedButton(
+                        onPressed: () => context.goNamed(RouteNames.login),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: AppTokens.brandPrimary,
+                          side: const BorderSide(color: AppTokens.brandPrimary),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          minimumSize: const Size(0, 36),
+                          padding:
+                              const EdgeInsets.symmetric(horizontal: 18),
+                          textStyle: GoogleFonts.inter(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        child: const Text('Iniciar sesión'),
+                      )
+                    else
+                      MouseRegion(
+                        cursor: SystemMouseCursors.click,
+                        child: GestureDetector(
+                          onTap: () => context.goNamed(RouteNames.profile),
+                          child: CircleAvatar(
+                            radius: 18,
+                            backgroundColor:
+                                AppTokens.brandPrimary.withValues(alpha: 0.15),
+                            child: const Icon(
+                              Icons.person,
+                              color: AppTokens.brandPrimary,
+                              size: 18,
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ── NavLink del menú ─────────────────────────────────────────────────────────
+
+class _MenuNavLink extends StatefulWidget {
+  const _MenuNavLink({
+    required this.label,
+    required this.isActive,
+    required this.onTap,
+  });
+
+  final String label;
+  final bool isActive;
+  final VoidCallback onTap;
+
+  @override
+  State<_MenuNavLink> createState() => _MenuNavLinkState();
+}
+
+class _MenuNavLinkState extends State<_MenuNavLink> {
+  bool _hovered = false;
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 40,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        itemCount: categories.length + 1,
-        separatorBuilder: (_, __) => const SizedBox(width: 8),
-        itemBuilder: (context, index) {
-          if (index == 0) {
-            final isAllSelected = selectedId == null;
-            return FilterChip(
-              label: Text(
-                'Todos',
-                style: TextStyle(
-                  color: isAllSelected ? Colors.white : null,
-                  fontWeight: isAllSelected
-                      ? FontWeight.w600
-                      : FontWeight.normal,
+    final highlight = widget.isActive || _hovered;
+    return MouseRegion(
+      onEnter: (_) => setState(() => _hovered = true),
+      onExit: (_) => setState(() => _hovered = false),
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        onTap: widget.onTap,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                widget.label,
+                style: GoogleFonts.inter(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 0.5,
+                  color: highlight
+                      ? AppTokens.brandPrimary
+                      : const Color(0xFF222222),
                 ),
               ),
-              selected: isAllSelected,
-              onSelected: (_) => onSelected(null),
-              selectedColor: AppTokens.brandPrimary,
-              showCheckmark: false,
-            );
-          }
-          final category = categories[index - 1];
-          final isSelected = selectedId == category.id;
-          return FilterChip(
-            label: Text(
-              category.name,
-              style: TextStyle(
-                color: isSelected ? Colors.white : null,
-                fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+              const SizedBox(height: 4),
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 180),
+                height: 2.5,
+                width: highlight ? 24 : 0,
+                decoration: BoxDecoration(
+                  color: AppTokens.brandPrimary,
+                  borderRadius: BorderRadius.circular(2),
+                ),
               ),
-            ),
-            selected: isSelected,
-            onSelected: (_) => onSelected(category.id),
-            selectedColor: AppTokens.brandPrimary,
-            showCheckmark: false,
-          );
-        },
+            ],
+          ),
+        ),
       ),
     );
   }

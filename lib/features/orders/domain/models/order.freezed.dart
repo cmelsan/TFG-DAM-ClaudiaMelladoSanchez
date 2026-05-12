@@ -30,6 +30,7 @@ mixin _$Order {
   double get total => throw _privateConstructorUsedError;
   DateTime get createdAt => throw _privateConstructorUsedError;
   DateTime get updatedAt => throw _privateConstructorUsedError;
+  double get discountAmount => throw _privateConstructorUsedError;
   String? get userId => throw _privateConstructorUsedError;
   String? get paymentMethod => throw _privateConstructorUsedError;
   String? get addressId => throw _privateConstructorUsedError;
@@ -61,6 +62,7 @@ abstract class $OrderCopyWith<$Res> {
     double total,
     DateTime createdAt,
     DateTime updatedAt,
+    double discountAmount,
     String? userId,
     String? paymentMethod,
     String? addressId,
@@ -94,6 +96,7 @@ class _$OrderCopyWithImpl<$Res, $Val extends Order>
     Object? total = null,
     Object? createdAt = null,
     Object? updatedAt = null,
+    Object? discountAmount = null,
     Object? userId = freezed,
     Object? paymentMethod = freezed,
     Object? addressId = freezed,
@@ -139,6 +142,10 @@ class _$OrderCopyWithImpl<$Res, $Val extends Order>
                 ? _value.updatedAt
                 : updatedAt // ignore: cast_nullable_to_non_nullable
                       as DateTime,
+            discountAmount: null == discountAmount
+                ? _value.discountAmount
+                : discountAmount // ignore: cast_nullable_to_non_nullable
+                      as double,
             userId: freezed == userId
                 ? _value.userId
                 : userId // ignore: cast_nullable_to_non_nullable
@@ -187,6 +194,7 @@ abstract class _$$OrderImplCopyWith<$Res> implements $OrderCopyWith<$Res> {
     double total,
     DateTime createdAt,
     DateTime updatedAt,
+    double discountAmount,
     String? userId,
     String? paymentMethod,
     String? addressId,
@@ -219,6 +227,7 @@ class __$$OrderImplCopyWithImpl<$Res>
     Object? total = null,
     Object? createdAt = null,
     Object? updatedAt = null,
+    Object? discountAmount = null,
     Object? userId = freezed,
     Object? paymentMethod = freezed,
     Object? addressId = freezed,
@@ -264,6 +273,10 @@ class __$$OrderImplCopyWithImpl<$Res>
             ? _value.updatedAt
             : updatedAt // ignore: cast_nullable_to_non_nullable
                   as DateTime,
+        discountAmount: null == discountAmount
+            ? _value.discountAmount
+            : discountAmount // ignore: cast_nullable_to_non_nullable
+                  as double,
         userId: freezed == userId
             ? _value.userId
             : userId // ignore: cast_nullable_to_non_nullable
@@ -307,6 +320,7 @@ class _$OrderImpl implements _Order {
     required this.total,
     required this.createdAt,
     required this.updatedAt,
+    this.discountAmount = 0.0,
     this.userId,
     this.paymentMethod,
     this.addressId,
@@ -337,6 +351,9 @@ class _$OrderImpl implements _Order {
   @override
   final DateTime updatedAt;
   @override
+  @JsonKey()
+  final double discountAmount;
+  @override
   final String? userId;
   @override
   final String? paymentMethod;
@@ -351,7 +368,7 @@ class _$OrderImpl implements _Order {
 
   @override
   String toString() {
-    return 'Order(id: $id, orderType: $orderType, status: $status, paymentStatus: $paymentStatus, subtotal: $subtotal, deliveryFee: $deliveryFee, total: $total, createdAt: $createdAt, updatedAt: $updatedAt, userId: $userId, paymentMethod: $paymentMethod, addressId: $addressId, scheduledAt: $scheduledAt, notes: $notes, assignedDriverId: $assignedDriverId)';
+    return 'Order(id: $id, orderType: $orderType, status: $status, paymentStatus: $paymentStatus, subtotal: $subtotal, deliveryFee: $deliveryFee, total: $total, createdAt: $createdAt, updatedAt: $updatedAt, discountAmount: $discountAmount, userId: $userId, paymentMethod: $paymentMethod, addressId: $addressId, scheduledAt: $scheduledAt, notes: $notes, assignedDriverId: $assignedDriverId)';
   }
 
   @override
@@ -374,6 +391,8 @@ class _$OrderImpl implements _Order {
                 other.createdAt == createdAt) &&
             (identical(other.updatedAt, updatedAt) ||
                 other.updatedAt == updatedAt) &&
+            (identical(other.discountAmount, discountAmount) ||
+                other.discountAmount == discountAmount) &&
             (identical(other.userId, userId) || other.userId == userId) &&
             (identical(other.paymentMethod, paymentMethod) ||
                 other.paymentMethod == paymentMethod) &&
@@ -399,6 +418,7 @@ class _$OrderImpl implements _Order {
     total,
     createdAt,
     updatedAt,
+    discountAmount,
     userId,
     paymentMethod,
     addressId,
@@ -432,6 +452,7 @@ abstract class _Order implements Order {
     required final double total,
     required final DateTime createdAt,
     required final DateTime updatedAt,
+    final double discountAmount,
     final String? userId,
     final String? paymentMethod,
     final String? addressId,
@@ -460,6 +481,8 @@ abstract class _Order implements Order {
   DateTime get createdAt;
   @override
   DateTime get updatedAt;
+  @override
+  double get discountAmount;
   @override
   String? get userId;
   @override

@@ -402,5 +402,28 @@ class _OrderRatingProviderElement
   String get orderId => (origin as OrderRatingProvider).orderId;
 }
 
+String _$isEligibleForFirstOrderDiscountHash() =>
+    r'3fc784b173a3e2ebba950b096677a2a81c485192';
+
+/// Devuelve true si el usuario es elegible para el descuento de primer pedido:
+/// el descuento está activado en el admin Y el usuario no tiene pedidos
+/// anteriores no cancelados.
+///
+/// Copied from [isEligibleForFirstOrderDiscount].
+@ProviderFor(isEligibleForFirstOrderDiscount)
+final isEligibleForFirstOrderDiscountProvider =
+    AutoDisposeFutureProvider<bool>.internal(
+      isEligibleForFirstOrderDiscount,
+      name: r'isEligibleForFirstOrderDiscountProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$isEligibleForFirstOrderDiscountHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef IsEligibleForFirstOrderDiscountRef = AutoDisposeFutureProviderRef<bool>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

@@ -9,6 +9,7 @@ import 'package:sabor_de_casa/features/admin/domain/models/admin_event_request.d
 import 'package:sabor_de_casa/features/admin/domain/models/admin_user.dart';
 import 'package:sabor_de_casa/features/admin/domain/models/business_config_item.dart';
 import 'package:sabor_de_casa/features/admin/domain/models/schedule_entry.dart';
+import 'package:sabor_de_casa/features/catering/domain/models/event_menu.dart';
 import 'package:sabor_de_casa/features/menu/domain/models/category.dart';
 import 'package:sabor_de_casa/features/menu/domain/models/dish.dart';
 import 'package:sabor_de_casa/features/orders/domain/models/order.dart';
@@ -533,6 +534,113 @@ class AdminRepository {
           .from(SupabaseConstants.schedule)
           .update({'open_time': openTime, 'close_time': closeTime})
           .eq('id', id);
+    } on PostgrestException catch (e) {
+      throw DatabaseFailure(message: e.message, code: e.code);
+    } catch (e) {
+      throw UnexpectedFailure(message: e.toString());
+    }
+  }
+
+  // ──────────────────────────── EVENT MENU CRUD ──────────────────────────────
+
+  Future<List<EventMenu>> getEventMenus() async {
+    try {
+      final data = await _client
+          .from(SupabaseConstants.eventMenus)
+          .select()
+          .order('created_at', ascending: false);
+      return data.map(EventMenu.fromJson).toList();
+    } on PostgrestException catch (e) {
+      throw DatabaseFailure(message: e.message, code: e.code);
+    } catch (e) {
+      throw UnexpectedFailure(message: e.toString());
+    }
+  }
+
+  Future<EventMenu> createEventMenu({
+    required String name,
+    required double pricePerPerson,
+    required int minGuests,
+    required int maxGuests,
+    String? description,
+    bool isActive = true,
+  }) async {
+    try {
+      final payload = {
+        'name': name,
+        'price_per_person': pricePerPerson,
+        'min_guests': minGuests,
+        'max_guests': maxGuests,
+        'description': description,
+        'is_active': isActive,
+      };
+      final data = await _client
+          .from(SupabaseConstants.eventMenus)
+          .insert(payload)
+          .select()
+          .single();
+      return EventMenu.fromJson(data);
+    } on PostgrestException catch (e) {
+      throw DatabaseFailure(message: e.message, code: e.code);
+    } catch (e) {
+      throw UnexpectedFailure(message: e.toString());
+    }
+  }
+
+  Future<void> updateEventMenu({
+    required String id,
+    required String name,
+    required double pricePerPerson,
+    required int minGuests,
+    required int maxGuests,
+    required bool isActive,
+    String? description,
+  }) async {
+    try {
+      await _client
+          .from(SupabaseConstants.eventMenus)
+          .update({
+            'name': name,
+            'price_per_person': pricePerPerson,
+            'min_guests': minGuests,
+            'max_guests': maxGuests,
+            'description': description,
+            'is_active': isActive,
+          })
+          .eq('id', id);
+    } on PostgrestException catch (e) {
+      throw DatabaseFailure(message: e.message, code: e.code);
+    } catch (e) {
+      throw UnexpectedFailure(message: e.toString());
+    }
+  }
+
+  Future<void> deleteEventMenu(String id) async {
+    try {
+      await _client
+          .from(SupabaseConstants.eventMenus)
+          .delete()
+          .eq('id', id);
+    } on PostgrestException catch (e) {
+      throw DatabaseFailure(message: e.message, code: e.code);
+    } catch (e) {
+      throw UnexpectedFailure(message: e.toString());
+    }
+  }
+
+  Future<void> updateEventRequestQuote({
+    required String requestId,
+    required String status,
+    double? quotedTotal,
+  }) async {
+    try {
+      await _client
+          .from(SupabaseConstants.eventRequests)
+          .update({
+            'status': status,
+            if (quotedTotal != null) 'quoted_total': quotedTotal,
+          })
+          .eq('id', requestId);
     } on PostgrestException catch (e) {
       throw DatabaseFailure(message: e.message, code: e.code);
     } catch (e) {

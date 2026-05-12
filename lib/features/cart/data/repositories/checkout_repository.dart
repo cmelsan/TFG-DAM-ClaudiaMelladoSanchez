@@ -39,7 +39,14 @@ class CheckoutRepository {
         (sum, item) => sum + (item.unitPrice * item.quantity),
       );
       final deliveryFee = orderType == 'domicilio' ? 2.5 : 0.0;
-      final total = subtotal + deliveryFee;
+
+      // — Descuento primer pedido —
+      final discountAmount = await _computeFirstOrderDiscount(
+        userId: userId,
+        subtotal: subtotal,
+      );
+
+      final total = subtotal - discountAmount + deliveryFee;
 
       final order = await _client
           .from(SupabaseConstants.orders)
@@ -51,6 +58,7 @@ class CheckoutRepository {
             'payment_method': paymentMethod,
             'subtotal': subtotal,
             'delivery_fee': deliveryFee,
+            'discount_amount': discountAmount,
             'total': total,
             'notes': notes?.trim().isEmpty ?? true ? null : notes?.trim(),
             if (scheduledAt != null)
@@ -80,6 +88,41 @@ class CheckoutRepository {
       throw DatabaseFailure(message: e.message, code: e.code);
     } catch (e) {
       throw UnexpectedFailure(message: e.toString());
+    }
+  }
+
+  /// Devuelve el importe del descuento de primer pedido (30% del subtotal)
+  /// si el descuento está activo en la configuración y el usuario no tiene
+  /// pedidos anteriores. En cualquier otro caso devuelve 0.
+  Future<double> _computeFirstOrderDiscount({
+    required String userId,
+    required double subtotal,
+  }) async {
+    try {
+      // 1. ¿Está el descuento habilitado en la configuración?
+      final configRow = await _client
+          .from('business_config')
+          .select('value')
+          .eq('key', 'first_order_discount_enabled')
+          .maybeSingle();
+
+      final discountEnabled = configRow?['value'] as String?;
+      if (discountEnabled == 'false') return 0.0;
+
+      // 2. ¿Tiene el usuario pedidos anteriores (no cancelados)?
+      final countResult = await _client
+          .from(SupabaseConstants.orders)
+          .select('id')
+          .eq('user_id', userId)
+          .neq('status', 'cancelled');
+
+      if ((countResult as List).isNotEmpty) return 0.0;
+
+      // 3. Primer pedido elegible → 30% de descuento sobre el subtotal.
+      return double.parse((subtotal * 0.30).toStringAsFixed(2));
+    } catch (_) {
+      // En caso de error de red, no bloqueamos el pedido; sin descuento.
+      return 0.0;
     }
   }
 }

@@ -7,6 +7,7 @@ import 'package:sabor_de_casa/features/admin/domain/models/admin_event_request.d
 import 'package:sabor_de_casa/features/admin/domain/models/admin_user.dart';
 import 'package:sabor_de_casa/features/admin/domain/models/business_config_item.dart';
 import 'package:sabor_de_casa/features/admin/domain/models/schedule_entry.dart';
+import 'package:sabor_de_casa/features/catering/domain/models/event_menu.dart';
 import 'package:sabor_de_casa/features/menu/domain/models/category.dart';
 import 'package:sabor_de_casa/features/menu/domain/models/dish.dart';
 import 'package:sabor_de_casa/features/menu/presentation/providers/menu_provider.dart';
@@ -43,6 +44,12 @@ Future<List<Dish>> adminDishes(AdminDishesRef ref) {
 // ignore: deprecated_member_use_from_same_package, Riverpod 2.x typed Ref
 Future<List<AdminEventRequest>> adminEventRequests(AdminEventRequestsRef ref) {
   return ref.watch(adminRepositoryProvider).getEventRequests();
+}
+
+@riverpod
+// ignore: deprecated_member_use_from_same_package, Riverpod 2.x typed Ref
+Future<List<EventMenu>> adminEventMenus(AdminEventMenusRef ref) {
+  return ref.watch(adminRepositoryProvider).getEventMenus();
 }
 
 @riverpod
@@ -97,6 +104,17 @@ Future<bool> showSeasonalSection(ShowSeasonalSectionRef ref) async {
   final value = await ref
       .watch(adminRepositoryProvider)
       .getConfigValue('show_seasonal_section');
+  return value != 'false';
+}
+
+/// Controla si el descuento del 30% al primer pedido está activo.
+/// El admin puede activarlo/desactivarlo desde el panel de configuración.
+@riverpod
+// ignore: deprecated_member_use_from_same_package, Riverpod 2.x typed Ref
+Future<bool> firstOrderDiscountEnabled(FirstOrderDiscountEnabledRef ref) async {
+  final value = await ref
+      .watch(adminRepositoryProvider)
+      .getConfigValue('first_order_discount_enabled');
   return value != 'false';
 }
 
@@ -382,4 +400,76 @@ class AdminAction extends _$AdminAction {
       ..invalidate(adminOrdersProvider)
       ..invalidate(adminDashboardStatsProvider);
   }
-}
+  // ──────────────── EVENT MENU CRUD ──────────────────────────
+
+  Future<void> createEventMenu({
+    required String name,
+    required double pricePerPerson,
+    required int minGuests,
+    required int maxGuests,
+    String? description,
+    bool isActive = true,
+  }) async {
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(
+      () => ref.read(adminRepositoryProvider).createEventMenu(
+            name: name,
+            pricePerPerson: pricePerPerson,
+            minGuests: minGuests,
+            maxGuests: maxGuests,
+            description: description,
+            isActive: isActive,
+          ),
+    );
+    ref.invalidate(adminEventMenusProvider);
+  }
+
+  Future<void> updateEventMenu({
+    required String id,
+    required String name,
+    required double pricePerPerson,
+    required int minGuests,
+    required int maxGuests,
+    required bool isActive,
+    String? description,
+  }) async {
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(
+      () => ref.read(adminRepositoryProvider).updateEventMenu(
+            id: id,
+            name: name,
+            pricePerPerson: pricePerPerson,
+            minGuests: minGuests,
+            maxGuests: maxGuests,
+            description: description,
+            isActive: isActive,
+          ),
+    );
+    ref.invalidate(adminEventMenusProvider);
+  }
+
+  Future<void> deleteEventMenu(String id) async {
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(
+      () => ref.read(adminRepositoryProvider).deleteEventMenu(id),
+    );
+    ref.invalidate(adminEventMenusProvider);
+  }
+
+  Future<void> updateEventRequestQuote({
+    required String requestId,
+    required String status,
+    double? quotedTotal,
+  }) async {
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(
+      () => ref.read(adminRepositoryProvider).updateEventRequestQuote(
+            requestId: requestId,
+            status: status,
+            quotedTotal: quotedTotal,
+          ),
+    );
+    ref
+      ..invalidate(adminEventRequestsProvider)
+      ..invalidate(adminDashboardStatsProvider);
+  }}

@@ -245,7 +245,7 @@ class MenuRepository {
           .uploadBinary(
             path,
             toUpload,
-            fileOptions: FileOptions(upsert: false, contentType: contentType),
+            fileOptions: FileOptions(contentType: contentType),
           );
       return _client.storage
           .from(SupabaseConstants.dishImagesBucket)

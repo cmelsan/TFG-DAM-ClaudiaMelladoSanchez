@@ -7,7 +7,6 @@ import 'package:latlong2/latlong.dart';
 import 'package:sabor_de_casa/core/theme/app_tokens.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-// TODO(dev): Reemplazar con las coordenadas exactas del local
 const _kLat = 36.7773;
 const _kLng = -6.3534;
 
@@ -28,20 +27,17 @@ class LocationSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ColoredBox(
-      color: const Color(0xFF0D3B2E),
+      color: AppTokens.pageBg,
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 36),
+        padding: const EdgeInsets.symmetric(vertical: 64, horizontal: 48),
         child: Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 1200),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 32),
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-                  final isWide = constraints.maxWidth >= 720;
-                  return isWide ? _buildWide() : _buildNarrow();
-                },
-              ),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final isWide = constraints.maxWidth >= 720;
+                return isWide ? _buildWide() : _buildNarrow();
+              },
             ),
           ),
         ),
@@ -50,13 +46,25 @@ class LocationSection extends StatelessWidget {
   }
 
   Widget _buildWide() {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        SizedBox(width: 340, child: _InfoPanel(onOpenMaps: _openMaps)),
-        const SizedBox(width: 48),
-        const Expanded(child: _MapTile(height: 420)),
-      ],
+    return IntrinsicHeight(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          SizedBox(
+            width: 340,
+            child: Container(
+              padding: const EdgeInsets.all(36),
+              decoration: BoxDecoration(
+                color: const Color(0xFF0D3B2E),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: _InfoPanel(onOpenMaps: _openMaps),
+            ),
+          ),
+          const SizedBox(width: 24),
+          const Expanded(child: _MapTile(height: 420)),
+        ],
+      ),
     );
   }
 
@@ -64,9 +72,16 @@ class LocationSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _InfoPanel(onOpenMaps: _openMaps),
-        const SizedBox(height: 24),
-        const _MapTile(height: 200),
+        Container(
+          padding: const EdgeInsets.all(28),
+          decoration: BoxDecoration(
+            color: const Color(0xFF0D3B2E),
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: _InfoPanel(onOpenMaps: _openMaps),
+        ),
+        const SizedBox(height: 20),
+        const _MapTile(height: 220),
       ],
     );
   }
@@ -84,43 +99,67 @@ class _InfoPanel extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'DÓNDE\nENCONTRARNOS',
-          style: GoogleFonts.inter(fontWeight: FontWeight.w900, 
-            fontSize: 38,
-            color: const Color(0xFFF2EBD9),
-            letterSpacing: 2,
-            height: 0.9,
+        // Eyebrow badge
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+          decoration: BoxDecoration(
+            color: AppTokens.brandPrimary.withValues(alpha: 0.25),
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Text(
+            'Nuestra ubicación',
+            style: GoogleFonts.inter(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: const Color(0xFF7ED4B8),
+            ),
           ),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 14),
+        // Título compacto
+        Text(
+          'Dónde\nencontrarnos',
+          style: GoogleFonts.inter(
+            fontWeight: FontWeight.w800,
+            fontSize: 26,
+            color: Colors.white,
+            height: 1.2,
+          ),
+        ),
+        const SizedBox(height: 22),
         const _InfoRow(
           icon: Icons.location_on_outlined,
           text: 'Calle Ejemplo, 12\nSanlúcar de Barrameda, Cádiz',
         ),
-        const SizedBox(height: 10),
+        const SizedBox(height: 12),
         const _InfoRow(
           icon: Icons.access_time_outlined,
-          text: 'Lunes a Domingo\n12:00 – 15:30 · 20:00 – 23:30',
+          text: 'Lun – Dom\n12:00 – 15:30 · 20:00 – 23:30',
         ),
-        const SizedBox(height: 10),
+        const SizedBox(height: 12),
         const _InfoRow(
           icon: Icons.phone_outlined,
           text: '+34 900 123 456',
         ),
-        const SizedBox(height: 20),
+        const SizedBox(height: 26),
         FilledButton.icon(
           onPressed: onOpenMaps,
-          icon: const Icon(Icons.directions_outlined, size: 18),
-          label: const Text(
+          icon: const Icon(Icons.directions_outlined, size: 17),
+          label: Text(
             'CÓMO LLEGAR',
-            style: TextStyle(fontWeight: FontWeight.w700, letterSpacing: 1.2),
+            style: GoogleFonts.inter(
+              fontWeight: FontWeight.w700,
+              fontSize: 13,
+              letterSpacing: 0.8,
+            ),
           ),
           style: FilledButton.styleFrom(
-            backgroundColor: Colors.white,
-            foregroundColor: const Color(0xFF0D3B2E),
-            padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
-            shape: const StadiumBorder(),
+            backgroundColor: AppTokens.brandPrimary,
+            foregroundColor: Colors.white,
+            padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 13),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
             minimumSize: Size.zero,
           ),
         ),

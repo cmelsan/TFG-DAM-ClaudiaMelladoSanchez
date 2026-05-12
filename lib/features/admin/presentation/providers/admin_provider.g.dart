@@ -98,6 +98,24 @@ final adminEventRequestsProvider =
 // ignore: unused_element
 typedef AdminEventRequestsRef =
     AutoDisposeFutureProviderRef<List<AdminEventRequest>>;
+String _$adminEventMenusHash() => r'87d32d4379e81e22100ef95aaf0755949dd6a814';
+
+/// See also [adminEventMenus].
+@ProviderFor(adminEventMenus)
+final adminEventMenusProvider =
+    AutoDisposeFutureProvider<List<EventMenu>>.internal(
+      adminEventMenus,
+      name: r'adminEventMenusProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$adminEventMenusHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef AdminEventMenusRef = AutoDisposeFutureProviderRef<List<EventMenu>>;
 String _$adminUsersHash() => r'ea6be1b626bc1aac297aa33547dee304217ec89c';
 
 /// See also [adminUsers].
@@ -226,7 +244,29 @@ final showSeasonalSectionProvider = AutoDisposeFutureProvider<bool>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef ShowSeasonalSectionRef = AutoDisposeFutureProviderRef<bool>;
-String _$adminActionHash() => r'f0d32695b4f7d232cb79615e7367dc40b55ce5ed';
+String _$firstOrderDiscountEnabledHash() =>
+    r'c02f7c0d45fdf33c334eb4b0de3bc57240e9e2f9';
+
+/// Controla si el descuento del 30% al primer pedido está activo.
+/// El admin puede activarlo/desactivarlo desde el panel de configuración.
+///
+/// Copied from [firstOrderDiscountEnabled].
+@ProviderFor(firstOrderDiscountEnabled)
+final firstOrderDiscountEnabledProvider =
+    AutoDisposeFutureProvider<bool>.internal(
+      firstOrderDiscountEnabled,
+      name: r'firstOrderDiscountEnabledProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$firstOrderDiscountEnabledHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef FirstOrderDiscountEnabledRef = AutoDisposeFutureProviderRef<bool>;
+String _$adminActionHash() => r'0164178f6c5f63f17ec4853008f56b924a86dc68';
 
 /// See also [AdminAction].
 @ProviderFor(AdminAction)

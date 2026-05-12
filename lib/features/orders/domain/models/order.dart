@@ -16,6 +16,7 @@ class Order with _$Order {
     required double total,
     required DateTime createdAt,
     required DateTime updatedAt,
+    @Default(0.0) double discountAmount,
     String? userId,
     String? paymentMethod,
     String? addressId,

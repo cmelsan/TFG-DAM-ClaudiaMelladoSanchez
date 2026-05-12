@@ -215,7 +215,7 @@ class _CateringScreenState extends ConsumerState<CateringScreen>
                                 crossAxisCount: 2,
                                 crossAxisSpacing: 20,
                                 mainAxisSpacing: 20,
-                                childAspectRatio: 1.45,
+                                mainAxisExtent: 340,
                               ),
                               delegate: SliverChildBuilderDelegate(
                                 (ctx, i) => _MenuCard(menu: menus[i]),
@@ -227,7 +227,10 @@ class _CateringScreenState extends ConsumerState<CateringScreen>
                                 (ctx, i) => Padding(
                                   padding:
                                       const EdgeInsets.only(bottom: 20),
-                                  child: _MenuCard(menu: menus[i]),
+                                  child: SizedBox(
+                                    height: 340,
+                                    child: _MenuCard(menu: menus[i]),
+                                  ),
                                 ),
                                 childCount: menus.length,
                               ),
@@ -955,8 +958,8 @@ class _MenuCardState extends State<_MenuCard> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Imagen o placeholder
-              Expanded(
-                flex: 5,
+              SizedBox(
+                height: 185,
                 child: Stack(
                   fit: StackFit.expand,
                   children: [
@@ -1017,7 +1020,6 @@ class _MenuCardState extends State<_MenuCard> {
 
               // Contenido inferior
               Expanded(
-                flex: 4,
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(18, 14, 18, 16),
                   child: Column(
@@ -1036,17 +1038,15 @@ class _MenuCardState extends State<_MenuCard> {
                       ),
                       const SizedBox(height: 6),
                       if ((menu.description ?? '').isNotEmpty)
-                        Expanded(
-                          child: Text(
-                            menu.description!,
-                            style: GoogleFonts.inter(
-                              fontSize: 13,
-                              color: Colors.black54,
-                              height: 1.5,
-                            ),
-                            maxLines: 3,
-                            overflow: TextOverflow.ellipsis,
+                        Text(
+                          menu.description!,
+                          style: GoogleFonts.inter(
+                            fontSize: 13,
+                            color: Colors.black54,
+                            height: 1.5,
                           ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       const Spacer(),
                       Row(

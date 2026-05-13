@@ -155,10 +155,12 @@ class _ConfirmationBodyState extends State<_ConfirmationBody>
     final shortId = order.id.length >= 8
         ? order.id.substring(0, 8).toUpperCase()
         : order.id.toUpperCase();
+    final screenW = MediaQuery.sizeOf(context).width;
+    final hPad = screenW > 700 ? (screenW - 700) / 2 : 20.0;
 
     return SafeArea(
       child: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+        padding: EdgeInsets.symmetric(horizontal: hPad, vertical: 24),
         child: Column(
           children: [
             // â”€â”€ Animación Lottie â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€

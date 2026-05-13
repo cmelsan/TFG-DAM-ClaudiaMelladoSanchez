@@ -72,6 +72,9 @@ class OrderDetailScreen extends ConsumerWidget {
     final order = orderAsync.value!;
     final items = itemsAsync.value!;
 
+    final screenW = MediaQuery.sizeOf(context).width;
+    final hPad = screenW > 900 ? (screenW - 900) / 2 : 16.0;
+
     return Scaffold(
       backgroundColor: AppTokens.pageBg,
       appBar: AppBar(
@@ -86,7 +89,7 @@ class OrderDetailScreen extends ConsumerWidget {
         ],
       ),
       body: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.symmetric(horizontal: hPad, vertical: 16),
         children: [
           // â”€â”€ Estado con Lottie â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
           _StatusCard(order: order),

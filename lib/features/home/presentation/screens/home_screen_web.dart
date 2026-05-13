@@ -118,6 +118,10 @@ class _WebNavbar extends ConsumerWidget {
     final authState = ref.watch(authNotifierProvider);
     final cartCount = ref.watch(cartItemsCountProvider);
     final profile = authState.valueOrNull;
+    final screenW = MediaQuery.sizeOf(context).width;
+    final navHPad = screenW < 500 ? 16.0 : 40.0;
+    final navH = screenW < 500 ? 72.0 : 120.0;
+    final logoFontSize = screenW < 500 ? 22.0 : 32.0;
 
     return ClipRect(
       child: BackdropFilter(
@@ -142,34 +146,38 @@ class _WebNavbar extends ConsumerWidget {
               ),
             ],
           ),
-          padding: const EdgeInsets.symmetric(horizontal: 40),
+          padding: EdgeInsets.symmetric(horizontal: navHPad),
           child: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 1280),
           child: SizedBox(
-            height: 120,
+            height: navH,
             child: Row(
               children: [
                 // Logo
-                GestureDetector(
-                  onTap: () => context.goNamed(RouteNames.home),
-                  child: Row(
-                    children: [
-                      Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
+                Flexible(
+                  child: GestureDetector(
+                    onTap: () => context.goNamed(RouteNames.home),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        FittedBox(
+                          fit: BoxFit.scaleDown,
+                          alignment: Alignment.centerLeft,
+                          child: Text(
                             'Sabor de Casa',
                             style: GoogleFonts.syne(
                               fontWeight: FontWeight.w800,
                               fontStyle: FontStyle.italic,
-                              fontSize: 32,
+                              fontSize: logoFontSize,
                               letterSpacing: 0,
                               height: 1,
-                              color:AppTokens.brandPrimary,
+                              color: AppTokens.brandPrimary,
                             ),
                           ),
+                        ),
+                        if (screenW >= 400) ...[
                           const SizedBox(height: 4),
                           Text(
                             'Sanlúcar de Barrameda',
@@ -181,8 +189,8 @@ class _WebNavbar extends ConsumerWidget {
                             ),
                           ),
                         ],
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
 
@@ -231,7 +239,7 @@ class _WebNavbar extends ConsumerWidget {
                 const SizedBox(width: 8),
 
                 // Auth
-                if (profile == null) ...[
+                if (profile == null && MediaQuery.sizeOf(context).width >= 700) ...[
                   OutlinedButton(
                     onPressed: () => context.goNamed(RouteNames.login),
                     style: OutlinedButton.styleFrom(
@@ -266,7 +274,7 @@ class _WebNavbar extends ConsumerWidget {
                     ),
                     child: const Text('Registrarse'),
                   ),
-                ] else
+                ] else if (profile != null)
                   GestureDetector(
                     onTap: () => context.goNamed(RouteNames.profile),
                     child: Row(
@@ -545,89 +553,111 @@ class _WebSaborBanner extends ConsumerWidget {
         ref.watch(firstOrderDiscountEnabledProvider).valueOrNull ?? true;
     return ColoredBox(
       color: const Color(0xFF0D3B2E),
-      child: SizedBox(
-        height: 420,
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // Imagen ocupa la mitad exacta
-            Expanded(
-              child: Image.network(
-                'https://images.unsplash.com/photo-1574484284002-952d92456975'
-                '?q=80&w=1200&auto=format&fit=crop',
-                fit: BoxFit.cover,
-              ),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final narrow = constraints.maxWidth < 700;
+          final textContent = Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: narrow ? 24 : 64,
+              vertical: narrow ? 32 : 48,
             ),
-            // Texto derecho sobre fondo verde oscuro
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 64, vertical: 48),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text.rich(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text.rich(
+                  TextSpan(
+                    style: GoogleFonts.inter(
+                      fontSize: narrow ? 32 : 48,
+                      fontWeight: FontWeight.w800,
+                      color: Colors.white,
+                      height: 1.1,
+                    ),
+                    children: const [
+                      TextSpan(text: 'El sabor de '),
                       TextSpan(
-                        style: GoogleFonts.inter(
-                          fontSize: 48,
-                          fontWeight: FontWeight.w800,
-                          color: Colors.white,
-                          height: 1.1,
-                        ),
-                        children: const [
-                          TextSpan(text: 'El sabor de '),
-                          TextSpan(
-                            text: 'casa',
-                            style: TextStyle(fontStyle: FontStyle.italic),
-                          ),
-                        ],
+                        text: 'casa',
+                        style: TextStyle(fontStyle: FontStyle.italic),
                       ),
-                    ),
-                    const SizedBox(height: 20),
-                    const Text(
-                      'Cocinamos para que disfrutes comiendo comida casera,\nnatural y variada cada semana.',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.white70,
-                        height: 1.6,
-                      ),
-                    ),
-                    const SizedBox(height: 32),
-                    FilledButton(
-                      onPressed: () {
-                        context.goNamed(RouteNames.menu);
-                        if (discountEnabled) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text(
-                                '¡Tu 30% se aplicará automáticamente en tu primer pedido!',
-                              ),
-                              backgroundColor: AppTokens.brandPrimary,
-                            ),
-                          );
-                        }
-                      },
-                      style: FilledButton.styleFrom(
-                        backgroundColor: Colors.white,
-                        foregroundColor: AppTokens.brandPrimary,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 28,
-                          vertical: 16,
-                        ),
-                        shape: const StadiumBorder(),
-                        textStyle: GoogleFonts.inter(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                      child: const Text('Pruébalo hoy: 30% Dto.'),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
+                const SizedBox(height: 20),
+                const Text(
+                  'Cocinamos para que disfrutes comiendo comida casera,\nnatural y variada cada semana.',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.white70,
+                    height: 1.6,
+                  ),
+                ),
+                const SizedBox(height: 32),
+                FilledButton(
+                  onPressed: () {
+                    context.goNamed(RouteNames.menu);
+                    if (discountEnabled) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text(
+                            '¡Tu 30% se aplicará automáticamente en tu primer pedido!',
+                          ),
+                          backgroundColor: AppTokens.brandPrimary,
+                        ),
+                      );
+                    }
+                  },
+                  style: FilledButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    foregroundColor: AppTokens.brandPrimary,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 28,
+                      vertical: 16,
+                    ),
+                    shape: const StadiumBorder(),
+                    textStyle: GoogleFonts.inter(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  child: const Text('Pruébalo hoy: 30% Dto.'),
+                ),
+              ],
             ),
-          ],
-        ),
+          );
+          if (narrow) {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                SizedBox(
+                  height: 220,
+                  child: Image.network(
+                    'https://images.unsplash.com/photo-1574484284002-952d92456975'
+                    '?q=80&w=1200&auto=format&fit=crop',
+                    fit: BoxFit.cover,
+                    width: double.infinity,
+                  ),
+                ),
+                textContent,
+              ],
+            );
+          }
+          return SizedBox(
+            height: 420,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Expanded(
+                  child: Image.network(
+                    'https://images.unsplash.com/photo-1574484284002-952d92456975'
+                    '?q=80&w=1200&auto=format&fit=crop',
+                    fit: BoxFit.cover,
+                  ),
+                ),
+                Expanded(child: textContent),
+              ],
+            ),
+          );
+        },
       ),
     );
   }
@@ -1088,84 +1118,105 @@ class _WebEncargosBanner extends StatelessWidget {
   Widget build(BuildContext context) {
     return ColoredBox(
       color: const Color(0xFF1B4332),
-      child: SizedBox(
-        height: 420,
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // Imagen ocupa la mitad exacta
-            Expanded(
-              child: Image.network(
-                'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=1200&q=80&auto=format&fit=crop',
-                fit: BoxFit.cover,
-              ),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final narrow = constraints.maxWidth < 700;
+          final textContent = Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: narrow ? 24 : 64,
+              vertical: narrow ? 32 : 48,
             ),
-            // Texto derecho sobre fondo verde oscuro
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 64, vertical: 48),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.start,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+                  decoration: BoxDecoration(
+                    color: AppTokens.brandPrimary.withValues(alpha: 0.5),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: const Text(
+                    'ENCARGOS',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 1.2,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'Encarga con\nantelación',
+                  style: GoogleFonts.inter(
+                    fontWeight: FontWeight.w800,
+                    fontSize: narrow ? 28 : 40,
+                    color: Colors.white,
+                    height: 1.1,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                const Text(
+                  'Reserva tus platos con antelación y recoge cuando quieras.\nSin esperas, con garantía de disponibilidad.',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.white70,
+                    height: 1.6,
+                  ),
+                ),
+                const SizedBox(height: 32),
+                Row(
                   children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
-                      decoration: BoxDecoration(
-                        color: AppTokens.brandPrimary.withValues(alpha: 0.5),
-                        borderRadius: BorderRadius.circular(20),
+                    FilledButton(
+                      onPressed: () => context.goNamed(RouteNames.orders),
+                      style: FilledButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        foregroundColor: const Color(0xFF1B4332),
+                        padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 16),
+                        shape: const StadiumBorder(),
+                        minimumSize: const Size(0, 48),
+                        textStyle: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w700),
                       ),
-                      child: const Text(
-                        'ENCARGOS',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 11,
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: 1.2,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      'Encarga con\nantelación',
-                      style: GoogleFonts.inter(
-                        fontWeight: FontWeight.w800,
-                        fontSize: 40,
-                        color: Colors.white,
-                        height: 1.1,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    const Text(
-                      'Reserva tus platos con antelación y recoge cuando quieras.\nSin esperas, con garantía de disponibilidad.',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.white70,
-                        height: 1.6,
-                      ),
-                    ),
-                    const SizedBox(height: 32),
-                    Row(
-                      children: [
-                        FilledButton(
-                          onPressed: () => context.goNamed(RouteNames.orders),
-                          style: FilledButton.styleFrom(
-                            backgroundColor: Colors.white,
-                            foregroundColor: const Color(0xFF1B4332),
-                            padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 16),
-                            shape: const StadiumBorder(),
-                            minimumSize: const Size(0, 48),
-                            textStyle: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w700),
-                          ),
-                          child: const Text('Ver mis encargos'),
-                        ),
-                      ],
+                      child: const Text('Ver mis encargos'),
                     ),
                   ],
                 ),
-              ),
+              ],
             ),
-          ],
-        ),
+          );
+          if (narrow) {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                SizedBox(
+                  height: 220,
+                  child: Image.network(
+                    'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=1200&q=80&auto=format&fit=crop',
+                    fit: BoxFit.cover,
+                    width: double.infinity,
+                  ),
+                ),
+                textContent,
+              ],
+            );
+          }
+          return SizedBox(
+            height: 420,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Expanded(
+                  child: Image.network(
+                    'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=1200&q=80&auto=format&fit=crop',
+                    fit: BoxFit.cover,
+                  ),
+                ),
+                Expanded(child: textContent),
+              ],
+            ),
+          );
+        },
       ),
     );
   }
@@ -1935,97 +1986,119 @@ class _WebCateringBanner extends StatelessWidget {
   Widget build(BuildContext context) {
     return ColoredBox(
       color: const Color(0xFF1B4332),
-      child: SizedBox(
-        height: 420,
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // Imagen ocupa la mitad exacta
-            Expanded(
-              child: Image.network(
-                'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?q=80&w=1200&auto=format&fit=crop',
-                fit: BoxFit.cover,
-              ),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final narrow = constraints.maxWidth < 700;
+          final textContent = Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: narrow ? 24 : 64,
+              vertical: narrow ? 32 : 48,
             ),
-            // Texto derecho sobre fondo verde oscuro
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 64, vertical: 48),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.start,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+                  decoration: BoxDecoration(
+                    color: AppTokens.brandPrimary.withValues(alpha: 0.5),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: const Text(
+                    'CATERING & EVENTOS',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 1.2,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'Organiza tu evento\ncon nosotros',
+                  style: GoogleFonts.inter(
+                    fontWeight: FontWeight.w800,
+                    fontSize: narrow ? 28 : 40,
+                    color: Colors.white,
+                    height: 1.1,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                const Text(
+                  'Bodas, cumpleaños, reuniones de empresa y mucho más.\nPresupuesto personalizado sin compromiso.',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.white70,
+                    height: 1.6,
+                  ),
+                ),
+                const SizedBox(height: 32),
+                Wrap(
+                  spacing: 12,
+                  runSpacing: 12,
                   children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
-                      decoration: BoxDecoration(
-                        color: AppTokens.brandPrimary.withValues(alpha: 0.5),
-                        borderRadius: BorderRadius.circular(20),
+                    FilledButton(
+                      onPressed: () => context.goNamed(RouteNames.cateringRequest),
+                      style: FilledButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        foregroundColor: const Color(0xFF1B4332),
+                        padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 16),
+                        shape: const StadiumBorder(),
+                        minimumSize: const Size(0, 48),
+                        textStyle: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w700),
                       ),
-                      child: const Text(
-                        'CATERING & EVENTOS',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 11,
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: 1.2,
-                        ),
-                      ),
+                      child: const Text('Solicitar presupuesto'),
                     ),
-                    const SizedBox(height: 16),
-                    Text(
-                      'Organiza tu evento\ncon nosotros',
-                      style: GoogleFonts.inter(
-                        fontWeight: FontWeight.w800,
-                        fontSize: 40,
-                        color: Colors.white,
-                        height: 1.1,
+                    OutlinedButton(
+                      onPressed: () => context.goNamed(RouteNames.catering),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: Colors.white,
+                        side: const BorderSide(color: Colors.white, width: 1.5),
+                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                        shape: const StadiumBorder(),
+                        minimumSize: const Size(0, 48),
+                        textStyle: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w600),
                       ),
-                    ),
-                    const SizedBox(height: 16),
-                    const Text(
-                      'Bodas, cumpleaños, reuniones de empresa y mucho más.\nPresupuesto personalizado sin compromiso.',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.white70,
-                        height: 1.6,
-                      ),
-                    ),
-                    const SizedBox(height: 32),
-                    Row(
-                      children: [
-                        FilledButton(
-                          onPressed: () => context.goNamed(RouteNames.cateringRequest),
-                          style: FilledButton.styleFrom(
-                            backgroundColor: Colors.white,
-                            foregroundColor: const Color(0xFF1B4332),
-                            padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 16),
-                            shape: const StadiumBorder(),
-                            minimumSize: const Size(0, 48),
-                            textStyle: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w700),
-                          ),
-                          child: const Text('Solicitar presupuesto'),
-                        ),
-                        const SizedBox(width: 12),
-                        OutlinedButton(
-                          onPressed: () => context.goNamed(RouteNames.catering),
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: Colors.white,
-                            side: const BorderSide(color: Colors.white, width: 1.5),
-                            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-                            shape: const StadiumBorder(),
-                            minimumSize: const Size(0, 48),
-                            textStyle: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w600),
-                          ),
-                          child: const Text('Ver más'),
-                        ),
-                      ],
+                      child: const Text('Ver más'),
                     ),
                   ],
                 ),
-              ),
+              ],
             ),
-          ],
-        ),
+          );
+          if (narrow) {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                SizedBox(
+                  height: 220,
+                  child: Image.network(
+                    'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?q=80&w=1200&auto=format&fit=crop',
+                    fit: BoxFit.cover,
+                    width: double.infinity,
+                  ),
+                ),
+                textContent,
+              ],
+            );
+          }
+          return SizedBox(
+            height: 420,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Expanded(
+                  child: Image.network(
+                    'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?q=80&w=1200&auto=format&fit=crop',
+                    fit: BoxFit.cover,
+                  ),
+                ),
+                Expanded(child: textContent),
+              ],
+            ),
+          );
+        },
       ),
     );
   }
@@ -2931,195 +3004,203 @@ class _WebSubscriptionSectionState
         child: Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 1200),
-            child: Row(
-              children: [
-                // ── Texto izquierda ──────────────────────────────────────
-                Expanded(
-                  flex: 4,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        '¿Quieres recibir\nel menú del día?',
-                        style: GoogleFonts.inter(
-                          fontSize: 30,
-                          fontWeight: FontWeight.w900,
-                          color: Colors.white,
-                          height: 1.2,
-                        ),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final narrow = constraints.maxWidth < 700;
+                final textBlock = Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '¿Quieres recibir\nel menú del día?',
+                      style: GoogleFonts.inter(
+                        fontSize: 30,
+                        fontWeight: FontWeight.w900,
+                        color: Colors.white,
+                        height: 1.2,
                       ),
-                      const SizedBox(height: 14),
-                      Text(
-                        'Suscríbete y recibe el menú, las ofertas especiales '
-                        'y las novedades directamente en tu correo o WhatsApp. '
-                        'Sin spam, solo lo que importa.',
-                        style: GoogleFonts.inter(
-                          fontSize: 15,
-                          color: Colors.white.withValues(alpha: 0.75),
-                          height: 1.7,
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-                      Row(
-                        children: [
-                          const Icon(
-                            Icons.check_circle,
-                            color: AppTokens.brandPrimary,
-                            size: 17,
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            'Menú del día',
-                            style: GoogleFonts.inter(
-                              color: Colors.white70,
-                              fontSize: 13,
-                            ),
-                          ),
-                          const SizedBox(width: 20),
-                          const Icon(
-                            Icons.check_circle,
-                            color: AppTokens.brandPrimary,
-                            size: 17,
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            'Ofertas especiales',
-                            style: GoogleFonts.inter(
-                              color: Colors.white70,
-                              fontSize: 13,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 64),
-
-                // ── Formulario derecha ───────────────────────────────────
-                Expanded(
-                  flex: 5,
-                  child: Container(
-                    padding: const EdgeInsets.all(32),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(20),
                     ),
-                    child: status == SubscriptionStatus.done
-                        ? const _SubscribedMessage()
-                        : Form(
-                            key: _formKey,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  'Elige cómo quieres recibir las novedades',
-                                  style: GoogleFonts.inter(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w700,
-                                    color: const Color(0xFF1A1A1A),
+                    const SizedBox(height: 14),
+                    Text(
+                      'Suscríbete y recibe el menú, las ofertas especiales '
+                      'y las novedades directamente en tu correo o WhatsApp. '
+                      'Sin spam, solo lo que importa.',
+                      style: GoogleFonts.inter(
+                        fontSize: 15,
+                        color: Colors.white.withValues(alpha: 0.75),
+                        height: 1.7,
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.check_circle,
+                          color: AppTokens.brandPrimary,
+                          size: 17,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Menú del día',
+                          style: GoogleFonts.inter(
+                            color: Colors.white70,
+                            fontSize: 13,
+                          ),
+                        ),
+                        const SizedBox(width: 20),
+                        const Icon(
+                          Icons.check_circle,
+                          color: AppTokens.brandPrimary,
+                          size: 17,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Ofertas especiales',
+                          style: GoogleFonts.inter(
+                            color: Colors.white70,
+                            fontSize: 13,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                );
+                final formBlock = Container(
+                  padding: const EdgeInsets.all(32),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: status == SubscriptionStatus.done
+                      ? const _SubscribedMessage()
+                      : Form(
+                          key: _formKey,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                'Elige cómo quieres recibir las novedades',
+                                style: GoogleFonts.inter(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w700,
+                                  color: const Color(0xFF1A1A1A),
+                                ),
+                              ),
+                              const SizedBox(height: 14),
+                              Row(
+                                children: [
+                                  _TypeToggle(
+                                    label: 'Email',
+                                    icon: Icons.email_outlined,
+                                    selected: !_isWhatsApp,
+                                    onTap: () => setState(() {
+                                      _isWhatsApp = false;
+                                      _ctrl.clear();
+                                    }),
                                   ),
-                                ),
-                                const SizedBox(height: 14),
-                                Row(
-                                  children: [
-                                    _TypeToggle(
-                                      label: 'Email',
-                                      icon: Icons.email_outlined,
-                                      selected: !_isWhatsApp,
-                                      onTap: () => setState(() {
-                                        _isWhatsApp = false;
-                                        _ctrl.clear();
-                                      }),
-                                    ),
-                                    const SizedBox(width: 10),
-                                    _TypeToggle(
-                                      label: 'WhatsApp',
-                                      icon: Icons.phone_outlined,
-                                      selected: _isWhatsApp,
-                                      onTap: () => setState(() {
-                                        _isWhatsApp = true;
-                                        _ctrl.clear();
-                                      }),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 16),
-                                TextFormField(
-                                  controller: _ctrl,
-                                  keyboardType: _isWhatsApp
-                                      ? TextInputType.phone
-                                      : TextInputType.emailAddress,
-                                  decoration: InputDecoration(
-                                    hintText: _isWhatsApp
-                                        ? 'Tu número de WhatsApp'
-                                        : 'Tu correo electrónico',
-                                    filled: true,
-                                    fillColor: const Color(0xFFF5F5F3),
-                                    border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(10),
-                                      borderSide: BorderSide.none,
-                                    ),
-                                    prefixIcon: Icon(
-                                      _isWhatsApp
-                                          ? Icons.phone_outlined
-                                          : Icons.email_outlined,
-                                      color: AppTokens.brandPrimary,
-                                    ),
-                                  ),
-                                  validator: (v) {
-                                    if (v == null || v.trim().isEmpty) {
-                                      return _isWhatsApp
-                                          ? 'Introduce tu número'
-                                          : 'Introduce tu correo';
-                                    }
-                                    return null;
-                                  },
-                                ),
-                                const SizedBox(height: 14),
-                                SizedBox(
-                                  height: 48,
-                                  child: status == SubscriptionStatus.loading
-                                      ? const Center(
-                                          child: CircularProgressIndicator(),
-                                        )
-                                      : FilledButton(
-                                          style: FilledButton.styleFrom(
-                                            backgroundColor:
-                                                AppTokens.brandPrimary,
-                                            shape: RoundedRectangleBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(10),
-                                            ),
-                                          ),
-                                          onPressed: _subscribe,
-                                          child: Text(
-                                            'SUSCRIBIRME',
-                                            style: GoogleFonts.inter(
-                                              fontSize: 14,
-                                              fontWeight: FontWeight.w800,
-                                              letterSpacing: 1.2,
-                                            ),
-                                          ),
-                                        ),
-                                ),
-                                if (status == SubscriptionStatus.error) ...[
-                                  const SizedBox(height: 12),
-                                  const Text(
-                                    'Ha ocurrido un error. Inténtalo de nuevo.',
-                                    style: TextStyle(
-                                      color: Colors.red,
-                                      fontSize: 13,
-                                    ),
+                                  const SizedBox(width: 10),
+                                  _TypeToggle(
+                                    label: 'WhatsApp',
+                                    icon: Icons.phone_outlined,
+                                    selected: _isWhatsApp,
+                                    onTap: () => setState(() {
+                                      _isWhatsApp = true;
+                                      _ctrl.clear();
+                                    }),
                                   ),
                                 ],
+                              ),
+                              const SizedBox(height: 16),
+                              TextFormField(
+                                controller: _ctrl,
+                                keyboardType: _isWhatsApp
+                                    ? TextInputType.phone
+                                    : TextInputType.emailAddress,
+                                decoration: InputDecoration(
+                                  hintText: _isWhatsApp
+                                      ? 'Tu número de WhatsApp'
+                                      : 'Tu correo electrónico',
+                                  filled: true,
+                                  fillColor: const Color(0xFFF5F5F3),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                    borderSide: BorderSide.none,
+                                  ),
+                                  prefixIcon: Icon(
+                                    _isWhatsApp
+                                        ? Icons.phone_outlined
+                                        : Icons.email_outlined,
+                                    color: AppTokens.brandPrimary,
+                                  ),
+                                ),
+                                validator: (v) {
+                                  if (v == null || v.trim().isEmpty) {
+                                    return _isWhatsApp
+                                        ? 'Introduce tu número'
+                                        : 'Introduce tu correo';
+                                  }
+                                  return null;
+                                },
+                              ),
+                              const SizedBox(height: 14),
+                              SizedBox(
+                                height: 48,
+                                child: status == SubscriptionStatus.loading
+                                    ? const Center(
+                                        child: CircularProgressIndicator(),
+                                      )
+                                    : FilledButton(
+                                        style: FilledButton.styleFrom(
+                                          backgroundColor:
+                                              AppTokens.brandPrimary,
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(10),
+                                          ),
+                                        ),
+                                        onPressed: _subscribe,
+                                        child: Text(
+                                          'SUSCRIBIRME',
+                                          style: GoogleFonts.inter(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w800,
+                                            letterSpacing: 1.2,
+                                          ),
+                                        ),
+                                      ),
+                              ),
+                              if (status == SubscriptionStatus.error) ...[
+                                const SizedBox(height: 12),
+                                const Text(
+                                  'Ha ocurrido un error. Inténtalo de nuevo.',
+                                  style: TextStyle(
+                                    color: Colors.red,
+                                    fontSize: 13,
+                                  ),
+                                ),
                               ],
-                            ),
+                            ],
                           ),
-                  ),
-                ),
-              ],
+                        ),
+                );
+                if (narrow) {
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      textBlock,
+                      const SizedBox(height: 32),
+                      formBlock,
+                    ],
+                  );
+                }
+                return Row(
+                  children: [
+                    Expanded(flex: 4, child: textBlock),
+                    const SizedBox(width: 64),
+                    Expanded(flex: 5, child: formBlock),
+                  ],
+                );
+              },
             ),
           ),
         ),
@@ -3551,174 +3632,172 @@ class _WebFooter extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           // ── Cuerpo: 4 columnas ──────────────────────────────────────────
-          Padding(
-            padding: const EdgeInsets.fromLTRB(48, 64, 48, 48),
-            child: Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 1200),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+          LayoutBuilder(
+            builder: (context, lc) {
+              final narrow = lc.maxWidth < 700;
+              final hPad = narrow ? 20.0 : 48.0;
+              final colW = narrow ? (lc.maxWidth - hPad * 2 - 24) / 2 : 0.0;
+              final col1 = Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Conócenos',
+                    style: GoogleFonts.inter(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w800,
+                      color: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Sabor de Casa es tu servicio de comida casera '
+                    'de confianza en Sanlúcar de Barrameda. Platos '
+                    'elaborados a diario con ingredientes frescos, sin '
+                    'conservantes, para que comas rico cada día.',
+                    style: GoogleFonts.inter(
+                      fontSize: 13,
+                      color: _muted,
+                      height: 1.7,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Recogida en local, encargo previo o entrega a domicilio.',
+                    style: GoogleFonts.inter(
+                      fontSize: 13,
+                      color: _muted,
+                      height: 1.7,
+                      fontStyle: FontStyle.italic,
+                    ),
+                  ),
+                ],
+              );
+              final col2 = Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Navegación',
+                    style: GoogleFonts.inter(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w800,
+                      color: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  _FooterLink(
+                    label: 'Menú del día',
+                    onTap: () => context.goNamed(RouteNames.menu),
+                  ),
+                  _FooterLink(
+                    label: 'Catering y eventos',
+                    onTap: () => context.goNamed(RouteNames.catering),
+                  ),
+                  _FooterLink(
+                    label: 'Mis pedidos',
+                    onTap: () => context.goNamed(RouteNames.orders),
+                  ),
+                  _FooterLink(
+                    label: 'Mi perfil',
+                    onTap: () => context.goNamed(RouteNames.profile),
+                  ),
+                  _FooterLink(
+                    label: 'Contacto',
+                    onTap: () => context.goNamed(RouteNames.contact),
+                  ),
+                ],
+              );
+              final col3 = Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Contacto',
+                    style: GoogleFonts.inter(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w800,
+                      color: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  const _FooterInfoRow(
+                    icon: Icons.location_on_outlined,
+                    text: 'Sanlúcar de Barrameda, Cádiz',
+                  ),
+                  const SizedBox(height: 10),
+                  const _FooterInfoRow(
+                    icon: Icons.phone_outlined,
+                    text: '956 36 30 09',
+                  ),
+                  const SizedBox(height: 10),
+                  const _FooterInfoRow(
+                    icon: Icons.email_outlined,
+                    text: 'info@sabordecasa.es',
+                  ),
+                  const SizedBox(height: 10),
+                  const _FooterInfoRow(
+                    icon: Icons.access_time_outlined,
+                    text: 'Lun – Sáb: 12:00 – 16:00',
+                  ),
+                ],
+              );
+              final col4 = Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 14,
+                ),
+                decoration: BoxDecoration(
+                  color: _bgCard,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: const Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    // Columna 1: Conócenos
-                    Expanded(
-                      flex: 3,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Conócenos',
-                            style: GoogleFonts.inter(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w800,
-                              color: Colors.white,
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            'Sabor de Casa es tu servicio de comida casera '
-                            'de confianza en Sanlúcar de Barrameda. Platos '
-                            'elaborados a diario con ingredientes frescos, sin '
-                            'conservantes, para que comas rico cada día.',
-                            style: GoogleFonts.inter(
-                              fontSize: 13,
-                              color: _muted,
-                              height: 1.7,
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            'Recogida en local, encargo previo o entrega a domicilio.',
-                            style: GoogleFonts.inter(
-                              fontSize: 13,
-                              color: _muted,
-                              height: 1.7,
-                              fontStyle: FontStyle.italic,
-                            ),
-                          ),
-                        ],
-                      ),
+                    _SocialCircle(
+                      icon: Icons.facebook,
+                      tooltip: 'Facebook',
                     ),
-                    const SizedBox(width: 48),
-
-                    // Columna 2: Navegación
-                    Expanded(
-                      flex: 2,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Navegación',
-                            style: GoogleFonts.inter(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w800,
-                              color: Colors.white,
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          _FooterLink(
-                            label: 'Menú del día',
-                            onTap: () => context.goNamed(RouteNames.menu),
-                          ),
-                          _FooterLink(
-                            label: 'Catering y eventos',
-                            onTap: () => context.goNamed(RouteNames.catering),
-                          ),
-                          _FooterLink(
-                            label: 'Mis pedidos',
-                            onTap: () => context.goNamed(RouteNames.orders),
-                          ),
-                          _FooterLink(
-                            label: 'Mi perfil',
-                            onTap: () => context.goNamed(RouteNames.profile),
-                          ),
-                          _FooterLink(
-                            label: 'Contacto',
-                            onTap: () => context.goNamed(RouteNames.contact),
-                          ),
-                        ],
-                      ),
+                    _SocialCircle(
+                      icon: Icons.camera_alt_outlined,
+                      tooltip: 'Instagram',
                     ),
-                    const SizedBox(width: 48),
-
-                    // Columna 3: Contacto
-                    Expanded(
-                      flex: 2,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Contacto',
-                            style: GoogleFonts.inter(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w800,
-                              color: Colors.white,
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          const _FooterInfoRow(
-                            icon: Icons.location_on_outlined,
-                            text: 'Sanlúcar de Barrameda, Cádiz',
-                          ),
-                          const SizedBox(height: 10),
-                          const _FooterInfoRow(
-                            icon: Icons.phone_outlined,
-                            text: '956 36 30 09',
-                          ),
-                          const SizedBox(height: 10),
-                          const _FooterInfoRow(
-                            icon: Icons.email_outlined,
-                            text: 'info@sabordecasa.es',
-                          ),
-                          const SizedBox(height: 10),
-                          const _FooterInfoRow(
-                            icon: Icons.access_time_outlined,
-                            text: 'Lun – Sáb: 12:00 – 16:00',
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: 48),
-
-                    // Columna 4: Redes sociales
-                    SizedBox(
-                      width: 280,
-                      child: Column(
-                        children: [
-                          Container(
-                            width: 260,
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 14,
-                            ),
-                            decoration: BoxDecoration(
-                              color: _bgCard,
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            child: const Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                              children: [
-                                _SocialCircle(
-                                  icon: Icons.facebook,
-                                  tooltip: 'Facebook',
-                                ),
-                                _SocialCircle(
-                                  icon: Icons.camera_alt_outlined,
-                                  tooltip: 'Instagram',
-                                ),
-                                _SocialCircle(
-                                  icon: Icons.alternate_email,
-                                  tooltip: 'Email',
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
+                    _SocialCircle(
+                      icon: Icons.alternate_email,
+                      tooltip: 'Email',
                     ),
                   ],
                 ),
-              ),
-            ),
+              );
+              return Padding(
+                padding: EdgeInsets.fromLTRB(hPad, 64, hPad, 48),
+                child: Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 1200),
+                    child: narrow
+                        ? Wrap(
+                            spacing: 24,
+                            runSpacing: 32,
+                            children: [
+                              SizedBox(width: colW, child: col1),
+                              SizedBox(width: colW, child: col2),
+                              SizedBox(width: colW, child: col3),
+                              SizedBox(width: colW, child: col4),
+                            ],
+                          )
+                        : Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(flex: 3, child: col1),
+                              const SizedBox(width: 48),
+                              Expanded(flex: 2, child: col2),
+                              const SizedBox(width: 48),
+                              Expanded(flex: 2, child: col3),
+                              const SizedBox(width: 48),
+                              SizedBox(width: 280, child: col4),
+                            ],
+                          ),
+                  ),
+                ),
+              );
+            },
           ),
 
           // ── Divisor ─────────────────────────────────────────────────────
@@ -3731,50 +3810,68 @@ class _WebFooter extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 28),
             child: Center(
-              child: Text(
-                'Sabor de Casa',
-                style: GoogleFonts.syne(
-                  fontWeight: FontWeight.w800,
-                  fontStyle: FontStyle.italic,
-                  fontSize: 72,
-                  letterSpacing: 0,
-                  height: 1,
-                  color: AppTokens.brandPrimary,
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  'Sabor de Casa',
+                  style: GoogleFonts.syne(
+                    fontWeight: FontWeight.w800,
+                    fontStyle: FontStyle.italic,
+                    fontSize: 72,
+                    letterSpacing: 0,
+                    height: 1,
+                    color: AppTokens.brandPrimary,
+                  ),
                 ),
               ),
             ),
           ),
 
           // ── Barra legal ──────────────────────────────────────────────────
-          Padding(
-            padding: const EdgeInsets.fromLTRB(48, 20, 48, 36),
-            child: Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 1200),
-                child: Row(
-                  children: [
-                    const Expanded(
-                      child: Wrap(
-                        spacing: 24,
-                        runSpacing: 8,
-                        children: [
-                          _LegalLink(label: 'Aviso legal'),
-                          _LegalLink(label: 'Privacidad'),
-                          _LegalLink(label: 'Cookies'),
-                          _LegalLink(label: 'Términos y condiciones'),
-                          _LegalLink(label: 'Preguntas frecuentes'),
-                        ],
-                      ),
-                    ),
-                    Text(
-                      'Copyright \u00a9 ${DateTime.now().year} Sabor de Casa. '
-                      'Todos los derechos reservados.',
-                      style: const TextStyle(color: _muted, fontSize: 12),
-                    ),
-                  ],
+          LayoutBuilder(
+            builder: (context, lc) {
+              final narrow = lc.maxWidth < 700;
+              final hPad = narrow ? 20.0 : 48.0;
+              const links = Wrap(
+                spacing: 24,
+                runSpacing: 8,
+                children: [
+                  _LegalLink(label: 'Aviso legal'),
+                  _LegalLink(label: 'Privacidad'),
+                  _LegalLink(label: 'Cookies'),
+                  _LegalLink(label: 'Términos y condiciones'),
+                  _LegalLink(label: 'Preguntas frecuentes'),
+                ],
+              );
+              final copyright = Text(
+                'Copyright \u00a9 ${DateTime.now().year} Sabor de Casa. '
+                'Todos los derechos reservados.',
+                style: const TextStyle(color: _muted, fontSize: 12),
+              );
+              return Padding(
+                padding: EdgeInsets.fromLTRB(hPad, 20, hPad, 36),
+                child: Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 1200),
+                    child: narrow
+                        ? Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              links,
+                              const SizedBox(height: 12),
+                              copyright,
+                            ],
+                          )
+                        : Row(
+                            children: [
+                              const Expanded(child: links),
+                              copyright,
+                            ],
+                          ),
+                  ),
                 ),
-              ),
-            ),
+              );
+            },
           ),
         ],
       ),

@@ -101,6 +101,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final profileAsync = ref.watch(profileNotifierProvider);
     final isDarkMode =
         ref.watch(themeNotifierProvider).valueOrNull == ThemeMode.dark;
+    final screenW = MediaQuery.sizeOf(context).width;
+    final hPad = screenW > 900 ? (screenW - 900) / 2 : 20.0;
 
     ref.listen(profileNotifierProvider, (prev, next) {
       final hadValue = prev?.hasValue ?? false;
@@ -137,7 +139,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   ),
                 ),
                 SliverPadding(
-                  padding: const EdgeInsets.fromLTRB(20, 28, 20, 40),
+                  padding: EdgeInsets.fromLTRB(hPad, 28, hPad, 40),
                   sliver: SliverList(
                     delegate: SliverChildListDelegate([
                       // Datos personales

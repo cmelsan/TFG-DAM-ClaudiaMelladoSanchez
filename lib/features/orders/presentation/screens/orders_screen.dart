@@ -86,6 +86,8 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
   @override
   Widget build(BuildContext context) {
     final ordersAsync = ref.watch(ordersProvider);
+    final screenW = MediaQuery.sizeOf(context).width;
+    final hPad = screenW > 900 ? (screenW - 900) / 2 : 16.0;
 
     return Scaffold(
       appBar: AppBar(title: const Text('Mis pedidos'), centerTitle: true),
@@ -138,15 +140,15 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
                 if (filtered.isEmpty)
                   const SliverFillRemaining(child: _EmptyOrders())
                 else ...[
-                  const SliverToBoxAdapter(
+                  SliverToBoxAdapter(
                     child: Padding(
-                      padding: EdgeInsets.fromLTRB(16, 20, 16, 4),
-                      child: SectionHeader('Historial'),
+                      padding: EdgeInsets.fromLTRB(hPad, 20, hPad, 4),
+                      child: const SectionHeader('Historial'),
                     ),
                   ),
                   SliverPadding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
+                    padding: EdgeInsets.symmetric(
+                      horizontal: hPad,
                       vertical: 8,
                     ),
                     sliver: SliverList(

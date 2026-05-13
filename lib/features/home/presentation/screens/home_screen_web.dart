@@ -69,6 +69,7 @@ class _HomeScreenWebState extends ConsumerState<HomeScreenWeb> {
             const _WebOffersSection(),
             const _WebEncargosBanner(),
             const _WebHowItWorksSection(),
+            const _WebTestimonialsSection(),
             Center(
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 1200),
@@ -77,8 +78,6 @@ class _HomeScreenWebState extends ConsumerState<HomeScreenWeb> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      SizedBox(height: 56),
-                      _WebTestimonialsSection(),
                       SizedBox(height: 56),
                       _WebSeasonalSection(),
                       SizedBox(height: 80),
@@ -2806,38 +2805,110 @@ class _DailyFoodImage extends StatelessWidget {
 
 // -- Testimonios -------------------------------------------------------------
 
-class _WebTestimonialsSection extends StatelessWidget {
+// ── Sección de testimonios ─────────────────────────────────────────────────
+
+class _WebTestimonialsSection extends StatefulWidget {
   const _WebTestimonialsSection();
 
+  @override
+  State<_WebTestimonialsSection> createState() =>
+      _WebTestimonialsSectionState();
+}
+
+class _WebTestimonialsSectionState extends State<_WebTestimonialsSection> {
+  // TODO: Reemplazar con datos reales de Supabase (valoraciones 5 estrellas)
   static const _reviews = [
     (
-      author: 'Maria G.',
+      author: 'Mar\u00eda G.',
       text:
-          'La mejor comida casera de Sanlucar. El pollo asado es espectacular, '
+          'La mejor comida casera de Sanl\u00facar. El pollo asado es espectacular, '
           'igual que el de mi abuela. Llevo meses pidiendo cada semana.',
       rating: 5,
     ),
     (
       author: 'Carlos R.',
       text:
-          'Pedimos catering para la comunion de mi hija y fue todo un exito. '
-          'La organizacion perfecta y la comida deliciosa.',
+          'Pedimos catering para la comuni\u00f3n de mi hija y fue todo un \u00e9xito. '
+          'La organizaci\u00f3n perfecta y la comida deliciosa.',
       rating: 5,
     ),
     (
       author: 'Ana L.',
       text:
-          'Los encargos son comodisimos. Dejo el pedido el dia anterior y lo '
-          'recojo recien hecho. Sin colas, sin esperas.',
+          'Los encargos son comod\u00edsimos. Dejo el pedido el d\u00eda anterior y lo '
+          'recojo reci\u00e9n hecho. Sin colas, sin esperas.',
       rating: 5,
     ),
   ];
 
+  static const _bullets = [
+    ('M\u00e1s de 500 familias', 'ya conf\u00edan en nuestra cocina cada semana.'),
+    ('Despreoc\u00fapate', 'de cocinar, sin dejar de comer bien.'),
+    ('Ingredientes frescos', 'elaborados a diario, sin conservantes.'),
+  ];
+
+  int _page = 0;
+
   @override
   Widget build(BuildContext context) {
+    return ColoredBox(
+      color: Colors.white,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 56),
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 1200),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 32),
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final isWide = constraints.maxWidth >= 680;
+                  final itemsPerPage = isWide ? 2 : 1;
+                  final totalPages =
+                      (_reviews.length / itemsPerPage).ceil();
+
+                  final mainContent = _buildMainContent(
+                    constraints,
+                    isWide,
+                    itemsPerPage,
+                    totalPages,
+                  );
+
+                  if (!isWide) return mainContent;
+
+                  return Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Expanded(flex: 6, child: mainContent),
+                      const SizedBox(width: 24),
+                      SizedBox(
+                        width: 260,
+                        child: Image.asset(
+                          'assets/images/movilopiniones.png',
+                          fit: BoxFit.contain,
+                        ),
+                      ),
+                    ],
+                  );
+                },
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMainContent(
+    BoxConstraints outerConstraints,
+    bool isWide,
+    int itemsPerPage,
+    int totalPages,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // Badge
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
           decoration: BoxDecoration(
@@ -2849,12 +2920,15 @@ class _WebTestimonialsSection extends StatelessWidget {
             children: [
               ...List.generate(
                 5,
-                (_) =>
-                    const Icon(Icons.star, color: Color(0xFFFFC107), size: 13),
+                (_) => const Icon(
+                  Icons.star,
+                  color: Color(0xFFFFC107),
+                  size: 13,
+                ),
               ),
               const SizedBox(width: 6),
               const Text(
-                '4.9 · Valoraciones de clientes',
+                '4.9 \u00b7 Valoraciones de clientes',
                 style: TextStyle(
                   color: Color(0xFF7B5000),
                   fontWeight: FontWeight.w700,
@@ -2865,39 +2939,201 @@ class _WebTestimonialsSection extends StatelessWidget {
             ],
           ),
         ),
-        const SizedBox(height: 10),
+        const SizedBox(height: 12),
+        // T\u00edtulo
         Text(
-          'LO QUE DICEN NUESTROS CLIENTES',
+          'Lo que dicen\nnuestros clientes',
           style: GoogleFonts.inter(
-            fontSize: 34,
+            fontSize: isWide ? 30 : 26,
             fontWeight: FontWeight.w900,
-            letterSpacing: 0.5,
+            letterSpacing: 0.2,
+            height: 1.15,
             color: const Color(0xFF111111),
           ),
         ),
-        const SizedBox(height: 24),
-        LayoutBuilder(
-          builder: (_, constraints) {
-            const spacing = 20.0;
-            final cols = constraints.maxWidth < 600 ? 1 : 3;
-            final cardW = cols == 1
-                ? constraints.maxWidth
-                : (constraints.maxWidth - spacing * (cols - 1)) / cols;
-            return Wrap(
-              spacing: spacing,
-              runSpacing: spacing,
-              children: _reviews
-                  .map(
-                    (r) => SizedBox(
-                      width: cardW,
-                      child: _ReviewCard(review: r),
+        const SizedBox(height: 16),
+        // Bullets
+        ..._bullets.map(
+          (b) => Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Padding(
+                  padding: EdgeInsets.only(top: 1),
+                  child: Icon(
+                    Icons.check_circle,
+                    size: 15,
+                    color: AppTokens.brandPrimary,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text.rich(
+                    TextSpan(
+                      children: [
+                        TextSpan(
+                          text: '${b.$1} ',
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w700,
+                            fontSize: 13,
+                            color: Color(0xFF111111),
+                          ),
+                        ),
+                        TextSpan(
+                          text: b.$2,
+                          style: const TextStyle(
+                            fontSize: 13,
+                            color: Color(0xFF555555),
+                          ),
+                        ),
+                      ],
                     ),
-                  )
-                  .toList(),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 20),
+        // Carrusel
+        LayoutBuilder(
+          builder: (context, constraints) {
+            const arrowW = 36.0;
+            const arrowSpacing = 8.0;
+            const cardSpacing = 16.0;
+            final carouselW =
+                constraints.maxWidth - (arrowW + arrowSpacing) * 2;
+            final cardW = itemsPerPage == 1
+                ? carouselW
+                : (carouselW - cardSpacing) / 2;
+
+            final start = _page * itemsPerPage;
+            final end = (start + itemsPerPage).clamp(0, _reviews.length);
+            final pageReviews = _reviews.sublist(start, end);
+
+            return Column(
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Flecha izquierda
+                    Padding(
+                      padding: const EdgeInsets.only(
+                        top: 24,
+                        right: arrowSpacing,
+                      ),
+                      child: _ArrowButton(
+                        icon: Icons.chevron_left,
+                        enabled: _page > 0,
+                        onTap: () => setState(() => _page--),
+                      ),
+                    ),
+                    // Cards
+                    Expanded(
+                      child: AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 280),
+                        transitionBuilder: (child, anim) =>
+                            FadeTransition(opacity: anim, child: child),
+                        child: Row(
+                          key: ValueKey(_page),
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            for (int i = 0; i < pageReviews.length; i++) ...[
+                              if (i > 0) const SizedBox(width: cardSpacing),
+                              SizedBox(
+                                width: cardW,
+                                child: _ReviewCard(review: pageReviews[i]),
+                              ),
+                            ],
+                            if (pageReviews.length < itemsPerPage)
+                              SizedBox(width: cardW + cardSpacing),
+                          ],
+                        ),
+                      ),
+                    ),
+                    // Flecha derecha
+                    Padding(
+                      padding: const EdgeInsets.only(
+                        top: 24,
+                        left: arrowSpacing,
+                      ),
+                      child: _ArrowButton(
+                        icon: Icons.chevron_right,
+                        enabled: _page < totalPages - 1,
+                        onTap: () => setState(() => _page++),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                // Puntos indicadores
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: List.generate(
+                    totalPages,
+                    (i) => AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
+                      margin: const EdgeInsets.symmetric(horizontal: 3),
+                      width: i == _page ? 20 : 8,
+                      height: 8,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(4),
+                        color: i == _page
+                            ? AppTokens.brandPrimary
+                            : const Color(0xFFCCCCCC),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             );
           },
         ),
+        if (!isWide) ...[
+          const SizedBox(height: 24),
+          Center(
+            child: Image.asset(
+              'assets/images/movilopiniones.png',
+              height: 200,
+              fit: BoxFit.contain,
+            ),
+          ),
+        ],
       ],
+    );
+  }
+}
+
+class _ArrowButton extends StatelessWidget {
+  const _ArrowButton({
+    required this.icon,
+    required this.enabled,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final bool enabled;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: enabled ? onTap : null,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
+        width: 36,
+        height: 36,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: enabled ? AppTokens.brandPrimary : const Color(0xFFE0E0E0),
+        ),
+        child: Icon(
+          icon,
+          color: enabled ? Colors.white : const Color(0xFFAAAAAA),
+          size: 20,
+        ),
+      ),
     );
   }
 }
@@ -2910,7 +3146,7 @@ class _ReviewCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
@@ -2935,24 +3171,24 @@ class _ReviewCard extends StatelessWidget {
               (_) => const Icon(
                 Icons.star,
                 color: Color(0xFFFFC107),
-                size: 16,
+                size: 15,
               ),
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 10),
           Text(
             '"${review.text}"',
             style: const TextStyle(
-              fontSize: 14,
+              fontSize: 13,
               color: Color(0xFF333330),
               height: 1.6,
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
           Text(
-            'â€” ${review.author}',
+            '\u2014 ${review.author}',
             style: const TextStyle(
-              fontSize: 13,
+              fontSize: 12,
               fontWeight: FontWeight.w700,
               color: AppTokens.brandPrimary,
             ),
@@ -2962,7 +3198,6 @@ class _ReviewCard extends StatelessWidget {
     );
   }
 }
-
 // -- Suscripcion -------------------------------------------------------------
 
 class _WebSubscriptionSection extends ConsumerStatefulWidget {

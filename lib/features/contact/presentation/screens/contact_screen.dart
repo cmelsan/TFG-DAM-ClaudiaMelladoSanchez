@@ -1,9 +1,12 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:sabor_de_casa/core/router/route_names.dart';
 import 'package:sabor_de_casa/core/theme/app_tokens.dart';
 import 'package:sabor_de_casa/core/utils/validators.dart';
 import 'package:sabor_de_casa/core/widgets/location_section.dart';
+import 'package:sabor_de_casa/core/widgets/web_footer.dart';
+import 'package:sabor_de_casa/core/widgets/web_navbar.dart';
 import 'package:sabor_de_casa/features/contact/presentation/providers/contact_provider.dart';
 
 class ContactScreen extends ConsumerStatefulWidget {
@@ -20,6 +23,18 @@ class _ContactScreenState extends ConsumerState<ContactScreen> {
   final _phoneCtrl = TextEditingController();
   String? _selectedType;
   final _messageCtrl = TextEditingController();
+  late final ScrollController _scrollCtrl;
+  bool _isScrolled = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollCtrl = ScrollController()
+      ..addListener(() {
+        final scrolled = _scrollCtrl.offset > 10;
+        if (scrolled != _isScrolled) setState(() => _isScrolled = scrolled);
+      });
+  }
 
   @override
   void dispose() {
@@ -27,6 +42,7 @@ class _ContactScreenState extends ConsumerState<ContactScreen> {
     _emailCtrl.dispose();
     _phoneCtrl.dispose();
     _messageCtrl.dispose();
+    _scrollCtrl.dispose();
     super.dispose();
   }
 
@@ -156,6 +172,7 @@ class _ContactScreenState extends ConsumerState<ContactScreen> {
           const SliverToBoxAdapter(child: SizedBox(height: 48)),
           const SliverToBoxAdapter(child: LocationSection()),
           const SliverToBoxAdapter(child: SizedBox(height: 40)),
+          const SliverToBoxAdapter(child: WebFooter()),
         ],
       ),
     );

@@ -1,6 +1,8 @@
 ﻿import 'dart:ui';
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:sabor_de_casa/core/widgets/web_footer.dart';
+import 'package:sabor_de_casa/core/widgets/web_navbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -51,7 +53,7 @@ class _HomeScreenWebState extends ConsumerState<HomeScreenWeb> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F5),
+      backgroundColor: Colors.white,
       endDrawer: const _WebCartDrawer(),
       body: Stack(
         children: [
@@ -60,7 +62,7 @@ class _HomeScreenWebState extends ConsumerState<HomeScreenWeb> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const SizedBox(height: 120), // offset navbar fija
+                const SizedBox(height: 80), // offset navbar fija
                 _WebHero(),
             const _WebDailyMenuSection(),
             const _WebCateringBanner(),
@@ -88,7 +90,7 @@ class _HomeScreenWebState extends ConsumerState<HomeScreenWeb> {
             ),
             const _WebSubscriptionSection(),
             const LocationSection(),
-            const _WebFooter(),
+            const WebFooter(),
           ],
         ),
           ),
@@ -97,7 +99,11 @@ class _HomeScreenWebState extends ConsumerState<HomeScreenWeb> {
             top: 0,
             left: 0,
             right: 0,
-            child: _WebNavbar(isScrolled: _isScrolled),
+            child: WebNavbar(
+              isScrolled: _isScrolled,
+              activeRoute: RouteNames.home,
+              onCartTap: () => Scaffold.of(context).openEndDrawer(),
+            ),
           ),
         ],
       ),
@@ -105,7 +111,7 @@ class _HomeScreenWebState extends ConsumerState<HomeScreenWeb> {
   }
 }
 
-// ── Navbar Web ────────────────────────────────────────────────────────────
+// ── Navbar Web (privado, conservado) ── use WebNavbar from core/widgets ─────
 
 class _WebNavbar extends ConsumerWidget {
   const _WebNavbar({required this.isScrolled});
@@ -199,11 +205,6 @@ class _WebNavbar extends ConsumerWidget {
                 if (MediaQuery.sizeOf(context).width >= 700) ...[
                   _NavLink(
                     label: 'Menú',
-                    onTap: () => context.goNamed(RouteNames.menu),
-                  ),
-                  const SizedBox(width: 8),
-                  _NavLink(
-                    label: 'Plato del dia',
                     onTap: () => context.goNamed(RouteNames.menu),
                   ),
                   const SizedBox(width: 8),
@@ -2460,7 +2461,7 @@ class _DailyMenuLayout extends StatelessWidget {
     final imageUrl = special.imageUrl ?? _defaultPhoto;
 
     return ColoredBox(
-      color: AppTokens.pageBg,
+      color: Colors.white,
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 56, horizontal: 32),
         child: Center(
@@ -2596,7 +2597,7 @@ class _DailyMenuHeader extends StatelessWidget {
 
 // ── Panel de menú (izquierda) ─────────────────────────────────────────────────
 
-class _MenuPanel extends StatelessWidget {
+class _MenuPanel extends ConsumerWidget {
   const _MenuPanel({required this.special});
 
   final DailySpecial special;
@@ -2605,7 +2606,7 @@ class _MenuPanel extends StatelessWidget {
   static const _labelColor = Color(0xFF9E9E9E);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 36, vertical: 36),
       child: Column(
@@ -2687,7 +2688,30 @@ class _MenuPanel extends StatelessWidget {
                 const SizedBox(width: 20),
               ],
               FilledButton(
-                onPressed: () => context.goNamed(RouteNames.menu),
+                onPressed: special.menuPrice == null
+                    ? null
+                    : () {
+                        ref.read(cartNotifierProvider.notifier).addItem(
+                          CartItem(
+                            dishId: special.id,
+                            name: 'Menú del día',
+                            unitPrice: special.menuPrice!,
+                            quantity: 1,
+                            imageUrl: special.imageUrl,
+                          ),
+                        );
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              'Menú del día añadido al carrito',
+                              style: GoogleFonts.inter(fontSize: 14),
+                            ),
+                            backgroundColor: AppTokens.brandPrimary,
+                            behavior: SnackBarBehavior.floating,
+                            duration: const Duration(seconds: 2),
+                          ),
+                        );
+                      },
                 style: FilledButton.styleFrom(
                   backgroundColor: AppTokens.brandPrimary,
                   padding: const EdgeInsets.symmetric(
@@ -2707,33 +2731,7 @@ class _MenuPanel extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 12),
-          // ── CTA secundario ────────────────────────────────────────────
-          TextButton(
-            onPressed: () => context.goNamed(RouteNames.menu),
-            style: TextButton.styleFrom(
-              foregroundColor: AppTokens.brandPrimary,
-              padding: EdgeInsets.zero,
-              minimumSize: const Size(0, 32),
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  'Ver menú completo',
-                  style: GoogleFonts.inter(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w500,
-                    decoration: TextDecoration.underline,
-                    decorationColor: AppTokens.brandPrimary,
-                  ),
-                ),
-                const SizedBox(width: 4),
-                const Icon(Icons.arrow_forward_rounded, size: 15),
-              ],
-            ),
-          ),
+
         ],
       ),
     );

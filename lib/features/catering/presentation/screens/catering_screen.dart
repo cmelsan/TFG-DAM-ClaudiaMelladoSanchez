@@ -1,6 +1,8 @@
 ﻿import 'dart:ui';
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:sabor_de_casa/core/widgets/web_footer.dart';
+import 'package:sabor_de_casa/core/widgets/web_navbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -67,7 +69,7 @@ class _CateringScreenState extends ConsumerState<CateringScreen>
       backgroundColor: AppTokens.pageBg,
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(80),
-        child: _CateringNavbar(isScrolled: _isScrolled),
+        child: WebNavbar(isScrolled: _isScrolled, activeRoute: RouteNames.catering),
       ),
       body: SingleChildScrollView(
         controller: _scrollCtrl,
@@ -185,7 +187,7 @@ class _CateringScreenState extends ConsumerState<CateringScreen>
             // ── Cómo funciona ─────────────────────────────────────────
             _HowItWorksSection(sidePad: sidePad),
 
-            const SizedBox(height: 80),
+            const WebFooter(),
           ],
         ),
       ),

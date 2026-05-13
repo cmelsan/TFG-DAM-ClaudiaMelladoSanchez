@@ -1,6 +1,8 @@
 ﻿import 'dart:ui';
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:sabor_de_casa/core/widgets/web_footer.dart';
+import 'package:sabor_de_casa/core/widgets/web_navbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -145,6 +147,31 @@ class _MenuScreenState extends ConsumerState<MenuScreen>
 
     return Scaffold(
       backgroundColor: Colors.white,
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(80),
+        child: WebNavbar(
+          isScrolled: _isScrolled,
+          activeRoute: RouteNames.menu,
+          trailingActions: [
+            IconButton(
+              onPressed: () => _showAllergenFilterSheet(context),
+              tooltip: 'Filtrar por alérgenos',
+              icon: Badge.count(
+                count: allergenFilter.length,
+                isLabelVisible: allergenFilter.isNotEmpty,
+                backgroundColor: Colors.orange,
+                child: Icon(
+                  Icons.tune_outlined,
+                  size: 22,
+                  color: allergenFilter.isNotEmpty
+                      ? Colors.orange.shade700
+                      : const Color(0xFF444444),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
       body: RefreshIndicator(
         onRefresh: () async {
           ref
@@ -154,24 +181,6 @@ class _MenuScreenState extends ConsumerState<MenuScreen>
         child: CustomScrollView(
           controller: _scrollCtrl,
           slivers: [
-            // -- Navbar web --------------------------------------------------
-            SliverAppBar(
-              pinned: true,
-              backgroundColor: Colors.transparent,
-              surfaceTintColor: Colors.transparent,
-              elevation: 0,
-              scrolledUnderElevation: 0,
-              toolbarHeight: 0,
-              automaticallyImplyLeading: false,
-              bottom: PreferredSize(
-                preferredSize: const Size.fromHeight(80),
-                child: _MenuWebNavbar(
-                  isScrolled: _isScrolled,
-                  onAllergenTap: () => _showAllergenFilterSheet(context),
-                ),
-              ),
-            ),
-
             // ── Hero ──────────────────────────────────────────────────────────
             SliverToBoxAdapter(
               child: FadeTransition(
@@ -523,7 +532,7 @@ class _MenuScreenState extends ConsumerState<MenuScreen>
               ),
             ),
 
-            const SliverToBoxAdapter(child: SizedBox(height: 80)),
+            const SliverToBoxAdapter(child: WebFooter()),
           ],
         ),
       ),

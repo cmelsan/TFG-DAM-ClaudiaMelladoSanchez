@@ -3303,7 +3303,14 @@ class _WebSubscriptionSectionState
                   padding: const EdgeInsets.all(32),
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    borderRadius: BorderRadius.circular(20),
+                    borderRadius: BorderRadius.circular(24),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.10),
+                        blurRadius: 32,
+                        offset: Offset(0, 8),
+                      ),
+                    ],
                   ),
                   child: status == SubscriptionStatus.done
                       ? const _SubscribedMessage()
@@ -3499,9 +3506,7 @@ class _TypeToggle extends StatelessWidget {
           color: selected ? AppTokens.brandPrimary : Colors.white,
           borderRadius: BorderRadius.circular(10),
           border: Border.all(
-            color: selected
-                ? AppTokens.brandPrimary
-                : const Color(0xFFDDDDDD),
+            color: AppTokens.brandPrimary,
           ),
         ),
         child: Row(

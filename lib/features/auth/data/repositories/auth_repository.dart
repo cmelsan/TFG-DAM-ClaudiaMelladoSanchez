@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show debugPrint;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:sabor_de_casa/core/constants/supabase_constants.dart';
 import 'package:sabor_de_casa/core/errors/failures.dart';
@@ -126,5 +127,38 @@ class AuthRepository {
         .eq('id', user.id)
         .single();
     return UserProfile.fromJson(data);
+  }
+
+  /// Registra o actualiza el token FCM del dispositivo en push_tokens.
+  /// Operación best-effort: los errores no se propagan al caller.
+  Future<void> saveFcmToken(String userId, String token) async {
+    try {
+      await _client.from(SupabaseConstants.pushTokens).upsert(
+        {
+          'user_id': userId,
+          'token': token,
+          'updated_at': DateTime.now().toIso8601String(),
+        },
+        onConflict: 'user_id,token',
+      );
+    } on PostgrestException catch (e) {
+      debugPrint('[FCM] Error guardando token: ${e.message}');
+    } catch (e) {
+      debugPrint('[FCM] Error guardando token: $e');
+    }
+  }
+
+  /// Elimina el token FCM del dispositivo al hacer logout.
+  Future<void> deleteFcmToken(String token) async {
+    try {
+      await _client
+          .from(SupabaseConstants.pushTokens)
+          .delete()
+          .eq('token', token);
+    } on PostgrestException catch (e) {
+      debugPrint('[FCM] Error eliminando token: ${e.message}');
+    } catch (e) {
+      debugPrint('[FCM] Error eliminando token: $e');
+    }
   }
 }

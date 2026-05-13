@@ -1,10 +1,9 @@
-import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:sabor_de_casa/services/supabase_service.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+﻿import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:sabor_de_casa/features/home/data/repositories/subscription_repository.dart';
 
 part 'subscription_provider.g.dart';
 
-/// Estado de la suscripción actual (idle / loading / done / error).
+/// Estado de la suscripciÃ³n actual (idle / loading / done / error).
 enum SubscriptionStatus { idle, loading, done, error }
 
 /// Notifier para gestionar las suscripciones de newsletter / WhatsApp.
@@ -13,7 +12,7 @@ class SubscriptionNotifier extends _$SubscriptionNotifier {
   @override
   SubscriptionStatus build() => SubscriptionStatus.idle;
 
-  /// Inserta una suscripción en Supabase.
+  /// Inserta una suscripciÃ³n en Supabase via SubscriptionRepository.
   /// [type] debe ser 'email' o 'whatsapp'.
   Future<void> subscribe({
     required String type,
@@ -28,15 +27,9 @@ class SubscriptionNotifier extends _$SubscriptionNotifier {
 
     state = SubscriptionStatus.loading;
     try {
-      final client = ref.read(supabaseClientProvider);
-      await client.from('subscriptions').insert({
-        'type': type,
-        if (email != null) 'email': email,
-        if (phone != null) 'phone': phone,
-      });
+      final repo = ref.read(subscriptionRepositoryProvider);
+      await repo.subscribe(type: type, email: email, phone: phone);
       state = SubscriptionStatus.done;
-    } on PostgrestException catch (_) {
-      state = SubscriptionStatus.error;
     } catch (_) {
       state = SubscriptionStatus.error;
     }

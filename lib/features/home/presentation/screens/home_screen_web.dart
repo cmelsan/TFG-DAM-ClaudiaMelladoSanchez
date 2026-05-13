@@ -711,7 +711,7 @@ class _WebTopDishesCarouselState
                       fontWeight: FontWeight.w900,
                       fontSize: 38,
                       letterSpacing: 1.5,
-                      color: AppTokens.brandPrimary,
+                      color: const Color.fromARGB(255, 9, 9, 9),
                     ),
                   ),
                   const SizedBox(height: 40),
@@ -1244,12 +1244,12 @@ class _WebOffersSectionState extends ConsumerState<_WebOffersSection> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'En oferta',
+                    'Descuentos de la semana',
                     style: GoogleFonts.inter(
                       fontWeight: FontWeight.w900,
                       fontSize: 38,
                       letterSpacing: 1.5,
-                      color: AppTokens.brandPrimary,
+                      color: const Color.fromARGB(255, 9, 9, 9),
                     ),
                   ),
                   const SizedBox(height: 40),
@@ -3662,12 +3662,12 @@ class _WebFooter extends StatelessWidget {
                           const SizedBox(height: 10),
                           const _FooterInfoRow(
                             icon: Icons.phone_outlined,
-                            text: '956 XX XX XX',
+                            text: '956 36 30 09',
                           ),
                           const SizedBox(height: 10),
                           const _FooterInfoRow(
                             icon: Icons.email_outlined,
-                            text: 'hola@sabordecasa.es',
+                            text: 'info@sabordecasa.es',
                           ),
                           const SizedBox(height: 10),
                           const _FooterInfoRow(

@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter/foundation.dart' show debugPrint, kIsWeb;
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:sabor_de_casa/features/auth/data/repositories/auth_repository.dart';
 import 'package:sabor_de_casa/features/auth/domain/models/user_profile.dart';
@@ -90,18 +90,10 @@ class AuthNotifier extends _$AuthNotifier {
 
   /// Registra el token FCM del dispositivo en push_tokens (best-effort).
   Future<void> _saveFcmToken() async {
-    try {
-      final userId = _repo.currentUser?.id;
-      if (userId == null) return;
-      final token = await FirebaseMessaging.instance.getToken();
-      if (token == null) return;
-      await Supabase.instance.client.from('push_tokens').upsert({
-        'user_id': userId,
-        'token': token,
-        'updated_at': DateTime.now().toIso8601String(),
-      }, onConflict: 'user_id,token');
-    } catch (e) {
-      debugPrint('[FCM] Error guardando token: $e');
-    }
+    final userId = _repo.currentUser?.id;
+    if (userId == null) return;
+    final token = await FirebaseMessaging.instance.getToken();
+    if (token == null) return;
+    await _repo.saveFcmToken(userId, token);
   }
 }

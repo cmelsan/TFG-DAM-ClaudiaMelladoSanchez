@@ -65,196 +65,175 @@ class _CateringScreenState extends ConsumerState<CateringScreen>
 
     return Scaffold(
       backgroundColor: AppTokens.pageBg,
-      body: RefreshIndicator(
-        onRefresh: () async => ref.invalidate(cateringMenusProvider),
-        child: CustomScrollView(
-          controller: _scrollCtrl,
-          slivers: [
-            // ── Navbar web ──────────────────────────────────────────────
-            SliverAppBar(
-              pinned: true,
-              backgroundColor: Colors.transparent,
-              surfaceTintColor: Colors.transparent,
-              elevation: 0,
-              scrolledUnderElevation: 0,
-              toolbarHeight: 0,
-              automaticallyImplyLeading: false,
-              bottom: PreferredSize(
-                preferredSize: const Size.fromHeight(80),
-                child: _CateringNavbar(isScrolled: _isScrolled),
-              ),
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(80),
+        child: _CateringNavbar(isScrolled: _isScrolled),
+      ),
+      body: SingleChildScrollView(
+        controller: _scrollCtrl,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // ── Hero ────────────────────────────────────────────────
+            _CateringHero(
+              fadeCtrl: _heroFade,
+              isLoggedIn: _isLoggedIn,
             ),
 
-            // ── Hero ────────────────────────────────────────────────────
-            SliverToBoxAdapter(
-              child: _CateringHero(
-                fadeCtrl: _heroFade,
-                isLoggedIn: _isLoggedIn,
-              ),
-            ),
+            // ── Stats ────────────────────────────────────────────────
+            _StatsSection(sidePad: sidePad),
 
-            // ── Stats ────────────────────────────────────────────────────
-            SliverToBoxAdapter(
-              child: _StatsSection(sidePad: sidePad),
-            ),
-
-            // ── Sección "Nuestros menús de evento" ───────────────────────
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: EdgeInsets.fromLTRB(
-                    sidePad + 24, 48, sidePad + 24, 8),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 12, vertical: 5),
-                      decoration: BoxDecoration(
-                        color: AppTokens.brandPrimary.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(100),
-                      ),
-                      child: Text(
-                        'MENÚS DE EVENTO',
-                        style: GoogleFonts.inter(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: 1.2,
-                          color: AppTokens.brandPrimary,
-                        ),
-                      ),
+            // ── Sección "Nuestros menús de evento" ───────────────────
+            Padding(
+              padding: EdgeInsets.fromLTRB(sidePad + 24, 48, sidePad + 24, 8),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+                    decoration: BoxDecoration(
+                      color: AppTokens.brandPrimary.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(100),
                     ),
-                    const SizedBox(height: 10),
-                    Text(
-                      'Elige el menú perfecto',
+                    child: Text(
+                      'MENÚS DE EVENTO',
                       style: GoogleFonts.inter(
-                        fontSize: 28,
-                        fontWeight: FontWeight.w900,
-                        color: const Color(0xFF111111),
-                        height: 1.1,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 1.2,
+                        color: AppTokens.brandPrimary,
                       ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Cada menú está diseñado para que tu evento sea único.\nSolicita tu presupuesto personalizado sin compromiso.',
-                      style: GoogleFonts.inter(
-                        fontSize: 15,
-                        color: Colors.black54,
-                        height: 1.6,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-
-            // ── Grid de menús ─────────────────────────────────────────────
-            menusAsync.when(
-              loading: () => const SliverToBoxAdapter(
-                child: Padding(
-                  padding: EdgeInsets.symmetric(vertical: 60),
-                  child: Center(
-                    child: CircularProgressIndicator(
-                      color: AppTokens.brandPrimary,
                     ),
                   ),
+                  const SizedBox(height: 10),
+                  Text(
+                    'Elige el menú perfecto',
+                    style: GoogleFonts.inter(
+                      fontSize: 28,
+                      fontWeight: FontWeight.w900,
+                      color: const Color(0xFF111111),
+                      height: 1.1,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Cada menú está diseñado para que tu evento sea único.\nSolicita tu presupuesto personalizado sin compromiso.',
+                    style: GoogleFonts.inter(
+                      fontSize: 15,
+                      color: Colors.black54,
+                      height: 1.6,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // ── Grid de menús ─────────────────────────────────────────
+            menusAsync.when(
+              loading: () => const Padding(
+                padding: EdgeInsets.symmetric(vertical: 60),
+                child: Center(
+                  child: CircularProgressIndicator(color: AppTokens.brandPrimary),
                 ),
               ),
-              error: (error, _) => SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.all(40),
-                  child: Center(
-                    child: Column(
-                      children: [
-                        const Icon(
-                          Icons.error_outline,
-                          size: 48,
+              error: (error, _) => Padding(
+                padding: const EdgeInsets.all(40),
+                child: Center(
+                  child: Column(
+                    children: [
+                      const Icon(Icons.error_outline, size: 48, color: AppTokens.danger),
+                      const SizedBox(height: 12),
+                      Text(
+                        'Error al cargar los menús',
+                        style: GoogleFonts.inter(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
                           color: AppTokens.danger,
                         ),
-                        const SizedBox(height: 12),
-                        Text(
-                          'Error al cargar los menús',
-                          style: GoogleFonts.inter(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            color: AppTokens.danger,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        TextButton(
-                          onPressed: () =>
-                              ref.invalidate(cateringMenusProvider),
-                          child: const Text('Reintentar'),
-                        ),
-                      ],
-                    ),
+                      ),
+                      const SizedBox(height: 8),
+                      TextButton(
+                        onPressed: () => ref.invalidate(cateringMenusProvider),
+                        child: const Text('Reintentar'),
+                      ),
+                    ],
                   ),
                 ),
               ),
               data: (menus) => menus.isEmpty
-                  ? const SliverToBoxAdapter(
-                      child: Padding(
-                        padding: EdgeInsets.symmetric(
-                            vertical: 60, horizontal: 40),
-                        child: Center(
-                          child: Text(
-                            'Próximamente dispondremos de menús de eventos.\nContacta con nosotros para más información.',
-                            style: TextStyle(
-                                color: Colors.black54, fontSize: 16),
-                            textAlign: TextAlign.center,
-                          ),
+                  ? const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 60, horizontal: 40),
+                      child: Center(
+                        child: Text(
+                          'Próximamente dispondremos de menús de eventos.\nContacta con nosotros para más información.',
+                          style: TextStyle(color: Colors.black54, fontSize: 16),
+                          textAlign: TextAlign.center,
                         ),
                       ),
                     )
-                  : SliverPadding(
-                      padding: EdgeInsets.fromLTRB(
-                          sidePad + 16, 24, sidePad + 16, 16),
-                      sliver: screenW > 760
-                          ? SliverGrid(
-                              gridDelegate:
-                                  const SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: 2,
-                                crossAxisSpacing: 20,
-                                mainAxisSpacing: 20,
-                                mainAxisExtent: 340,
-                              ),
-                              delegate: SliverChildBuilderDelegate(
-                                (ctx, i) => _MenuCard(menu: menus[i]),
-                                childCount: menus.length,
-                              ),
-                            )
-                          : SliverList(
-                              delegate: SliverChildBuilderDelegate(
-                                (ctx, i) => Padding(
-                                  padding:
-                                      const EdgeInsets.only(bottom: 20),
-                                  child: SizedBox(
-                                    height: 340,
-                                    child: _MenuCard(menu: menus[i]),
-                                  ),
-                                ),
-                                childCount: menus.length,
-                              ),
-                            ),
+                  : Padding(
+                      padding: EdgeInsets.fromLTRB(sidePad + 16, 24, sidePad + 16, 16),
+                      child: screenW > 760
+                          ? _MenuGrid(menus: menus)
+                          : _MenuList(menus: menus),
                     ),
             ),
 
-            // ── CTA banner ────────────────────────────────────────────────
-            SliverToBoxAdapter(
-              child: _CtaBanner(
-                sidePad: sidePad,
-                isLoggedIn: _isLoggedIn,
-              ),
-            ),
+            // ── CTA banner ────────────────────────────────────────────
+            _CtaBanner(sidePad: sidePad, isLoggedIn: _isLoggedIn),
 
-            // ── Cómo funciona ─────────────────────────────────────────────
-            SliverToBoxAdapter(
-              child: _HowItWorksSection(sidePad: sidePad),
-            ),
+            // ── Cómo funciona ─────────────────────────────────────────
+            _HowItWorksSection(sidePad: sidePad),
 
-            const SliverToBoxAdapter(child: SizedBox(height: 80)),
+            const SizedBox(height: 80),
           ],
         ),
       ),
+    );
+  }
+}
+
+// ── Menu Grid / List helpers ──────────────────────────────────────────────────
+
+class _MenuGrid extends StatelessWidget {
+  const _MenuGrid({required this.menus});
+  final List<EventMenu> menus;
+
+  @override
+  Widget build(BuildContext context) {
+    return Wrap(
+      spacing: 20,
+      runSpacing: 20,
+      children: menus.map((m) {
+        return SizedBox(
+          width: (MediaQuery.sizeOf(context).width -
+                  (MediaQuery.sizeOf(context).width > 1200
+                      ? (MediaQuery.sizeOf(context).width - 1200)
+                      : 0) -
+                  32 * 2 -
+                  20) /
+              2,
+          height: 340,
+          child: _MenuCard(menu: m),
+        );
+      }).toList(),
+    );
+  }
+}
+
+class _MenuList extends StatelessWidget {
+  const _MenuList({required this.menus});
+  final List<EventMenu> menus;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: menus
+          .map((m) => Padding(
+                padding: const EdgeInsets.only(bottom: 20),
+                child: SizedBox(height: 340, child: _MenuCard(menu: m)),
+              ))
+          .toList(),
     );
   }
 }
@@ -1176,7 +1155,9 @@ class _CtaBanner extends StatelessWidget {
                           child: _CtaContent(isLoggedIn: isLoggedIn),
                         ),
                         const SizedBox(width: 32),
-                        _CtaButtons(isLoggedIn: isLoggedIn),
+                        IntrinsicWidth(
+                          child: _CtaButtons(isLoggedIn: isLoggedIn),
+                        ),
                       ],
                     )
                   : Column(

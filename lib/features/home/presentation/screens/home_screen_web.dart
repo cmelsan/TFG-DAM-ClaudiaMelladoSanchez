@@ -3232,83 +3232,117 @@ class _WebSubscriptionSectionState
   @override
   Widget build(BuildContext context) {
     final status = ref.watch(subscriptionNotifierProvider);
-    return ColoredBox(
-      color: const Color(0xFF0D3B2E),
+    return Container(
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFF0D3B2E), Color(0xFF0A2F24)],
+        ),
+      ),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 56),
+        padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 72),
         child: Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 1200),
             child: LayoutBuilder(
               builder: (context, constraints) {
                 final narrow = constraints.maxWidth < 700;
+
                 final textBlock = Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    // Badge superior
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppTokens.brandPrimary.withValues(alpha: 0.25),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: AppTokens.brandPrimary.withValues(alpha: 0.5),
+                        ),
+                      ),
+                      child: Text(
+                        'NEWSLETTER',
+                        style: GoogleFonts.inter(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w800,
+                          color: const Color(0xFF7FFFC4),
+                          letterSpacing: 1.5,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    // Título
                     Text(
                       '¿Quieres recibir\nel menú del día?',
                       style: GoogleFonts.inter(
-                        fontSize: 30,
+                        fontSize: narrow ? 30 : 40,
                         fontWeight: FontWeight.w900,
                         color: Colors.white,
-                        height: 1.2,
+                        height: 1.1,
+                        letterSpacing: -0.5,
                       ),
                     ),
-                    const SizedBox(height: 14),
+                    const SizedBox(height: 20),
+                    // Descripción
                     Text(
                       'Suscríbete y recibe el menú, las ofertas especiales '
                       'y las novedades directamente en tu correo o WhatsApp. '
                       'Sin spam, solo lo que importa.',
                       style: GoogleFonts.inter(
                         fontSize: 15,
-                        color: Colors.white.withValues(alpha: 0.75),
-                        height: 1.7,
+                        color: Colors.white.withValues(alpha: 0.70),
+                        height: 1.75,
                       ),
                     ),
-                    const SizedBox(height: 24),
-                    Row(
+                    const SizedBox(height: 28),
+                    // Pills de características
+                    Wrap(
+                      spacing: 10,
+                      runSpacing: 10,
                       children: [
-                        const Icon(
-                          Icons.check_circle,
-                          color: AppTokens.brandPrimary,
-                          size: 17,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          'Menú del día',
-                          style: GoogleFonts.inter(
-                            color: Colors.white70,
-                            fontSize: 13,
-                          ),
-                        ),
-                        const SizedBox(width: 20),
-                        const Icon(
-                          Icons.check_circle,
-                          color: AppTokens.brandPrimary,
-                          size: 17,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          'Ofertas especiales',
-                          style: GoogleFonts.inter(
-                            color: Colors.white70,
-                            fontSize: 13,
-                          ),
-                        ),
+                        _SubBadge(label: 'Menú del día'),
+                        _SubBadge(label: 'Ofertas especiales'),
+                        _SubBadge(label: 'Novedades'),
                       ],
                     ),
+                    if (!narrow) ...[
+                      const SizedBox(height: 36),
+                      Row(
+                        children: [
+                          const Icon(
+                            Icons.people_outline,
+                            color: Color(0xFF7FFFC4),
+                            size: 18,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Más de 500 familias ya suscritas',
+                            style: GoogleFonts.inter(
+                              color: Colors.white.withValues(alpha: 0.55),
+                              fontSize: 13,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ],
                 );
+
                 final formBlock = Container(
-                  padding: const EdgeInsets.all(32),
+                  padding: const EdgeInsets.all(36),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(24),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.10),
-                        blurRadius: 32,
-                        offset: Offset(0, 8),
+                        color: Colors.black.withValues(alpha: 0.18),
+                        blurRadius: 48,
+                        offset: const Offset(0, 16),
                       ),
                     ],
                   ),
@@ -3323,57 +3357,104 @@ class _WebSubscriptionSectionState
                               Text(
                                 'Elige cómo quieres recibir las novedades',
                                 style: GoogleFonts.inter(
-                                  fontSize: 14,
+                                  fontSize: 15,
                                   fontWeight: FontWeight.w700,
-                                  color: const Color(0xFF1A1A1A),
+                                  color: const Color(0xFF111111),
                                 ),
                               ),
-                              const SizedBox(height: 14),
-                              Row(
-                                children: [
-                                  _TypeToggle(
-                                    label: 'Email',
-                                    icon: Icons.email_outlined,
-                                    selected: !_isWhatsApp,
-                                    onTap: () => setState(() {
-                                      _isWhatsApp = false;
-                                      _ctrl.clear();
-                                    }),
-                                  ),
-                                  const SizedBox(width: 10),
-                                  _TypeToggle(
-                                    label: 'WhatsApp',
-                                    icon: Icons.phone_outlined,
-                                    selected: _isWhatsApp,
-                                    onTap: () => setState(() {
-                                      _isWhatsApp = true;
-                                      _ctrl.clear();
-                                    }),
-                                  ),
-                                ],
-                              ),
                               const SizedBox(height: 16),
+                              // Toggles Email / WhatsApp
+                              Container(
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFF2F2F0),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                padding: const EdgeInsets.all(4),
+                                child: Row(
+                                  children: [
+                                    Expanded(
+                                      child: _TypeToggle(
+                                        label: 'Email',
+                                        icon: Icons.email_outlined,
+                                        selected: !_isWhatsApp,
+                                        onTap: () => setState(() {
+                                          _isWhatsApp = false;
+                                          _ctrl.clear();
+                                        }),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Expanded(
+                                      child: _TypeToggle(
+                                        label: 'WhatsApp',
+                                        icon: Icons.chat_bubble_outline,
+                                        selected: _isWhatsApp,
+                                        onTap: () => setState(() {
+                                          _isWhatsApp = true;
+                                          _ctrl.clear();
+                                        }),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(height: 20),
+                              // Campo de entrada
                               TextFormField(
                                 controller: _ctrl,
                                 keyboardType: _isWhatsApp
                                     ? TextInputType.phone
                                     : TextInputType.emailAddress,
+                                style: GoogleFonts.inter(
+                                  fontSize: 15,
+                                  color: const Color(0xFF111111),
+                                ),
                                 decoration: InputDecoration(
                                   hintText: _isWhatsApp
                                       ? 'Tu número de WhatsApp'
                                       : 'Tu correo electrónico',
+                                  hintStyle: GoogleFonts.inter(
+                                    color: const Color(0xFFAAAAAA),
+                                    fontSize: 14,
+                                  ),
                                   filled: true,
-                                  fillColor: const Color(0xFFF5F5F3),
+                                  fillColor: const Color(0xFFF7F7F5),
+                                  contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                    vertical: 16,
+                                  ),
                                   border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(10),
+                                    borderRadius: BorderRadius.circular(12),
                                     borderSide: BorderSide.none,
                                   ),
-                                  prefixIcon: Icon(
-                                    _isWhatsApp
-                                        ? Icons.phone_outlined
-                                        : Icons.email_outlined,
-                                    color: AppTokens.brandPrimary,
+                                  enabledBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: const BorderSide(
+                                      color: Color(0xFFE8E8E6),
+                                    ),
                                   ),
+                                  focusedBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: const BorderSide(
+                                      color: AppTokens.brandPrimary,
+                                      width: 2,
+                                    ),
+                                  ),
+                                  prefixIcon: Padding(
+                                    padding: const EdgeInsets.only(
+                                      left: 14,
+                                      right: 10,
+                                    ),
+                                    child: Icon(
+                                      _isWhatsApp
+                                          ? Icons.chat_bubble_outline
+                                          : Icons.email_outlined,
+                                      color: AppTokens.brandPrimary,
+                                      size: 20,
+                                    ),
+                                  ),
+                                  prefixIconConstraints:
+                                      const BoxConstraints(minWidth: 0),
                                 ),
                                 validator: (v) {
                                   if (v == null || v.trim().isEmpty) {
@@ -3384,9 +3465,9 @@ class _WebSubscriptionSectionState
                                   return null;
                                 },
                               ),
-                              const SizedBox(height: 14),
+                              const SizedBox(height: 16),
                               SizedBox(
-                                height: 48,
+                                height: 52,
                                 child: status == SubscriptionStatus.loading
                                     ? const Center(
                                         child: CircularProgressIndicator(),
@@ -3397,8 +3478,9 @@ class _WebSubscriptionSectionState
                                               AppTokens.brandPrimary,
                                           shape: RoundedRectangleBorder(
                                             borderRadius:
-                                                BorderRadius.circular(10),
+                                                BorderRadius.circular(12),
                                           ),
+                                          elevation: 0,
                                         ),
                                         onPressed: _subscribe,
                                         child: Text(
@@ -3406,38 +3488,61 @@ class _WebSubscriptionSectionState
                                           style: GoogleFonts.inter(
                                             fontSize: 14,
                                             fontWeight: FontWeight.w800,
-                                            letterSpacing: 1.2,
+                                            letterSpacing: 1.5,
+                                            color: Colors.white,
                                           ),
                                         ),
                                       ),
                               ),
                               if (status == SubscriptionStatus.error) ...[
-                                const SizedBox(height: 12),
+                                const SizedBox(height: 10),
                                 const Text(
                                   'Ha ocurrido un error. Inténtalo de nuevo.',
                                   style: TextStyle(
                                     color: Colors.red,
                                     fontSize: 13,
                                   ),
+                                  textAlign: TextAlign.center,
                                 ),
                               ],
+                              const SizedBox(height: 14),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  const Icon(
+                                    Icons.lock_outline,
+                                    size: 13,
+                                    color: Color(0xFFAAAAAA),
+                                  ),
+                                  const SizedBox(width: 5),
+                                  Text(
+                                    'Sin spam. Cancela cuando quieras.',
+                                    style: GoogleFonts.inter(
+                                      fontSize: 12,
+                                      color: const Color(0xFFAAAAAA),
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ],
                           ),
                         ),
                 );
+
                 if (narrow) {
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       textBlock,
-                      const SizedBox(height: 32),
+                      const SizedBox(height: 36),
                       formBlock,
                     ],
                   );
                 }
                 return Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Expanded(flex: 4, child: textBlock),
+                    Expanded(flex: 5, child: textBlock),
                     const SizedBox(width: 64),
                     Expanded(flex: 5, child: formBlock),
                   ],
@@ -3451,33 +3556,88 @@ class _WebSubscriptionSectionState
   }
 }
 
+class _SubBadge extends StatelessWidget {
+  const _SubBadge({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.18),
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(
+            Icons.check_circle,
+            size: 14,
+            color: Color(0xFF7FFFC4),
+          ),
+          const SizedBox(width: 6),
+          Text(
+            label,
+            style: GoogleFonts.inter(
+              color: Colors.white.withValues(alpha: 0.85),
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _SubscribedMessage extends StatelessWidget {
   const _SubscribedMessage();
 
   @override
   Widget build(BuildContext context) {
-    return const Column(
-      children: [
-        Icon(
-          Icons.check_circle_outline,
-          color: AppTokens.brandPrimary,
-          size: 48,
-        ),
-        SizedBox(height: 12),
-        Text(
-          'Te has suscrito con exito',
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-            color: AppTokens.brandDark,
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 16),
+      child: Column(
+        children: [
+          Container(
+            width: 64,
+            height: 64,
+            decoration: BoxDecoration(
+              color: AppTokens.brandPrimary.withValues(alpha: 0.1),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.check_circle_outline,
+              color: AppTokens.brandPrimary,
+              size: 36,
+            ),
           ),
-        ),
-        SizedBox(height: 8),
-        Text(
-          'Pronto recibiras las novedades de Sabor de Casa.',
-          style: TextStyle(fontSize: 14, color: Color(0xFF2D5E4F)),
-        ),
-      ],
+          const SizedBox(height: 16),
+          Text(
+            '¡Suscripción confirmada!',
+            style: GoogleFonts.inter(
+              fontSize: 18,
+              fontWeight: FontWeight.w800,
+              color: AppTokens.brandDark,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Pronto recibirás las novedades de Sabor de Casa.',
+            style: GoogleFonts.inter(
+              fontSize: 14,
+              color: const Color(0xFF2D5E4F),
+              height: 1.5,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
     );
   }
 }
@@ -3501,27 +3661,34 @@ class _TypeToggle extends StatelessWidget {
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
         decoration: BoxDecoration(
-          color: selected ? AppTokens.brandPrimary : Colors.white,
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(
-            color: AppTokens.brandPrimary,
-          ),
+          color: selected ? AppTokens.brandPrimary : Colors.transparent,
+          borderRadius: BorderRadius.circular(9),
+          boxShadow: selected
+              ? [
+                  BoxShadow(
+                    color: AppTokens.brandPrimary.withValues(alpha: 0.25),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ]
+              : null,
         ),
         child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
               icon,
-              size: 18,
-              color: selected ? Colors.white : AppTokens.brandPrimary,
+              size: 17,
+              color: selected ? Colors.white : const Color(0xFF666666),
             ),
-            const SizedBox(width: 8),
+            const SizedBox(width: 7),
             Text(
               label,
-              style: TextStyle(
-                color: selected ? Colors.white : AppTokens.brandPrimary,
+              style: GoogleFonts.inter(
+                color: selected ? Colors.white : const Color(0xFF666666),
                 fontWeight: FontWeight.w600,
                 fontSize: 14,
               ),
@@ -3532,8 +3699,6 @@ class _TypeToggle extends StatelessWidget {
     );
   }
 }
-
-// ── Panel lateral del carrito (web) ─────────────────────────────────────────
 
 class _WebCartDrawer extends ConsumerWidget {
   const _WebCartDrawer();

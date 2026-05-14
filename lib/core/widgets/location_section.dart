@@ -11,9 +11,8 @@ const _kLat = 36.7773;
 const _kLng = -6.3534;
 
 /// Sección "Dónde encontrarnos" adaptativa:
-/// - Web (≥720px): info a la izquierda, mapa a la derecha.
+/// - Web (≥720px): info a la izquierda sin card, mapa grande a la derecha.
 /// - Móvil (<720px): info arriba, mapa abajo.
-/// Usa OpenStreetMap (sin API key). El botón abre Google Maps / app nativa.
 class LocationSection extends StatelessWidget {
   const LocationSection({super.key});
 
@@ -27,9 +26,9 @@ class LocationSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ColoredBox(
-      color: AppTokens.pageBg,
+      color: Colors.white,
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 64, horizontal: 48),
+        padding: const EdgeInsets.symmetric(vertical: 72, horizontal: 48),
         child: Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 1200),
@@ -46,23 +45,21 @@ class LocationSection extends StatelessWidget {
   }
 
   Widget _buildWide() {
-    return IntrinsicHeight(
+    return SizedBox(
+      height: 480,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          // ── Panel izquierdo: texto directo sobre fondo blanco ──
           SizedBox(
-            width: 340,
-            child: Container(
-              padding: const EdgeInsets.all(36),
-              decoration: BoxDecoration(
-                color: const Color(0xFF0D3B2E),
-                borderRadius: BorderRadius.circular(20),
-              ),
+            width: 380,
+            child: Padding(
+              padding: const EdgeInsets.only(right: 48, top: 8, bottom: 8),
               child: _InfoPanel(onOpenMaps: _openMaps),
             ),
           ),
-          const SizedBox(width: 24),
-          const Expanded(child: _MapTile(height: 420)),
+          // ── Mapa: ocupa el resto del espacio en altura ──────────
+          const Expanded(child: _MapTile()),
         ],
       ),
     );
@@ -72,22 +69,20 @@ class LocationSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Container(
-          padding: const EdgeInsets.all(28),
-          decoration: BoxDecoration(
-            color: const Color(0xFF0D3B2E),
-            borderRadius: BorderRadius.circular(16),
-          ),
+        Padding(
+          padding: const EdgeInsets.only(bottom: 28),
           child: _InfoPanel(onOpenMaps: _openMaps),
         ),
-        const SizedBox(height: 20),
-        const _MapTile(height: 220),
+        const SizedBox(
+          height: 260,
+          child: _MapTile(),
+        ),
       ],
     );
   }
 }
 
-// ── Panel de información ───────────────────────────────────────────────────────
+// ── Panel de información (sin card/fondo) ─────────────────────────────────────
 
 class _InfoPanel extends StatelessWidget {
   const _InfoPanel({required this.onOpenMaps});
@@ -98,12 +93,13 @@ class _InfoPanel extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.center,
       children: [
         // Eyebrow badge
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
           decoration: BoxDecoration(
-            color: AppTokens.brandPrimary.withValues(alpha: 0.25),
+            color: AppTokens.brandPrimary.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(20),
           ),
           child: Text(
@@ -111,37 +107,45 @@ class _InfoPanel extends StatelessWidget {
             style: GoogleFonts.inter(
               fontSize: 12,
               fontWeight: FontWeight.w600,
-              color: const Color(0xFF7ED4B8),
+              color: AppTokens.brandPrimary,
             ),
           ),
         ),
-        const SizedBox(height: 14),
-        // Título compacto
+        const SizedBox(height: 16),
         Text(
           'Dónde\nencontrarnos',
           style: GoogleFonts.inter(
             fontWeight: FontWeight.w800,
-            fontSize: 26,
-            color: Colors.white,
-            height: 1.2,
+            fontSize: 36,
+            color: const Color(0xFF0D3B2E),
+            height: 1.1,
           ),
         ),
-        const SizedBox(height: 22),
+        const SizedBox(height: 8),
+        Container(
+          width: 44,
+          height: 3,
+          decoration: BoxDecoration(
+            color: AppTokens.brandPrimary,
+            borderRadius: BorderRadius.circular(2),
+          ),
+        ),
+        const SizedBox(height: 32),
         const _InfoRow(
           icon: Icons.location_on_outlined,
           text: 'Calle Ejemplo, 12\nSanlúcar de Barrameda, Cádiz',
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 18),
         const _InfoRow(
           icon: Icons.access_time_outlined,
           text: 'Lun – Dom\n12:00 – 15:30 · 20:00 – 23:30',
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 18),
         const _InfoRow(
           icon: Icons.phone_outlined,
           text: '+34 900 123 456',
         ),
-        const SizedBox(height: 26),
+        const SizedBox(height: 36),
         FilledButton.icon(
           onPressed: onOpenMaps,
           icon: const Icon(Icons.directions_outlined, size: 17),
@@ -156,7 +160,7 @@ class _InfoPanel extends StatelessWidget {
           style: FilledButton.styleFrom(
             backgroundColor: AppTokens.brandPrimary,
             foregroundColor: Colors.white,
-            padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 13),
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(10),
             ),
@@ -181,15 +185,15 @@ class _InfoRow extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(icon, color: const Color(0xFF8FBFB0), size: 20),
-        const SizedBox(width: 12),
+        Icon(icon, color: AppTokens.brandPrimary, size: 21),
+        const SizedBox(width: 14),
         Flexible(
           child: Text(
             text,
             style: const TextStyle(
-              color: Color(0xFFD0EEE6),
+              color: Color(0xFF3A3A3A),
               fontSize: 15,
-              height: 1.6,
+              height: 1.65,
             ),
           ),
         ),
@@ -198,36 +202,36 @@ class _InfoRow extends StatelessWidget {
   }
 }
 
-// ── Mapa interactivo (OpenStreetMap via flutter_map) ──────────────────────────
+// ── Mapa estático sin interacción ─────────────────────────────────────────────
 
 class _MapTile extends StatelessWidget {
-  const _MapTile({required this.height});
-
-  final double height;
+  const _MapTile();
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: height,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: const Color(0xFF1D9E75).withValues(alpha: 0.35),
+          color: const Color(0xFF1D9E75).withValues(alpha: 0.2),
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.25),
-            blurRadius: 16,
+            color: Colors.black.withValues(alpha: 0.08),
+            blurRadius: 20,
             offset: const Offset(0, 6),
           ),
         ],
       ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(20),
         child: FlutterMap(
-          options: const MapOptions(
-            initialCenter: LatLng(_kLat, _kLng),
+          options: MapOptions(
+            initialCenter: const LatLng(_kLat, _kLng),
             initialZoom: 15.5,
+            interactionOptions: const InteractionOptions(
+              flags: InteractiveFlag.none,
+            ),
           ),
           children: [
             TileLayer(

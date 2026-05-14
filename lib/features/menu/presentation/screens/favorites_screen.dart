@@ -6,6 +6,7 @@ import 'package:sabor_de_casa/core/widgets/error_view.dart';
 import 'package:sabor_de_casa/core/widgets/loading_indicator.dart';
 import 'package:sabor_de_casa/features/cart/presentation/providers/cart_provider.dart';
 import 'package:sabor_de_casa/features/menu/presentation/providers/favorites_provider.dart';
+import 'package:sabor_de_casa/features/menu/presentation/screens/dish_detail_screen.dart';
 import 'package:sabor_de_casa/features/menu/presentation/widgets/dish_card.dart';
 
 class FavoritesScreen extends ConsumerWidget {
@@ -66,10 +67,7 @@ class FavoritesScreen extends ConsumerWidget {
               final dish = dishes[index];
               return DishCard(
                 dish: dish,
-                onTap: () => context.pushNamed(
-                  RouteNames.dishDetail,
-                  pathParameters: {'dishId': dish.id},
-                ),
+                onTap: () => showDishDetailModal(context, dish.id),
                 onAddToCart: () {
                   ref.read(cartNotifierProvider.notifier).addDish(dish);
                   ScaffoldMessenger.of(context).showSnackBar(

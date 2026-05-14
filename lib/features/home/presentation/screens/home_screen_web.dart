@@ -20,6 +20,7 @@ import 'package:sabor_de_casa/features/menu/domain/models/daily_special.dart';
 import 'package:sabor_de_casa/features/menu/domain/models/dish.dart';
 import 'package:sabor_de_casa/features/menu/presentation/providers/daily_special_notifier.dart';
 import 'package:sabor_de_casa/features/menu/presentation/providers/menu_provider.dart';
+import 'package:sabor_de_casa/features/menu/presentation/screens/dish_detail_screen.dart';
 
 class HomeScreenWeb extends ConsumerStatefulWidget {
   const HomeScreenWeb({super.key});
@@ -933,10 +934,7 @@ class _TopDishCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return GestureDetector(
-      onTap: () => context.pushNamed(
-        RouteNames.dishDetail,
-        pathParameters: {'dishId': dish.id},
-      ),
+      onTap: () => showDishDetailModal(context, dish.id),
       child: Container(
         decoration: BoxDecoration(
           color: Colors.white,
@@ -1435,10 +1433,7 @@ class _OfferDishCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final hasOfferPrice = dish.offerPrice != null;
     return GestureDetector(
-      onTap: () => context.pushNamed(
-        RouteNames.dishDetail,
-        pathParameters: {'dishId': dish.id},
-      ),
+      onTap: () => showDishDetailModal(context, dish.id),
       child: Container(
         decoration: BoxDecoration(
           color: Colors.white,
@@ -1771,10 +1766,7 @@ class _SeasonalDishCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return GestureDetector(
-      onTap: () => context.pushNamed(
-        RouteNames.dishDetail,
-        pathParameters: {'dishId': dish.id},
-      ),
+      onTap: () => showDishDetailModal(context, dish.id),
       child: Container(
         decoration: BoxDecoration(
           color: Colors.white,

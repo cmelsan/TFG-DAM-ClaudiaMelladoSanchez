@@ -16,6 +16,7 @@ import 'package:sabor_de_casa/features/menu/domain/models/category.dart';
 import 'package:sabor_de_casa/features/menu/domain/models/dish.dart';
 import 'package:sabor_de_casa/features/menu/presentation/providers/categories_provider.dart';
 import 'package:sabor_de_casa/features/menu/presentation/providers/menu_provider.dart';
+import 'package:sabor_de_casa/features/menu/presentation/screens/dish_detail_screen.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 
 const _heroImageUrl =
@@ -463,10 +464,7 @@ class _MenuScreenState extends ConsumerState<MenuScreen>
                       (context, i) => _MenuDishCard(
                         dish: dishes[i],
                         index: i,
-                        onTap: () => context.pushNamed(
-                          RouteNames.dishDetail,
-                          pathParameters: {'dishId': dishes[i].id},
-                        ),
+                        onTap: () => showDishDetailModal(context, dishes[i].id),
                         onAddToCart: () {
                           ref
                               .read(cartNotifierProvider.notifier)

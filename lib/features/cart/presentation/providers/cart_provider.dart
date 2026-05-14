@@ -101,6 +101,20 @@ class CartNotifier extends _$CartNotifier {
     _setActive(items);
   }
 
+  void addItem(CartItem item) {
+    final items = _itemsFromState();
+    final index = items.indexWhere((i) => i.dishId == item.dishId);
+
+    if (index >= 0) {
+      final current = items[index];
+      items[index] = current.copyWith(quantity: current.quantity + item.quantity);
+    } else {
+      items.add(item);
+    }
+
+    _setActive(items);
+  }
+
   void clearCart() {
     state = const CartState.empty();
   }

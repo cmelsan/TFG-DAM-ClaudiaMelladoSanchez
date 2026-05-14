@@ -17,6 +17,7 @@ import 'package:sabor_de_casa/features/menu/domain/models/dish.dart';
 import 'package:sabor_de_casa/features/menu/presentation/providers/categories_provider.dart';
 import 'package:sabor_de_casa/features/menu/presentation/providers/menu_provider.dart';
 import 'package:sabor_de_casa/features/menu/presentation/screens/dish_detail_screen.dart';
+import 'package:sabor_de_casa/features/menu/presentation/widgets/card_add_to_cart.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 
 const _heroImageUrl =
@@ -465,25 +466,13 @@ class _MenuScreenState extends ConsumerState<MenuScreen>
                         dish: dishes[i],
                         index: i,
                         onTap: () => showDishDetailModal(context, dishes[i].id),
-                        onAddToCart: () {
-                          ref
-                              .read(cartNotifierProvider.notifier)
-                              .addDish(dishes[i]);
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text('${dishes[i].name} añadido'),
-                              duration: const Duration(seconds: 1),
-                              behavior: SnackBarBehavior.floating,
-                            ),
-                          );
-                        },
                       ),
                       childCount: dishes.length,
                     ),
                     gridDelegate:
                         const SliverGridDelegateWithMaxCrossAxisExtent(
                       maxCrossAxisExtent: 290,
-                      mainAxisExtent: 310,
+                      mainAxisExtent: 360,
                       mainAxisSpacing: 16,
                       crossAxisSpacing: 16,
                     ),
@@ -666,13 +655,11 @@ class _MenuDishCard extends StatefulWidget {
     required this.dish,
     required this.index,
     required this.onTap,
-    required this.onAddToCart,
   });
 
   final Dish dish;
   final int index;
   final VoidCallback onTap;
-  final VoidCallback onAddToCart;
 
   @override
   State<_MenuDishCard> createState() => _MenuDishCardState();
@@ -806,49 +793,34 @@ class _MenuDishCardState extends State<_MenuDishCard>
                                   color: AppTokens.brandPrimary,
                                 ),
                               ),
-                              const Spacer(),
-                              if (widget.dish.isAvailable)
-                                GestureDetector(
-                                  onTap: widget.onAddToCart,
-                                  child: AnimatedContainer(
-                                    duration:
-                                        const Duration(milliseconds: 150),
-                                    width: 36,
-                                    height: 36,
-                                    decoration: BoxDecoration(
-                                      color: _hovered
-                                          ? AppTokens.brandDark
-                                          : AppTokens.brandPrimary,
-                                      borderRadius: BorderRadius.circular(10),
-                                    ),
-                                    child: const Icon(
-                                      Icons.add,
-                                      color: Colors.white,
-                                      size: 20,
-                                    ),
-                                  ),
-                                )
-                              else
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 10,
-                                    vertical: 4,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: Colors.black
-                                        .withValues(alpha: 0.07),
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  child: Text(
-                                    'Agotado',
-                                    style: GoogleFonts.inter(
-                                      fontSize: 11,
-                                      color: Colors.black38,
-                                    ),
-                                  ),
-                                ),
                             ],
                           ),
+                          const SizedBox(height: 8),
+                          if (widget.dish.isAvailable)
+                            GestureDetector(
+                              behavior: HitTestBehavior.opaque,
+                              onTap: () {},
+                              child: CardAddToCart(dish: widget.dish),
+                            )
+                          else
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.black
+                                    .withValues(alpha: 0.07),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Text(
+                                'Agotado',
+                                style: GoogleFonts.inter(
+                                  fontSize: 11,
+                                  color: Colors.black38,
+                                ),
+                              ),
+                            ),
                         ],
                       ),
                     ),
@@ -958,290 +930,6 @@ class _AllergenFilterSheet extends ConsumerWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-// ── Navbar web del menú ──────────────────────────────────────────────────────
-
-class _MenuWebNavbar extends ConsumerWidget {
-  const _MenuWebNavbar({
-    required this.isScrolled,
-    required this.onAllergenTap,
-  });
-
-  final bool isScrolled;
-  final VoidCallback onAllergenTap;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final cartCount = ref.watch(cartItemsCountProvider);
-    final allergenFilter = ref.watch(menuAllergenFilterProvider);
-    final authState = ref.watch(authNotifierProvider);
-    final profile = authState.valueOrNull;
-    final screenW = MediaQuery.sizeOf(context).width;
-
-    return ClipRect(
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 220),
-          curve: Curves.easeOut,
-          decoration: BoxDecoration(
-            color: isScrolled
-                ? Colors.white.withValues(alpha: 0.92)
-                : Colors.white,
-            border: const Border(
-              top: BorderSide(color: AppTokens.brandPrimary, width: 4),
-            ),
-            boxShadow: [
-              BoxShadow(
-                color:
-                    Colors.black.withValues(alpha: isScrolled ? 0.12 : 0.07),
-                blurRadius: isScrolled ? 24 : 12,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          padding: const EdgeInsets.symmetric(horizontal: 40),
-          child: Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 1280),
-              child: SizedBox(
-                height: 76,
-                child: Row(
-                  children: [
-                    // Logo
-                    MouseRegion(
-                      cursor: SystemMouseCursors.click,
-                      child: GestureDetector(
-                        onTap: () => context.goNamed(RouteNames.home),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Sabor de Casa',
-                              style: GoogleFonts.syne(
-                                fontWeight: FontWeight.w800,
-                                fontStyle: FontStyle.italic,
-                                fontSize: 26,
-                                height: 1,
-                                color: AppTokens.brandPrimary,
-                              ),
-                            ),
-                            const SizedBox(height: 3),
-                            Text(
-                              'Sanlúcar de Barrameda',
-                              style: GoogleFonts.inter(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w500,
-                                letterSpacing: 0.8,
-                                color: const Color(0xFF888888),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-
-                    const Spacer(),
-
-                    // Nav links (solo en pantallas anchas)
-                    if (screenW >= 700) ...[
-                      _MenuNavLink(
-                        label: 'Inicio',
-                        isActive: false,
-                        onTap: () => context.goNamed(RouteNames.home),
-                      ),
-                      const SizedBox(width: 4),
-                      _MenuNavLink(
-                        label: 'Menú',
-                        isActive: true,
-                        onTap: () {},
-                      ),
-                      const SizedBox(width: 4),
-                      _MenuNavLink(
-                        label: 'Catering',
-                        isActive: false,
-                        onTap: () => context.goNamed(RouteNames.catering),
-                      ),
-                      const SizedBox(width: 4),
-                      _MenuNavLink(
-                        label: 'Contacto',
-                        isActive: false,
-                        onTap: () => context.goNamed(RouteNames.contact),
-                      ),
-                      const SizedBox(width: 12),
-                    ],
-
-                    // Botón alérgenos
-                    IconButton(
-                      onPressed: onAllergenTap,
-                      tooltip: 'Filtrar por alérgenos',
-                      icon: Badge.count(
-                        count: allergenFilter.length,
-                        isLabelVisible: allergenFilter.isNotEmpty,
-                        backgroundColor: Colors.orange,
-                        child: Icon(
-                          Icons.tune_outlined,
-                          size: 22,
-                          color: allergenFilter.isNotEmpty
-                              ? Colors.orange.shade700
-                              : const Color(0xFF444444),
-                        ),
-                      ),
-                    ),
-
-                    const SizedBox(width: 6),
-
-                    // Carrito
-                    MouseRegion(
-                      cursor: SystemMouseCursors.click,
-                      child: GestureDetector(
-                        onTap: () => context.pushNamed(RouteNames.cart),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 9,
-                          ),
-                          decoration: BoxDecoration(
-                            color: AppTokens.brandPrimary,
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const Icon(
-                                Icons.shopping_bag_outlined,
-                                color: Colors.white,
-                                size: 18,
-                              ),
-                              if (cartCount > 0) ...[
-                                const SizedBox(width: 6),
-                                Text(
-                                  '$cartCount',
-                                  style: GoogleFonts.inter(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.w700,
-                                    fontSize: 13,
-                                  ),
-                                ),
-                              ],
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-
-                    const SizedBox(width: 12),
-
-                    // Auth
-                    if (profile == null)
-                      OutlinedButton(
-                        onPressed: () => context.goNamed(RouteNames.login),
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: AppTokens.brandPrimary,
-                          side: const BorderSide(color: AppTokens.brandPrimary),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          minimumSize: const Size(0, 36),
-                          padding:
-                              const EdgeInsets.symmetric(horizontal: 18),
-                          textStyle: GoogleFonts.inter(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                        child: const Text('Iniciar sesión'),
-                      )
-                    else
-                      MouseRegion(
-                        cursor: SystemMouseCursors.click,
-                        child: GestureDetector(
-                          onTap: () => context.goNamed(RouteNames.profile),
-                          child: CircleAvatar(
-                            radius: 18,
-                            backgroundColor:
-                                AppTokens.brandPrimary.withValues(alpha: 0.15),
-                            child: const Icon(
-                              Icons.person,
-                              color: AppTokens.brandPrimary,
-                              size: 18,
-                            ),
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-// ── NavLink del menú ─────────────────────────────────────────────────────────
-
-class _MenuNavLink extends StatefulWidget {
-  const _MenuNavLink({
-    required this.label,
-    required this.isActive,
-    required this.onTap,
-  });
-
-  final String label;
-  final bool isActive;
-  final VoidCallback onTap;
-
-  @override
-  State<_MenuNavLink> createState() => _MenuNavLinkState();
-}
-
-class _MenuNavLinkState extends State<_MenuNavLink> {
-  bool _hovered = false;
-
-  @override
-  Widget build(BuildContext context) {
-    final highlight = widget.isActive || _hovered;
-    return MouseRegion(
-      onEnter: (_) => setState(() => _hovered = true),
-      onExit: (_) => setState(() => _hovered = false),
-      cursor: SystemMouseCursors.click,
-      child: GestureDetector(
-        onTap: widget.onTap,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                widget.label,
-                style: GoogleFonts.inter(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w600,
-                  letterSpacing: 0.5,
-                  color: highlight
-                      ? AppTokens.brandPrimary
-                      : const Color(0xFF222222),
-                ),
-              ),
-              const SizedBox(height: 4),
-              AnimatedContainer(
-                duration: const Duration(milliseconds: 180),
-                height: 2.5,
-                width: highlight ? 24 : 0,
-                decoration: BoxDecoration(
-                  color: AppTokens.brandPrimary,
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }

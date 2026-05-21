@@ -1,17 +1,12 @@
-﻿import 'dart:ui';
-
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:sabor_de_casa/core/widgets/web_footer.dart';
-import 'package:sabor_de_casa/core/widgets/web_navbar.dart';
+﻿import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:sabor_de_casa/core/router/route_names.dart';
 import 'package:sabor_de_casa/core/theme/app_tokens.dart';
 import 'package:sabor_de_casa/core/utils/formatters.dart';
-import 'package:sabor_de_casa/features/auth/presentation/providers/auth_provider.dart';
-import 'package:sabor_de_casa/features/cart/presentation/providers/cart_provider.dart';
+import 'package:sabor_de_casa/core/widgets/web_footer.dart';
+import 'package:sabor_de_casa/core/widgets/web_navbar.dart';
 import 'package:sabor_de_casa/features/menu/domain/models/category.dart';
 import 'package:sabor_de_casa/features/menu/domain/models/dish.dart';
 import 'package:sabor_de_casa/features/menu/presentation/providers/categories_provider.dart';

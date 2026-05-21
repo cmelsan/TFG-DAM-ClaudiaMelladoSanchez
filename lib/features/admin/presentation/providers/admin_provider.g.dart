@@ -43,6 +43,148 @@ final adminOrdersProvider = AutoDisposeFutureProvider<List<Order>>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef AdminOrdersRef = AutoDisposeFutureProviderRef<List<Order>>;
+String _$adminOrderItemsHash() => r'0ae925cd19b2dc97bfa8bdabcf06183413fbf9aa';
+
+/// Copied from Dart SDK
+class _SystemHash {
+  _SystemHash._();
+
+  static int combine(int hash, int value) {
+    // ignore: parameter_assignments
+    hash = 0x1fffffff & (hash + value);
+    // ignore: parameter_assignments
+    hash = 0x1fffffff & (hash + ((0x0007ffff & hash) << 10));
+    return hash ^ (hash >> 6);
+  }
+
+  static int finish(int hash) {
+    // ignore: parameter_assignments
+    hash = 0x1fffffff & (hash + ((0x03ffffff & hash) << 3));
+    // ignore: parameter_assignments
+    hash = hash ^ (hash >> 11);
+    return 0x1fffffff & (hash + ((0x00003fff & hash) << 15));
+  }
+}
+
+/// See also [adminOrderItems].
+@ProviderFor(adminOrderItems)
+const adminOrderItemsProvider = AdminOrderItemsFamily();
+
+/// See also [adminOrderItems].
+class AdminOrderItemsFamily extends Family<AsyncValue<List<OrderItem>>> {
+  /// See also [adminOrderItems].
+  const AdminOrderItemsFamily();
+
+  /// See also [adminOrderItems].
+  AdminOrderItemsProvider call(String orderId) {
+    return AdminOrderItemsProvider(orderId);
+  }
+
+  @override
+  AdminOrderItemsProvider getProviderOverride(
+    covariant AdminOrderItemsProvider provider,
+  ) {
+    return call(provider.orderId);
+  }
+
+  static const Iterable<ProviderOrFamily>? _dependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
+
+  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
+      _allTransitiveDependencies;
+
+  @override
+  String? get name => r'adminOrderItemsProvider';
+}
+
+/// See also [adminOrderItems].
+class AdminOrderItemsProvider
+    extends AutoDisposeFutureProvider<List<OrderItem>> {
+  /// See also [adminOrderItems].
+  AdminOrderItemsProvider(String orderId)
+    : this._internal(
+        (ref) => adminOrderItems(ref as AdminOrderItemsRef, orderId),
+        from: adminOrderItemsProvider,
+        name: r'adminOrderItemsProvider',
+        debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+            ? null
+            : _$adminOrderItemsHash,
+        dependencies: AdminOrderItemsFamily._dependencies,
+        allTransitiveDependencies:
+            AdminOrderItemsFamily._allTransitiveDependencies,
+        orderId: orderId,
+      );
+
+  AdminOrderItemsProvider._internal(
+    super._createNotifier, {
+    required super.name,
+    required super.dependencies,
+    required super.allTransitiveDependencies,
+    required super.debugGetCreateSourceHash,
+    required super.from,
+    required this.orderId,
+  }) : super.internal();
+
+  final String orderId;
+
+  @override
+  Override overrideWith(
+    FutureOr<List<OrderItem>> Function(AdminOrderItemsRef provider) create,
+  ) {
+    return ProviderOverride(
+      origin: this,
+      override: AdminOrderItemsProvider._internal(
+        (ref) => create(ref as AdminOrderItemsRef),
+        from: from,
+        name: null,
+        dependencies: null,
+        allTransitiveDependencies: null,
+        debugGetCreateSourceHash: null,
+        orderId: orderId,
+      ),
+    );
+  }
+
+  @override
+  AutoDisposeFutureProviderElement<List<OrderItem>> createElement() {
+    return _AdminOrderItemsProviderElement(this);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is AdminOrderItemsProvider && other.orderId == orderId;
+  }
+
+  @override
+  int get hashCode {
+    var hash = _SystemHash.combine(0, runtimeType.hashCode);
+    hash = _SystemHash.combine(hash, orderId.hashCode);
+
+    return _SystemHash.finish(hash);
+  }
+}
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+mixin AdminOrderItemsRef on AutoDisposeFutureProviderRef<List<OrderItem>> {
+  /// The parameter `orderId` of this provider.
+  String get orderId;
+}
+
+class _AdminOrderItemsProviderElement
+    extends AutoDisposeFutureProviderElement<List<OrderItem>>
+    with AdminOrderItemsRef {
+  _AdminOrderItemsProviderElement(super.provider);
+
+  @override
+  String get orderId => (origin as AdminOrderItemsProvider).orderId;
+}
+
 String _$adminCategoriesHash() => r'2ec2b3fbba5c010858e25b24dac6cd1660a70eac';
 
 /// See also [adminCategories].

@@ -76,8 +76,167 @@ final encargoKitchenOrdersProvider =
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef EncargoKitchenOrdersRef = AutoDisposeFutureProviderRef<List<Order>>;
+String _$pickupReadyOrdersHash() => r'da15d83272ebf09997f4afe197a05a73660e3259';
+
+/// See also [pickupReadyOrders].
+@ProviderFor(pickupReadyOrders)
+final pickupReadyOrdersProvider =
+    AutoDisposeFutureProvider<List<Order>>.internal(
+      pickupReadyOrders,
+      name: r'pickupReadyOrdersProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$pickupReadyOrdersHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef PickupReadyOrdersRef = AutoDisposeFutureProviderRef<List<Order>>;
+String _$orderForPickupHash() => r'556da8ae44df30693640e17ae05cc52672a7336a';
+
+/// Copied from Dart SDK
+class _SystemHash {
+  _SystemHash._();
+
+  static int combine(int hash, int value) {
+    // ignore: parameter_assignments
+    hash = 0x1fffffff & (hash + value);
+    // ignore: parameter_assignments
+    hash = 0x1fffffff & (hash + ((0x0007ffff & hash) << 10));
+    return hash ^ (hash >> 6);
+  }
+
+  static int finish(int hash) {
+    // ignore: parameter_assignments
+    hash = 0x1fffffff & (hash + ((0x03ffffff & hash) << 3));
+    // ignore: parameter_assignments
+    hash = hash ^ (hash >> 11);
+    return 0x1fffffff & (hash + ((0x00003fff & hash) << 15));
+  }
+}
+
+/// See also [orderForPickup].
+@ProviderFor(orderForPickup)
+const orderForPickupProvider = OrderForPickupFamily();
+
+/// See also [orderForPickup].
+class OrderForPickupFamily extends Family<AsyncValue<Order?>> {
+  /// See also [orderForPickup].
+  const OrderForPickupFamily();
+
+  /// See also [orderForPickup].
+  OrderForPickupProvider call(String orderId) {
+    return OrderForPickupProvider(orderId);
+  }
+
+  @override
+  OrderForPickupProvider getProviderOverride(
+    covariant OrderForPickupProvider provider,
+  ) {
+    return call(provider.orderId);
+  }
+
+  static const Iterable<ProviderOrFamily>? _dependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
+
+  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
+      _allTransitiveDependencies;
+
+  @override
+  String? get name => r'orderForPickupProvider';
+}
+
+/// See also [orderForPickup].
+class OrderForPickupProvider extends AutoDisposeFutureProvider<Order?> {
+  /// See also [orderForPickup].
+  OrderForPickupProvider(String orderId)
+    : this._internal(
+        (ref) => orderForPickup(ref as OrderForPickupRef, orderId),
+        from: orderForPickupProvider,
+        name: r'orderForPickupProvider',
+        debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+            ? null
+            : _$orderForPickupHash,
+        dependencies: OrderForPickupFamily._dependencies,
+        allTransitiveDependencies:
+            OrderForPickupFamily._allTransitiveDependencies,
+        orderId: orderId,
+      );
+
+  OrderForPickupProvider._internal(
+    super._createNotifier, {
+    required super.name,
+    required super.dependencies,
+    required super.allTransitiveDependencies,
+    required super.debugGetCreateSourceHash,
+    required super.from,
+    required this.orderId,
+  }) : super.internal();
+
+  final String orderId;
+
+  @override
+  Override overrideWith(
+    FutureOr<Order?> Function(OrderForPickupRef provider) create,
+  ) {
+    return ProviderOverride(
+      origin: this,
+      override: OrderForPickupProvider._internal(
+        (ref) => create(ref as OrderForPickupRef),
+        from: from,
+        name: null,
+        dependencies: null,
+        allTransitiveDependencies: null,
+        debugGetCreateSourceHash: null,
+        orderId: orderId,
+      ),
+    );
+  }
+
+  @override
+  AutoDisposeFutureProviderElement<Order?> createElement() {
+    return _OrderForPickupProviderElement(this);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is OrderForPickupProvider && other.orderId == orderId;
+  }
+
+  @override
+  int get hashCode {
+    var hash = _SystemHash.combine(0, runtimeType.hashCode);
+    hash = _SystemHash.combine(hash, orderId.hashCode);
+
+    return _SystemHash.finish(hash);
+  }
+}
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+mixin OrderForPickupRef on AutoDisposeFutureProviderRef<Order?> {
+  /// The parameter `orderId` of this provider.
+  String get orderId;
+}
+
+class _OrderForPickupProviderElement
+    extends AutoDisposeFutureProviderElement<Order?>
+    with OrderForPickupRef {
+  _OrderForPickupProviderElement(super.provider);
+
+  @override
+  String get orderId => (origin as OrderForPickupProvider).orderId;
+}
+
 String _$employeeOrderActionHash() =>
-    r'0ca682cf759c9730e81e5aeb48d8fab3debe62e3';
+    r'c6491dda78d79c937825b8daa567968b283e2ad2';
 
 /// See also [EmployeeOrderAction].
 @ProviderFor(EmployeeOrderAction)

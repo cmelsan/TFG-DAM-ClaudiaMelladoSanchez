@@ -8,6 +8,8 @@ import 'package:sabor_de_casa/core/theme/theme_provider.dart';
 import 'package:sabor_de_casa/core/utils/validators.dart';
 import 'package:sabor_de_casa/core/widgets/error_view.dart';
 import 'package:sabor_de_casa/core/widgets/loading_indicator.dart';
+import 'package:sabor_de_casa/core/widgets/web_footer.dart';
+import 'package:sabor_de_casa/core/widgets/web_navbar.dart';
 import 'package:sabor_de_casa/features/auth/presentation/providers/auth_provider.dart';
 import 'package:sabor_de_casa/features/profile/presentation/providers/profile_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -32,6 +34,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   final _formKey = GlobalKey<FormState>();
   final _fullNameCtrl = TextEditingController();
   final _phoneCtrl = TextEditingController();
+  late final ScrollController _scrollCtrl;
+  bool _isScrolled = false;
 
   String? _lastProfileId;
 
@@ -53,6 +57,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   void initState() {
     super.initState();
     _loadPreferences();
+    _scrollCtrl = ScrollController()
+      ..addListener(() {
+        final scrolled = _scrollCtrl.offset > 10;
+        if (scrolled != _isScrolled) setState(() => _isScrolled = scrolled);
+      });
   }
 
   Future<void> _loadPreferences() async {
@@ -93,6 +102,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   void dispose() {
     _fullNameCtrl.dispose();
     _phoneCtrl.dispose();
+    _scrollCtrl.dispose();
     super.dispose();
   }
 
@@ -102,7 +112,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final isDarkMode =
         ref.watch(themeNotifierProvider).valueOrNull == ThemeMode.dark;
     final screenW = MediaQuery.sizeOf(context).width;
-    final hPad = screenW > 900 ? (screenW - 900) / 2 : 20.0;
+    final hPad = screenW > 1200 ? (screenW - 1200) / 2 + 24.0 : 24.0;
 
     ref.listen(profileNotifierProvider, (prev, next) {
       final hadValue = prev?.hasValue ?? false;
@@ -118,6 +128,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
     return Scaffold(
       backgroundColor: AppTokens.pageBg,
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(80),
+        child: WebNavbar(
+          isScrolled: _isScrolled,
+          activeRoute: RouteNames.profile,
+        ),
+      ),
       body: profileAsync.when(
         data: (profile) {
           if (_lastProfileId != profile.id) {
@@ -130,6 +147,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             color: AppTokens.brandPrimary,
             onRefresh: ref.read(profileNotifierProvider.notifier).refresh,
             child: CustomScrollView(
+              controller: _scrollCtrl,
               slivers: [
                 SliverToBoxAdapter(
                   child: _ProfileHero(
@@ -378,6 +396,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     ]),
                   ),
                 ),
+                const SliverToBoxAdapter(child: WebFooter()),
               ],
             ),
           );
@@ -443,10 +462,8 @@ class _ProfileHero extends StatelessWidget {
   Widget build(BuildContext context) {
     return ColoredBox(
       color: _kBgDark,
-      child: SafeArea(
-        bottom: false,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(24, 32, 24, 40),
+      child: Padding(
+          padding: const EdgeInsets.fromLTRB(24, 40, 24, 40),
           child: Row(
             children: [
               Container(
@@ -516,7 +533,6 @@ class _ProfileHero extends StatelessWidget {
             ],
           ),
         ),
-      ),
     );
   }
 }

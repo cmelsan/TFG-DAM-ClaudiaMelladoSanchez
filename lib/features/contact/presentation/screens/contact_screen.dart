@@ -142,7 +142,6 @@ class _ContactScreenState extends ConsumerState<ContactScreen> {
       child: Form(
         key: _formKey,
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Text(
               'Envíanos un mensaje',
@@ -281,7 +280,7 @@ class _ContactScreenState extends ConsumerState<ContactScreen> {
 
   Widget _buildDropdown() {
     return DropdownButtonFormField<String>(
-      value: _selectedType,
+      initialValue: _selectedType,
       decoration: InputDecoration(
         labelText: 'Tipo de consulta',
         labelStyle: GoogleFonts.inter(fontSize: 14, color: Colors.black45),
@@ -336,10 +335,9 @@ class _HeroBanner extends StatelessWidget {
     return SizedBox(
       width: double.infinity,
       child: Stack(
-        clipBehavior: Clip.hardEdge,
         children: [
           // Fondo verde
-          Positioned.fill(child: ColoredBox(color: AppTokens.brandDark)),
+          const Positioned.fill(child: ColoredBox(color: AppTokens.brandDark)),
           // Círculo decorativo top-right
           Positioned(
             top: -80,
@@ -409,7 +407,7 @@ class _HeroBanner extends StatelessWidget {
                 ),
                 const SizedBox(height: 20),
                 Text(
-                  '¿Hablamos?',
+                  '¿Hablamos?', 
                   textAlign: TextAlign.center,
                   style: GoogleFonts.inter(
                     fontSize: screenW < 600 ? 44 : 68,
@@ -462,9 +460,9 @@ class _ContactStrip extends StatelessWidget {
           vertical: 32,
         ),
         child: isWide
-            ? Row(
+            ? const Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: const [
+                children: [
                   _ContactItem(
                     icon: Icons.phone_outlined,
                     label: 'Teléfono',
@@ -490,11 +488,11 @@ class _ContactStrip extends StatelessWidget {
                   ),
                 ],
               )
-            : Wrap(
+            : const Wrap(
                 spacing: 24,
                 runSpacing: 20,
                 alignment: WrapAlignment.center,
-                children: const [
+                children: [
                   _ContactItem(
                     icon: Icons.phone_outlined,
                     label: 'Teléfono',

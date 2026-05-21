@@ -114,10 +114,24 @@ class AdminRepository {
     required String status,
   }) async {
     try {
+      // Fetch user_id and order_type before updating (needed for notification)
+      final row = await _client
+          .from(SupabaseConstants.orders)
+          .select('user_id, order_type')
+          .eq('id', orderId)
+          .single();
+
       await _client
           .from(SupabaseConstants.orders)
           .update({'status': status})
           .eq('id', orderId);
+
+      _sendStatusNotification(
+        orderId: orderId,
+        newStatus: status,
+        userId: row['user_id'] as String? ?? '',
+        orderType: row['order_type'] as String? ?? '',
+      );
     } on PostgrestException catch (e) {
       throw DatabaseFailure(message: e.message, code: e.code);
     } catch (e) {
@@ -655,14 +669,49 @@ class AdminRepository {
     required String reason,
   }) async {
     try {
+      // Fetch user_id and order_type for notification
+      final row = await _client
+          .from(SupabaseConstants.orders)
+          .select('user_id, order_type')
+          .eq('id', orderId)
+          .single();
+
       await _client
           .from(SupabaseConstants.orders)
           .update({'status': 'cancelled', 'cancellation_reason': reason})
           .eq('id', orderId);
+
+      _sendStatusNotification(
+        orderId: orderId,
+        newStatus: 'cancelled',
+        userId: row['user_id'] as String? ?? '',
+        orderType: row['order_type'] as String? ?? '',
+      );
     } on PostgrestException catch (e) {
       throw DatabaseFailure(message: e.message, code: e.code);
     } catch (e) {
       throw UnexpectedFailure(message: e.toString());
     }
+  }
+
+  /// Fire-and-forget: notifica al cliente via Edge Function.
+  void _sendStatusNotification({
+    required String orderId,
+    required String newStatus,
+    required String userId,
+    required String orderType,
+  }) {
+    _client.functions
+        .invoke(
+          'send-order-notification',
+          body: {
+            'orderId': orderId,
+            'newStatus': newStatus,
+            'userId': userId,
+            'orderType': orderType,
+          },
+        )
+        // ignore: avoid_redundant_argument_values
+        .catchError((_) => FunctionResponse(data: null, status: 200));
   }
 }

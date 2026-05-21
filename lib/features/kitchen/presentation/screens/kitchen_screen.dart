@@ -129,11 +129,12 @@ class _KitchenOrderCard extends ConsumerWidget {
   const _KitchenOrderCard({required this.order});
   final Order order;
 
-  // Urgencia: hace cuánto se creó el pedido
+  // Urgencia: hace cuánto se creó el pedido. Recogida → azul cuando no es urgente.
   Color _accentColor() {
     final elapsed = DateTime.now().difference(order.createdAt).inMinutes;
     if (elapsed > 15) return AppTokens.danger;
     if (order.status == 'preparing') return AppTokens.warning;
+    if (order.orderType == 'recogida') return AppTokens.badgeRecogidaFg;
     return AppTokens.brandPrimary;
   }
 

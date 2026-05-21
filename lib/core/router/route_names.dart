@@ -34,6 +34,7 @@ class RouteNames {
   static const delivery = 'delivery';
   static const pos = 'pos';
   static const scanner = 'scanner';
+  static const pickup = 'pickup';
 
   // Pago web (retorno desde Stripe Checkout)
   static const paymentSuccess = 'payment-success';

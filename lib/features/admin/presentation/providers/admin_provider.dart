@@ -11,7 +11,9 @@ import 'package:sabor_de_casa/features/catering/domain/models/event_menu.dart';
 import 'package:sabor_de_casa/features/menu/domain/models/category.dart';
 import 'package:sabor_de_casa/features/menu/domain/models/dish.dart';
 import 'package:sabor_de_casa/features/menu/presentation/providers/menu_provider.dart';
+import 'package:sabor_de_casa/features/orders/data/repositories/orders_repository.dart';
 import 'package:sabor_de_casa/features/orders/domain/models/order.dart';
+import 'package:sabor_de_casa/features/orders/domain/models/order_item.dart';
 
 part 'admin_provider.g.dart';
 
@@ -25,6 +27,12 @@ Future<Map<String, double>> adminDashboardStats(AdminDashboardStatsRef ref) {
 // ignore: deprecated_member_use_from_same_package, Riverpod 2.x typed Ref
 Future<List<Order>> adminOrders(AdminOrdersRef ref) {
   return ref.watch(adminRepositoryProvider).getAllOrders();
+}
+
+@riverpod
+// ignore: deprecated_member_use_from_same_package
+Future<List<OrderItem>> adminOrderItems(AdminOrderItemsRef ref, String orderId) {
+  return ref.watch(ordersRepositoryProvider).getOrderItems(orderId);
 }
 
 // Provider categorías admin

@@ -194,4 +194,38 @@ class EmployeeOrdersRepository {
       throw UnexpectedFailure(message: e.toString());
     }
   }
+
+  /// Pedidos de recogida que están listos para ser entregados al cliente.
+  Future<List<Order>> getPickupReadyOrders() async {
+    try {
+      final data = await _client
+          .from(SupabaseConstants.orders)
+          .select()
+          .eq('order_type', 'recogida')
+          .eq('status', 'ready')
+          .order('created_at', ascending: false);
+      return data.map(Order.fromJson).toList();
+    } on PostgrestException catch (e) {
+      throw DatabaseFailure(message: e.message, code: e.code);
+    } catch (e) {
+      throw UnexpectedFailure(message: e.toString());
+    }
+  }
+
+  /// Busca un pedido por ID sin filtro de usuario (para el escáner QR del empleado).
+  Future<Order?> getOrderForPickup(String orderId) async {
+    try {
+      final data = await _client
+          .from(SupabaseConstants.orders)
+          .select()
+          .eq('id', orderId)
+          .maybeSingle();
+      if (data == null) return null;
+      return Order.fromJson(data);
+    } on PostgrestException catch (e) {
+      throw DatabaseFailure(message: e.message, code: e.code);
+    } catch (e) {
+      throw UnexpectedFailure(message: e.toString());
+    }
+  }
 }

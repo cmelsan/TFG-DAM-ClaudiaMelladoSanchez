@@ -97,7 +97,7 @@ class _AdminOrdersScreenState extends ConsumerState<AdminOrdersScreen> {
                         itemCount: filtered.length,
                         separatorBuilder: (_, __) => const SizedBox(height: 10),
                         itemBuilder: (ctx, i) =>
-                            _OrderCard(order: filtered[i], index: i, ref: ref),
+                            _OrderCard(order: filtered[i], index: i),
                       ),
               ),
             ],
@@ -228,21 +228,19 @@ class _FilterChip extends StatelessWidget {
 
 // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ Order Card â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-class _OrderCard extends StatefulWidget {
+class _OrderCard extends ConsumerStatefulWidget {
   const _OrderCard({
     required this.order,
     required this.index,
-    required this.ref,
   });
   final Order order;
   final int index;
-  final WidgetRef ref;
 
   @override
-  State<_OrderCard> createState() => _OrderCardState();
+  ConsumerState<_OrderCard> createState() => _OrderCardState();
 }
 
-class _OrderCardState extends State<_OrderCard> {
+class _OrderCardState extends ConsumerState<_OrderCard> {
   bool _expanded = false;
 
   Color get _statusColor =>
@@ -279,7 +277,7 @@ class _OrderCardState extends State<_OrderCard> {
             style: FilledButton.styleFrom(backgroundColor: Colors.red),
             onPressed: () {
               Navigator.pop(ctx);
-              widget.ref
+              ref
                   .read(adminActionProvider.notifier)
                   .cancelOrderWithReason(
                     orderId: widget.order.id,
@@ -413,6 +411,10 @@ class _OrderCardState extends State<_OrderCard> {
                       ),
                       const SizedBox(height: 10),
 
+                      // Ítems del pedido
+                      _OrderItemsSection(orderId: order.id),
+                      const SizedBox(height: 10),
+
                       // Cambiar estado
                       if (!isCancelled) ...[
                         const Text(
@@ -447,7 +449,7 @@ class _OrderCardState extends State<_OrderCard> {
                               .toList(),
                           onChanged: (v) {
                             if (v == null || v == order.status) return;
-                            widget.ref
+                            ref
                                 .read(adminActionProvider.notifier)
                                 .updateOrderStatus(
                                   orderId: order.id,
@@ -497,21 +499,21 @@ class _OrderCardState extends State<_OrderCard> {
                           if (needsPayment)
                             FilledButton.icon(
                               style: FilledButton.styleFrom(
-                                backgroundColor: Colors.orange,
+                                backgroundColor: Colors.teal,
                                 padding: const EdgeInsets.symmetric(
                                   horizontal: 12,
                                   vertical: 6,
                                 ),
                               ),
-                              onPressed: () => widget.ref
+                              onPressed: () => ref
                                   .read(adminActionProvider.notifier)
-                                  .markPaymentPaid(order.id),
+                                  .markDeliveredAndPaid(order.id),
                               icon: const Icon(
-                                Icons.payments_outlined,
+                                Icons.done_all_rounded,
                                 size: 16,
                               ),
                               label: const Text(
-                                'Cobrar',
+                                'Entregar y cobrar',
                                 style: TextStyle(fontSize: 12),
                               ),
                             ),
@@ -532,6 +534,84 @@ class _OrderCardState extends State<_OrderCard> {
           duration: 250.ms,
           delay: (widget.index * 30).ms,
         );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Order Items Section
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _OrderItemsSection extends ConsumerWidget {
+  const _OrderItemsSection({required this.orderId});
+  final String orderId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final asyncItems = ref.watch(adminOrderItemsProvider(orderId));
+    return asyncItems.when(
+      loading: () => const Padding(
+        padding: EdgeInsets.symmetric(vertical: 8),
+        child: LinearProgressIndicator(),
+      ),
+      error: (_, __) => const SizedBox.shrink(),
+      data: (items) {
+        if (items.isEmpty) return const SizedBox.shrink();
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'PRODUCTOS',
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+                color: Colors.grey,
+              ),
+            ),
+            const SizedBox(height: 6),
+            ...items.map(
+              (item) => Padding(
+                padding: const EdgeInsets.symmetric(vertical: 2),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 22,
+                      height: 22,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: AppTokens.brandPrimary.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Text(
+                        '${item.quantity}×',
+                        style: const TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                          color: AppTokens.brandPrimary,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        item.dishName ?? 'Producto',
+                        style: const TextStyle(fontSize: 12),
+                      ),
+                    ),
+                    Text(
+                      Formatters.price(item.subtotal),
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
   }
 }
 

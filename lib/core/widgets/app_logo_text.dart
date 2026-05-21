@@ -11,6 +11,7 @@ class AppLogoText extends StatelessWidget {
     required this.fontSize,
     this.textAlign = TextAlign.left,
     this.showImage = false,
+    this.singleLine = false,
     super.key,
   });
 
@@ -19,18 +20,36 @@ class AppLogoText extends StatelessWidget {
   final TextAlign textAlign;
   final bool showImage;
 
+  /// Si true, el texto se muestra en una sola línea con tipografía Syne italic.
+  /// Si false (por defecto), se muestra en dos líneas con Inter w900.
+  final bool singleLine;
+
   @override
   Widget build(BuildContext context) {
-    final text = Text(
-      'SABOR\nDE CASA',
-      textAlign: textAlign,
-      style: GoogleFonts.inter(fontWeight: FontWeight.w900, 
-        fontSize: fontSize,
-        color: color,
-        height: 0.95,
-        letterSpacing: 2,
-      ),
-    );
+    final text = singleLine
+        ? Text(
+            'Sabor de Casa',
+            textAlign: textAlign,
+            style: GoogleFonts.syne(
+              fontWeight: FontWeight.w800,
+              fontStyle: FontStyle.italic,
+              fontSize: fontSize,
+              color: color,
+              height: 1,
+              letterSpacing: 0,
+            ),
+          )
+        : Text(
+            'SABOR\nDE CASA',
+            textAlign: textAlign,
+            style: GoogleFonts.inter(
+              fontWeight: FontWeight.w900,
+              fontSize: fontSize,
+              color: color,
+              height: 0.95,
+              letterSpacing: 2,
+            ),
+          );
 
     if (!showImage) return text;
 

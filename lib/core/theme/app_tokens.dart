@@ -8,7 +8,7 @@ abstract final class AppTokens {
   static const Color brandDark = Color(0xFF0F6E56);
   static const Color brandLight = Color(0xFFE1F5EE);
   static const Color surfaceDark = Color(0xFF1A1A2E); // admin / sidebar
-  static const Color pageBg = Color(0xFFF7F7F5);
+  static const Color pageBg = Color(0xFFFFFFFF);
 
   // ─── COLORES SEMÁNTICOS ───────────────────────────────────────────
   static const Color info = Color(0xFF378ADD);

@@ -1,8 +1,4 @@
-﻿import 'dart:ui';
-
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:sabor_de_casa/core/widgets/web_footer.dart';
-import 'package:sabor_de_casa/core/widgets/web_navbar.dart';
+﻿import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -11,8 +7,9 @@ import 'package:sabor_de_casa/core/router/route_names.dart';
 import 'package:sabor_de_casa/core/theme/app_tokens.dart';
 import 'package:sabor_de_casa/core/utils/formatters.dart';
 import 'package:sabor_de_casa/core/widgets/location_section.dart';
+import 'package:sabor_de_casa/core/widgets/web_footer.dart';
+import 'package:sabor_de_casa/core/widgets/web_navbar.dart';
 import 'package:sabor_de_casa/features/admin/presentation/providers/admin_provider.dart';
-import 'package:sabor_de_casa/features/auth/presentation/providers/auth_provider.dart';
 import 'package:sabor_de_casa/features/cart/domain/models/cart_item.dart';
 import 'package:sabor_de_casa/features/cart/presentation/providers/cart_provider.dart';
 import 'package:sabor_de_casa/features/home/presentation/providers/subscription_provider.dart';
@@ -504,7 +501,7 @@ class _WebTopDishesCarouselState
                             Stack(
                               children: [
                                 SizedBox(
-                                  height: 330,
+                                  height: 390,
                                   child: PageView.builder(
                                     controller: _pageCtrl,
                                     physics:
@@ -583,7 +580,7 @@ class _WebTopDishesCarouselState
                       });
                     },
                     loading: () => SizedBox(
-                      height: 330,
+                      height: 390,
                       child: Row(
                         children: List.generate(
                           4,
@@ -1028,7 +1025,7 @@ class _WebOffersSectionState extends ConsumerState<_WebOffersSection> {
                             Stack(
                               children: [
                                 SizedBox(
-                                  height: 330,
+                                  height: 390,
                                   child: PageView.builder(
                                     controller: _pageCtrl,
                                     physics:
@@ -1103,7 +1100,7 @@ class _WebOffersSectionState extends ConsumerState<_WebOffersSection> {
                       });
                     },
                     loading: () => SizedBox(
-                      height: 330,
+                      height: 390,
                       child: Row(
                         children: List.generate(
                           4,
@@ -2510,7 +2507,6 @@ class _WebTestimonialsSectionState extends State<_WebTestimonialsSection> {
                   if (!isWide) return mainContent;
 
                   return Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Expanded(flex: 6, child: mainContent),
                       const SizedBox(width: 24),
@@ -2934,7 +2930,7 @@ class _WebSubscriptionSectionState
                     ),
                     const SizedBox(height: 28),
                     // Pills de características
-                    Wrap(
+                    const Wrap(
                       spacing: 10,
                       runSpacing: 10,
                       children: [
@@ -3087,7 +3083,7 @@ class _WebSubscriptionSectionState
                                     ),
                                   ),
                                   prefixIconConstraints:
-                                      const BoxConstraints(minWidth: 0),
+                                      const BoxConstraints(),
                                 ),
                                 validator: (v) {
                                   if (v == null || v.trim().isEmpty) {
@@ -3173,7 +3169,6 @@ class _WebSubscriptionSectionState
                   );
                 }
                 return Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Expanded(flex: 5, child: textBlock),
                     const SizedBox(width: 64),
@@ -3651,4 +3646,3 @@ class _QtyButton extends StatelessWidget {
     );
   }
 }
-

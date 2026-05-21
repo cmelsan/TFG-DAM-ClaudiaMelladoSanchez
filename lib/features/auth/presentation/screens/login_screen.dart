@@ -237,7 +237,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           children: [
             const AppLogoText(
               color: AppTokens.brandPrimary,
-              fontSize: 42,
+              fontSize: 28,
+              singleLine: true,
             ),
             const SizedBox(height: 32),
             const Text(

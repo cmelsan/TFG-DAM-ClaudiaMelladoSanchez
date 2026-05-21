@@ -31,6 +31,18 @@ Future<List<Order>> encargoKitchenOrders(EncargoKitchenOrdersRef ref) {
 }
 
 @riverpod
+// ignore: deprecated_member_use_from_same_package, Riverpod 2.x typed Ref
+Future<List<Order>> pickupReadyOrders(PickupReadyOrdersRef ref) {
+  return ref.watch(employeeOrdersRepositoryProvider).getPickupReadyOrders();
+}
+
+@riverpod
+// ignore: deprecated_member_use_from_same_package, Riverpod 2.x typed Ref
+Future<Order?> orderForPickup(OrderForPickupRef ref, String orderId) {
+  return ref.watch(employeeOrdersRepositoryProvider).getOrderForPickup(orderId);
+}
+
+@riverpod
 class EmployeeOrderAction extends _$EmployeeOrderAction {
   @override
   FutureOr<void> build() {}
@@ -82,6 +94,7 @@ class EmployeeOrderAction extends _$EmployeeOrderAction {
       ..invalidate(kitchenOrdersProvider)
       ..invalidate(deliveryOrdersProvider)
       ..invalidate(posOrdersProvider)
-      ..invalidate(encargoKitchenOrdersProvider);
+      ..invalidate(encargoKitchenOrdersProvider)
+      ..invalidate(pickupReadyOrdersProvider);
   }
 }

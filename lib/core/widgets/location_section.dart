@@ -226,10 +226,10 @@ class _MapTile extends StatelessWidget {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(20),
         child: FlutterMap(
-          options: MapOptions(
-            initialCenter: const LatLng(_kLat, _kLng),
+          options: const MapOptions(
+            initialCenter: LatLng(_kLat, _kLng),
             initialZoom: 15.5,
-            interactionOptions: const InteractionOptions(
+            interactionOptions: InteractionOptions(
               flags: InteractiveFlag.none,
             ),
           ),

@@ -7,7 +7,7 @@ import 'package:sabor_de_casa/features/menu/domain/models/dish.dart';
 /// Selector de cantidad inline + botón de añadir al carrito para tarjetas.
 /// Se gestiona el estado de cantidad localmente.
 class CardAddToCart extends StatefulWidget {
-  const CardAddToCart({super.key, required this.dish});
+  const CardAddToCart({required this.dish, super.key});
 
   final Dish dish;
 
@@ -90,7 +90,7 @@ class _CardAddToCartState extends State<CardAddToCart> {
                           SnackBar(
                             content: Text(
                               _qty > 1
-                                  ? '${_qty}× ${widget.dish.name} añadido'
+                                  ? '$_qty× ${widget.dish.name} añadido'
                                   : '${widget.dish.name} añadido',
                             ),
                             duration: const Duration(seconds: 1),

@@ -68,6 +68,28 @@ class EmployeeOrdersRepository {
     }
   }
 
+  /// Igual que [getDeliveryOrders] pero trae la dirección y el perfil del
+  /// cliente mediante join de Supabase PostgREST.
+  Future<List<Map<String, dynamic>>> getDeliveryOrdersWithDetails() async {
+    try {
+      final data = await _client
+          .from(SupabaseConstants.orders)
+          .select(
+            '*, '
+            '${SupabaseConstants.addresses}(label, street, city, postal_code), '
+            '${SupabaseConstants.profiles}!user_id(full_name, phone)',
+          )
+          .inFilter('status', ['ready', 'delivering'])
+          .eq('order_type', 'domicilio')
+          .order('created_at', ascending: false);
+      return List<Map<String, dynamic>>.from(data as List);
+    } on PostgrestException catch (e) {
+      throw DatabaseFailure(message: e.message, code: e.code);
+    } catch (e) {
+      throw UnexpectedFailure(message: e.toString());
+    }
+  }
+
   Future<List<Order>> getPosOrders() async {
     try {
       final today = DateTime.now();

@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:sabor_de_casa/features/delivery/presentation/providers/delivery_provider.dart';
 import 'package:sabor_de_casa/features/kitchen/data/repositories/employee_orders_repository.dart';
 import 'package:sabor_de_casa/features/orders/domain/models/order.dart';
 
@@ -93,6 +94,7 @@ class EmployeeOrderAction extends _$EmployeeOrderAction {
     ref
       ..invalidate(kitchenOrdersProvider)
       ..invalidate(deliveryOrdersProvider)
+      ..invalidate(deliveryDetailProvider)
       ..invalidate(posOrdersProvider)
       ..invalidate(encargoKitchenOrdersProvider)
       ..invalidate(pickupReadyOrdersProvider);

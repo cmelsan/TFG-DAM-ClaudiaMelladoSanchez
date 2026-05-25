@@ -100,14 +100,9 @@ class _CategoryTile extends StatelessWidget {
     return Container(
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(14),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.05),
-                blurRadius: 6,
-                offset: const Offset(0, 2),
-              ),
-            ],
+            borderRadius: BorderRadius.circular(AppTokens.radiusLg),
+            border: Border.all(color: const Color(0xFFEEEEEE)),
+            boxShadow: [AppTokens.cardShadow],
           ),
           child: ListTile(
             contentPadding: const EdgeInsets.symmetric(

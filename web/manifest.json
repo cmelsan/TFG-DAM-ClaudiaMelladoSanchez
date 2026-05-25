@@ -1,11 +1,11 @@
 {
-    "name": "sabor_de_casa",
-    "short_name": "sabor_de_casa",
+    "name": "Sabor de Casa",
+    "short_name": "Sabor de Casa",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#1a7a7a",
+    "theme_color": "#1a7a7a",
+    "description": "Comida preparada para llevar y catering - Sabor de Casa",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

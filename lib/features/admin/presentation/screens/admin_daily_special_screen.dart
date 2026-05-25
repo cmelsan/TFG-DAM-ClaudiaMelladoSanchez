@@ -296,7 +296,20 @@ class _FormTextField extends StatelessWidget {
       decoration: InputDecoration(
         labelText: label,
         hintText: hint,
-        border: const OutlineInputBorder(),
+        filled: true,
+        fillColor: const Color(0xFFF8F8FA),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(AppTokens.radiusMd),
+          borderSide: const BorderSide(color: Color(0xFFEEEEEE)),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(AppTokens.radiusMd),
+          borderSide: const BorderSide(color: Color(0xFFEEEEEE)),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(AppTokens.radiusMd),
+          borderSide: const BorderSide(color: AppTokens.brandPrimary, width: 1.5),
+        ),
       ),
     );
   }
@@ -321,7 +334,21 @@ class _PriceField extends StatelessWidget {
       decoration: InputDecoration(
         labelText: label,
         hintText: hint,
-        border: const OutlineInputBorder(),
+        prefixIcon: const Icon(Icons.euro_outlined, size: 18),
+        filled: true,
+        fillColor: const Color(0xFFF8F8FA),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(AppTokens.radiusMd),
+          borderSide: const BorderSide(color: Color(0xFFEEEEEE)),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(AppTokens.radiusMd),
+          borderSide: const BorderSide(color: Color(0xFFEEEEEE)),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(AppTokens.radiusMd),
+          borderSide: const BorderSide(color: AppTokens.brandPrimary, width: 1.5),
+        ),
       ),
       validator: (v) {
         if (v == null || v.isEmpty) return null;

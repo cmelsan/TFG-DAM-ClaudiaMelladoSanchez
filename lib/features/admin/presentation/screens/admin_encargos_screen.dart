@@ -204,14 +204,12 @@ class _EncargoCard extends ConsumerWidget {
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(AppTokens.radiusLg),
         border: Border.all(
-          color: isUrgent ? Colors.orange.shade300 : const Color(0xFFE5E5E3),
-          width: isUrgent ? 2 : 1,
+          color: isUrgent ? AppTokens.warning : const Color(0xFFEEEEEE),
+          width: isUrgent ? 1.5 : 1,
         ),
-        boxShadow: const [
-          BoxShadow(color: Colors.black12, blurRadius: 6, offset: Offset(0, 2)),
-        ],
+        boxShadow: [AppTokens.cardShadow],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

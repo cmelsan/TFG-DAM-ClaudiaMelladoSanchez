@@ -39,18 +39,33 @@ class _AdminDishesScreenState extends ConsumerState<AdminDishesScreen> {
       ),
       child: Column(
         children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+          Container(
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              border: Border(bottom: BorderSide(color: Color(0xFFEEEEEE))),
+            ),
+            padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
             child: TextField(
               decoration: InputDecoration(
                 hintText: 'Buscar platos…',
-                prefixIcon: const Icon(Icons.search, color: Colors.grey),
+                prefixIcon: const Icon(Icons.search_rounded,
+                    color: Color(0xFF9E9E9E), size: 20),
                 filled: true,
-                fillColor: const Color(0xFFE5E5E3),
-                contentPadding: EdgeInsets.zero,
+                fillColor: const Color(0xFFF8F8FA),
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
+                  borderRadius: BorderRadius.circular(AppTokens.radiusMd),
+                  borderSide: const BorderSide(color: Color(0xFFEEEEEE)),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(AppTokens.radiusMd),
+                  borderSide: const BorderSide(color: Color(0xFFEEEEEE)),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(AppTokens.radiusMd),
+                  borderSide: const BorderSide(
+                      color: AppTokens.brandPrimary, width: 1.5),
                 ),
               ),
               onChanged: (v) => setState(() => _search = v.toLowerCase()),
@@ -973,18 +988,18 @@ class _DishFormSheetState extends ConsumerState<_DishFormSheet> {
 InputDecoration _inputDeco(String hint) => InputDecoration(
   hintText: hint,
   filled: true,
-  fillColor: const Color(0xFFE5E5E3),
+  fillColor: const Color(0xFFF8F8FA),
   contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
   border: OutlineInputBorder(
-    borderRadius: BorderRadius.circular(12),
-    borderSide: BorderSide.none,
+    borderRadius: BorderRadius.circular(AppTokens.radiusSm),
+    borderSide: const BorderSide(color: Color(0xFFEEEEEE)),
   ),
   enabledBorder: OutlineInputBorder(
-    borderRadius: BorderRadius.circular(12),
-    borderSide: BorderSide.none,
+    borderRadius: BorderRadius.circular(AppTokens.radiusSm),
+    borderSide: const BorderSide(color: Color(0xFFEEEEEE)),
   ),
   focusedBorder: OutlineInputBorder(
-    borderRadius: BorderRadius.circular(12),
+    borderRadius: BorderRadius.circular(AppTokens.radiusSm),
     borderSide: const BorderSide(color: AppTokens.brandPrimary, width: 1.5),
   ),
 );

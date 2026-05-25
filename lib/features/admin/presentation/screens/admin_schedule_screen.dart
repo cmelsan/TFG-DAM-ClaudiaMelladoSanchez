@@ -119,14 +119,9 @@ class _ScheduleTile extends StatelessWidget {
     return Container(
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(14),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.05),
-                blurRadius: 6,
-                offset: const Offset(0, 2),
-              ),
-            ],
+            borderRadius: BorderRadius.circular(AppTokens.radiusLg),
+            border: Border.all(color: const Color(0xFFEEEEEE)),
+            boxShadow: [AppTokens.cardShadow],
           ),
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -236,10 +231,10 @@ class _TimeButton extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
         decoration: BoxDecoration(
-          color: enabled ? const Color(0xFFE5E5E3) : Colors.grey.shade50,
-          borderRadius: BorderRadius.circular(8),
+          color: enabled ? const Color(0xFFF8F8FA) : Colors.grey.shade50,
+          borderRadius: BorderRadius.circular(AppTokens.radiusSm),
           border: Border.all(
-            color: enabled ? Colors.grey.shade300 : Colors.grey.shade200,
+            color: enabled ? const Color(0xFFEEEEEE) : Colors.grey.shade200,
           ),
         ),
         child: Row(

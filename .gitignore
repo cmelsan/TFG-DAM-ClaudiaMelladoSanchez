@@ -56,3 +56,9 @@ lib/core/config/env_config.dart
 *.keystore
 google-services.json
 firebase_options.dart
+
+# Supabase CLI temp files
+supabase/.temp/
+
+# Android build artifacts
+android/build/

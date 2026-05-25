@@ -62,3 +62,6 @@ supabase/.temp/
 
 # Android build artifacts
 android/build/
+
+# AI assistant folders (Claude, etc.)
+.claude/

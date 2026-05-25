@@ -39,7 +39,7 @@ class DeliveryDetail {
 
   /// Nombre o identificador corto del cliente.
   String get clientDisplay =>
-      clientName?.isNotEmpty == true ? clientName! : 'Cliente sin nombre';
+      (clientName?.isNotEmpty ?? false) ? clientName! : 'Cliente sin nombre';
 }
 
 // ── Provider ──────────────────────────────────────────────────────────────────

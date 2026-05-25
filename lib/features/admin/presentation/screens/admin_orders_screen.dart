@@ -116,8 +116,8 @@ class _AdminOrdersScreenState extends ConsumerState<AdminOrdersScreen> {
                             Container(
                               width: 64,
                               height: 64,
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFF0F0F0),
+                              decoration: const BoxDecoration(
+                                color: Color(0xFFF0F0F0),
                                 shape: BoxShape.circle,
                               ),
                               child: const Icon(Icons.inbox_rounded,
@@ -548,7 +548,7 @@ class _OrderCardState extends ConsumerState<_OrderCard> {
                     ),
                     const SizedBox(height: 6),
                     DropdownButtonFormField<String>(
-                      value: o.status,
+                      initialValue: o.status,
                       decoration: InputDecoration(
                         contentPadding: const EdgeInsets.symmetric(
                           horizontal: 12,
@@ -685,9 +685,9 @@ class _OrderItemsSection extends ConsumerWidget {
                     children: [
                       for (int i = 0; i < items.length; i++) ...[
                         if (i > 0)
-                          Divider(
+                          const Divider(
                             height: 1,
-                            color: const Color(0xFFEEEEEE),
+                            color: Color(0xFFEEEEEE),
                           ),
                         Padding(
                           padding: const EdgeInsets.symmetric(

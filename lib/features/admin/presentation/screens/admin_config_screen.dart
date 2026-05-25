@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:sabor_de_casa/core/theme/app_tokens.dart';
-import 'package:sabor_de_casa/features/admin/domain/models/business_config_item.dart';
 import 'package:sabor_de_casa/core/widgets/error_view.dart';
 import 'package:sabor_de_casa/core/widgets/loading_indicator.dart';
+import 'package:sabor_de_casa/features/admin/domain/models/business_config_item.dart';
 import 'package:sabor_de_casa/features/admin/presentation/providers/admin_provider.dart';
 import 'package:sabor_de_casa/features/admin/presentation/widgets/admin_shell.dart';
 
@@ -235,7 +235,7 @@ class _BoolConfigRow extends StatelessWidget {
         ),
       ),
       value: isOn,
-      activeColor: AppTokens.brandPrimary,
+      activeThumbColor: AppTokens.brandPrimary,
       onChanged: (v) => ref
           .read(adminActionProvider.notifier)
           .updateConfig(id: item.id, value: v.toString()),

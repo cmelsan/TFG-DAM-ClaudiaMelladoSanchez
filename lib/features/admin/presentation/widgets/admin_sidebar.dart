@@ -186,7 +186,7 @@ class AdminSidebar extends StatelessWidget {
                             fontSize: 10,
                             fontWeight: FontWeight.w600,
                             color: _textMuted,
-                            letterSpacing: 1.0,
+                            letterSpacing: 1,
                           ),
                         ),
                       ),

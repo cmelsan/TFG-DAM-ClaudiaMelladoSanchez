@@ -266,7 +266,7 @@ const _kQuickActions = [
   (label: 'Estadísticas', icon: Icons.bar_chart_rounded, route: '/admin/stats', color: Color(0xFF7C3AED)),
   (label: 'Usuarios', icon: Icons.people_rounded, route: '/admin/users', color: AppTokens.brandDark),
   (label: 'Catering', icon: Icons.celebration_rounded, route: '/admin/catering', color: AppTokens.warning),
-  (label: 'Configuración', icon: Icons.settings_rounded, route: '/admin/config', color: const Color(0xFF6B7280)),
+  (label: 'Configuración', icon: Icons.settings_rounded, route: '/admin/config', color: Color(0xFF6B7280)),
 ];
 
 class _QuickActions extends StatelessWidget {

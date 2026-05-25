@@ -189,7 +189,7 @@ class _UserTile extends ConsumerWidget {
             // Activo toggle
             Switch(
               value: user.isActive,
-              activeColor: AppTokens.brandPrimary,
+              activeThumbColor: AppTokens.brandPrimary,
               onChanged: (v) => ref
                   .read(adminActionProvider.notifier)
                   .updateUserActive(userId: user.id, isActive: v),

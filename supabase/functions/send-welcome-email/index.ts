@@ -1,3 +1,4 @@
+// @ts-nocheck — Deno Edge Function; el TS LS de VS Code no entiende los imports de Deno ni el global Deno
 // supabase/functions/send-welcome-email/index.ts
 // Edge Function que envía email de bienvenida cuando un usuario se registra.
 //

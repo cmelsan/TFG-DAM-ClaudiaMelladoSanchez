@@ -84,7 +84,7 @@ class _DeliveryScreenState extends ConsumerState<DeliveryScreen> {
         ),
         actions: [
           IconButton(
-            icon: Icon(
+            icon: const Icon(
               Icons.refresh_rounded,
               color: AppTokens.brandPrimary,
             ),
@@ -601,7 +601,7 @@ class _EmptyDelivery extends StatelessWidget {
           Container(
             width: 80,
             height: 80,
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               color: AppTokens.brandLight,
               shape: BoxShape.circle,
             ),

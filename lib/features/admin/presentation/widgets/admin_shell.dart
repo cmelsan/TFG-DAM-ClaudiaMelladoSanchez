@@ -120,7 +120,7 @@ class _MobileAdminShell extends StatelessWidget {
         ),
       ),
       drawer: const Drawer(
-        backgroundColor: Color(0xFF12131A),
+        backgroundColor: Colors.white,
         width: 260,
         child: AdminSidebar(),
       ),
@@ -176,11 +176,10 @@ class SectionHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       title.toUpperCase(),
-      style: GoogleFonts.inter(
-        fontSize: 11,
-        fontWeight: FontWeight.w700,
+      style: Theme.of(context).textTheme.labelSmall?.copyWith(
         letterSpacing: 1.2,
-        color: const Color(0xFF9A9A9A),
+        color: const Color(0xFF9CA3AF),
+        fontWeight: FontWeight.w700,
       ),
     );
   }

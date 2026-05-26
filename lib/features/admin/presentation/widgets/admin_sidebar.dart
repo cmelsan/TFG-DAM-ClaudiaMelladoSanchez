@@ -24,7 +24,7 @@ const _kItems = [
   _SidebarItem(
     icon: Icons.dashboard_rounded,
     label: 'Dashboard',
-    route: '/admin',
+    route: '/admin/dashboard',
     section: 'GENERAL',
   ),
   _SidebarItem(
@@ -90,11 +90,11 @@ const _kItems = [
 class AdminSidebar extends StatelessWidget {
   const AdminSidebar({super.key});
 
-  // Colores internos del sidebar
-  static const _bg = Color(0xFF12131A);
-  static const _border = Color(0xFF252634);
-  static const _textMuted = Color(0xFF606272);
-  static const _textNormal = Color(0xFFAAABBF);
+  // Colores internos del sidebar (tema claro)
+  static const _bg = Colors.white;
+  static const _border = Color(0xFFE5E7EB);
+  static const _textMuted = Color(0xFF9CA3AF);
+  static const _textNormal = Color(0xFF374151);
 
   @override
   Widget build(BuildContext context) {
@@ -102,7 +102,10 @@ class AdminSidebar extends StatelessWidget {
 
     return Container(
       width: 260,
-      color: _bg,
+      decoration: const BoxDecoration(
+        color: _bg,
+        border: Border(right: BorderSide(color: _border)),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -133,7 +136,7 @@ class AdminSidebar extends StatelessWidget {
                       style: GoogleFonts.syne(
                         fontSize: 12,
                         fontWeight: FontWeight.w800,
-                        color: Colors.white,
+                        color: AppTokens.brandDark,
                         letterSpacing: 0.5,
                       ),
                     ),
@@ -170,8 +173,8 @@ class AdminSidebar extends StatelessWidget {
               itemCount: _kItems.length,
               itemBuilder: (context, i) {
                 final item = _kItems[i];
-                final isActive = currentRoute.startsWith(item.route) &&
-                    (item.route != '/admin' || currentRoute == '/admin');
+                final isActive = currentRoute == item.route ||
+                    currentRoute.startsWith('${item.route}/');
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
@@ -182,11 +185,10 @@ class AdminSidebar extends StatelessWidget {
                         padding: const EdgeInsets.fromLTRB(10, 4, 0, 6),
                         child: Text(
                           item.section!,
-                          style: GoogleFonts.inter(
-                            fontSize: 10,
-                            fontWeight: FontWeight.w600,
+                          style: Theme.of(context).textTheme.labelSmall?.copyWith(
                             color: _textMuted,
-                            letterSpacing: 1,
+                            letterSpacing: 0.8,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
                       ),
@@ -255,16 +257,16 @@ class _NavTileState extends State<_NavTile> {
     if (widget.danger) {
       fg = _hovered ? AppTokens.danger : AppTokens.danger.withValues(alpha: 0.7);
     } else if (widget.isActive) {
-      fg = Colors.white;
+      fg = AppTokens.brandDark;
     } else {
-      fg = _hovered ? Colors.white : widget.textNormal;
+      fg = _hovered ? AppTokens.brandDark : widget.textNormal;
     }
 
     final Color bg;
     if (widget.isActive) {
-      bg = AppTokens.brandPrimary.withValues(alpha: 0.15);
+      bg = AppTokens.brandLight;
     } else if (_hovered && !widget.danger) {
-      bg = Colors.white.withValues(alpha: 0.04);
+      bg = AppTokens.brandLight.withValues(alpha: 0.6);
     } else if (_hovered && widget.danger) {
       bg = AppTokens.danger.withValues(alpha: 0.07);
     } else {
@@ -299,7 +301,7 @@ class _NavTileState extends State<_NavTile> {
                     ? AppTokens.brandPrimary
                     : widget.danger
                         ? fg
-                        : _hovered ? Colors.white : widget.textNormal,
+                        : _hovered ? AppTokens.brandPrimary : widget.textNormal,
               ),
               const SizedBox(width: 11),
               Expanded(

@@ -104,6 +104,11 @@ GoRouter appRouter(AppRouterRef ref) {
         }
       }
 
+      // /admin sin sub-ruta → redirigir al dashboard
+      if (path == '/admin') {
+        return '/admin/dashboard';
+      }
+
       // Si ya está autenticado y va a auth → home
       if (isLoggedIn && isAuthRoute) {
         return '/';

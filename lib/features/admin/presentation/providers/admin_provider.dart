@@ -35,6 +35,16 @@ Future<List<OrderItem>> adminOrderItems(AdminOrderItemsRef ref, String orderId) 
   return ref.watch(ordersRepositoryProvider).getOrderItems(orderId);
 }
 
+@riverpod
+// ignore: deprecated_member_use_from_same_package
+Future<AdminUser?> adminUserProfile(
+  AdminUserProfileRef ref,
+  String userId,
+) {
+  if (userId.isEmpty) return Future.value(null);
+  return ref.watch(adminRepositoryProvider).getUserProfile(userId);
+}
+
 // Provider categorías admin
 @riverpod
 // ignore: deprecated_member_use_from_same_package, Riverpod 2.x typed Ref
@@ -124,6 +134,17 @@ Future<bool> firstOrderDiscountEnabled(FirstOrderDiscountEnabledRef ref) async {
       .watch(adminRepositoryProvider)
       .getConfigValue('first_order_discount_enabled');
   return value != 'false';
+}
+
+/// Controla si el negocio está aceptando nuevos pedidos.
+/// Cuando es false, el checkout bloquea los pedidos de domicilio y recogida.
+@riverpod
+// ignore: deprecated_member_use_from_same_package, Riverpod 2.x typed Ref
+Future<bool> acceptingOrders(AcceptingOrdersRef ref) async {
+  final value = await ref
+      .watch(adminRepositoryProvider)
+      .getConfigValue('accepting_orders');
+  return value != 'false'; // por defecto true si la clave no existe
 }
 
 @riverpod
@@ -329,6 +350,29 @@ class AdminAction extends _$AdminAction {
       () => ref.read(adminRepositoryProvider).deleteDish(dishId),
     );
     ref.invalidate(adminDishesProvider);
+  }
+
+  /// Activa o desactiva la aceptación de nuevos pedidos.
+  Future<void> toggleAcceptingOrders({required bool accepting}) async {
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(
+      () => ref.read(adminRepositoryProvider).updateBusinessConfigByKey(
+            key: 'accepting_orders',
+            value: accepting ? 'true' : 'false',
+          ),
+    );
+    ref.invalidate(acceptingOrdersProvider);
+  }
+
+  /// Restaura todos los platos a disponible. Útil al inicio del servicio.
+  Future<void> resetAllDishAvailability() async {
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(
+      () => ref.read(adminRepositoryProvider).resetAllDishAvailability(),
+    );
+    ref
+      ..invalidate(adminDishesProvider)
+      ..invalidate(offerDishesProvider);
   }
 
   // ──────────────────── CATEGORY CRUD ───────────────────────────────────────

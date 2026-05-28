@@ -79,6 +79,23 @@ class AdminRepository {
     }
   }
 
+  /// Obtiene el perfil de un usuario por su ID (para mostrar en pedidos).
+  Future<AdminUser?> getUserProfile(String userId) async {
+    try {
+      final data = await _client
+          .from(SupabaseConstants.profiles)
+          .select()
+          .eq('id', userId)
+          .maybeSingle();
+      if (data == null) return null;
+      return AdminUser.fromJson(data);
+    } on PostgrestException catch (e) {
+      throw DatabaseFailure(message: e.message, code: e.code);
+    } catch (e) {
+      return null;
+    }
+  }
+
   Future<List<Dish>> getAllDishes() async {
     try {
       final data = await _client
@@ -282,6 +299,37 @@ class AdminRepository {
           .from(SupabaseConstants.businessConfig)
           .update({'value': value})
           .eq('id', id);
+    } on PostgrestException catch (e) {
+      throw DatabaseFailure(message: e.message, code: e.code);
+    } catch (e) {
+      throw UnexpectedFailure(message: e.toString());
+    }
+  }
+
+  /// Actualiza un valor en business_config buscando por clave (no por id).
+  Future<void> updateBusinessConfigByKey({
+    required String key,
+    required String value,
+  }) async {
+    try {
+      await _client
+          .from(SupabaseConstants.businessConfig)
+          .update({'value': value})
+          .eq('key', key);
+    } on PostgrestException catch (e) {
+      throw DatabaseFailure(message: e.message, code: e.code);
+    } catch (e) {
+      throw UnexpectedFailure(message: e.toString());
+    }
+  }
+
+  /// Restaura todos los platos a disponible (is_available = true).
+  Future<void> resetAllDishAvailability() async {
+    try {
+      await _client
+          .from(SupabaseConstants.dishes)
+          .update({'is_available': true})
+          .eq('is_available', false);
     } on PostgrestException catch (e) {
       throw DatabaseFailure(message: e.message, code: e.code);
     } catch (e) {

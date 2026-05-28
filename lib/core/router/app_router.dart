@@ -15,8 +15,10 @@ import 'package:sabor_de_casa/features/admin/presentation/screens/admin_schedule
 import 'package:sabor_de_casa/features/admin/presentation/screens/admin_stats_screen.dart';
 import 'package:sabor_de_casa/features/admin/presentation/screens/admin_users_screen.dart';
 import 'package:sabor_de_casa/features/auth/presentation/providers/auth_provider.dart';
+import 'package:sabor_de_casa/features/auth/presentation/providers/password_recovery_provider.dart';
 import 'package:sabor_de_casa/features/auth/presentation/screens/login_screen.dart';
 import 'package:sabor_de_casa/features/auth/presentation/screens/register_screen.dart';
+import 'package:sabor_de_casa/features/auth/presentation/screens/reset_password_screen.dart';
 import 'package:sabor_de_casa/features/cart/presentation/screens/cart_screen.dart';
 import 'package:sabor_de_casa/features/cart/presentation/screens/checkout_screen.dart';
 import 'package:sabor_de_casa/features/cart/presentation/screens/payment_success_screen.dart';
@@ -64,6 +66,7 @@ GoRouter appRouter(AppRouterRef ref) {
   final authNotifier = ValueNotifier<int>(0);
   ref
     ..listen(authNotifierProvider, (_, __) => authNotifier.value++)
+    ..listen(passwordRecoveryModeProvider, (_, __) => authNotifier.value++)
     ..onDispose(authNotifier.dispose);
 
   return GoRouter(
@@ -76,9 +79,18 @@ GoRouter appRouter(AppRouterRef ref) {
       // Mientras carga el estado de auth no redirigir (evita parpadeo).
       if (authState.isLoading) return null;
 
+      final isRecovery = ref.read(passwordRecoveryModeProvider);
+      final path = state.matchedLocation;
+
+      // Modo recuperación de contraseña: redirigir siempre a reset-password.
+      if (isRecovery && path != '/auth/reset-password') {
+        return '/auth/reset-password';
+      }
+      // Si ya está en reset-password y sigue en modo recuperación, no redirigir.
+      if (isRecovery) return null;
+
       final profile = authState.valueOrNull;
       final isLoggedIn = profile != null;
-      final path = state.matchedLocation;
 
       final isAuthRoute = path.startsWith('/auth');
       final isEmployeeRoute = path.startsWith('/employee');
@@ -216,6 +228,11 @@ GoRouter appRouter(AppRouterRef ref) {
         path: '/auth/register',
         name: RouteNames.register,
         builder: (_, __) => const RegisterScreen(),
+      ),
+      GoRoute(
+        path: '/auth/reset-password',
+        name: RouteNames.resetPassword,
+        builder: (_, __) => const ResetPasswordScreen(),
       ),
 
       // --- Protegidas (fuera del shell) ---

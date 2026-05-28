@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:sabor_de_casa/features/auth/data/repositories/auth_repository.dart';
 import 'package:sabor_de_casa/features/auth/domain/models/user_profile.dart';
+import 'package:sabor_de_casa/features/auth/presentation/providers/password_recovery_provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 part 'auth_provider.g.dart';
@@ -36,6 +37,11 @@ class AuthNotifier extends _$AuthNotifier {
           if (!_isAuthOperationInProgress) _refreshProfile();
           // Registrar token FCM tras autenticación (solo nativo)
           if (!kIsWeb) _saveFcmToken();
+        case AuthChangeEvent.passwordRecovery:
+          // El usuario llegó desde el enlace de recuperación de contraseña.
+          // Activar modo recuperación para que el router redirija a /auth/reset-password.
+          ref.read(passwordRecoveryModeProvider.notifier).state = true;
+          _refreshProfile();
         case AuthChangeEvent.signedOut:
           state = const AsyncData(null);
         case _:

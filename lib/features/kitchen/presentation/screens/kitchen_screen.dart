@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -10,6 +11,9 @@ import 'package:sabor_de_casa/core/widgets/loading_indicator.dart';
 import 'package:sabor_de_casa/core/widgets/status_badge.dart';
 import 'package:sabor_de_casa/features/kitchen/presentation/providers/employee_orders_provider.dart';
 import 'package:sabor_de_casa/features/orders/domain/models/order.dart';
+import 'package:sabor_de_casa/features/orders/presentation/providers/orders_provider.dart';
+import 'package:sabor_de_casa/services/supabase_service.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 // ── Paleta KDS oscura ─────────────────────────────────────────────────────────
 
@@ -32,23 +36,40 @@ class _KitchenScreenState extends ConsumerState<KitchenScreen>
     with SingleTickerProviderStateMixin {
   late final TabController _tabCtrl;
   Timer? _autoRefresh;
+  RealtimeChannel? _realtimeChannel;
 
   @override
   void initState() {
     super.initState();
     _tabCtrl = TabController(length: 2, vsync: this);
-    // Auto-refresh cada 30 segundos
+    // Auto-refresh cada 30 segundos como fallback
     _autoRefresh = Timer.periodic(const Duration(seconds: 30), (_) {
-      ref
-        ..invalidate(kitchenOrdersProvider)
-        ..invalidate(encargoKitchenOrdersProvider);
+      _refreshAll();
     });
+    // Supabase Realtime: actualiza al instante cuando cambia cualquier pedido
+    _setupRealtime();
+  }
+
+  void _setupRealtime() {
+    _realtimeChannel = ref
+        .read(supabaseClientProvider)
+        .channel('kitchen-orders-rt')
+        .onPostgresChanges(
+          event: PostgresChangeEvent.all,
+          schema: 'public',
+          table: 'orders',
+          callback: (_) {
+            if (mounted) _refreshAll();
+          },
+        )
+        .subscribe();
   }
 
   @override
   void dispose() {
     _tabCtrl.dispose();
     _autoRefresh?.cancel();
+    _realtimeChannel?.unsubscribe();
     super.dispose();
   }
 
@@ -199,7 +220,7 @@ class _KitchenTab extends ConsumerWidget {
             crossAxisCount: cols,
             mainAxisSpacing: 12,
             crossAxisSpacing: 12,
-            mainAxisExtent: 230,
+            mainAxisExtent: 310,
           ),
           itemCount: orders.length,
           itemBuilder: (_, i) => _KitchenCard(order: orders[i]),
@@ -369,6 +390,8 @@ class _KitchenCardState extends ConsumerState<_KitchenCard> {
     final next = _nextStatus(o.status);
     final elapsed = DateTime.now().difference(o.createdAt).inMinutes;
     final isUrgent = elapsed > 20 && o.status != 'pending';
+    // Carga los platos del ticket desde Supabase
+    final itemsAsync = ref.watch(orderItemsProvider(o.id));
 
     return Container(
       decoration: BoxDecoration(
@@ -489,6 +512,117 @@ class _KitchenCardState extends ConsumerState<_KitchenCard> {
                 ],
               ],
             ),
+          ),
+          // ── Platos del ticket ──────────────────────────────────────
+          itemsAsync.when(
+            loading: () => const Padding(
+              padding: EdgeInsets.fromLTRB(14, 8, 14, 0),
+              child: LinearProgressIndicator(
+                minHeight: 2,
+                backgroundColor: _kBorder,
+                color: AppTokens.brandPrimary,
+              ),
+            ),
+            error: (_, __) => const SizedBox.shrink(),
+            data: (items) {
+              if (items.isEmpty) return const SizedBox.shrink();
+              final visible = items.take(4).toList();
+              final more = items.length - visible.length;
+              return Padding(
+                padding: const EdgeInsets.fromLTRB(14, 8, 14, 0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Divider(height: 1, color: _kBorder),
+                    const SizedBox(height: 6),
+                    ...visible.map(
+                      (item) => Padding(
+                        padding: const EdgeInsets.only(bottom: 6),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Imagen del plato
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(5),
+                              child: item.dishImageUrl != null &&
+                                      item.dishImageUrl!.isNotEmpty
+                                  ? CachedNetworkImage(
+                                      imageUrl: item.dishImageUrl!,
+                                      width: 36,
+                                      height: 36,
+                                      fit: BoxFit.cover,
+                                      errorWidget: (_, __, ___) =>
+                                          _KitchenDishPlaceholder(),
+                                      placeholder: (_, __) =>
+                                          _KitchenDishPlaceholder(),
+                                    )
+                                  : _KitchenDishPlaceholder(),
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Text(
+                                        '${item.quantity}\u00d7',
+                                        style: GoogleFonts.inter(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w800,
+                                          color: AppTokens.brandPrimary,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 5),
+                                      Expanded(
+                                        child: Text(
+                                          item.dishName ?? '–',
+                                          style: GoogleFonts.inter(
+                                            fontSize: 12,
+                                            color: _kTextPrimary,
+                                          ),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  if (item.notes != null &&
+                                      item.notes!.isNotEmpty)
+                                    Padding(
+                                      padding:
+                                          const EdgeInsets.only(top: 2),
+                                      child: Text(
+                                        item.notes!,
+                                        style: GoogleFonts.inter(
+                                          fontSize: 10,
+                                          color: _kTextMuted,
+                                          fontStyle: FontStyle.italic,
+                                        ),
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    if (more > 0)
+                      Text(
+                        '+$more m\u00e1s...',
+                        style: GoogleFonts.inter(
+                          fontSize: 11,
+                          color: _kTextMuted,
+                          fontStyle: FontStyle.italic,
+                        ),
+                      ),
+                  ],
+                ),
+              );
+            },
           ),
           const Spacer(),
           // ── Botón acción ───────────────────────────────────────────────
@@ -866,6 +1000,28 @@ class _EncargoCardState extends ConsumerState<_EncargoCard> {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+// ── _KitchenDishPlaceholder ───────────────────────────────────────────────────
+
+class _KitchenDishPlaceholder extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 36,
+      height: 36,
+      decoration: BoxDecoration(
+        color: _kSurface,
+        borderRadius: BorderRadius.circular(5),
+        border: Border.all(color: _kBorder),
+      ),
+      child: const Icon(
+        Icons.restaurant_menu_rounded,
+        size: 16,
+        color: _kTextMuted,
       ),
     );
   }

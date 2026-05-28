@@ -236,7 +236,7 @@ class _OrderForPickupProviderElement
 }
 
 String _$employeeOrderActionHash() =>
-    r'c6491dda78d79c937825b8daa567968b283e2ad2';
+    r'4c2893fec416a04fe5af018d1c21d50cfb8da716';
 
 /// See also [EmployeeOrderAction].
 @ProviderFor(EmployeeOrderAction)

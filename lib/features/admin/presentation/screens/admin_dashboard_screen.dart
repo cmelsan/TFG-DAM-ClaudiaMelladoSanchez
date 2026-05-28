@@ -173,7 +173,15 @@ class _DashboardBody extends StatelessWidget {
           SliverPadding(
             padding: const EdgeInsets.fromLTRB(24, 12, 24, 0),
             sliver: SliverToBoxAdapter(
-              child: _ServiceStatusBar()
+              child: const _AcceptingOrdersCard()
+                  .animate()
+                  .fadeIn(duration: 300.ms),
+            ),
+          ),
+          SliverPadding(
+            padding: const EdgeInsets.fromLTRB(24, 10, 24, 0),
+            sliver: SliverToBoxAdapter(
+              child: const _ServiceStatusBar()
                   .animate()
                   .fadeIn(duration: 300.ms, delay: 200.ms),
             ),
@@ -250,7 +258,6 @@ class _HeroBanner extends StatelessWidget {
       ),
       padding: const EdgeInsets.fromLTRB(28, 28, 28, 28),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           // ── Texto ────────────────────────────────────────────────
           Expanded(
@@ -545,6 +552,98 @@ class _KpiCard extends StatelessWidget {
               ),
               child: Icon(data.icon, size: 22, color: data.color),
             ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ACEPTAR PEDIDOS
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _AcceptingOrdersCard extends ConsumerWidget {
+  const _AcceptingOrdersCard();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final asyncAccepting = ref.watch(acceptingOrdersProvider);
+    final isLoading = ref.watch(
+      adminActionProvider.select((v) => v.isLoading),
+    );
+    final accepting = asyncAccepting.valueOrNull ?? true;
+
+    return Container(
+      padding: const EdgeInsets.fromLTRB(18, 14, 14, 14),
+      decoration: BoxDecoration(
+        color: accepting ? Colors.white : const Color(0xFFFFF3CD),
+        borderRadius: BorderRadius.circular(AppTokens.radiusMd),
+        border: Border.all(
+          color: accepting
+              ? const Color(0xFFEEF2F7)
+              : const Color(0xFFFFC107).withValues(alpha: 0.5),
+        ),
+        boxShadow: [AppTokens.cardShadow],
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: accepting
+                  ? AppTokens.success.withValues(alpha: 0.1)
+                  : AppTokens.warning.withValues(alpha: 0.15),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              accepting
+                  ? Icons.storefront_rounded
+                  : Icons.pause_circle_outline_rounded,
+              color: accepting ? AppTokens.success : AppTokens.warning,
+              size: 22,
+            ),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  accepting ? 'Aceptando pedidos' : 'Pedidos pausados',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 14,
+                    color: accepting
+                        ? const Color(0xFF111111)
+                        : const Color(0xFF856404),
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  accepting
+                      ? 'Los clientes pueden realizar pedidos ahora'
+                      : 'El checkout est\u00e1 bloqueado para domicilio y recogida',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: accepting
+                        ? const Color(0xFF6B7280)
+                        : const Color(0xFF856404).withValues(alpha: 0.8),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 10),
+          Switch(
+            value: accepting,
+            activeThumbColor: AppTokens.success,
+            inactiveTrackColor: AppTokens.warning.withValues(alpha: 0.3),
+            onChanged: isLoading || asyncAccepting.isLoading
+                ? null
+                : (v) => ref
+                    .read(adminActionProvider.notifier)
+                    .toggleAcceptingOrders(accepting: v),
           ),
         ],
       ),
@@ -906,5 +1005,6 @@ class _SectionLabel extends StatelessWidget {
     );
   }
 }
+
 
 

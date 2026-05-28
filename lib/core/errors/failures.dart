@@ -32,3 +32,11 @@ class PaymentFailure extends Failure {
 class UnexpectedFailure extends Failure {
   const UnexpectedFailure({required super.message, super.code});
 }
+
+class OrdersPausedFailure extends Failure {
+  const OrdersPausedFailure()
+      : super(
+          message:
+              'El negocio no está aceptando pedidos en este momento. Inténtalo más tarde.',
+        );
+}

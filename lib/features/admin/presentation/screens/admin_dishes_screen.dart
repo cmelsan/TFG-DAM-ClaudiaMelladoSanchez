@@ -45,30 +45,61 @@ class _AdminDishesScreenState extends ConsumerState<AdminDishesScreen> {
               border: Border(bottom: BorderSide(color: Color(0xFFEEEEEE))),
             ),
             padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
-            child: TextField(
-              decoration: InputDecoration(
-                hintText: 'Buscar platos…',
-                prefixIcon: const Icon(Icons.search_rounded,
-                    color: Color(0xFF9E9E9E), size: 20),
-                filled: true,
-                fillColor: const Color(0xFFF8F8FA),
-                contentPadding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(AppTokens.radiusMd),
-                  borderSide: const BorderSide(color: Color(0xFFEEEEEE)),
+            child: Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    decoration: InputDecoration(
+                      hintText: 'Buscar platos…',
+                      prefixIcon: const Icon(Icons.search_rounded,
+                          color: Color(0xFF9E9E9E), size: 20),
+                      filled: true,
+                      fillColor: const Color(0xFFF8F8FA),
+                      contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 12),
+                      border: OutlineInputBorder(
+                        borderRadius:
+                            BorderRadius.circular(AppTokens.radiusMd),
+                        borderSide:
+                            const BorderSide(color: Color(0xFFEEEEEE)),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius:
+                            BorderRadius.circular(AppTokens.radiusMd),
+                        borderSide:
+                            const BorderSide(color: Color(0xFFEEEEEE)),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius:
+                            BorderRadius.circular(AppTokens.radiusMd),
+                        borderSide: const BorderSide(
+                            color: AppTokens.brandPrimary, width: 1.5),
+                      ),
+                    ),
+                    onChanged: (v) =>
+                        setState(() => _search = v.toLowerCase()),
+                  ),
                 ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(AppTokens.radiusMd),
-                  borderSide: const BorderSide(color: Color(0xFFEEEEEE)),
+                const SizedBox(width: 10),
+                Tooltip(
+                  message: 'Restaurar disponibilidad de todos los platos',
+                  child: OutlinedButton.icon(
+                    onPressed: () => _confirmResetAvailability(context),
+                    icon: const Icon(Icons.restart_alt_rounded, size: 18),
+                    label: const Text('Restaurar todos'),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppTokens.brandPrimary,
+                      side: const BorderSide(color: AppTokens.brandPrimary),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 14, vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius:
+                            BorderRadius.circular(AppTokens.radiusMd),
+                      ),
+                    ),
+                  ),
                 ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(AppTokens.radiusMd),
-                  borderSide: const BorderSide(
-                      color: AppTokens.brandPrimary, width: 1.5),
-                ),
-              ),
-              onChanged: (v) => setState(() => _search = v.toLowerCase()),
+              ],
             ),
           ),
           Expanded(
@@ -140,6 +171,40 @@ class _AdminDishesScreenState extends ConsumerState<AdminDishesScreen> {
         ],
       ),
     );
+  }
+
+  Future<void> _confirmResetAvailability(BuildContext context) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Restaurar disponibilidad'),
+        content: const Text(
+          '¿Marcar todos los platos como disponibles?\n\n'
+          'Útil al inicio del servicio para restablecer lo que se marcó como agotado.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancelar'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Restaurar todos'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !context.mounted) return;
+    await ref.read(adminActionProvider.notifier).resetAllDishAvailability();
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Todos los platos vuelven a estar disponibles'),
+          backgroundColor: AppTokens.success,
+          duration: Duration(seconds: 2),
+        ),
+      );
+    }
   }
 }
 

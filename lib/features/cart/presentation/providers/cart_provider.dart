@@ -1,5 +1,9 @@
+import 'dart:convert';
+
+import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import 'package:sabor_de_casa/core/utils/web_storage.dart';
 import 'package:sabor_de_casa/features/cart/domain/models/cart_item.dart';
 import 'package:sabor_de_casa/features/cart/domain/models/cart_state.dart';
 import 'package:sabor_de_casa/features/menu/domain/models/dish.dart';
@@ -117,6 +121,31 @@ class CartNotifier extends _$CartNotifier {
 
   void clearCart() {
     state = const CartState.empty();
+  }
+
+  /// Restaura el carrito desde sessionStorage si el usuario volvió atrás
+  /// desde la pasarela de Stripe Checkout (solo web).
+  void restoreFromPendingOrder() {
+    if (!kIsWeb) return;
+    final raw = WebStorage.getItem('pendingOrder');
+    if (raw == null) return;
+    try {
+      final data = jsonDecode(raw) as Map<String, dynamic>;
+      final itemsList = data['items'] as List<dynamic>?;
+      if (itemsList == null || itemsList.isEmpty) return;
+      final items = itemsList
+          .map((e) => CartItem.fromJson(e as Map<String, dynamic>))
+          .toList();
+      state = CartState.active(
+        items: items,
+        total: _calculateTotal(items),
+      );
+    } catch (_) {
+      // Si no se puede parsear, simplemente ignorar
+    } finally {
+      // Limpiar siempre para evitar datos obsoletos
+      WebStorage.removeItem('pendingOrder');
+    }
   }
 
   void startCheckout(String orderType) {

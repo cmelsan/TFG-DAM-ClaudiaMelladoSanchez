@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lottie/lottie.dart';
@@ -222,86 +223,251 @@ class OrderDetailScreen extends ConsumerWidget {
     Order order,
     List<OrderItem> items,
   ) async {
+    final refId = '#${order.id.substring(0, 8).toUpperCase()}';
+    final fecha =
+        '${order.createdAt.day.toString().padLeft(2, '0')}/${order.createdAt.month.toString().padLeft(2, '0')}/${order.createdAt.year}';
+    final hora =
+        '${order.createdAt.hour.toString().padLeft(2, '0')}:${order.createdAt.minute.toString().padLeft(2, '0')}';
+
     final pdf = pw.Document()
       ..addPage(
         pw.Page(
           pageFormat: PdfPageFormat.a5,
-          margin: const pw.EdgeInsets.all(24),
+          margin: const pw.EdgeInsets.symmetric(horizontal: 28, vertical: 28),
           build: (ctx) => pw.Column(
             crossAxisAlignment: pw.CrossAxisAlignment.start,
             children: [
+              // ── Cabecera ──────────────────────────────────────────
               pw.Center(
                 child: pw.Text(
                   'Sabor de Casa',
                   style: pw.TextStyle(
-                    fontSize: 22,
+                    fontSize: 24,
                     fontWeight: pw.FontWeight.bold,
                   ),
                 ),
               ),
-              pw.SizedBox(height: 4),
+              pw.SizedBox(height: 2),
               pw.Center(
                 child: pw.Text(
-                  'Ticket del pedido',
+                  'Calle Principal 1 · 28001 Madrid · Tel: +34 910 000 000',
                   style: const pw.TextStyle(
-                    fontSize: 14,
+                      fontSize: 9, color: PdfColors.grey600),
+                ),
+              ),
+              pw.SizedBox(height: 6),
+              pw.Center(
+                child: pw.Text(
+                  '— TICKET DE PEDIDO —',
+                  style: pw.TextStyle(
+                    fontSize: 11,
+                    fontWeight: pw.FontWeight.bold,
                     color: PdfColors.grey700,
                   ),
                 ),
               ),
-              pw.Divider(thickness: 1, color: PdfColors.grey400),
-              pw.SizedBox(height: 8),
-              _pdfRow('Pedido', '#${order.id.substring(0, 6).toUpperCase()}'),
+              pw.Divider(thickness: 1.5, color: PdfColors.grey400),
+              pw.SizedBox(height: 6),
+              // ── Info pedido ────────────────────────────────────────
+              _pdfRow('Pedido', refId),
+              _pdfRow('Fecha', fecha),
+              _pdfRow('Hora', hora),
               _pdfRow('Tipo', _orderTypeLabel(order.orderType)),
-              _pdfRow(
-                'Fecha',
-                '${order.createdAt.day}/${order.createdAt.month}/${order.createdAt.year}',
-              ),
               _pdfRow('Estado', _statusLabel(order.status)),
-              pw.SizedBox(height: 12),
-              pw.Divider(thickness: 1, color: PdfColors.grey400),
-              pw.SizedBox(height: 8),
-              for (final item in items) ...[
-                pw.Row(
-                  mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-                  children: [
-                    pw.Text(
-                      '${item.quantity}x ${item.dishName ?? "Plato"}',
-                      style: const pw.TextStyle(fontSize: 13),
-                    ),
-                    pw.Text(
-                      Formatters.price(item.subtotal),
-                      style: const pw.TextStyle(fontSize: 13),
-                    ),
-                  ],
+              if (order.paymentMethod != null)
+                _pdfRow('Pago', _paymentMethodLabel(order.paymentMethod!)),
+              if (order.scheduledAt != null)
+                _pdfRow(
+                  'Programado',
+                  '${order.scheduledAt!.day.toString().padLeft(2, '0')}/${order.scheduledAt!.month.toString().padLeft(2, '0')}/${order.scheduledAt!.year} '
+                      '${order.scheduledAt!.hour.toString().padLeft(2, '0')}:${order.scheduledAt!.minute.toString().padLeft(2, '0')}',
                 ),
-                pw.SizedBox(height: 4),
-              ],
-              pw.Divider(thickness: 1, color: PdfColors.grey400),
+              if (order.notes != null && order.notes!.isNotEmpty)
+                _pdfRow('Notas', order.notes!),
               pw.SizedBox(height: 8),
-              _pdfRow('Subtotal', Formatters.price(order.subtotal)),
-              _pdfRow('Envío', Formatters.price(order.deliveryFee)),
-              pw.SizedBox(height: 4),
+              pw.Divider(thickness: 1, color: PdfColors.grey400),
+              pw.SizedBox(height: 6),
+              // ── Cabecera tabla ──────────────────────────────────────
               pw.Row(
-                mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                 children: [
-                  pw.Text(
-                    'TOTAL',
-                    style: pw.TextStyle(
-                      fontSize: 16,
-                      fontWeight: pw.FontWeight.bold,
+                  pw.Expanded(
+                    flex: 4,
+                    child: pw.Text(
+                      'PRODUCTO',
+                      style: pw.TextStyle(
+                        fontSize: 9,
+                        fontWeight: pw.FontWeight.bold,
+                        color: PdfColors.grey600,
+                      ),
                     ),
                   ),
-                  pw.Text(
-                    Formatters.price(order.total),
-                    style: pw.TextStyle(
-                      fontSize: 16,
-                      fontWeight: pw.FontWeight.bold,
+                  pw.SizedBox(
+                    width: 36,
+                    child: pw.Text(
+                      'CANT.',
+                      style: pw.TextStyle(
+                        fontSize: 9,
+                        fontWeight: pw.FontWeight.bold,
+                        color: PdfColors.grey600,
+                      ),
+                      textAlign: pw.TextAlign.center,
+                    ),
+                  ),
+                  pw.SizedBox(
+                    width: 52,
+                    child: pw.Text(
+                      'P.UNIT.',
+                      style: pw.TextStyle(
+                        fontSize: 9,
+                        fontWeight: pw.FontWeight.bold,
+                        color: PdfColors.grey600,
+                      ),
+                      textAlign: pw.TextAlign.right,
+                    ),
+                  ),
+                  pw.SizedBox(
+                    width: 52,
+                    child: pw.Text(
+                      'SUBTOTAL',
+                      style: pw.TextStyle(
+                        fontSize: 9,
+                        fontWeight: pw.FontWeight.bold,
+                        color: PdfColors.grey600,
+                      ),
+                      textAlign: pw.TextAlign.right,
                     ),
                   ),
                 ],
               ),
-              pw.SizedBox(height: 20),
+              pw.SizedBox(height: 3),
+              pw.Divider(thickness: 0.5, color: PdfColors.grey300),
+              // ── Líneas de productos ─────────────────────────────────
+              for (final item in items) ...[
+                pw.Padding(
+                  padding:
+                      const pw.EdgeInsets.symmetric(vertical: 4),
+                  child: pw.Column(
+                    crossAxisAlignment:
+                        pw.CrossAxisAlignment.start,
+                    children: [
+                      pw.Row(
+                        children: [
+                          pw.Expanded(
+                            flex: 4,
+                            child: pw.Text(
+                              item.dishName ?? 'Plato',
+                              style:
+                                  const pw.TextStyle(fontSize: 12),
+                            ),
+                          ),
+                          pw.SizedBox(
+                            width: 36,
+                            child: pw.Text(
+                              '${item.quantity}',
+                              style:
+                                  const pw.TextStyle(fontSize: 12),
+                              textAlign: pw.TextAlign.center,
+                            ),
+                          ),
+                          pw.SizedBox(
+                            width: 52,
+                            child: pw.Text(
+                              Formatters.price(item.unitPrice),
+                              style:
+                                  const pw.TextStyle(fontSize: 12),
+                              textAlign: pw.TextAlign.right,
+                            ),
+                          ),
+                          pw.SizedBox(
+                            width: 52,
+                            child: pw.Text(
+                              Formatters.price(item.subtotal),
+                              style: pw.TextStyle(
+                                fontSize: 12,
+                                fontWeight: pw.FontWeight.bold,
+                              ),
+                              textAlign: pw.TextAlign.right,
+                            ),
+                          ),
+                        ],
+                      ),
+                      if (item.notes != null &&
+                          item.notes!.isNotEmpty)
+                        pw.Padding(
+                          padding:
+                              const pw.EdgeInsets.only(top: 2, left: 4),
+                          child: pw.Text(
+                            '↳ ${item.notes}',
+                            style: const pw.TextStyle(
+                              fontSize: 9,
+                              color: PdfColors.grey600,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+                pw.Divider(thickness: 0.5, color: PdfColors.grey200),
+              ],
+              pw.SizedBox(height: 6),
+              // ── Desglose costes ──────────────────────────────────────
+              _pdfRow('Subtotal', Formatters.price(order.subtotal)),
+              if (order.deliveryFee > 0)
+                _pdfRow(
+                    'Gastos de envío', Formatters.price(order.deliveryFee)),
+              if (order.discountAmount > 0)
+                _pdfRow(
+                    '− Descuento',
+                    '−${Formatters.price(order.discountAmount)}'),
+              pw.SizedBox(height: 4),
+              pw.Divider(thickness: 1.5, color: PdfColors.black),
+              pw.Padding(
+                padding: const pw.EdgeInsets.symmetric(vertical: 5),
+                child: pw.Row(
+                  mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                  children: [
+                    pw.Text(
+                      'TOTAL',
+                      style: pw.TextStyle(
+                        fontSize: 18,
+                        fontWeight: pw.FontWeight.bold,
+                      ),
+                    ),
+                    pw.Text(
+                      Formatters.price(order.total),
+                      style: pw.TextStyle(
+                        fontSize: 18,
+                        fontWeight: pw.FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              pw.Divider(thickness: 1.5, color: PdfColors.black),
+              pw.SizedBox(height: 16),
+              // ── QR del pedido ────────────────────────────────────────
+              pw.Row(
+                mainAxisAlignment: pw.MainAxisAlignment.center,
+                children: [
+                  pw.Column(
+                    children: [
+                      pw.BarcodeWidget(
+                        barcode: pw.Barcode.qrCode(),
+                        data: order.id,
+                        width: 90,
+                        height: 90,
+                      ),
+                      pw.SizedBox(height: 4),
+                      pw.Text(
+                        refId,
+                        style: const pw.TextStyle(
+                            fontSize: 10, color: PdfColors.grey600),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              pw.SizedBox(height: 12),
               pw.Center(
                 child: pw.Text(
                   '¡Gracias por tu pedido!',
@@ -312,13 +478,20 @@ class OrderDetailScreen extends ConsumerWidget {
                   ),
                 ),
               ),
+              pw.Center(
+                child: pw.Text(
+                  'www.sabordecasa.es',
+                  style: const pw.TextStyle(
+                      fontSize: 9, color: PdfColors.grey400),
+                ),
+              ),
             ],
           ),
         ),
       );
     await Printing.layoutPdf(
       onLayout: (_) async => pdf.save(),
-      name: 'ticket_${order.id.substring(0, 6).toUpperCase()}.pdf',
+      name: 'ticket_${order.id.substring(0, 8).toUpperCase()}.pdf',
     );
   }
 
@@ -477,7 +650,13 @@ class _OrderInfoCard extends StatelessWidget {
             icon: Icons.calendar_today_outlined,
             label: 'Fecha',
             value:
-                '${order.createdAt.day}/${order.createdAt.month}/${order.createdAt.year}',
+                '${order.createdAt.day.toString().padLeft(2, '0')}/${order.createdAt.month.toString().padLeft(2, '0')}/${order.createdAt.year}',
+          ),
+          const SizedBox(height: 10),
+          _InfoRow(
+            icon: Icons.access_time_outlined,
+            label: 'Hora del pedido',
+            value: '${order.createdAt.hour.toString().padLeft(2, '0')}:${order.createdAt.minute.toString().padLeft(2, '0')}',
           ),
           const SizedBox(height: 10),
           _InfoRow(
@@ -487,6 +666,14 @@ class _OrderInfoCard extends StatelessWidget {
             label: 'Tipo',
             value: _orderTypeLabel(order.orderType),
           ),
+          if (order.paymentMethod != null) ...[
+            const SizedBox(height: 10),
+            _InfoRow(
+              icon: Icons.payment_outlined,
+              label: 'Método de pago',
+              value: _paymentMethodLabel(order.paymentMethod!),
+            ),
+          ],
           if (order.scheduledAt != null) ...[
             const SizedBox(height: 10),
             _InfoRow(
@@ -885,36 +1072,125 @@ class _OrderItemTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              color: const Color(0xFFE5E5E3),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Text(
-              '${item.quantity}x',
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
-                color: AppTokens.brandPrimary,
-              ),
-            ),
+          // ── Imagen del plato ──────────────────────────────────────
+          ClipRRect(
+            borderRadius: BorderRadius.circular(10),
+            child: item.dishImageUrl != null && item.dishImageUrl!.isNotEmpty
+                ? CachedNetworkImage(
+                    imageUrl: item.dishImageUrl!,
+                    width: 64,
+                    height: 64,
+                    fit: BoxFit.cover,
+                    errorWidget: (_, __, ___) => const _DishImagePlaceholder(),
+                    placeholder: (_, __) => const _DishImagePlaceholder(),
+                  )
+                : const _DishImagePlaceholder(),
           ),
           const SizedBox(width: 12),
+          // ── Info del plato ────────────────────────────────────────
           Expanded(
-            child: Text(
-              item.dishName ?? 'Plato',
-              style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  item.dishName ?? 'Plato',
+                  style: const TextStyle(
+                      fontWeight: FontWeight.w600, fontSize: 15),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  '${Formatters.price(item.unitPrice)} / ud.',
+                  style: const TextStyle(
+                      color: Colors.black45, fontSize: 12),
+                ),
+                if (item.notes != null && item.notes!.isNotEmpty) ...[
+                  const SizedBox(height: 5),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 8, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: AppTokens.pageBg,
+                      borderRadius: BorderRadius.circular(6),
+                      border: Border.all(
+                          color: const Color(0xFFE5E5E3)),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.notes_rounded,
+                            size: 11, color: Colors.black38),
+                        const SizedBox(width: 4),
+                        Flexible(
+                          child: Text(
+                            item.notes!,
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: Colors.black54,
+                              fontStyle: FontStyle.italic,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ],
             ),
           ),
-          Text(
-            Formatters.price(item.subtotal),
-            style: const TextStyle(fontWeight: FontWeight.w600),
+          const SizedBox(width: 10),
+          // ── Cantidad + subtotal ───────────────────────────────────
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 9, vertical: 4),
+                decoration: BoxDecoration(
+                  color: AppTokens.brandPrimary.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Text(
+                  '×${item.quantity}',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: AppTokens.brandPrimary,
+                    fontSize: 13,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                Formatters.price(item.subtotal),
+                style: const TextStyle(
+                    fontWeight: FontWeight.w700, fontSize: 14),
+              ),
+            ],
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _DishImagePlaceholder extends StatelessWidget {
+  const _DishImagePlaceholder();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 64,
+      height: 64,
+      decoration: const BoxDecoration(
+        color: Color(0xFFF5F5F3),
+      ),
+      child: const Icon(
+        Icons.restaurant_outlined,
+        color: Color(0xFFBBBBBB),
+        size: 28,
       ),
     );
   }
@@ -1016,3 +1292,12 @@ Color _statusColor(String status) {
       return Colors.grey;
   }
 }
+
+String _paymentMethodLabel(String method) => switch (method) {
+      'cash' => 'Efectivo',
+      'card' => 'Tarjeta bancaria',
+      'stripe' => 'Tarjeta (online)',
+      'tpv' => 'TPV (en tienda)',
+      'transfer' => 'Transferencia',
+      _ => method,
+    };

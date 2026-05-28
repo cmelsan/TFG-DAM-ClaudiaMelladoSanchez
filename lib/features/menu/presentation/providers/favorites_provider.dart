@@ -53,6 +53,7 @@ class FavoriteToggle extends _$FavoriteToggle {
     // Invalidar para refrescar la lista y el estado individual
     ref
       ..invalidate(favoritesProvider)
+      ..invalidate(favoriteDishesProvider)
       ..invalidate(isFavoriteProvider(dishId));
   }
 }

@@ -75,6 +75,7 @@ class _ConfirmationBodyState extends State<_ConfirmationBody>
   // â”€â”€ Helpers según tipo de pedido â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   bool get _showQr =>
+      !kIsWeb &&
       (widget.order.orderType == 'recogida' ||
           widget.order.orderType == 'encargo') &&
       widget.order.status != 'cancelled';
@@ -103,10 +104,12 @@ class _ConfirmationBodyState extends State<_ConfirmationBody>
     return switch (widget.order.orderType) {
       'domicilio' =>
         '¡Tu pedido ha sido recibido!\nEstamos preparando tu comida y la llevaremos a tu domicilio.',
-      'recogida' =>
-        '¡Tu pedido ha sido recibido!\nCuando esté listo, muestra el QR en caja para recogerlo.',
-      'encargo' =>
-        '¡Tu encargo ha sido registrado!\nTe lo tendremos listo para la fecha indicada. Presenta el QR al recoger.',
+      'recogida' => kIsWeb
+        ? '¡Tu pedido ha sido recibido!\nCuando esté listo recibirás un email con tu código QR para recogerlo.'
+        : '¡Tu pedido ha sido recibido!\nCuando esté listo, muestra el QR en caja para recogerlo.',
+      'encargo' => kIsWeb
+        ? '¡Tu encargo ha sido registrado!\nTe lo tendremos listo para la fecha indicada. Recibirás un email con el código QR.'
+        : '¡Tu encargo ha sido registrado!\nTe lo tendremos listo para la fecha indicada. Presenta el QR al recoger.',
       'mostrador' => '¡Pedido registrado!\nEn breve te lo tendremos preparado.',
       _ => '¡Pedido realizado con éxito!',
     };
@@ -282,6 +285,61 @@ class _ConfirmationBodyState extends State<_ConfirmationBody>
                   const SizedBox(height: 16),
                   const Divider(height: 1, color: Color(0xFFE5E5E3)),
                   const SizedBox(height: 16),
+                  // Desglose de precios
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        'Subtotal',
+                        style: TextStyle(color: Colors.black54, fontSize: 13),
+                      ),
+                      Text(
+                        Formatters.price(order.subtotal),
+                        style: const TextStyle(fontSize: 13),
+                      ),
+                    ],
+                  ),
+                  if (order.discountAmount > 0) ...[
+                    const SizedBox(height: 4),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          '🎉 Dto. primer pedido (30%)',
+                          style: TextStyle(
+                            color: AppTokens.brandPrimary,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 13,
+                          ),
+                        ),
+                        Text(
+                          '- ${Formatters.price(order.discountAmount)}',
+                          style: const TextStyle(
+                            color: AppTokens.brandPrimary,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 13,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                  if (order.deliveryFee > 0) ...[
+                    const SizedBox(height: 4),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          'Envío',
+                          style: TextStyle(color: Colors.black54, fontSize: 13),
+                        ),
+                        Text(
+                          Formatters.price(order.deliveryFee),
+                          style: const TextStyle(fontSize: 13),
+                        ),
+                      ],
+                    ),
+                  ],
+                  const SizedBox(height: 8),
                   // Pago
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,

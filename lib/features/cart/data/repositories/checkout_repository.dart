@@ -34,16 +34,28 @@ class CheckoutRepository {
         );
       }
 
+      // — Bloquear pedidos inmediatos si el negocio está pausado —
+      if (orderType != 'encargo') {
+        final configRow = await _client
+            .from(SupabaseConstants.businessConfig)
+            .select('value')
+            .eq('key', 'accepting_orders')
+            .maybeSingle();
+        final accepting = (configRow?['value'] as String?) != 'false';
+        if (!accepting) throw const OrdersPausedFailure();
+      }
+
       final subtotal = items.fold<double>(
         0,
         (sum, item) => sum + (item.unitPrice * item.quantity),
       );
       final deliveryFee = orderType == 'domicilio' ? 2.5 : 0.0;
 
-      // — Descuento primer pedido —
+      // — Descuento primer pedido (solo domicilio / recogida) —
       final discountAmount = await _computeFirstOrderDiscount(
         userId: userId,
         subtotal: subtotal,
+        orderType: orderType,
       );
 
       final total = subtotal - discountAmount + deliveryFee;
@@ -81,6 +93,15 @@ class CheckoutRepository {
           .toList();
 
       await _client.from(SupabaseConstants.orderItems).insert(orderItems);
+
+      // Email de confirmación: se llama DESPUÉS de insertar los items para
+      // evitar la race condition del webhook (items ya existen en BD).
+      _sendOrderConfirmationEmail(
+        orderId: orderId,
+        userId: userId,
+        orderType: orderType,
+      );
+
       return orderId;
     } on Failure {
       rethrow;
@@ -97,32 +118,55 @@ class CheckoutRepository {
   Future<double> _computeFirstOrderDiscount({
     required String userId,
     required double subtotal,
+    required String orderType,
   }) async {
-    try {
-      // 1. ¿Está el descuento habilitado en la configuración?
-      final configRow = await _client
-          .from('business_config')
-          .select('value')
-          .eq('key', 'first_order_discount_enabled')
-          .maybeSingle();
+    // El descuento de primer pedido solo aplica a domicilio y recogida.
+    if (orderType != 'domicilio' && orderType != 'recogida') return 0.0;
 
-      final discountEnabled = configRow?['value'] as String?;
-      if (discountEnabled == 'false') return 0.0;
+    // 1. ¿Está el descuento habilitado en la configuración?
+    final configRow = await _client
+        .from('business_config')
+        .select('value')
+        .eq('key', 'first_order_discount_enabled')
+        .maybeSingle();
 
-      // 2. ¿Tiene el usuario pedidos anteriores (no cancelados)?
-      final countResult = await _client
-          .from(SupabaseConstants.orders)
-          .select('id')
-          .eq('user_id', userId)
-          .neq('status', 'cancelled');
+    final discountEnabled = configRow?['value'] as String?;
+    if (discountEnabled == 'false') return 0.0;
 
-      if ((countResult as List).isNotEmpty) return 0.0;
+    // 2. ¿Tiene el usuario pedidos anteriores (no cancelados)?
+    final countResult = await _client
+        .from(SupabaseConstants.orders)
+        .select('id')
+        .eq('user_id', userId)
+        .neq('status', 'cancelled');
 
-      // 3. Primer pedido elegible → 30% de descuento sobre el subtotal.
-      return double.parse((subtotal * 0.30).toStringAsFixed(2));
-    } catch (_) {
-      // En caso de error de red, no bloqueamos el pedido; sin descuento.
-      return 0.0;
-    }
+    if ((countResult as List).isNotEmpty) return 0.0;
+
+    // 3. Primer pedido elegible → 30% de descuento sobre el subtotal.
+    return double.parse((subtotal * 0.30).toStringAsFixed(2));
+  }
+
+  /// Invoca el Edge Function de notificación DESPUÉS de insertar los items,
+  /// evitando la race condition del webhook de base de datos.
+  /// Fire-and-forget: los errores no bloquean la confirmación del pedido.
+  void _sendOrderConfirmationEmail({
+    required String orderId,
+    required String userId,
+    required String orderType,
+  }) {
+    _client.functions
+        .invoke(
+          'send-order-notification',
+          body: {
+            'type': 'INSERT',
+            'record': {
+              'id': orderId,
+              'user_id': userId,
+              'order_type': orderType,
+              'status': 'pending',
+            },
+          },
+        )
+        .then((_) {}, onError: (_) {}); // Ignorar errores: el pedido ya está confirmado
   }
 }

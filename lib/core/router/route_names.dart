@@ -18,6 +18,7 @@ class RouteNames {
   // Auth
   static const login = 'login';
   static const register = 'register';
+  static const resetPassword = 'reset-password';
 
   // Protegidas (requieren auth)
   static const checkout = 'checkout';

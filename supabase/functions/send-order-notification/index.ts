@@ -102,7 +102,7 @@ interface OrderData {
   subtotal: number;
   delivery_fee: number;
   total: number;
-  discount: number | null;
+  discount_amount: number | null;
   scheduled_at: string | null;
   notes: string | null;
   created_at: string;
@@ -168,7 +168,7 @@ serve(async (req: Request) => {
       supabase
         .from("orders")
         .select(`id, order_type, status, payment_method, payment_status,
-                 subtotal, delivery_fee, total, discount, scheduled_at,
+                 subtotal, delivery_fee, total, discount_amount, scheduled_at,
                  notes, created_at,
                  addresses(street, city, postal_code, notes)`)
         .eq("id", orderId)
@@ -311,7 +311,7 @@ function buildOrderTicketHtml(params: {
     ${item.notes ? `<tr><td colspan="4" style="padding:0 0 8px;font-size:12px;color:#9ca3af;font-style:italic;">↳ ${item.notes}</td></tr>` : ""}
   `).join("");
 
-  const discount = orderData?.discount ? Number(orderData.discount) : 0;
+  const discount = orderData?.discount_amount ? Number(orderData.discount_amount) : 0;
 
   return `<!DOCTYPE html>
 <html lang="es">
@@ -424,6 +424,21 @@ function buildOrderTicketHtml(params: {
             <p style="margin:0;font-size:13px;color:#6b7280;background:#fffbeb;border-left:3px solid #f59e0b;padding:10px 14px;border-radius:4px;">
               📝 <strong>Nota:</strong> ${orderData.notes}
             </p>
+          </td>
+        </tr>` : ""}
+
+        <!-- QR de recogida/encargo -->
+        ${(orderData?.order_type === 'recogida' || orderData?.order_type === 'encargo') ? `<tr>
+          <td style="padding:0 32px 28px;text-align:center;">
+            <div style="border-top:1px dashed #e5e7eb;margin-top:4px;padding-top:22px;">
+              <p style="margin:0 0 4px;font-size:14px;font-weight:700;color:#374151;">&#128241; Tu c&#243;digo QR de recogida</p>
+              <p style="margin:0 0 16px;font-size:12px;color:#9ca3af;">Mu&#233;stralo al llegar al local para recoger tu pedido</p>
+              <img src="https://api.qrserver.com/v1/create-qr-code/?size=220x220&amp;data=${orderData.id}&amp;color=1a7a7a&amp;bgcolor=ffffff&amp;margin=8"
+                   alt="QR Pedido #${orderShortId}"
+                   width="220" height="220"
+                   style="display:block;margin:0 auto;border:8px solid #f3f4f6;border-radius:12px;background:#fff;"/>
+              <p style="margin:12px 0 0;font-size:12px;color:#9ca3af;">Referencia: <strong style="color:#374151;font-family:monospace;">#${orderShortId}</strong></p>
+            </div>
           </td>
         </tr>` : ""}
 

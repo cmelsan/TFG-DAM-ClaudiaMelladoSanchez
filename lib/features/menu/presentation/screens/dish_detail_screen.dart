@@ -8,11 +8,49 @@ import 'package:sabor_de_casa/core/theme/app_tokens.dart';
 import 'package:sabor_de_casa/core/utils/formatters.dart';
 import 'package:sabor_de_casa/core/widgets/error_view.dart';
 import 'package:sabor_de_casa/core/widgets/loading_indicator.dart';
+import 'package:sabor_de_casa/features/auth/presentation/providers/auth_provider.dart';
 import 'package:sabor_de_casa/features/cart/presentation/providers/cart_provider.dart';
 import 'package:sabor_de_casa/features/menu/domain/models/dish.dart';
 import 'package:sabor_de_casa/features/menu/presentation/providers/favorites_provider.dart';
 import 'package:sabor_de_casa/features/menu/presentation/providers/menu_provider.dart';
 import 'package:sabor_de_casa/features/menu/presentation/widgets/allergen_badge.dart';
+
+// Muestra diálogo de login si no autenticado; si sí, ejecuta el toggle.
+void _tapFavorite(BuildContext context, WidgetRef ref, String dishId) {
+  final user = ref.read(authNotifierProvider).valueOrNull;
+  if (user == null) {
+    showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        icon: const Icon(Icons.favorite_border, color: Colors.red, size: 36),
+        title: const Text(
+          'Inicia sesión para guardar favoritos',
+          textAlign: TextAlign.center,
+        ),
+        content: const Text(
+          'Necesitas una cuenta para guardar tus platos favoritos y acceder a ellos cuando quieras.',
+          textAlign: TextAlign.center,
+        ),
+        actionsAlignment: MainAxisAlignment.center,
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('Ahora no'),
+          ),
+          FilledButton(
+            onPressed: () {
+              Navigator.of(ctx).pop();
+              context.pushNamed(RouteNames.login);
+            },
+            child: const Text('Iniciar sesión'),
+          ),
+        ],
+      ),
+    );
+    return;
+  }
+  ref.read(favoriteToggleProvider.notifier).toggle(dishId);
+}
 
 class DishDetailScreen extends ConsumerStatefulWidget {
   const DishDetailScreen({required this.dishId, super.key});
@@ -244,9 +282,7 @@ class _MobileLayout extends ConsumerWidget {
                         isFav ? Icons.favorite : Icons.favorite_border,
                         color: isFav ? Colors.red : const Color(0xFF111111),
                       ),
-                      onPressed: () => ref
-                          .read(favoriteToggleProvider.notifier)
-                          .toggle(dishId),
+                      onPressed: () => _tapFavorite(context, ref, dishId),
                     ),
                     loading: () => const SizedBox.shrink(),
                     error: (_, __) => const SizedBox.shrink(),
@@ -400,9 +436,7 @@ class _DishInfo extends StatelessWidget {
                       isFav ? Icons.favorite : Icons.favorite_border,
                       color: isFav ? Colors.red : Colors.black38,
                     ),
-                    onPressed: () => ref
-                        .read(favoriteToggleProvider.notifier)
-                        .toggle(dishId),
+                    onPressed: () => _tapFavorite(context, ref, dishId),
                   ),
                   loading: () => const SizedBox.shrink(),
                   error: (_, __) => const SizedBox.shrink(),

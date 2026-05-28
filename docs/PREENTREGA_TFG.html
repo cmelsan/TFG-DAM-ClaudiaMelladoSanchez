@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <style>
+    body {
+      font-family: Calibri, sans-serif;
+      font-size: 11pt;
+      line-height: 1.5;
+      margin: 2.5cm 3cm;
+      color: #1a1a1a;
+    }
+    h1 {
+      font-size: 20pt;
+      font-weight: bold;
+      color: #C0392B;
+      border-bottom: 2px solid #C0392B;
+      padding-bottom: 6px;
+      margin-top: 0;
+    }
+    h2 {
+      font-size: 13pt;
+      font-weight: bold;
+      color: #2C3E50;
+      border-bottom: 1px solid #BDC3C7;
+      padding-bottom: 4px;
+      margin-top: 24px;
+    }
+    h3 {
+      font-size: 11pt;
+      font-weight: bold;
+      color: #2C3E50;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin: 10px 0 16px 0;
+      font-size: 10.5pt;
+    }
+    th {
+      background-color: #2C3E50;
+      color: white;
+      text-align: left;
+      padding: 7px 10px;
+    }
+    td {
+      padding: 6px 10px;
+      border: 1px solid #BDC3C7;
+    }
+    tr:nth-child(even) td {
+      background-color: #F5F6FA;
+    }
+    .info-table td:first-child {
+      font-weight: bold;
+      background-color: #FAFAFA;
+      width: 160px;
+    }
+    .repo-link {
+      display: inline-block;
+      background-color: #2C3E50;
+      color: white;
+      padding: 8px 16px;
+      border-radius: 4px;
+      text-decoration: none;
+      font-size: 10.5pt;
+      margin: 4px 0 12px 0;
+    }
+    ul {
+      margin: 6px 0 10px 0;
+      padding-left: 22px;
+    }
+    li {
+      margin-bottom: 4px;
+    }
+    pre {
+      background-color: #F4F4F4;
+      border: 1px solid #DDD;
+      border-radius: 4px;
+      padding: 10px 14px;
+      font-family: Consolas, monospace;
+      font-size: 9.5pt;
+      color: #2C3E50;
+    }
+    .pill {
+      display: inline-block;
+      background-color: #E8F4F8;
+      border: 1px solid #AED6F1;
+      border-radius: 12px;
+      padding: 1px 9px;
+      font-size: 9.5pt;
+      color: #2471A3;
+    }
+    .estado {
+      background-color: #EAFAF1;
+      border-left: 4px solid #27AE60;
+      padding: 10px 14px;
+      margin-top: 10px;
+      border-radius: 2px;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #E0E0E0;
+      margin: 20px 0;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Preentrega — Trabajo de Fin de Grado</h1>
+
+  <table class="info-table">
+    <tr><td>Alumna</td><td>Claudia Mellado Sánchez</td></tr>
+    <tr><td>Ciclo</td><td>Desarrollo de Aplicaciones Multiplataforma (DAM)</td></tr>
+    <tr><td>Centro</td><td>Victoria FP</td></tr>
+    <tr><td>Fecha</td><td>25 de mayo de 2026</td></tr>
+  </table>
+
+  <hr>
+
+  <h2>Repositorio</h2>
+  <a class="repo-link" href="https://github.com/cmelsan/TFG-DAM-ClaudiaMelladoSanchez">
+    https://github.com/cmelsan/TFG-DAM-ClaudiaMelladoSanchez
+  </a>
+
+  <hr>
+
+  <h2>Descripción del proyecto</h2>
+  <p>
+    <strong>Sabor de Casa</strong> es una aplicación multiplataforma <span class="pill">Android</span> <span class="pill">Web</span>
+    para un local de comida preparada para llevar con servicio de catering para eventos.
+    Desarrollada como Proyecto Final del Grado Superior DAM.
+  </p>
+  <p>
+    El negocio gestiona cuatro tipos de pedido: venta directa en mostrador, recogida en local, pedidos
+    a domicilio y encargos para fecha futura. Además ofrece un servicio de catering para eventos privados
+    (bodas, comuniones, empresas, etc.).
+  </p>
+
+  <hr>
+
+  <h2>Stack tecnológico</h2>
+  <table>
+    <tr><th>Capa</th><th>Tecnología</th></tr>
+    <tr><td>Framework</td><td>Flutter 3.38.6 / Dart 3.10.7</td></tr>
+    <tr><td>Gestión de estado</td><td>Riverpod + riverpod_annotation</td></tr>
+    <tr><td>Modelos de datos</td><td>Freezed</td></tr>
+    <tr><td>Navegación</td><td>GoRouter</td></tr>
+    <tr><td>Backend / Auth / DB</td><td>Supabase (PostgreSQL + Auth + Storage + Realtime)</td></tr>
+    <tr><td>Serverless</td><td>Supabase Edge Functions (Deno)</td></tr>
+    <tr><td>Pagos</td><td>Stripe (flutter_stripe + stripe_js)</td></tr>
+    <tr><td>Notificaciones push</td><td>Firebase Cloud Messaging</td></tr>
+    <tr><td>Emails transaccionales</td><td>Brevo API</td></tr>
+  </table>
+
+  <hr>
+
+  <h2>Funcionalidades implementadas</h2>
+  <ul>
+    <li><strong>Autenticación:</strong> registro/login con Supabase Auth, roles <em>client</em>, <em>employee</em> y <em>admin</em></li>
+    <li><strong>Menú y carrito:</strong> catálogo con filtros, carrito persistente, proceso de checkout</li>
+    <li><strong>Pedidos:</strong> historial de pedidos y seguimiento de estado en tiempo real (Realtime)</li>
+    <li><strong>Encargos y catering:</strong> formulario de solicitud con selección de fecha, hora y menú personalizado</li>
+    <li><strong>Panel de cocina:</strong> vista de empleado con cola de pedidos activos y cambio de estado</li>
+    <li><strong>Reparto:</strong> pantalla de repartidor con listado de pedidos a domicilio</li>
+    <li><strong>TPV mostrador:</strong> terminal punto de venta para venta directa sin cuenta</li>
+    <li><strong>Panel de administración:</strong> dashboard con métricas, gestión de usuarios, productos, pedidos y configuración</li>
+    <li><strong>Chat IA:</strong> asistente integrado para consultas sobre el menú y el local</li>
+    <li><strong>Notificaciones por email:</strong> confirmación de registro y seguimiento de pedidos (Brevo)</li>
+    <li><strong>Notificaciones push:</strong> alertas de cambio de estado del pedido vía FCM</li>
+    <li><strong>Pagos:</strong> integración con Stripe para pago con tarjeta en móvil y web</li>
+  </ul>
+
+  <hr>
+
+  <h2>Arquitectura</h2>
+  <p>
+    La aplicación sigue una arquitectura en capas (<strong>UI → Logic → Data</strong>) con separación por features:
+  </p>
+  <pre>lib/
+├── core/           # Tema, router, widgets compartidos, utilidades
+├── features/       # Módulos independientes (auth, menu, cart, orders, admin…)
+└── services/       # Capa de acceso a Supabase</pre>
+  <p>
+    El backend se apoya en Supabase: base de datos PostgreSQL con Row Level Security,
+    funciones PL/pgSQL para lógica de negocio, y Edge Functions en Deno para integraciones
+    externas (Stripe, Brevo, FCM).
+  </p>
+
+  <hr>
+
+  <h2>Estado actual</h2>
+  <div class="estado">
+    El proyecto se encuentra en <strong>fase de desarrollo avanzado</strong> con las funcionalidades
+    principales completadas y operativas. La aplicación compila y ejecuta correctamente en Android y Web.
+    El análisis estático (<code>flutter analyze</code>) no reporta errores ni advertencias.
+  </div>
+
+</body>
+</html>

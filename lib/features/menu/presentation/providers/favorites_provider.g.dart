@@ -179,7 +179,7 @@ class _IsFavoriteProviderElement extends AutoDisposeFutureProviderElement<bool>
   String get dishId => (origin as IsFavoriteProvider).dishId;
 }
 
-String _$favoriteToggleHash() => r'278a2dbc3ddf37d95acf6b98f88f1047cf72271f';
+String _$favoriteToggleHash() => r'17a08d8e8b898b51a52308ba0c15870f78aed03c';
 
 /// See also [FavoriteToggle].
 @ProviderFor(FavoriteToggle)

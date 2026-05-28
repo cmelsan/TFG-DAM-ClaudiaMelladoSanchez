@@ -1,4 +1,5 @@
 ﻿import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -14,11 +15,34 @@ import 'package:sabor_de_casa/features/cart/presentation/providers/cart_provider
 const _kWebBreakpoint = 880.0;
 const _kMaxContent = 1160.0;
 
-class CartScreen extends ConsumerWidget {
+class CartScreen extends ConsumerStatefulWidget {
   const CartScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<CartScreen> createState() => _CartScreenState();
+}
+
+class _CartScreenState extends ConsumerState<CartScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // En web: si el usuario volvió atrás desde Stripe sin pagar,
+    // el carrito estará vacío (la app se reinicia). Restauramos los
+    // artículos que guardamos antes de redirigir a Stripe.
+    if (kIsWeb) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        final cartState = ref.read(cartNotifierProvider);
+        final isEmpty = cartState.maybeWhen(empty: () => true, orElse: () => false);
+        if (isEmpty) {
+          ref.read(cartNotifierProvider.notifier).restoreFromPendingOrder();
+        }
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final cartState = ref.watch(cartNotifierProvider);
 
     return Scaffold(

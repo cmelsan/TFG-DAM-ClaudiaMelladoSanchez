@@ -185,6 +185,126 @@ class _AdminOrderItemsProviderElement
   String get orderId => (origin as AdminOrderItemsProvider).orderId;
 }
 
+String _$adminUserProfileHash() => r'a7f4be9e1de78e169acc716eacff88b3ec4af24e';
+
+/// See also [adminUserProfile].
+@ProviderFor(adminUserProfile)
+const adminUserProfileProvider = AdminUserProfileFamily();
+
+/// See also [adminUserProfile].
+class AdminUserProfileFamily extends Family<AsyncValue<AdminUser?>> {
+  /// See also [adminUserProfile].
+  const AdminUserProfileFamily();
+
+  /// See also [adminUserProfile].
+  AdminUserProfileProvider call(String userId) {
+    return AdminUserProfileProvider(userId);
+  }
+
+  @override
+  AdminUserProfileProvider getProviderOverride(
+    covariant AdminUserProfileProvider provider,
+  ) {
+    return call(provider.userId);
+  }
+
+  static const Iterable<ProviderOrFamily>? _dependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
+
+  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
+      _allTransitiveDependencies;
+
+  @override
+  String? get name => r'adminUserProfileProvider';
+}
+
+/// See also [adminUserProfile].
+class AdminUserProfileProvider extends AutoDisposeFutureProvider<AdminUser?> {
+  /// See also [adminUserProfile].
+  AdminUserProfileProvider(String userId)
+    : this._internal(
+        (ref) => adminUserProfile(ref as AdminUserProfileRef, userId),
+        from: adminUserProfileProvider,
+        name: r'adminUserProfileProvider',
+        debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+            ? null
+            : _$adminUserProfileHash,
+        dependencies: AdminUserProfileFamily._dependencies,
+        allTransitiveDependencies:
+            AdminUserProfileFamily._allTransitiveDependencies,
+        userId: userId,
+      );
+
+  AdminUserProfileProvider._internal(
+    super._createNotifier, {
+    required super.name,
+    required super.dependencies,
+    required super.allTransitiveDependencies,
+    required super.debugGetCreateSourceHash,
+    required super.from,
+    required this.userId,
+  }) : super.internal();
+
+  final String userId;
+
+  @override
+  Override overrideWith(
+    FutureOr<AdminUser?> Function(AdminUserProfileRef provider) create,
+  ) {
+    return ProviderOverride(
+      origin: this,
+      override: AdminUserProfileProvider._internal(
+        (ref) => create(ref as AdminUserProfileRef),
+        from: from,
+        name: null,
+        dependencies: null,
+        allTransitiveDependencies: null,
+        debugGetCreateSourceHash: null,
+        userId: userId,
+      ),
+    );
+  }
+
+  @override
+  AutoDisposeFutureProviderElement<AdminUser?> createElement() {
+    return _AdminUserProfileProviderElement(this);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is AdminUserProfileProvider && other.userId == userId;
+  }
+
+  @override
+  int get hashCode {
+    var hash = _SystemHash.combine(0, runtimeType.hashCode);
+    hash = _SystemHash.combine(hash, userId.hashCode);
+
+    return _SystemHash.finish(hash);
+  }
+}
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+mixin AdminUserProfileRef on AutoDisposeFutureProviderRef<AdminUser?> {
+  /// The parameter `userId` of this provider.
+  String get userId;
+}
+
+class _AdminUserProfileProviderElement
+    extends AutoDisposeFutureProviderElement<AdminUser?>
+    with AdminUserProfileRef {
+  _AdminUserProfileProviderElement(super.provider);
+
+  @override
+  String get userId => (origin as AdminUserProfileProvider).userId;
+}
+
 String _$adminCategoriesHash() => r'2ec2b3fbba5c010858e25b24dac6cd1660a70eac';
 
 /// See also [adminCategories].
@@ -408,7 +528,27 @@ final firstOrderDiscountEnabledProvider =
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef FirstOrderDiscountEnabledRef = AutoDisposeFutureProviderRef<bool>;
-String _$adminActionHash() => r'0164178f6c5f63f17ec4853008f56b924a86dc68';
+String _$acceptingOrdersHash() => r'70416eafb87870eb9d4e6522776304b1b430748e';
+
+/// Controla si el negocio está aceptando nuevos pedidos.
+/// Cuando es false, el checkout bloquea los pedidos de domicilio y recogida.
+///
+/// Copied from [acceptingOrders].
+@ProviderFor(acceptingOrders)
+final acceptingOrdersProvider = AutoDisposeFutureProvider<bool>.internal(
+  acceptingOrders,
+  name: r'acceptingOrdersProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$acceptingOrdersHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef AcceptingOrdersRef = AutoDisposeFutureProviderRef<bool>;
+String _$adminActionHash() => r'a2bcd53185720aedda9dc45e414affca23c05d3f';
 
 /// See also [AdminAction].
 @ProviderFor(AdminAction)

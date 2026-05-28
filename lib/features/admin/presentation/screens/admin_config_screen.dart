@@ -21,6 +21,7 @@ const _keyLabels = <String, String>{
   'show_offers_section': 'Mostrar sección "En oferta"',
   'show_seasonal_section': 'Mostrar sección "Temporada"',
   'first_order_discount_enabled': 'Descuento 30% primer pedido',
+  'accepting_orders': 'Aceptar nuevos pedidos',
 };
 
 class AdminConfigScreen extends ConsumerWidget {

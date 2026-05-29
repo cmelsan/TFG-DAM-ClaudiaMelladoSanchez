@@ -9,6 +9,7 @@ const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
     "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
 const BASE_SYSTEM_PROMPT = `Eres SaborIA, el asistente virtual de Sabor de Casa, un local de comida casera preparada para llevar y servicio de catering para eventos en España.

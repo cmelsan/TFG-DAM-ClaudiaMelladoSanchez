@@ -1,49 +1,109 @@
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sabor_de_casa/core/theme/app_tokens.dart';
 import 'package:sabor_de_casa/core/widgets/app_fab.dart';
 import 'package:sabor_de_casa/features/cart/presentation/providers/cart_provider.dart';
+import 'package:sabor_de_casa/features/chat/presentation/screens/chat_screen.dart';
 
-/// Shell persistente con barra de navegación personalizada estilo TGTG.
-class ScaffoldWithNavBar extends ConsumerWidget {
+/// Shell persistente con barra de navegación personalizada.
+/// En web el chatbot se muestra como panel flotante; en móvil navega a /chat.
+class ScaffoldWithNavBar extends ConsumerStatefulWidget {
   const ScaffoldWithNavBar({required this.navigationShell, super.key});
 
   final StatefulNavigationShell navigationShell;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    // En web no tiene sentido la BottomNavigationBar; cada pantalla
-    // gestiona su propia navegación (HomeScreenWeb tiene su propio navbar).
+  ConsumerState<ScaffoldWithNavBar> createState() => _ScaffoldWithNavBarState();
+}
+
+class _ScaffoldWithNavBarState extends ConsumerState<ScaffoldWithNavBar> {
+  bool _chatOpen = false;
+
+  void _toggleChat() => setState(() => _chatOpen = !_chatOpen);
+  void _closeChat() => setState(() => _chatOpen = false);
+
+  @override
+  Widget build(BuildContext context) {
     if (kIsWeb) {
       return Scaffold(
-        body: navigationShell,
-        floatingActionButton: AppFab(
-          onPressed: () => context.push('/chat'),
+        body: Stack(
+          children: [
+            widget.navigationShell,
+            if (_chatOpen)
+              _ChatOverlayPanel(onClose: _closeChat),
+            Positioned(
+              right: 20,
+              bottom: 20,
+              child: AppFab(
+                isOpen: _chatOpen,
+                onPressed: _toggleChat,
+              ),
+            ),
+          ],
         ),
-        floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       );
     }
 
+    // ── Móvil: navegación a ruta /chat (pantalla completa) ────────────────
     final cartCount = ref.watch(cartItemsCountProvider);
 
     return Scaffold(
       backgroundColor: AppTokens.pageBg,
-      body: navigationShell,
+      body: widget.navigationShell,
       floatingActionButton: AppFab(
         onPressed: () => context.push('/chat'),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       bottomNavigationBar: _ModernNavBar(
-        selectedIndex: navigationShell.currentIndex,
+        selectedIndex: widget.navigationShell.currentIndex,
         cartCount: cartCount,
-        onTap: (index) => navigationShell.goBranch(
+        onTap: (index) => widget.navigationShell.goBranch(
           index,
-          initialLocation: index == navigationShell.currentIndex,
+          initialLocation:
+              index == widget.navigationShell.currentIndex,
         ),
       ),
     );
+  }
+}
+
+// ── Panel flotante del chatbot (web) ─────────────────────────────────────────
+
+class _ChatOverlayPanel extends StatelessWidget {
+  const _ChatOverlayPanel({required this.onClose});
+
+  final VoidCallback onClose;
+
+  @override
+  Widget build(BuildContext context) {
+    final screenH = MediaQuery.sizeOf(context).height;
+    final panelH = (screenH - 100).clamp(400.0, 600.0);
+
+    return Positioned(
+      right: 20,
+      bottom: 80,
+      width: 380,
+      height: panelH,
+      child: Material(
+        elevation: 20,
+        shadowColor: Colors.black38,
+        borderRadius: BorderRadius.circular(16),
+        clipBehavior: Clip.antiAlias,
+        child: ChatScreen(onClose: onClose),
+      ),
+    )
+        .animate()
+        .scale(
+          begin: const Offset(0.85, 0.85),
+          end: const Offset(1, 1),
+          duration: 200.ms,
+          curve: Curves.easeOutCubic,
+          alignment: Alignment.bottomRight,
+        )
+        .fadeIn(duration: 150.ms);
   }
 }
 

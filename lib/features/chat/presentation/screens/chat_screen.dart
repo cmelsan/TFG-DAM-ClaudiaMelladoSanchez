@@ -9,7 +9,10 @@ import 'package:sabor_de_casa/features/chat/domain/models/chat_message.dart';
 import 'package:sabor_de_casa/features/chat/presentation/providers/chat_provider.dart';
 
 class ChatScreen extends ConsumerStatefulWidget {
-  const ChatScreen({super.key});
+  const ChatScreen({this.onClose, super.key});
+
+  /// Callback para cerrar el chat. Si es null usa context.pop() (modo ruta).
+  final VoidCallback? onClose;
 
   @override
   ConsumerState<ChatScreen> createState() => _ChatScreenState();
@@ -60,7 +63,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             _ChatHeader(
               onClear: () =>
                   ref.read(chatNotifierProvider.notifier).clear(),
-              onClose: () => context.pop(),
+              onClose: widget.onClose ?? () => context.pop(),
             ),
             Expanded(
               child: ListView.builder(

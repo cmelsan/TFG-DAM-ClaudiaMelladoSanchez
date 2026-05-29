@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show debugPrint;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:sabor_de_casa/features/chat/data/repositories/chat_repository.dart';
 import 'package:sabor_de_casa/features/chat/domain/models/chat_message.dart';
@@ -72,7 +73,8 @@ class ChatNotifier extends _$ChatNotifier {
         ],
         isLoading: false,
       );
-    } catch (_) {
+    } catch (e, st) {
+      debugPrint('[SaborIA] Error al llamar Edge Function: $e\n$st');
       state = state.copyWith(
         messages: [
           ...state.messages,

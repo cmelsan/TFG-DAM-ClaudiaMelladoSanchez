@@ -1,6 +1,7 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:sabor_de_casa/core/theme/app_tokens.dart';
@@ -52,71 +53,177 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     ref.listen(chatNotifierProvider, (_, __) => _scrollToBottom());
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF2F6F4),
-      appBar: AppBar(
-        backgroundColor: AppTokens.brandPrimary,
-        foregroundColor: Colors.white,
-        elevation: 0,
-        title: Row(
-          mainAxisSize: MainAxisSize.min,
+      backgroundColor: const Color(0xFFF0F4F3),
+      body: SafeArea(
+        child: Column(
           children: [
-            Container(
-              padding: const EdgeInsets.all(6),
-              decoration: const BoxDecoration(
-                color: Colors.white24,
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.smart_toy_outlined,
-                size: 18,
-                color: Colors.white,
+            _ChatHeader(
+              onClear: () =>
+                  ref.read(chatNotifierProvider.notifier).clear(),
+              onClose: () => context.pop(),
+            ),
+            Expanded(
+              child: ListView.builder(
+                controller: _scrollCtrl,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                itemCount: chatState.messages.length +
+                    (chatState.isLoading ? 1 : 0),
+                itemBuilder: (context, index) {
+                  if (index == chatState.messages.length) {
+                    return const _TypingBubble();
+                  }
+                  final msg = chatState.messages[index];
+                  return _MessageBubble(message: msg, key: ValueKey(msg.id));
+                },
               ),
             ),
-            const SizedBox(width: 8),
-            Text(
-              'SaborIA',
+            const _PoweredBy(),
+            _InputBar(
+              ctrl: _ctrl,
+              onSend: _send,
+              isLoading: chatState.isLoading,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ── Header ────────────────────────────────────────────────────────────────────
+
+class _ChatHeader extends StatelessWidget {
+  const _ChatHeader({
+    required this.onClear,
+    required this.onClose,
+  });
+
+  final VoidCallback onClear;
+  final VoidCallback onClose;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: AppTokens.brandDark,
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+      child: Row(
+        children: [
+          IconButton(
+            icon: const Icon(
+              Icons.arrow_back_ios_new_rounded,
+              color: Colors.white,
+              size: 20,
+            ),
+            onPressed: onClose,
+            padding: EdgeInsets.zero,
+            constraints:
+                const BoxConstraints(minWidth: 36, minHeight: 36),
+          ),
+          const SizedBox(width: 4),
+          Container(
+            width: 44,
+            height: 44,
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
+            ),
+            padding: const EdgeInsets.all(6),
+            child: Image.asset(
+              'assets/images/logo_bueno.png',
+              fit: BoxFit.contain,
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'SaborIA',
+                  style: GoogleFonts.inter(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 16,
+                  ),
+                ),
+                Row(
+                  children: [
+                    Container(
+                      width: 7,
+                      height: 7,
+                      decoration: const BoxDecoration(
+                        color: Color(0xFF4ADE80),
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    const SizedBox(width: 5),
+                    Text(
+                      'Está disponible',
+                      style: GoogleFonts.inter(
+                        color: Colors.white70,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          PopupMenuButton<String>(
+            icon: const Icon(
+              Icons.menu_rounded,
+              color: Colors.white,
+              size: 24,
+            ),
+            onSelected: (value) {
+              if (value == 'clear') onClear();
+            },
+            itemBuilder: (_) => const [
+              PopupMenuItem(
+                value: 'clear',
+                child: Row(
+                  children: [
+                    Icon(Icons.refresh_rounded, size: 18),
+                    SizedBox(width: 8),
+                    Text('Nueva conversación'),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Powered by ────────────────────────────────────────────────────────────────
+
+class _PoweredBy extends StatelessWidget {
+  const _PoweredBy();
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 5),
+      child: Text.rich(
+        TextSpan(
+          text: 'Powered by ',
+          style: const TextStyle(fontSize: 11, color: Colors.black45),
+          children: [
+            TextSpan(
+              text: 'Sabor de Casa',
               style: GoogleFonts.inter(
+                fontSize: 11,
+                color: AppTokens.brandPrimary,
                 fontWeight: FontWeight.w700,
-                fontSize: 18,
-                color: Colors.white,
               ),
             ),
           ],
         ),
-        centerTitle: true,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh_rounded),
-            tooltip: 'Nueva conversación',
-            onPressed: () =>
-                ref.read(chatNotifierProvider.notifier).clear(),
-          ),
-        ],
-      ),
-      body: Column(
-        children: [
-          Expanded(
-            child: ListView.builder(
-              controller: _scrollCtrl,
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-              itemCount: chatState.messages.length +
-                  (chatState.isLoading ? 1 : 0),
-              itemBuilder: (context, index) {
-                if (index == chatState.messages.length) {
-                  return const _TypingBubble();
-                }
-                final msg = chatState.messages[index];
-                return _MessageBubble(message: msg, key: ValueKey(msg.id));
-              },
-            ),
-          ),
-          _InputBar(
-            ctrl: _ctrl,
-            onSend: _send,
-            isLoading: chatState.isLoading,
-          ),
-        ],
+        textAlign: TextAlign.center,
       ),
     );
   }
@@ -142,13 +249,17 @@ class _MessageBubble extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           if (!isUser) ...[
-            const CircleAvatar(
-              radius: 16,
-              backgroundColor: AppTokens.brandLight,
-              child: Icon(
-                Icons.smart_toy_outlined,
-                size: 16,
-                color: AppTokens.brandDark,
+            Container(
+              width: 32,
+              height: 32,
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.circle,
+              ),
+              padding: const EdgeInsets.all(4),
+              child: Image.asset(
+                'assets/images/logo_bueno.png',
+                fit: BoxFit.contain,
               ),
             ),
             const SizedBox(width: 6),
@@ -217,13 +328,17 @@ class _TypingBubble extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          const CircleAvatar(
-            radius: 16,
-            backgroundColor: AppTokens.brandLight,
-            child: Icon(
-              Icons.smart_toy_outlined,
-              size: 16,
-              color: AppTokens.brandDark,
+          Container(
+            width: 32,
+            height: 32,
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
+            ),
+            padding: const EdgeInsets.all(4),
+            child: Image.asset(
+              'assets/images/logo_bueno.png',
+              fit: BoxFit.contain,
             ),
           ),
           const SizedBox(width: 6),
@@ -329,7 +444,7 @@ class _InputBar extends StatelessWidget {
               minLines: 1,
               textInputAction: TextInputAction.send,
               decoration: InputDecoration(
-                hintText: 'Escribe tu pregunta...',
+                hintText: 'Escribe aquí..',
                 hintStyle: const TextStyle(color: Colors.black38),
                 filled: true,
                 fillColor: const Color(0xFFF2F6F4),

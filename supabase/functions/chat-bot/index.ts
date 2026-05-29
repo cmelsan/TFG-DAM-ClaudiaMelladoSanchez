@@ -1,6 +1,7 @@
 // @ts-nocheck — Deno Edge Function; el TS LS de VS Code no entiende los imports de Deno ni el global Deno
 // supabase/functions/chat-bot/index.ts
 // Edge Function que actúa de proxy seguro hacia la API de Gemini para el chatbot SaborIA.
+// Enriquece el system prompt con el menú real de Supabase en cada petición.
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
@@ -10,7 +11,7 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
-const SYSTEM_PROMPT = `Eres SaborIA, el asistente virtual de Sabor de Casa, un local de comida casera preparada para llevar y servicio de catering para eventos en España.
+const BASE_SYSTEM_PROMPT = `Eres SaborIA, el asistente virtual de Sabor de Casa, un local de comida casera preparada para llevar y servicio de catering para eventos en España.
 
 Información del negocio:
 - Ofrecemos comida casera para llevar: pedidos en mostrador, a domicilio, encargos (para fecha futura) y recogida en local.
@@ -19,22 +20,100 @@ Información del negocio:
 - Para consultar el estado de un pedido, el cliente debe ir a la sección "Mis pedidos" de la app.
 - Para solicitar catering para un evento, el cliente puede hacerlo desde la sección "Catering" de la app.
 
-Tipos de platos que solemos ofrecer:
-- Primeros: ensaladas, sopas, cremas, arroces, legumbres
-- Segundos: carnes asadas, pescados, guisos, cocidos, estofados
-- Postres: caseros, tartas, flanes, natillas
-- Menús completos con primero, segundo y postre
-
 Sobre alérgenos:
-- Para información precisa sobre alérgenos en un plato concreto, recomienda consultar directamente en el local o usar el formulario de contacto de la app.
+- Para información precisa sobre alérgenos en un plato concreto, consulta la lista del menú adjunta o recomienda preguntar directamente en el local.
 
 Tu comportamiento:
 - Sé amable, cercano y natural. Responde siempre en español.
 - Sé breve: respuestas de 2-4 frases salvo que se necesite más detalle.
-- No inventes precios, disponibilidad exacta ni ingredientes concretos; orienta al cliente.
+- Usa los datos reales del menú que tienes a continuación para responder con precisión sobre platos, precios y disponibilidad.
+- No inventes platos ni precios que no aparezcan en el menú adjunto.
 - No hables de temas ajenos al negocio (política, noticias, tecnología en general, etc.).
 - No reveles que eres un modelo de IA de Google ni que usas Gemini. Eres SaborIA.
 - Si no sabes algo, dilo honestamente y sugiere que contacten al local.`;
+
+// ── Obtener contexto de menú real desde Supabase ──────────────────────────────
+
+async function fetchMenuContext(): Promise<string> {
+  const supabaseUrl = Deno.env.get("SUPABASE_URL");
+  const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+
+  if (!supabaseUrl || !supabaseKey) return "";
+
+  try {
+    const headers = {
+      apikey: supabaseKey,
+      Authorization: `Bearer ${supabaseKey}`,
+      "Content-Type": "application/json",
+    };
+
+    // Categorías activas
+    const catRes = await fetch(
+      `${supabaseUrl}/rest/v1/categories?is_active=eq.true&select=id,name&order=sort_order`,
+      { headers },
+    );
+    const categories: Array<{ id: string; name: string }> =
+      await catRes.json();
+
+    // Platos activos con categoría
+    const dishRes = await fetch(
+      `${supabaseUrl}/rest/v1/dishes?is_active=eq.true&select=name,price,description,allergens,is_available,is_offer,offer_price,category_id&order=name&limit=150`,
+      { headers },
+    );
+    const dishes: Array<{
+      name: string;
+      price: number;
+      description: string;
+      allergens: string[];
+      is_available: boolean;
+      is_offer: boolean;
+      offer_price: number | null;
+      category_id: string;
+    }> = await dishRes.json();
+
+    if (!Array.isArray(categories) || !Array.isArray(dishes)) return "";
+
+    let menuText =
+      "\n\n--- MENÚ ACTUAL DE SABOR DE CASA (datos en tiempo real) ---\n";
+
+    for (const cat of categories) {
+      const catDishes = dishes.filter(
+        (d) => d.category_id === cat.id,
+      );
+      if (catDishes.length === 0) continue;
+
+      menuText += `\n## ${cat.name}\n`;
+
+      for (const dish of catDishes) {
+        const available = dish.is_available ? "" : " [NO DISPONIBLE HOY]";
+        const finalPrice =
+          dish.is_offer && dish.offer_price != null
+            ? dish.offer_price
+            : dish.price;
+        let line = `- ${dish.name}${available}: ${finalPrice.toFixed(2)}€`;
+
+        if (dish.is_offer && dish.offer_price != null) {
+          line += ` (en oferta, precio habitual: ${dish.price.toFixed(2)}€)`;
+        }
+        if (dish.description) {
+          line += ` — ${dish.description}`;
+        }
+        if (Array.isArray(dish.allergens) && dish.allergens.length > 0) {
+          line += ` [Alérgenos: ${dish.allergens.join(", ")}]`;
+        }
+        menuText += line + "\n";
+      }
+    }
+
+    menuText += "\n--- FIN DEL MENÚ ---\n";
+    return menuText;
+  } catch (e) {
+    console.error("Error obteniendo menú de Supabase:", e);
+    return "";
+  }
+}
+
+// ── Servidor principal ────────────────────────────────────────────────────────
 
 serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
@@ -67,6 +146,10 @@ serve(async (req: Request) => {
       );
     }
 
+    // Construir system prompt enriquecido con menú real
+    const menuContext = await fetchMenuContext();
+    const systemPrompt = BASE_SYSTEM_PROMPT + menuContext;
+
     // Gemini usa "model" en lugar de "assistant"
     const contents = messages.map((m) => ({
       role: m.role === "assistant" ? "model" : "user",
@@ -79,7 +162,7 @@ serve(async (req: Request) => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
+          system_instruction: { parts: [{ text: systemPrompt }] },
           contents,
           generationConfig: {
             maxOutputTokens: 512,
@@ -113,3 +196,4 @@ serve(async (req: Request) => {
     });
   }
 });
+

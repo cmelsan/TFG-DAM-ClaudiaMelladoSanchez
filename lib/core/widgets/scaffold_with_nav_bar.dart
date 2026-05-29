@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sabor_de_casa/core/theme/app_tokens.dart';
+import 'package:sabor_de_casa/core/widgets/app_fab.dart';
 import 'package:sabor_de_casa/features/cart/presentation/providers/cart_provider.dart';
 
 /// Shell persistente con barra de navegación personalizada estilo TGTG.
@@ -15,13 +16,25 @@ class ScaffoldWithNavBar extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     // En web no tiene sentido la BottomNavigationBar; cada pantalla
     // gestiona su propia navegación (HomeScreenWeb tiene su propio navbar).
-    if (kIsWeb) return Scaffold(body: navigationShell);
+    if (kIsWeb) {
+      return Scaffold(
+        body: navigationShell,
+        floatingActionButton: AppFab(
+          onPressed: () => context.push('/chat'),
+        ),
+        floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+      );
+    }
 
     final cartCount = ref.watch(cartItemsCountProvider);
 
     return Scaffold(
       backgroundColor: AppTokens.pageBg,
       body: navigationShell,
+      floatingActionButton: AppFab(
+        onPressed: () => context.push('/chat'),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       bottomNavigationBar: _ModernNavBar(
         selectedIndex: navigationShell.currentIndex,
         cartCount: cartCount,

@@ -29,11 +29,11 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     super.dispose();
   }
 
-  void _send() {
-    final text = _ctrl.text;
-    if (text.trim().isEmpty) return;
-    _ctrl.clear();
-    ref.read(chatNotifierProvider.notifier).send(text);
+  void _send([String? text]) {
+    final msg = text ?? _ctrl.text;
+    if (msg.trim().isEmpty) return;
+    if (text == null) _ctrl.clear();
+    ref.read(chatNotifierProvider.notifier).send(msg);
     _scrollToBottom();
   }
 
@@ -81,10 +81,12 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                 },
               ),
             ),
+            if (chatState.messages.length == 1 && !chatState.isLoading)
+              _SuggestionChips(onTap: _send),
             const _PoweredBy(),
             _InputBar(
               ctrl: _ctrl,
-              onSend: _send,
+              onSend: () => _send(),
               isLoading: chatState.isLoading,
             ),
           ],
@@ -400,6 +402,94 @@ class _Dot extends StatelessWidget {
           .then()
           .fadeOut(duration: const Duration(milliseconds: 400)),
     );
+  }
+}
+
+// ── Chips de sugerencias rápidas ─────────────────────────────────────────────
+
+class _SuggestionChips extends StatelessWidget {
+  const _SuggestionChips({required this.onTap});
+
+  final void Function(String) onTap;
+
+  static const _suggestions = [
+    ('🍽️ ¿Cuál es el menú de hoy?', Icons.restaurant_menu_rounded),
+    ('🥗 ¿Tenéis opciones vegetarianas?', Icons.eco_rounded),
+    ('💰 ¿Cuánto cuesta el catering?', Icons.celebration_rounded),
+    ('⏰ ¿Cuáles son los horarios?', Icons.schedule_rounded),
+    ('🚚 ¿Hacéis entregas a domicilio?', Icons.delivery_dining_rounded),
+    ('⚠️ ¿Qué alérgenos contienen los platos?', Icons.warning_amber_rounded),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: const Color(0xFFF0F4F3),
+      padding: const EdgeInsets.fromLTRB(12, 4, 12, 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(left: 4, bottom: 6),
+            child: Text(
+              'Preguntas frecuentes',
+              style: TextStyle(
+                fontSize: 11,
+                color: Colors.black45,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          Wrap(
+            spacing: 6,
+            runSpacing: 6,
+            children: _suggestions.map((s) {
+              final (label, icon) = s;
+              return GestureDetector(
+                onTap: () => onTap(label),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 7,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: AppTokens.brandPrimary.withValues(alpha: 0.35),
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.04),
+                        blurRadius: 3,
+                        offset: const Offset(0, 1),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(icon, size: 14, color: AppTokens.brandPrimary),
+                      const SizedBox(width: 5),
+                      Flexible(
+                        child: Text(
+                          label,
+                          style: TextStyle(
+                            fontSize: 12.5,
+                            color: const Color(0xFF1A1A1A),
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+        ],
+      ),
+    ).animate().fadeIn(duration: 300.ms).slideY(begin: 0.1, end: 0);
   }
 }
 

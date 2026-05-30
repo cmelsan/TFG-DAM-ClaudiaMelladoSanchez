@@ -29,6 +29,7 @@ class RouteNames {
   static const cateringRequest = 'catering-request';
   static const myCateringRequests = 'my-catering-requests';
   static const groupOrder = 'group-order';
+  static const notifications = 'notifications';
 
   // Empleado
   static const kitchen = 'kitchen';

@@ -130,18 +130,18 @@ serve(async (req: Request) => {
       return new Response(
         JSON.stringify({ error: "El campo messages (array) es obligatorio." }),
         {
-          status: 400,
+          status: 200,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         },
       );
     }
 
-    const apiKey = Deno.env.get("GEMINI_API_KEY");
+    const apiKey = Deno.env.get("GROQ_API_KEY");
     if (!apiKey) {
       return new Response(
-        JSON.stringify({ error: "GEMINI_API_KEY no configurada en secrets." }),
+        JSON.stringify({ error: "GROQ_API_KEY no configurada en secrets." }),
         {
-          status: 500,
+          status: 200,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         },
       );
@@ -151,39 +151,47 @@ serve(async (req: Request) => {
     const menuContext = await fetchMenuContext();
     const systemPrompt = BASE_SYSTEM_PROMPT + menuContext;
 
-    // Gemini usa "model" en lugar de "assistant"
-    const contents = messages.map((m) => ({
-      role: m.role === "assistant" ? "model" : "user",
-      parts: [{ text: m.content }],
-    }));
-
-    const geminiRes = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+    // Groq usa la misma interfaz que OpenAI Chat Completions
+    const groqRes = await fetch(
+      "https://api.groq.com/openai/v1/chat/completions",
       {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${apiKey}`,
+        },
         body: JSON.stringify({
-          system_instruction: { parts: [{ text: systemPrompt }] },
-          contents,
-          generationConfig: {
-            maxOutputTokens: 512,
-            temperature: 0.7,
-          },
+          model: "llama-3.1-8b-instant",
+          messages: [
+            { role: "system", content: systemPrompt },
+            ...messages.map((m) => ({
+              role: m.role, // "user" | "assistant" — compatible con OpenAI
+              content: m.content,
+            })),
+          ],
+          max_tokens: 512,
+          temperature: 0.7,
         }),
       },
     );
 
-    if (!geminiRes.ok) {
-      const errText = await geminiRes.text();
-      return new Response(JSON.stringify({ error: errText }), {
-        status: geminiRes.status,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+    if (!groqRes.ok) {
+      let errMsg: string;
+      try {
+        const errJson = await groqRes.json();
+        errMsg = errJson?.error?.message ?? JSON.stringify(errJson);
+      } catch {
+        errMsg = await groqRes.text();
+      }
+      return new Response(
+        JSON.stringify({ error: `Groq ${groqRes.status}: ${errMsg}` }),
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
     }
 
-    const data = await geminiRes.json();
+    const data = await groqRes.json();
     const reply: string =
-      data?.candidates?.[0]?.content?.parts?.[0]?.text ??
+      data?.choices?.[0]?.message?.content ??
       "Lo siento, no pude procesar tu consulta en este momento.";
 
     return new Response(JSON.stringify({ reply }), {
@@ -191,10 +199,10 @@ serve(async (req: Request) => {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {
-    return new Response(JSON.stringify({ error: String(e) }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return new Response(
+      JSON.stringify({ error: `Error interno: ${String(e)}` }),
+      { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+    );
   }
 });
 

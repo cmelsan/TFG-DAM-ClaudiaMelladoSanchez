@@ -11,6 +11,7 @@ import 'package:sabor_de_casa/core/widgets/loading_indicator.dart';
 import 'package:sabor_de_casa/core/widgets/web_footer.dart';
 import 'package:sabor_de_casa/core/widgets/web_navbar.dart';
 import 'package:sabor_de_casa/features/auth/presentation/providers/auth_provider.dart';
+import 'package:sabor_de_casa/features/notifications/presentation/providers/notifications_provider.dart';
 import 'package:sabor_de_casa/features/profile/presentation/providers/profile_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -343,6 +344,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       const SizedBox(height: 12),
                       _SettingsGroup(
                         items: [
+                          _NotificationsRow(),
                           _SettingsRow(
                             icon: Icons.receipt_long_outlined,
                             title: 'Mis pedidos',
@@ -675,7 +677,7 @@ class _PersonalDataCard extends StatelessWidget {
 
 class _SettingsGroup extends StatelessWidget {
   const _SettingsGroup({required this.items});
-  final List<_SettingsRow> items;
+  final List<Widget> items;
 
   @override
   Widget build(BuildContext context) {
@@ -766,6 +768,97 @@ class _SettingsRow extends StatelessWidget {
                 size: 14,
                 color: Color(0xFFBBBBB8),
               ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// Notifications row with badge
+
+class _NotificationsRow extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final unread = ref.watch(unreadNotificationsCountProvider);
+    return InkWell(
+      onTap: () => context.pushNamed(RouteNames.notifications),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
+        child: Row(
+          children: [
+            Container(
+              width: 36,
+              height: 36,
+              decoration: BoxDecoration(
+                color: AppTokens.brandLight,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              alignment: Alignment.center,
+              child: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  const Icon(
+                    Icons.notifications_outlined,
+                    color: AppTokens.brandPrimary,
+                    size: 20,
+                  ),
+                  if (unread > 0)
+                    Positioned(
+                      top: -4,
+                      right: -4,
+                      child: Container(
+                        width: 14,
+                        height: 14,
+                        decoration: const BoxDecoration(
+                          color: Colors.red,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Center(
+                          child: Text(
+                            unread > 9 ? '9+' : '$unread',
+                            style: const TextStyle(
+                              fontSize: 8,
+                              color: Colors.white,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Notificaciones',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 15,
+                      color: _kTextMain,
+                    ),
+                  ),
+                  Text(
+                    unread > 0
+                        ? '$unread sin leer'
+                        : 'Al dia con tus avisos',
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: _kTextMuted,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const Icon(
+              Icons.arrow_forward_ios,
+              size: 14,
+              color: Color(0xFFBBBBB8),
+            ),
           ],
         ),
       ),

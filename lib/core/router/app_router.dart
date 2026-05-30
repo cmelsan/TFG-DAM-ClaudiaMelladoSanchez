@@ -30,6 +30,7 @@ import 'package:sabor_de_casa/features/contact/presentation/screens/contact_scre
 import 'package:sabor_de_casa/features/delivery/presentation/screens/delivery_screen.dart';
 import 'package:sabor_de_casa/features/delivery/presentation/screens/scanner_screen.dart';
 import 'package:sabor_de_casa/features/group_order/presentation/screens/group_order_screen.dart';
+import 'package:sabor_de_casa/features/notifications/presentation/screens/notifications_screen.dart';
 import 'package:sabor_de_casa/features/home/presentation/screens/home_screen.dart';
 import 'package:sabor_de_casa/features/kitchen/presentation/screens/kitchen_screen.dart';
 import 'package:sabor_de_casa/features/kitchen/presentation/screens/pickup_screen.dart';
@@ -373,6 +374,13 @@ GoRouter appRouter(AppRouterRef ref) {
         path: '/group-order',
         name: RouteNames.groupOrder,
         builder: (_, __) => const GroupOrderScreen(),
+      ),
+
+      // --- Notifications ---
+      GoRoute(
+        path: '/notifications',
+        name: RouteNames.notifications,
+        builder: (_, __) => const NotificationsScreen(),
       ),
 
       // --- My Catering Requests ---

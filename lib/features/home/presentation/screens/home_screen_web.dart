@@ -13,6 +13,8 @@ import 'package:sabor_de_casa/features/admin/presentation/providers/admin_provid
 import 'package:sabor_de_casa/features/cart/domain/models/cart_item.dart';
 import 'package:sabor_de_casa/features/cart/presentation/providers/cart_provider.dart';
 import 'package:sabor_de_casa/features/home/presentation/providers/subscription_provider.dart';
+import 'package:sabor_de_casa/features/home/presentation/providers/testimonials_provider.dart';
+import 'package:sabor_de_casa/features/home/presentation/providers/testimonials_provider.dart';
 import 'package:sabor_de_casa/features/menu/domain/models/daily_special.dart';
 import 'package:sabor_de_casa/features/menu/domain/models/dish.dart';
 import 'package:sabor_de_casa/features/menu/presentation/providers/daily_special_notifier.dart';
@@ -2437,17 +2439,16 @@ class _DailyFoodImage extends StatelessWidget {
 
 // ── Sección de testimonios ─────────────────────────────────────────────────
 
-class _WebTestimonialsSection extends StatefulWidget {
+class _WebTestimonialsSection extends ConsumerStatefulWidget {
   const _WebTestimonialsSection();
 
   @override
-  State<_WebTestimonialsSection> createState() =>
+  ConsumerState<_WebTestimonialsSection> createState() =>
       _WebTestimonialsSectionState();
 }
 
-class _WebTestimonialsSectionState extends State<_WebTestimonialsSection> {
-  // TODO: Reemplazar con datos reales de Supabase (valoraciones 5 estrellas)
-  static const _reviews = [
+class _WebTestimonialsSectionState extends ConsumerState<_WebTestimonialsSection> {
+  static const _fallbackReviews = [
     (
       author: 'Mar\u00eda G.',
       text:
@@ -2481,6 +2482,19 @@ class _WebTestimonialsSectionState extends State<_WebTestimonialsSection> {
 
   @override
   Widget build(BuildContext context) {
+    // Carga testimonios reales desde Supabase; usa fallback si falla/carga
+    final testimonialsAsync = ref.watch(testimonialsProvider);
+    final reviews = testimonialsAsync.maybeWhen(
+      data: (list) => list
+          .map(
+            (t) => (author: t.authorName, text: t.body, rating: t.rating),
+          )
+          .toList(),
+      orElse: () => _fallbackReviews
+          .map((r) => (author: r.author, text: r.text, rating: r.rating))
+          .toList(),
+    );
+
     return ColoredBox(
       color: Colors.white,
       child: Padding(
@@ -2495,13 +2509,14 @@ class _WebTestimonialsSectionState extends State<_WebTestimonialsSection> {
                   final isWide = constraints.maxWidth >= 680;
                   final itemsPerPage = isWide ? 2 : 1;
                   final totalPages =
-                      (_reviews.length / itemsPerPage).ceil();
+                      (reviews.length / itemsPerPage).ceil();
 
                   final mainContent = _buildMainContent(
                     constraints,
                     isWide,
                     itemsPerPage,
                     totalPages,
+                    reviews,
                   );
 
                   if (!isWide) return mainContent;
@@ -2533,6 +2548,7 @@ class _WebTestimonialsSectionState extends State<_WebTestimonialsSection> {
     bool isWide,
     int itemsPerPage,
     int totalPages,
+    List<({String author, String text, int rating})> reviews,
   ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -2638,8 +2654,8 @@ class _WebTestimonialsSectionState extends State<_WebTestimonialsSection> {
                 : (carouselW - cardSpacing) / 2;
 
             final start = _page * itemsPerPage;
-            final end = (start + itemsPerPage).clamp(0, _reviews.length);
-            final pageReviews = _reviews.sublist(start, end);
+            final end = (start + itemsPerPage).clamp(0, reviews.length);
+            final pageReviews = reviews.sublist(start, end);
 
             return Column(
               children: [

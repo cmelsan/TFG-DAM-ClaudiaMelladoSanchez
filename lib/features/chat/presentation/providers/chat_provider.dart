@@ -75,13 +75,17 @@ class ChatNotifier extends _$ChatNotifier {
       );
     } catch (e, st) {
       debugPrint('[SaborIA] Error al llamar Edge Function: $e\n$st');
+      final msg = e.toString();
+      final friendlyText = msg.contains('429') || msg.contains('quota') || msg.contains('RESOURCE_EXHAUSTED')
+          ? 'El asistente está temporalmente no disponible (límite de consultas alcanzado). Inténtalo más tarde. 🙏'
+          : 'Lo siento, ha ocurrido un error. Inténtalo de nuevo.';
       state = state.copyWith(
         messages: [
           ...state.messages,
           ChatMessage(
             id: '${DateTime.now().microsecondsSinceEpoch}_e',
             role: ChatRole.assistant,
-            text: 'Lo siento, ha ocurrido un error. Inténtalo de nuevo.',
+            text: friendlyText,
             timestamp: DateTime.now(),
           ),
         ],

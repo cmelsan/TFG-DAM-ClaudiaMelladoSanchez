@@ -62,6 +62,29 @@ Future<void> _setupFcm() async {
 
   // Actualizar token si cambia (raro, pero puede ocurrir)
   messaging.onTokenRefresh.listen(_saveFcmToken);
+
+  // Guardar notificaciones FCM recibidas en primer plano en la BD
+  FirebaseMessaging.onMessage.listen(_handleFcmMessage);
+}
+
+Future<void> _handleFcmMessage(RemoteMessage message) async {
+  final notification = message.notification;
+  if (notification == null) return;
+  final client = Supabase.instance.client;
+  final userId = client.auth.currentUser?.id;
+  if (userId == null) return;
+  await client
+      .from('notifications')
+      .insert({
+        'user_id': userId,
+        'title': notification.title ?? 'Notificacion',
+        'body': notification.body ?? '',
+        'type': message.data['type'] as String? ?? 'general',
+        if (message.data.isNotEmpty) 'data': message.data,
+      })
+      .catchError(
+        (Object e) => debugPrint('[FCM] Error guardando notificacion: $e'),
+      );
 }
 
 Future<void> _saveFcmToken(String token) async {

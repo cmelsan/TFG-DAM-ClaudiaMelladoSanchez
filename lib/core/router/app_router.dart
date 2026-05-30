@@ -7,6 +7,7 @@ import 'package:sabor_de_casa/features/admin/presentation/screens/admin_categori
 import 'package:sabor_de_casa/features/admin/presentation/screens/admin_catering_screen.dart';
 import 'package:sabor_de_casa/features/admin/presentation/screens/admin_config_screen.dart';
 import 'package:sabor_de_casa/features/admin/presentation/screens/admin_daily_special_screen.dart';
+import 'package:sabor_de_casa/features/admin/presentation/screens/admin_newsletter_screen.dart';
 import 'package:sabor_de_casa/features/admin/presentation/screens/admin_dashboard_screen.dart';
 import 'package:sabor_de_casa/features/admin/presentation/screens/admin_dishes_screen.dart';
 import 'package:sabor_de_casa/features/admin/presentation/screens/admin_encargos_screen.dart';
@@ -338,6 +339,11 @@ GoRouter appRouter(AppRouterRef ref) {
         path: '/admin/daily-special',
         name: RouteNames.adminDailySpecial,
         builder: (_, __) => const AdminDailySpecialScreen(),
+      ),
+      GoRoute(
+        path: '/admin/newsletter',
+        name: RouteNames.adminNewsletter,
+        builder: (_, __) => const AdminNewsletterScreen(),
       ),
 
       // --- Pago web (retorno desde Stripe Checkout) ---

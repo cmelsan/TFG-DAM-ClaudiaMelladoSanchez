@@ -77,6 +77,12 @@ const _kItems = [
     route: '/admin/schedule',
   ),
   _SidebarItem(
+    icon: Icons.campaign_rounded,
+    label: 'Comunicados',
+    route: '/admin/newsletter',
+    section: 'COMUNICACIÓN',
+  ),
+  _SidebarItem(
     icon: Icons.settings_rounded,
     label: 'Configuración',
     route: '/admin/config',

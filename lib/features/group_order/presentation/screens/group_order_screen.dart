@@ -7,7 +7,6 @@ class GroupOrderScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTokens.pageBg,
       appBar: AppBar(title: const Text('Pedido grupal'), centerTitle: true),
       body: Center(
         child: Padding(

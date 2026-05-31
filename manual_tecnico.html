@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manual Técnico — Sabor de Casa</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; color: #1a1a2e; line-height: 1.8; background: #f8f9fa; }
+        @media print { body { background: white; } .page-break { page-break-before: always; } .cover { page-break-after: always; } section { page-break-inside: avoid; } }
+
+        .cover { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; background: linear-gradient(135deg, #0f0c29, #302b63, #24243e); color: white; text-align: center; padding: 2rem; }
+        .cover-icon { font-size: 5rem; margin-bottom: 1.5rem; }
+        .cover h1 { font-size: 2.4rem; font-weight: 700; margin-bottom: 0.5rem; }
+        .cover h2 { font-size: 1.3rem; font-weight: 300; color: #a8a8d0; margin-bottom: 3rem; }
+        .cover-meta { display: flex; flex-direction: column; gap: 0.5rem; font-size: 1rem; color: #c0c0e0; }
+        .cover-meta strong { color: white; }
+        .cover-line { width: 80px; height: 3px; background: linear-gradient(90deg, #6c63ff, #e94560); border-radius: 2px; margin: 2rem auto; }
+
+        .content { max-width: 920px; margin: 0 auto; padding: 3rem 2rem; }
+        section { background: white; border-radius: 12px; padding: 2.5rem; margin-bottom: 2rem; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+        h2 { font-size: 1.6rem; font-weight: 700; color: #302b63; margin-bottom: 1.5rem; padding-bottom: 0.5rem; border-bottom: 3px solid #6c63ff; display: inline-block; }
+        h3 { font-size: 1.15rem; font-weight: 600; color: #1a1a2e; margin-top: 1.5rem; margin-bottom: 0.8rem; }
+        h4 { font-size: 1rem; font-weight: 600; color: #302b63; margin-top: 1rem; margin-bottom: 0.5rem; }
+        p { margin-bottom: 1rem; text-align: justify; color: #333; }
+        ul, ol { margin: 0.8rem 0 1.2rem 1.5rem; color: #333; }
+        li { margin-bottom: 0.4rem; }
+        code { font-family: 'JetBrains Mono', monospace; background: #f0efff; color: #302b63; padding: 0.1rem 0.4rem; border-radius: 4px; font-size: 0.88em; }
+        pre { background: #1a1a2e; color: #f8f8f2; padding: 1rem 1.2rem; border-radius: 8px; overflow-x: auto; font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; line-height: 1.5; margin: 1rem 0; }
+        pre code { background: transparent; color: inherit; padding: 0; }
+
+        .highlight-box { background: linear-gradient(135deg, #f0efff, #e8e6ff); border-left: 4px solid #6c63ff; padding: 1.2rem 1.5rem; border-radius: 0 8px 8px 0; margin: 1.2rem 0; }
+        .highlight-box p { margin: 0; color: #302b63; }
+        .highlight-box.warn { background: linear-gradient(135deg, #fff3d6, #ffe6b0); border-color: #ef9f27; }
+        .highlight-box.warn p { color: #8a5a00; }
+
+        table { width: 100%; border-collapse: collapse; margin: 1.2rem 0; font-size: 0.9rem; }
+        thead th { background: #302b63; color: white; padding: 0.7rem 1rem; text-align: left; font-weight: 600; }
+        thead th:first-child { border-radius: 8px 0 0 0; } thead th:last-child { border-radius: 0 8px 0 0; }
+        tbody td { padding: 0.6rem 1rem; border-bottom: 1px solid #eee; color: #333; vertical-align: top; }
+        tbody tr:hover { background: #f8f7ff; }
+
+        .footer { text-align: center; padding: 2rem; color: #999; font-size: 0.8rem; }
+    </style>
+</head>
+<body>
+
+<div class="cover">
+    <div class="cover-icon">🛠️</div>
+    <h1>Manual Técnico</h1>
+    <h2>Instalación, configuración, despliegue y mantenimiento</h2>
+    <div class="cover-line"></div>
+    <div class="cover-meta">
+        <span><strong>Proyecto:</strong> Sabor de Casa</span>
+        <span><strong>Plataformas:</strong> Android · Web</span>
+        <span><strong>Stack:</strong> Flutter 3.38 · Supabase · Stripe · Brevo · FCM</span>
+        <span><strong>Versión:</strong> 1.0.0 · Mayo 2026</span>
+    </div>
+</div>
+
+<div class="content">
+
+<section>
+<h2>1. Requisitos previos</h2>
+
+<h3>1.1 Hardware mínimo recomendado para desarrollo</h3>
+<ul>
+    <li>CPU: x64 de 4 núcleos (Intel i5 / Ryzen 5 o superior).</li>
+    <li>RAM: 16 GB (mínimo 8 GB, con limitaciones evidentes).</li>
+    <li>Disco: 30 GB libres en SSD.</li>
+    <li>GPU: cualquier integrada moderna; obligatoria para emuladores Android.</li>
+</ul>
+
+<h3>1.2 Software</h3>
+<table>
+    <thead><tr><th>Software</th><th>Versión</th><th>Uso</th></tr></thead>
+    <tbody>
+        <tr><td>Flutter SDK</td><td>3.38.x stable</td><td>Compilación de la aplicación</td></tr>
+        <tr><td>Dart</td><td>≥ 3.5</td><td>Lenguaje del proyecto</td></tr>
+        <tr><td>Android Studio</td><td>Iguana o superior</td><td>SDK Android + emulador</td></tr>
+        <tr><td>Android SDK</td><td>API 34 (target) · API 21 (min)</td><td>Compilación APK / AAB</td></tr>
+        <tr><td>JDK</td><td>17 LTS</td><td>Compilación Android</td></tr>
+        <tr><td>VS Code</td><td>actual</td><td>IDE recomendado</td></tr>
+        <tr><td>Node.js</td><td>≥ 18</td><td>Supabase CLI y Edge Functions</td></tr>
+        <tr><td>Supabase CLI</td><td>≥ 1.180</td><td>Migraciones y despliegue de funciones</td></tr>
+        <tr><td>Deno</td><td>≥ 1.40</td><td>Runtime de Edge Functions</td></tr>
+        <tr><td>Git</td><td>≥ 2.40</td><td>Control de versiones</td></tr>
+        <tr><td>Chrome</td><td>actual</td><td>Target web</td></tr>
+    </tbody>
+</table>
+
+<h3>1.3 Servicios en la nube</h3>
+<ul>
+    <li><strong>Supabase</strong>: cuenta y proyecto (project ref usado: <code>vrxliepwzvdrcxpdgpnd</code>).</li>
+    <li><strong>Stripe</strong>: cuenta con claves test/live, producto y precios opcionales.</li>
+    <li><strong>Brevo</strong> (antes Sendinblue): API key SMTP/HTTP.</li>
+    <li><strong>Firebase</strong>: proyecto con Cloud Messaging activado y <code>google-services.json</code>.</li>
+    <li><strong>Vercel / Netlify / Cloud Hosting</strong>: hosting estático de la build web.</li>
+</ul>
+</section>
+
+<section class="page-break">
+<h2>2. Instalación del entorno</h2>
+
+<h3>2.1 Instalar Flutter</h3>
+<p>Seguir la guía oficial en <code>https://docs.flutter.dev/get-started/install/windows</code>. Verificar:</p>
+<pre><code>flutter --version
+flutter doctor -v</code></pre>
+<p>Deben aparecer todos los apartados con tick verde (Android toolchain, Chrome, VS Code).</p>
+
+<h3>2.2 Clonar el repositorio</h3>
+<pre><code>git clone https://github.com/&lt;tu-usuario&gt;/sabor-de-casa.git
+cd sabor-de-casa
+flutter pub get</code></pre>
+
+<h3>2.3 Generar código (Riverpod, Freezed, JsonSerializable)</h3>
+<pre><code>dart run build_runner clean
+dart run build_runner build --delete-conflicting-outputs</code></pre>
+
+<h3>2.4 Variables de entorno</h3>
+<p>Crear el archivo <code>.env.development</code> en la raíz con la siguiente plantilla:</p>
+<pre><code>SUPABASE_URL=https://vrxliepwzvdrcxpdgpnd.supabase.co
+SUPABASE_ANON_KEY=&lt;anon-key&gt;
+STRIPE_PUBLISHABLE_KEY=pk_test_xxx
+STRIPE_MERCHANT_COUNTRY=ES</code></pre>
+
+<div class="highlight-box warn">
+    <p><strong>Importante:</strong> no commitear los archivos <code>.env.*</code>. Están listados en <code>.gitignore</code>. La <code>service_role_key</code> NUNCA debe llegar al cliente, solo se usa en Edge Functions.</p>
+</div>
+</section>
+
+<section class="page-break">
+<h2>3. Configuración de Supabase</h2>
+
+<h3>3.1 Crear el proyecto</h3>
+<ol>
+    <li>Acceder a <code>https://app.supabase.com</code> y crear un nuevo proyecto.</li>
+    <li>Anotar la URL del proyecto y la <code>anon key</code>.</li>
+    <li>Crear los buckets de Storage necesarios (<code>menu-images</code>, <code>profile-avatars</code>) con políticas públicas de lectura.</li>
+</ol>
+
+<h3>3.2 Aplicar migraciones</h3>
+<p>Las migraciones SQL viven en <code>supabase/migrations/</code> (28 archivos numerados 00001 - 00028). Por razones de desfase de historial documentadas, se aplican manualmente:</p>
+<ol>
+    <li>Abrir el <strong>SQL Editor</strong> en Supabase Studio.</li>
+    <li>Ejecutar en orden cada archivo SQL.</li>
+    <li>Verificar tras cada bloque que no haya errores (tablas, índices y políticas creadas).</li>
+</ol>
+
+<h3>3.3 Configurar secretos de Edge Functions</h3>
+<pre><code>supabase secrets set STRIPE_SECRET_KEY=sk_test_xxx
+supabase secrets set STRIPE_WEBHOOK_SECRET=whsec_xxx
+supabase secrets set BREVO_API_KEY=xkeysib-xxx
+supabase secrets set BREVO_SENDER_EMAIL=no-reply@sabordecasa.local
+supabase secrets set BREVO_SENDER_NAME="Sabor de Casa"
+supabase secrets set FCM_SERVER_KEY=AAAA...</code></pre>
+
+<h3>3.4 Desplegar las 8 Edge Functions</h3>
+<pre><code>supabase functions deploy create-payment-intent
+supabase functions deploy stripe-webhook --no-verify-jwt
+supabase functions deploy send-order-notification
+supabase functions deploy send-encargo-confirmation
+supabase functions deploy send-encargo-reminders
+supabase functions deploy send-catering-notification
+supabase functions deploy send-newsletter
+supabase functions deploy send-welcome-email
+supabase functions deploy chat-bot</code></pre>
+</section>
+
+<section class="page-break">
+<h2>4. Configuración de servicios externos</h2>
+
+<h3>4.1 Stripe</h3>
+<ul>
+    <li>En el dashboard de Stripe, crear las claves <strong>test</strong> y <strong>live</strong>.</li>
+    <li>Configurar un endpoint webhook apuntando a <code>https://&lt;project&gt;.functions.supabase.co/stripe-webhook</code> con los eventos: <code>payment_intent.succeeded</code>, <code>payment_intent.payment_failed</code>.</li>
+    <li>Copiar el <strong>signing secret</strong> al secreto <code>STRIPE_WEBHOOK_SECRET</code>.</li>
+</ul>
+
+<h3>4.2 Brevo (emails)</h3>
+<ul>
+    <li>Crear una API key con permisos <em>Transactional Email</em>.</li>
+    <li>Verificar el dominio remitente: añadir registros <strong>SPF</strong>, <strong>DKIM</strong> y, opcionalmente, <strong>DMARC</strong>.</li>
+    <li>En desarrollo se puede usar el remitente Brevo por defecto.</li>
+</ul>
+
+<h3>4.3 Firebase Cloud Messaging</h3>
+<ol>
+    <li>Crear un proyecto Firebase y registrar la app Android con el <code>applicationId</code> del proyecto (<code>com.sabordecasa.app</code>).</li>
+    <li>Descargar <code>google-services.json</code> y colocarlo en <code>android/app/</code>.</li>
+    <li>Activar Cloud Messaging y copiar el <em>server key</em> al secreto <code>FCM_SERVER_KEY</code> de Supabase.</li>
+</ol>
+</section>
+
+<section class="page-break">
+<h2>5. Ejecución en desarrollo</h2>
+
+<h3>5.1 Modo web (Chrome)</h3>
+<pre><code>flutter run -d chrome --dart-define-from-file=.env.development</code></pre>
+
+<h3>5.2 Modo Android (emulador o físico)</h3>
+<pre><code>flutter devices
+flutter run -d &lt;deviceId&gt; --dart-define-from-file=.env.development</code></pre>
+
+<h3>5.3 Hot reload / hot restart</h3>
+<ul>
+    <li><code>r</code> en la consola → hot reload (mantiene estado).</li>
+    <li><code>R</code> en la consola → hot restart (reinicia el estado).</li>
+</ul>
+
+<h3>5.4 Análisis estático</h3>
+<pre><code>dart analyze</code></pre>
+<p>Debe devolver <em>0 errors</em>. Los warnings y los <em>info</em> son tolerables si no afectan a compilación.</p>
+</section>
+
+<section class="page-break">
+<h2>6. Compilación para producción</h2>
+
+<h3>6.1 Build Web</h3>
+<pre><code>flutter build web --release \
+  --dart-define-from-file=.env.production \
+  --base-href "/"</code></pre>
+<p>Salida: <code>build/web/</code>. Subir todo el contenido al hosting estático.</p>
+
+<h3>6.2 Build Android (APK)</h3>
+<pre><code>flutter build apk --release \
+  --dart-define-from-file=.env.production</code></pre>
+<p>Salida: <code>build/app/outputs/flutter-apk/app-release.apk</code>.</p>
+
+<h3>6.3 Build Android (App Bundle para Play Store)</h3>
+<pre><code>flutter build appbundle --release \
+  --dart-define-from-file=.env.production</code></pre>
+<p>Salida: <code>build/app/outputs/bundle/release/app-release.aab</code>.</p>
+
+<div class="highlight-box warn">
+    <p>El bundle debe firmarse con un keystore propio configurado en <code>android/key.properties</code> antes del primer release. NO usar el <em>debug.keystore</em> en producción.</p>
+</div>
+</section>
+
+<section class="page-break">
+<h2>7. Despliegue</h2>
+
+<h3>7.1 Web (Vercel)</h3>
+<ol>
+    <li>Crear un proyecto en Vercel apuntando a la carpeta <code>build/web</code> como output.</li>
+    <li>Configurar como <em>framework preset</em>: <em>Other</em>.</li>
+    <li>Build command: <code>flutter build web --release --dart-define-from-file=.env.production</code>.</li>
+    <li>Output directory: <code>build/web</code>.</li>
+    <li>Definir las variables de entorno necesarias en el panel de Vercel.</li>
+</ol>
+
+<h3>7.2 Android (Play Store)</h3>
+<ol>
+    <li>Subir el <code>app-release.aab</code> a la consola de Play Store.</li>
+    <li>Completar fichas: descripción, capturas, política de privacidad.</li>
+    <li>Configurar canal interno → cerrado → producción.</li>
+</ol>
+
+<h3>7.3 Webhooks y URLs externas</h3>
+<table>
+    <thead><tr><th>Servicio</th><th>Endpoint</th></tr></thead>
+    <tbody>
+        <tr><td>Stripe webhook</td><td><code>https://vrxliepwzvdrcxpdgpnd.functions.supabase.co/stripe-webhook</code></td></tr>
+        <tr><td>Brevo webhook (opcional)</td><td>no requerido en esta versión</td></tr>
+        <tr><td>FCM</td><td>configurado vía server key en función <code>send-order-notification</code></td></tr>
+    </tbody>
+</table>
+</section>
+
+<section class="page-break">
+<h2>8. Mantenimiento</h2>
+
+<h3>8.1 Tareas periódicas recomendadas</h3>
+<ul>
+    <li><strong>Semanal:</strong> revisar errores de Sentry / logs de Supabase y atender pedidos atascados en estados intermedios.</li>
+    <li><strong>Mensual:</strong> actualizar dependencias con <code>flutter pub upgrade --major-versions</code> y volver a ejecutar <code>build_runner</code>.</li>
+    <li><strong>Trimestral:</strong> rotar claves de Stripe / Brevo / FCM y refrescar SPF/DKIM si cambia el remitente.</li>
+    <li><strong>Backups:</strong> Supabase realiza snapshots automáticos diarios. Exportar manualmente con <code>pg_dump</code> antes de migraciones críticas.</li>
+</ul>
+
+<h3>8.2 Regenerar codegen tras cambios en modelos</h3>
+<pre><code>dart run build_runner clean
+dart run build_runner build --delete-conflicting-outputs</code></pre>
+
+<h3>8.3 Aplicar una nueva migración</h3>
+<ol>
+    <li>Crear el archivo en <code>supabase/migrations/000XX_nombre.sql</code>.</li>
+    <li>Probarla localmente o en un entorno de staging.</li>
+    <li>Aplicarla en Supabase Studio (SQL Editor) en producción.</li>
+    <li>Documentarla en <code>docs/SUPABASE.md</code>.</li>
+</ol>
+</section>
+
+<section class="page-break">
+<h2>9. Resolución de problemas (troubleshooting)</h2>
+
+<table>
+    <thead><tr><th>Síntoma</th><th>Causa probable</th><th>Solución</th></tr></thead>
+    <tbody>
+        <tr><td><code>PGRST205 relation "X" does not exist</code></td><td>Migración no aplicada en la BD remota</td><td>Aplicar la migración correspondiente en Studio SQL Editor</td></tr>
+        <tr><td>Texto con acentos corruptos (<em>autenticaciÃ³n</em>)</td><td>Edición desde PowerShell <code>Add-Content</code> con CP1252</td><td>Editar siempre desde el IDE en UTF-8</td></tr>
+        <tr><td>build_runner: <em>Cannot recurse at later or equal phase</em></td><td>Caché de codegen inconsistente</td><td><code>dart run build_runner clean</code> + build</td></tr>
+        <tr><td><code>invalid_override</code> con <code>update</code> en AsyncNotifier</td><td>Nombre reservado por Riverpod</td><td>Renombrar a <code>updateOne</code>, <code>updateMany</code>...</td></tr>
+        <tr><td><code>supabase db push</code> rechazado por desfase</td><td>Migraciones aplicadas manualmente fuera de orden</td><td>Aplicar nuevas migraciones en Studio y mantener la disciplina</td></tr>
+        <tr><td>Notificaciones push duplicadas</td><td>Tokens FCM duplicados por usuario</td><td>Usar upsert con <code>UNIQUE(user_id, token)</code></td></tr>
+        <tr><td>Stripe: error <em>signature verification failed</em></td><td><code>STRIPE_WEBHOOK_SECRET</code> incorrecto</td><td>Re-copiar el secret del dashboard de Stripe</td></tr>
+        <tr><td>Emails bloqueados por Gmail/Outlook</td><td>Falta SPF/DKIM en el dominio</td><td>Configurar registros DNS según la guía de Brevo</td></tr>
+        <tr><td>Pantalla en blanco al volver de Stripe Checkout (Web)</td><td>Mala estrategia de routing</td><td>Mantener <code>UrlStrategy.hash</code> y query params persistentes</td></tr>
+        <tr><td>APK pesa demasiado</td><td>Recursos sin tree-shaking</td><td><code>flutter build apk --split-per-abi --release</code></td></tr>
+    </tbody>
+</table>
+</section>
+
+<section>
+<h2>10. Contactos y referencias</h2>
+<ul>
+    <li>Repositorio del código: <code>https://github.com/&lt;tu-usuario&gt;/sabor-de-casa</code></li>
+    <li>Documentación interna: carpeta <code>docs/</code> y archivos HTML en la raíz del proyecto.</li>
+    <li>Supabase Status: <code>https://status.supabase.com</code></li>
+    <li>Stripe Status: <code>https://status.stripe.com</code></li>
+    <li>Flutter Docs: <code>https://docs.flutter.dev</code></li>
+</ul>
+</section>
+
+</div>
+
+<div class="footer">Sabor de Casa — Manual Técnico · Proyecto Final DAM 2025/26</div>
+
+</body>
+</html>

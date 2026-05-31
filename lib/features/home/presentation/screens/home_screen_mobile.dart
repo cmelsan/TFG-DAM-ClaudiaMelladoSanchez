@@ -23,7 +23,6 @@ class _HomeScreenMobileState extends ConsumerState<HomeScreenMobile> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTokens.pageBg,
       body: SafeArea(
         child: CustomScrollView(
           slivers: [

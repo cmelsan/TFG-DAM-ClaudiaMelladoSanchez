@@ -66,6 +66,21 @@ const _kItems = [
     section: 'CLIENTES',
   ),
   _SidebarItem(
+    icon: Icons.forum_rounded,
+    label: 'Mensajes',
+    route: '/admin/support',
+  ),
+  _SidebarItem(
+    icon: Icons.mark_email_read_rounded,
+    label: 'Newsletter',
+    route: '/admin/newsletter',
+  ),
+  _SidebarItem(
+    icon: Icons.reviews_rounded,
+    label: 'Reseñas',
+    route: '/admin/testimonials',
+  ),
+  _SidebarItem(
     icon: Icons.celebration_rounded,
     label: 'Catering',
     route: '/admin/catering',
@@ -125,7 +140,11 @@ class AdminSidebar extends StatelessWidget {
                     ),
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: const Icon(Icons.storefront_rounded, color: Colors.white, size: 20),
+                  child: const Icon(
+                    Icons.storefront_rounded,
+                    color: Colors.white,
+                    size: 20,
+                  ),
                 ),
                 const SizedBox(width: 12),
                 Column(
@@ -142,7 +161,10 @@ class AdminSidebar extends StatelessWidget {
                     ),
                     const SizedBox(height: 2),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 2,
+                      ),
                       decoration: BoxDecoration(
                         color: AppTokens.brandPrimary.withValues(alpha: 0.18),
                         borderRadius: BorderRadius.circular(4),
@@ -173,7 +195,8 @@ class AdminSidebar extends StatelessWidget {
               itemCount: _kItems.length,
               itemBuilder: (context, i) {
                 final item = _kItems[i];
-                final isActive = currentRoute == item.route ||
+                final isActive =
+                    currentRoute == item.route ||
                     currentRoute.startsWith('${item.route}/');
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -185,11 +208,12 @@ class AdminSidebar extends StatelessWidget {
                         padding: const EdgeInsets.fromLTRB(10, 4, 0, 6),
                         child: Text(
                           item.section!,
-                          style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                            color: _textMuted,
-                            letterSpacing: 0.8,
-                            fontWeight: FontWeight.w600,
-                          ),
+                          style: Theme.of(context).textTheme.labelSmall
+                              ?.copyWith(
+                                color: _textMuted,
+                                letterSpacing: 0.8,
+                                fontWeight: FontWeight.w600,
+                              ),
                         ),
                       ),
                     ],
@@ -255,7 +279,9 @@ class _NavTileState extends State<_NavTile> {
   Widget build(BuildContext context) {
     final Color fg;
     if (widget.danger) {
-      fg = _hovered ? AppTokens.danger : AppTokens.danger.withValues(alpha: 0.7);
+      fg = _hovered
+          ? AppTokens.danger
+          : AppTokens.danger.withValues(alpha: 0.7);
     } else if (widget.isActive) {
       fg = AppTokens.brandDark;
     } else {
@@ -300,8 +326,10 @@ class _NavTileState extends State<_NavTile> {
                 color: widget.isActive
                     ? AppTokens.brandPrimary
                     : widget.danger
-                        ? fg
-                        : _hovered ? AppTokens.brandPrimary : widget.textNormal,
+                    ? fg
+                    : _hovered
+                    ? AppTokens.brandPrimary
+                    : widget.textNormal,
               ),
               const SizedBox(width: 11),
               Expanded(

@@ -65,7 +65,6 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTokens.pageBg,
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),

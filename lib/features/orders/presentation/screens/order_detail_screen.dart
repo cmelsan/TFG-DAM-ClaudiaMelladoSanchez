@@ -38,14 +38,12 @@ class OrderDetailScreen extends ConsumerWidget {
 
     if (orderAsync.isLoading || itemsAsync.isLoading) {
       return const Scaffold(
-        backgroundColor: AppTokens.pageBg,
         body: LoadingIndicator(),
       );
     }
 
     if (orderAsync.hasError) {
       return Scaffold(
-        backgroundColor: AppTokens.pageBg,
         appBar: AppBar(
           title: const Text('Detalle del pedido'),
           centerTitle: true,
@@ -59,7 +57,6 @@ class OrderDetailScreen extends ConsumerWidget {
 
     if (itemsAsync.hasError) {
       return Scaffold(
-        backgroundColor: AppTokens.pageBg,
         appBar: AppBar(
           title: const Text('Detalle del pedido'),
           centerTitle: true,
@@ -78,7 +75,6 @@ class OrderDetailScreen extends ConsumerWidget {
     final hPad = screenW > 1180 ? (screenW - 1120) / 2 : 16.0;
 
     return Scaffold(
-      backgroundColor: AppTokens.pageBg,
       appBar: AppBar(
         title: Text('Pedido #${order.shortId}'),
         centerTitle: true,

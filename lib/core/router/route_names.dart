@@ -51,9 +51,12 @@ class RouteNames {
   static const adminCatering = 'admin-catering';
   static const adminEncargos = 'admin-encargos';
   static const adminUsers = 'admin-users';
+  static const adminSupport = 'admin-support';
   static const adminConfig = 'admin-config';
   static const adminSchedule = 'admin-schedule';
   static const adminStats = 'admin-stats';
   static const adminCategories = 'admin-categories';
   static const adminDailySpecial = 'admin-daily-special';
+  static const adminNewsletter = 'admin-newsletter';
+  static const adminTestimonials = 'admin-testimonials';
 }

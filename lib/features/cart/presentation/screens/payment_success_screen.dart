@@ -108,7 +108,6 @@ class _PaymentSuccessScreenState extends ConsumerState<PaymentSuccessScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTokens.pageBg,
       body: Center(
         child: _error != null
             ? Column(

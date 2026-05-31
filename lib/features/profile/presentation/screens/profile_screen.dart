@@ -18,11 +18,28 @@ import 'package:shared_preferences/shared_preferences.dart';
 const _kBgDark = Color(0xFF0D3B2E);
 const _kCream = Color(0xFFF2EBD9);
 const _kMuted = Color(0xFF8FBFB0);
-const _kCardBg = Colors.white;
-const _kBorder = Color(0xFFE8E8E6);
-const _kDivider = Color(0xFFEEEEEC);
-const _kTextMuted = Color(0xFF888885);
-const _kTextMain = Color(0xFF111111);
+
+// Theme-aware helpers
+Color _cardBg(BuildContext c) =>
+    Theme.of(c).brightness == Brightness.dark
+        ? const Color(0xFF1E1E1E)
+        : Colors.white;
+Color _borderColor(BuildContext c) =>
+    Theme.of(c).brightness == Brightness.dark
+        ? const Color(0xFF2A2A2A)
+        : const Color(0xFFE8E8E6);
+Color _dividerColor(BuildContext c) =>
+    Theme.of(c).brightness == Brightness.dark
+        ? const Color(0xFF2A2A2A)
+        : const Color(0xFFEEEEEC);
+Color _textMain(BuildContext c) =>
+    Theme.of(c).brightness == Brightness.dark
+        ? Colors.white
+        : const Color(0xFF111111);
+Color _textMuted(BuildContext c) =>
+    Theme.of(c).brightness == Brightness.dark
+        ? const Color(0xFFAAAAAA)
+        : const Color(0xFF888885);
 
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
@@ -128,7 +145,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     });
 
     return Scaffold(
-      backgroundColor: AppTokens.pageBg,
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(80),
         child: WebNavbar(
@@ -551,11 +567,11 @@ class _SectionLabel extends StatelessWidget {
       padding: const EdgeInsets.only(left: 4),
       child: Text(
         text.toUpperCase(),
-        style: const TextStyle(
+        style: TextStyle(
           fontSize: 11,
           fontWeight: FontWeight.w700,
           letterSpacing: 1.5,
-          color: _kTextMuted,
+          color: _textMuted(context),
         ),
       ),
     );
@@ -583,9 +599,9 @@ class _PersonalDataCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: _kCardBg,
+        color: _cardBg(context),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: _kBorder),
+        border: Border.all(color: _borderColor(context)),
       ),
       padding: const EdgeInsets.all(20),
       child: Form(
@@ -683,9 +699,9 @@ class _SettingsGroup extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: _kCardBg,
+        color: _cardBg(context),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: _kBorder),
+        border: Border.all(color: _borderColor(context)),
       ),
       clipBehavior: Clip.hardEdge,
       child: Column(
@@ -693,7 +709,7 @@ class _SettingsGroup extends StatelessWidget {
           for (int i = 0; i < items.length; i++) ...[
             items[i],
             if (i < items.length - 1)
-              const Divider(height: 1, indent: 56, color: _kDivider),
+              Divider(height: 1, indent: 56, color: _dividerColor(context)),
           ],
         ],
       ),
@@ -743,18 +759,18 @@ class _SettingsRow extends StatelessWidget {
                 children: [
                   Text(
                     title,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontWeight: FontWeight.w600,
                       fontSize: 15,
-                      color: _kTextMain,
+                      color: _textMain(context),
                     ),
                   ),
                   if (subtitle != null)
                     Text(
                       subtitle!,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 12,
-                        color: _kTextMuted,
+                        color: _textMuted(context),
                       ),
                     ),
                 ],
@@ -834,21 +850,21 @@ class _NotificationsRow extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
+                  Text(
                     'Notificaciones',
                     style: TextStyle(
                       fontWeight: FontWeight.w600,
                       fontSize: 15,
-                      color: _kTextMain,
+                      color: _textMain(context),
                     ),
                   ),
                   Text(
                     unread > 0
                         ? '$unread sin leer'
                         : 'Al dia con tus avisos',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 12,
-                      color: _kTextMuted,
+                      color: _textMuted(context),
                     ),
                   ),
                 ],
@@ -884,16 +900,16 @@ class _AllergensCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: _kCardBg,
+        color: _cardBg(context),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: _kBorder),
+        border: Border.all(color: _borderColor(context)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'Marca los alergenos que tienes. Te avisaremos en los platos que los contengan.',
-            style: TextStyle(color: _kTextMuted, fontSize: 13, height: 1.4),
+            style: TextStyle(color: _textMuted(context), fontSize: 13, height: 1.4),
           ),
           const SizedBox(height: 16),
           Wrap(
@@ -952,9 +968,9 @@ class _AddressesSection extends ConsumerWidget {
           return Container(
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: _kCardBg,
+              color: _cardBg(context),
               borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: _kBorder),
+              border: Border.all(color: _borderColor(context)),
             ),
             child: Column(
               children: [
@@ -964,9 +980,9 @@ class _AddressesSection extends ConsumerWidget {
                   color: Color(0xFFCCCCC8),
                 ),
                 const SizedBox(height: 8),
-                const Text(
+                Text(
                   'Aun no tienes direcciones guardadas',
-                  style: TextStyle(color: _kTextMuted),
+                  style: TextStyle(color: _textMuted(context)),
                 ),
                 const SizedBox(height: 12),
                 OutlinedButton.icon(
@@ -998,12 +1014,12 @@ class _AddressesSection extends ConsumerWidget {
                   vertical: 14,
                 ),
                 decoration: BoxDecoration(
-                  color: _kCardBg,
+                  color: _cardBg(context),
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(
                     color: isDefault
                         ? AppTokens.brandPrimary.withValues(alpha: 0.5)
-                        : _kBorder,
+                        : _borderColor(context),
                     width: isDefault ? 1.5 : 1,
                   ),
                 ),
@@ -1023,7 +1039,7 @@ class _AddressesSection extends ConsumerWidget {
                         Icons.location_on_outlined,
                         color: isDefault
                             ? AppTokens.brandPrimary
-                            : _kTextMuted,
+                            : _textMuted(context),
                         size: 20,
                       ),
                     ),
@@ -1036,10 +1052,10 @@ class _AddressesSection extends ConsumerWidget {
                             children: [
                               Text(
                                 label,
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontWeight: FontWeight.w600,
                                   fontSize: 15,
-                                  color: _kTextMain,
+                                  color: _textMain(context),
                                 ),
                               ),
                               if (isDefault) ...[
@@ -1067,8 +1083,8 @@ class _AddressesSection extends ConsumerWidget {
                           ),
                           Text(
                             '$street, $postalCode $city',
-                            style: const TextStyle(
-                              color: _kTextMuted,
+                            style: TextStyle(
+                              color: _textMuted(context),
                               fontSize: 13,
                             ),
                           ),
@@ -1171,12 +1187,12 @@ class _AddAddressSheetState extends ConsumerState<_AddAddressSheet> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               'Nueva direccion',
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
-                color: _kTextMain,
+                color: _textMain(context),
               ),
             ),
             const SizedBox(height: 20),

@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Planificación de la Ejecución — Sabor de Casa</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; color: #1a1a2e; line-height: 1.8; background: #f8f9fa; }
+
+        @media print {
+            body { background: white; }
+            .page-break { page-break-before: always; }
+            .cover { page-break-after: always; }
+            section { page-break-inside: avoid; }
+        }
+
+        .cover {
+            min-height: 100vh;
+            display: flex; flex-direction: column;
+            justify-content: center; align-items: center;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            color: white; text-align: center; padding: 2rem;
+        }
+        .cover-icon { font-size: 5rem; margin-bottom: 1.5rem; }
+        .cover h1 { font-size: 2.4rem; font-weight: 700; margin-bottom: 0.5rem; letter-spacing: -0.5px; }
+        .cover h2 { font-size: 1.3rem; font-weight: 300; color: #a8a8d0; margin-bottom: 3rem; }
+        .cover-meta { display: flex; flex-direction: column; gap: 0.5rem; font-size: 1rem; color: #c0c0e0; }
+        .cover-meta strong { color: white; }
+        .cover-line { width: 80px; height: 3px; background: linear-gradient(90deg, #6c63ff, #e94560); border-radius: 2px; margin: 2rem auto; }
+
+        .content { max-width: 920px; margin: 0 auto; padding: 3rem 2rem; }
+        section { background: white; border-radius: 12px; padding: 2.5rem; margin-bottom: 2rem; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+
+        h2 { font-size: 1.6rem; font-weight: 700; color: #302b63; margin-bottom: 1.5rem; padding-bottom: 0.5rem; border-bottom: 3px solid #6c63ff; display: inline-block; }
+        h3 { font-size: 1.15rem; font-weight: 600; color: #1a1a2e; margin-top: 1.5rem; margin-bottom: 0.8rem; }
+        p { margin-bottom: 1rem; text-align: justify; color: #333; }
+        ul, ol { margin: 0.8rem 0 1.2rem 1.5rem; color: #333; }
+        li { margin-bottom: 0.4rem; }
+
+        .highlight-box { background: linear-gradient(135deg, #f0efff, #e8e6ff); border-left: 4px solid #6c63ff; padding: 1.2rem 1.5rem; border-radius: 0 8px 8px 0; margin: 1.2rem 0; }
+        .highlight-box p { margin: 0; color: #302b63; font-weight: 500; }
+
+        .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin: 1.5rem 0; }
+        .stat-card { background: linear-gradient(135deg, #302b63, #24243e); color: white; padding: 1.2rem; border-radius: 10px; text-align: center; }
+        .stat-card .number { font-size: 1.8rem; font-weight: 700; color: #6c63ff; }
+        .stat-card .label { font-size: 0.8rem; color: #a8a8d0; margin-top: 0.3rem; }
+
+        table { width: 100%; border-collapse: collapse; margin: 1.2rem 0; font-size: 0.9rem; }
+        thead th { background: #302b63; color: white; padding: 0.8rem 1rem; text-align: left; font-weight: 600; }
+        thead th:first-child { border-radius: 8px 0 0 0; }
+        thead th:last-child { border-radius: 0 8px 0 0; }
+        tbody td { padding: 0.7rem 1rem; border-bottom: 1px solid #eee; color: #333; vertical-align: top; }
+        tbody tr:hover { background: #f8f7ff; }
+
+        .phase-timeline { position: relative; padding-left: 2rem; margin: 1.5rem 0; }
+        .phase-timeline::before { content: ''; position: absolute; left: 6px; top: 0; bottom: 0; width: 3px; background: linear-gradient(to bottom, #6c63ff, #e94560); border-radius: 2px; }
+        .phase-item { position: relative; margin-bottom: 1.5rem; padding-left: 1rem; }
+        .phase-item::before { content: ''; position: absolute; left: -1.65rem; top: 0.4rem; width: 12px; height: 12px; background: #6c63ff; border-radius: 50%; border: 3px solid white; box-shadow: 0 0 0 2px #6c63ff; }
+        .phase-item h4 { font-size: 1rem; font-weight: 600; color: #302b63; margin-bottom: 0.3rem; }
+        .phase-item p { font-size: 0.9rem; margin-bottom: 0; color: #555; }
+
+        /* Gantt */
+        .gantt-wrap { overflow-x: auto; margin: 1.5rem 0; padding: 1rem; background: #fafaff; border-radius: 10px; border: 1px solid #eceaff; }
+        .gantt { width: 100%; min-width: 760px; border-collapse: collapse; font-size: 0.85rem; }
+        .gantt th { background: #302b63; color: white; padding: 0.5rem 0.4rem; font-weight: 600; font-size: 0.8rem; text-align: center; }
+        .gantt th:first-child { text-align: left; min-width: 220px; }
+        .gantt td { border-bottom: 1px solid #eee; padding: 0.4rem 0.2rem; height: 28px; }
+        .gantt td:first-child { color: #1a1a2e; font-weight: 500; padding-left: 0.6rem; }
+        .gantt .bar { background: linear-gradient(90deg, #6c63ff, #8b85ff); border-radius: 4px; height: 18px; display: block; }
+        .gantt .bar.alt { background: linear-gradient(90deg, #e94560, #ff7e95); }
+        .gantt .bar.done { background: linear-gradient(90deg, #1d9e75, #28c98f); }
+
+        /* Risk matrix */
+        .risk { display: inline-block; padding: 0.2rem 0.6rem; border-radius: 12px; font-size: 0.75rem; font-weight: 600; }
+        .risk.low { background: #e1f5ee; color: #0f6e56; }
+        .risk.med { background: #fff3d6; color: #8a5a00; }
+        .risk.high { background: #fde2e1; color: #a51c1a; }
+
+        .footer { text-align: center; padding: 2rem; color: #999; font-size: 0.8rem; }
+    </style>
+</head>
+<body>
+
+<div class="cover">
+    <div class="cover-icon">📅</div>
+    <h1>Planificación de la Ejecución</h1>
+    <h2>Cronograma, Gantt, recursos, riesgos y plan de contingencia</h2>
+    <div class="cover-line"></div>
+    <div class="cover-meta">
+        <span><strong>Proyecto Final</strong> — Desarrollo de Aplicaciones Multiplataforma (DAM)</span>
+        <span><strong>Aplicación:</strong> Sabor de Casa — Gestión de comida preparada y catering</span>
+        <span><strong>Alumna:</strong> Claudia Mellado</span>
+        <span><strong>Curso:</strong> 2025/2026</span>
+        <span><strong>Fecha:</strong> Mayo 2026</span>
+    </div>
+</div>
+
+<div class="content">
+
+<section>
+<h2>1. Objetivo del documento</h2>
+<p>Este documento recoge la <strong>planificación detallada de la ejecución</strong> del Proyecto Final DAM "Sabor de Casa", una aplicación multiplataforma (Android + Web) para la gestión integral de un negocio de comida preparada y catering. Complementa los entregables previos (<em>Análisis del Contexto</em> y <em>Diseño del Proyecto</em>) y constituye el plan operativo que ha guiado el desarrollo durante 11 semanas.</p>
+
+<div class="highlight-box">
+    <p><strong>Resultado:</strong> aplicación funcional desplegada, 28 migraciones SQL aplicadas, 8 Edge Functions activas, 41 pantallas implementadas en 3 perfiles de usuario (cliente / empleado / administrador), build web sin errores y APK Android firmado.</p>
+</div>
+
+<div class="stat-grid">
+    <div class="stat-card"><div class="number">11</div><div class="label">Semanas planificadas</div></div>
+    <div class="stat-card"><div class="number">5</div><div class="label">Fases del ciclo de vida</div></div>
+    <div class="stat-card"><div class="number">41</div><div class="label">Pantallas previstas</div></div>
+    <div class="stat-card"><div class="number">8</div><div class="label">Funciones serverless</div></div>
+</div>
+</section>
+
+<section class="page-break">
+<h2>2. Secuenciación de tareas y plazos</h2>
+<p>El proyecto se ha desglosado siguiendo la <strong>guía oficial DAM</strong> en 5 grandes fases más la defensa. Cada fase produce uno o varios entregables verificables.</p>
+
+<div class="phase-timeline">
+    <div class="phase-item">
+        <h4>Fase 1 · Análisis del contexto (sem. 1-2)</h4>
+        <p>Estudio del sector hostelería, identificación del problema, entrevistas informales, análisis DAFO y entregable <code>analisis_contexto.html</code>.</p>
+    </div>
+    <div class="phase-item">
+        <h4>Fase 2 · Diseño del proyecto (sem. 3-4)</h4>
+        <p>Requisitos funcionales y no funcionales, arquitectura por capas, modelo entidad-relación, mockups de las 41 pantallas y entregable <code>diseno_proyecto.html</code>.</p>
+    </div>
+    <div class="phase-item">
+        <h4>Fase 3 · Planificación (sem. 5)</h4>
+        <p>Diagrama de Gantt, asignación de recursos, análisis de riesgos y plan de contingencia (este documento).</p>
+    </div>
+    <div class="phase-item">
+        <h4>Fase 4 · Desarrollo e implementación (sem. 6-9)</h4>
+        <p>Scaffolding Flutter, configuración Supabase, autenticación, módulos cliente, módulos empleado, panel admin, Edge Functions, integración Stripe, pruebas funcionales.</p>
+    </div>
+    <div class="phase-item">
+        <h4>Fase 5 · Seguimiento, evaluación y documentación (sem. 10)</h4>
+        <p>Manuales técnico y de usuario, registro de incidencias, evaluación, generación del paquete final.</p>
+    </div>
+    <div class="phase-item">
+        <h4>Defensa del proyecto (sem. 11)</h4>
+        <p>Presentación oral, demostración en vivo de la aplicación y resolución de dudas del tribunal.</p>
+    </div>
+</div>
+</section>
+
+<section class="page-break">
+<h2>3. Diagrama de Gantt</h2>
+<p>Representación visual de la planificación temporal en bloques semanales. Las barras moradas corresponden a las fases obligatorias de la guía; las rojas, a hitos de entrega; las verdes, a tareas completadas en paralelo.</p>
+
+<div class="gantt-wrap">
+<table class="gantt">
+    <thead>
+        <tr>
+            <th>Tarea</th>
+            <th>S1</th><th>S2</th><th>S3</th><th>S4</th><th>S5</th>
+            <th>S6</th><th>S7</th><th>S8</th><th>S9</th><th>S10</th><th>S11</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr><td>Análisis del contexto</td>
+            <td><span class="bar done"></span></td><td><span class="bar done"></span></td>
+            <td colspan="9"></td></tr>
+        <tr><td>Diseño del proyecto</td>
+            <td colspan="2"></td>
+            <td><span class="bar done"></span></td><td><span class="bar done"></span></td>
+            <td colspan="7"></td></tr>
+        <tr><td>Planificación &amp; Gantt</td>
+            <td colspan="4"></td>
+            <td><span class="bar done"></span></td>
+            <td colspan="6"></td></tr>
+        <tr><td>Scaffolding Flutter + Supabase</td>
+            <td colspan="5"></td>
+            <td><span class="bar"></span></td>
+            <td colspan="5"></td></tr>
+        <tr><td>Autenticación &amp; perfiles</td>
+            <td colspan="5"></td>
+            <td><span class="bar"></span></td><td><span class="bar"></span></td>
+            <td colspan="4"></td></tr>
+        <tr><td>Módulos cliente (menú, carrito, pedidos)</td>
+            <td colspan="6"></td>
+            <td><span class="bar"></span></td><td><span class="bar"></span></td>
+            <td colspan="3"></td></tr>
+        <tr><td>Módulos empleado (cocina, delivery, POS)</td>
+            <td colspan="7"></td>
+            <td><span class="bar"></span></td><td><span class="bar"></span></td>
+            <td colspan="2"></td></tr>
+        <tr><td>Panel admin completo</td>
+            <td colspan="7"></td>
+            <td><span class="bar"></span></td><td><span class="bar"></span></td>
+            <td colspan="2"></td></tr>
+        <tr><td>Edge Functions &amp; pagos Stripe</td>
+            <td colspan="6"></td>
+            <td><span class="bar alt"></span></td><td><span class="bar alt"></span></td>
+            <td colspan="3"></td></tr>
+        <tr><td>Pruebas funcionales y QA</td>
+            <td colspan="8"></td>
+            <td><span class="bar"></span></td>
+            <td colspan="2"></td></tr>
+        <tr><td>Documentación técnica &amp; usuario</td>
+            <td colspan="9"></td>
+            <td><span class="bar"></span></td>
+            <td></td></tr>
+        <tr><td>Empaquetado &amp; entrega final</td>
+            <td colspan="9"></td>
+            <td><span class="bar alt"></span></td>
+            <td></td></tr>
+        <tr><td>Presentación y defensa</td>
+            <td colspan="10"></td>
+            <td><span class="bar alt"></span></td></tr>
+    </tbody>
+</table>
+</div>
+
+<p style="font-size:0.85rem;color:#666;margin-top:0.6rem;">
+<span class="risk low">verde</span> = fases ya completadas en el momento de la entrega · 
+<span class="risk med">morado</span> = desarrollo planificado · 
+<span class="risk high">rojo</span> = hito de entrega.
+</p>
+</section>
+
+<section class="page-break">
+<h2>4. Asignación de recursos</h2>
+
+<h3>4.1 Recursos humanos</h3>
+<p>El proyecto se desarrolla en formato individual. La alumna asume todos los roles del ciclo de vida: analista, diseñadora, programadora full-stack, QA y documentalista.</p>
+
+<table>
+    <thead><tr><th>Rol</th><th>Persona</th><th>Dedicación estimada</th></tr></thead>
+    <tbody>
+        <tr><td>Analista funcional</td><td>Claudia Mellado</td><td>~ 25 h</td></tr>
+        <tr><td>Diseñadora UX/UI</td><td>Claudia Mellado</td><td>~ 30 h</td></tr>
+        <tr><td>Desarrolladora Flutter (front)</td><td>Claudia Mellado</td><td>~ 110 h</td></tr>
+        <tr><td>Desarrolladora backend (Supabase + Edge Functions)</td><td>Claudia Mellado</td><td>~ 55 h</td></tr>
+        <tr><td>QA / pruebas</td><td>Claudia Mellado</td><td>~ 20 h</td></tr>
+        <tr><td>Documentación y memoria</td><td>Claudia Mellado</td><td>~ 25 h</td></tr>
+        <tr><td><strong>TOTAL</strong></td><td></td><td><strong>~ 265 h</strong></td></tr>
+    </tbody>
+</table>
+
+<h3>4.2 Recursos técnicos</h3>
+<table>
+    <thead><tr><th>Categoría</th><th>Recurso</th><th>Coste</th></tr></thead>
+    <tbody>
+        <tr><td>Hardware</td><td>Portátil Windows 11 (16 GB RAM)</td><td>Propio</td></tr>
+        <tr><td>Hardware</td><td>Móvil Android físico (Android 13) + emuladores</td><td>Propio</td></tr>
+        <tr><td>IDE</td><td>VS Code + extensión Flutter/Dart + Android Studio</td><td>0 €</td></tr>
+        <tr><td>SDK</td><td>Flutter 3.38, Dart 3.5</td><td>0 €</td></tr>
+        <tr><td>Backend</td><td>Supabase (plan Free — Postgres + Auth + Storage + Edge)</td><td>0 €</td></tr>
+        <tr><td>Pagos</td><td>Stripe (modo Test)</td><td>0 €</td></tr>
+        <tr><td>Email transaccional</td><td>Brevo (plan Free — 300 emails/día)</td><td>0 €</td></tr>
+        <tr><td>Notificaciones push</td><td>Firebase Cloud Messaging</td><td>0 €</td></tr>
+        <tr><td>Repositorio</td><td>GitHub privado</td><td>0 €</td></tr>
+        <tr><td>Diseño</td><td>Figma free + Canva free</td><td>0 €</td></tr>
+        <tr><td><strong>TOTAL</strong></td><td></td><td><strong>0 € (todo Free Tier)</strong></td></tr>
+    </tbody>
+</table>
+
+<h3>4.3 Recursos logísticos</h3>
+<ul>
+    <li>Espacio de trabajo en casa con conexión a internet estable.</li>
+    <li>Aulas del centro formativo para tutorías semanales con el profesor.</li>
+    <li>Repositorio Git como herramienta de control de versiones y backup remoto.</li>
+    <li>Acceso a Supabase Studio para administración remota de la base de datos.</li>
+</ul>
+</section>
+
+<section class="page-break">
+<h2>5. Análisis de riesgos y plan de contingencia</h2>
+
+<p>Se ha realizado un análisis cualitativo de los principales riesgos del proyecto, evaluando <strong>probabilidad</strong> e <strong>impacto</strong> en una escala baja / media / alta. Para cada riesgo se define una medida preventiva y, si se materializa, un plan de contingencia.</p>
+
+<table>
+    <thead>
+        <tr><th>ID</th><th>Riesgo</th><th>Prob.</th><th>Impacto</th><th>Mitigación / contingencia</th></tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>R1</td>
+            <td>Curva de aprendizaje de Flutter + Riverpod + Freezed superior a lo previsto.</td>
+            <td><span class="risk med">Media</span></td>
+            <td><span class="risk high">Alto</span></td>
+            <td>Spike previo de 3 días con plantilla mínima; uso de codegen para reducir boilerplate; documentación oficial y skills internos.</td>
+        </tr>
+        <tr>
+            <td>R2</td>
+            <td>Errores en las migraciones SQL aplicadas a Supabase (orden, RLS, claves).</td>
+            <td><span class="risk med">Media</span></td>
+            <td><span class="risk high">Alto</span></td>
+            <td>Numeración estricta de migraciones, backup antes de cambios de esquema, aplicación manual en Studio SQL Editor cuando <code>db push</code> falla.</td>
+        </tr>
+        <tr>
+            <td>R3</td>
+            <td>Bloqueo de pagos en producción por requisitos de Stripe (SCA, métodos europeos).</td>
+            <td><span class="risk low">Baja</span></td>
+            <td><span class="risk high">Alto</span></td>
+            <td>Trabajar todo en modo Test; documentar el switch a Live solo en deploy final; usar Payment Sheet (móvil) y Stripe.js (web) ya certificados.</td>
+        </tr>
+        <tr>
+            <td>R4</td>
+            <td>Notificaciones push (FCM) no entregadas en algunos dispositivos.</td>
+            <td><span class="risk med">Media</span></td>
+            <td><span class="risk med">Medio</span></td>
+            <td>Doble canal: push + email Brevo paralelo. Reintentos best-effort en la Edge Function. Logs de entrega en panel admin.</td>
+        </tr>
+        <tr>
+            <td>R5</td>
+            <td>Diferencias de comportamiento entre Web y Android (router, layouts, Stripe).</td>
+            <td><span class="risk high">Alta</span></td>
+            <td><span class="risk med">Medio</span></td>
+            <td>Test manual en ambas plataformas tras cada feature, condicionales <code>kIsWeb</code> donde aplica, ShellRoute compartido para evitar divergencia.</td>
+        </tr>
+        <tr>
+            <td>R6</td>
+            <td>Pérdida de datos del repositorio o del proyecto local.</td>
+            <td><span class="risk low">Baja</span></td>
+            <td><span class="risk high">Alto</span></td>
+            <td>Push diario a GitHub; backup adicional semanal a disco externo; uso de la rama <code>main</code> como única fuente de verdad.</td>
+        </tr>
+        <tr>
+            <td>R7</td>
+            <td>Codificación UTF-8 corrupta al editar archivos con acentos desde PowerShell.</td>
+            <td><span class="risk med">Media</span></td>
+            <td><span class="risk med">Medio</span></td>
+            <td>Editar siempre desde VS Code; nunca <code>Add-Content @"..."@</code> con caracteres acentuados; recuperación desde historial local de VS Code en caso de corrupción.</td>
+        </tr>
+        <tr>
+            <td>R8</td>
+            <td>Cuota agotada en plan Free de Supabase / Brevo en producción.</td>
+            <td><span class="risk low">Baja</span></td>
+            <td><span class="risk med">Medio</span></td>
+            <td>Monitorizar uso semanal; plan B documentado con upgrade a planes Pro mensuales.</td>
+        </tr>
+        <tr>
+            <td>R9</td>
+            <td>Retraso en la fase de pruebas por acumulación de features.</td>
+            <td><span class="risk med">Media</span></td>
+            <td><span class="risk med">Medio</span></td>
+            <td>Pruebas continuas tras cada feature, no acumular QA al final; widget tests para los componentes críticos.</td>
+        </tr>
+        <tr>
+            <td>R10</td>
+            <td>Imposibilidad de defensa en fecha por motivos personales o de salud.</td>
+            <td><span class="risk low">Baja</span></td>
+            <td><span class="risk high">Alto</span></td>
+            <td>Adelantar entrega 1 semana respecto al deadline oficial; tener slides y demo grabada como backup.</td>
+        </tr>
+    </tbody>
+</table>
+</section>
+
+<section class="page-break">
+<h2>6. Entregables parciales planificados</h2>
+
+<table>
+    <thead><tr><th>Hito</th><th>Semana</th><th>Entregable</th><th>Validación</th></tr></thead>
+    <tbody>
+        <tr><td>H1 — Análisis</td><td>2</td><td><code>analisis_contexto.html</code></td><td>Tutor</td></tr>
+        <tr><td>H2 — Diseño</td><td>4</td><td><code>diseno_proyecto.html</code> + mockups</td><td>Tutor</td></tr>
+        <tr><td>H3 — Planificación</td><td>5</td><td><code>planificacion_proyecto.html</code> (este documento)</td><td>Tutor</td></tr>
+        <tr><td>H4 — Preentrega</td><td>7</td><td>App funcional con login, catálogo y carrito</td><td>Demo en clase</td></tr>
+        <tr><td>H5 — Versión final</td><td>9</td><td>APK + build web + todas las features</td><td>Repositorio Git</td></tr>
+        <tr><td>H6 — Documentación</td><td>10</td><td>Manuales + memoria + presentación</td><td>Tribunal</td></tr>
+        <tr><td>H7 — Defensa</td><td>11</td><td>Presentación oral + demo en vivo</td><td>Tribunal</td></tr>
+    </tbody>
+</table>
+</section>
+
+<section>
+<h2>7. Indicadores de seguimiento</h2>
+<p>Durante la ejecución se han usado los siguientes indicadores para verificar el avance:</p>
+<ul>
+    <li><strong>% de pantallas implementadas</strong> sobre las 41 previstas (objetivo final: 100 %).</li>
+    <li><strong>Migraciones SQL aplicadas / planificadas</strong> (objetivo: 28 / 28).</li>
+    <li><strong>Errores de <code>dart analyze</code></strong> (objetivo: 0 errores; los <em>info</em> cosméticos son aceptables).</li>
+    <li><strong>Build web sin <em>wasm dry-run</em></strong> verde tras cada feature mayor.</li>
+    <li><strong>Cobertura de roles</strong>: cliente, empleado y admin con flujos completos extremo a extremo.</li>
+</ul>
+
+<div class="highlight-box">
+    <p><strong>Resultado a fecha de entrega:</strong> 41/41 pantallas, 28/28 migraciones, 0 errores de análisis, build web OK (≈ 20 MB), 3 roles funcionales, 8 Edge Functions desplegadas. El cronograma se ha cumplido sin desviaciones críticas.</p>
+</div>
+</section>
+
+</div>
+
+<div class="footer">Sabor de Casa — Planificación de la Ejecución · Proyecto Final DAM 2025/26</div>
+
+</body>
+</html>

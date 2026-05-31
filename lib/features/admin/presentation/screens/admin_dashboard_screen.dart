@@ -46,62 +46,91 @@ class AdminDashboardScreen extends ConsumerWidget {
 // CUERPO PRINCIPAL
 // ─────────────────────────────────────────────────────────────────────────────
 
-class _DashboardBody extends StatelessWidget {
+class _DashboardBody extends ConsumerWidget {
   const _DashboardBody({required this.stats, required this.onRefresh});
   final Map<String, dynamic> stats;
   final VoidCallback onRefresh;
 
   @override
-  Widget build(BuildContext context) {
-    final revenue = (stats['revenue_total'] as num? ?? 0).toDouble();
-    final ordersTotal = (stats['orders_total'] as num?)?.toInt() ?? 0;
+  Widget build(BuildContext context, WidgetRef ref) {
+    final revenueToday = (stats['revenue_today'] as num? ?? 0).toDouble();
+    final revenueWeek = (stats['revenue_week'] as num? ?? 0).toDouble();
+    final revenueMonth = (stats['revenue_month'] as num? ?? 0).toDouble();
+    final ordersToday = (stats['orders_today'] as num?)?.toInt() ?? 0;
     final ordersPending = (stats['orders_pending'] as num?)?.toInt() ?? 0;
-    final usersTotal = (stats['users_total'] as num?)?.toInt() ?? 0;
+    final avgTicketToday = (stats['avg_ticket_today'] as num? ?? 0).toDouble();
+    final clientsTotal = (stats['clients_total'] as num?)?.toInt() ?? 0;
+    final usersNewWeek = (stats['users_new_week'] as num?)?.toInt() ?? 0;
     final contactsUnread = (stats['contacts_unread'] as num?)?.toInt() ?? 0;
-    final eventsTotal = (stats['events_total'] as num?)?.toInt() ?? 0;
+    final supportUnread = (stats['support_unread'] as num?)?.toInt() ?? 0;
+    final eventsPending = (stats['events_pending'] as num?)?.toInt() ?? 0;
 
-    final kpis = [
+    // Serie de los últimos 7 días para el minigráfico.
+    final revenue7d = ref.watch(adminRevenueLast7DaysProvider).valueOrNull ?? const [];
+    final series = revenue7d
+        .map((e) => (e['total'] as num? ?? 0).toDouble())
+        .toList(growable: false);
+    // Variación respecto al día anterior (penúltimo de la serie).
+    double? deltaPct;
+    if (series.length >= 2) {
+      final yesterday = series[series.length - 2];
+      if (yesterday > 0) {
+        deltaPct = ((revenueToday - yesterday) / yesterday) * 100;
+      } else if (revenueToday > 0) {
+        deltaPct = 100;
+      }
+    }
+
+    final secondaryKpis = [
       _KpiData(
-        label: 'Ingresos hoy',
-        value: Formatters.price(revenue),
-        icon: Icons.payments_rounded,
-        color: AppTokens.brandPrimary,
-        subtitle: 'Ventas del día',
-      ),
-      _KpiData(
-        label: 'Pedidos totales',
-        value: '$ordersTotal',
-        icon: Icons.receipt_long_rounded,
-        color: AppTokens.info,
-        subtitle: 'Registrados hoy',
-      ),
-      _KpiData(
-        label: 'Pendientes',
-        value: '$ordersPending',
-        icon: Icons.pending_actions_rounded,
-        color: ordersPending > 0 ? AppTokens.warning : AppTokens.brandPrimary,
-        subtitle: ordersPending > 0 ? 'Requieren atención' : 'Al día ✓',
-      ),
-      _KpiData(
-        label: 'Usuarios',
-        value: '$usersTotal',
-        icon: Icons.people_rounded,
+        label: 'Ingresos semana',
+        value: Formatters.price(revenueWeek),
+        icon: Icons.calendar_view_week_rounded,
         color: AppTokens.brandDark,
-        subtitle: 'Clientes registrados',
+        subtitle: 'Lunes a hoy',
       ),
       _KpiData(
-        label: 'Mensajes sin leer',
-        value: '$contactsUnread',
-        icon: Icons.mark_email_unread_rounded,
-        color: contactsUnread > 0 ? AppTokens.danger : const Color(0xFF6B7280),
-        subtitle: contactsUnread > 0 ? 'Respuesta pendiente' : 'Sin mensajes nuevos',
-      ),
-      _KpiData(
-        label: 'Eventos catering',
-        value: '$eventsTotal',
-        icon: Icons.celebration_rounded,
+        label: 'Ingresos mes',
+        value: Formatters.price(revenueMonth),
+        icon: Icons.calendar_month_rounded,
         color: const Color(0xFF7C3AED),
-        subtitle: 'Solicitudes activas',
+        subtitle: 'Acumulado',
+      ),
+      _KpiData(
+        label: 'Clientes',
+        value: '$clientsTotal',
+        icon: Icons.people_rounded,
+        color: const Color(0xFF0F6E56),
+        subtitle: usersNewWeek > 0
+            ? '+$usersNewWeek esta semana'
+            : 'Sin altas nuevas',
+      ),
+      _KpiData(
+        label: 'Mensajes',
+        value: '${contactsUnread + supportUnread}',
+        icon: Icons.mark_email_unread_rounded,
+        color: (contactsUnread + supportUnread) > 0
+            ? AppTokens.danger
+            : const Color(0xFF6B7280),
+        subtitle: supportUnread > 0
+            ? '$supportUnread soporte · $contactsUnread contacto'
+            : 'Bandeja al día',
+      ),
+      _KpiData(
+        label: 'Catering',
+        value: '$eventsPending',
+        icon: Icons.celebration_rounded,
+        color: eventsPending > 0
+            ? AppTokens.warning
+            : const Color(0xFF7C3AED),
+        subtitle: eventsPending > 0 ? 'Por revisar' : 'Sin solicitudes',
+      ),
+      _KpiData(
+        label: 'Ticket medio',
+        value: Formatters.price(avgTicketToday),
+        icon: Icons.local_atm_rounded,
+        color: AppTokens.info,
+        subtitle: 'Promedio hoy',
       ),
     ];
 
@@ -114,51 +143,80 @@ class _DashboardBody extends StatelessWidget {
             child: _HeroBanner(
               onRefresh: onRefresh,
               ordersPending: ordersPending,
-              contactsUnread: contactsUnread,
+              contactsUnread: contactsUnread + supportUnread,
             ).animate().fadeIn(duration: 350.ms),
           ),
 
           // ── Alertas urgentes (solo si hay pendientes) ────────────────
-          if (ordersPending > 0 || contactsUnread > 0)
+          if (ordersPending > 0 ||
+              contactsUnread > 0 ||
+              supportUnread > 0 ||
+              eventsPending > 0)
             SliverPadding(
               padding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
               sliver: SliverToBoxAdapter(
                 child: _AlertsRow(
                   ordersPending: ordersPending,
-                  contactsUnread: contactsUnread,
+                  contactsUnread: contactsUnread + supportUnread,
+                  eventsPending: eventsPending,
                 ).animate().fadeIn(duration: 300.ms).slideY(begin: 0.1),
               ),
             ),
 
-          // ── Label: métricas ──────────────────────────────────────────
-          const SliverPadding(
-            padding: EdgeInsets.fromLTRB(24, 24, 24, 0),
-            sliver: SliverToBoxAdapter(child: _SectionLabel('Métricas del día')),
+          // ── Tarjeta destacada con resumen del día ────────────────────
+          SliverPadding(
+            padding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
+            sliver: SliverToBoxAdapter(
+              child: _TodayHeroCard(
+                revenueToday: revenueToday,
+                ordersToday: ordersToday,
+                ordersPending: ordersPending,
+                avgTicket: avgTicketToday,
+                series: series,
+                deltaPct: deltaPct,
+              ).animate().fadeIn(duration: 350.ms).slideY(begin: 0.05),
+            ),
           ),
 
-          // ── Grid de KPIs ─────────────────────────────────────────────
+          // ── Label: otras métricas ────────────────────────────────────
+          const SliverPadding(
+            padding: EdgeInsets.fromLTRB(24, 28, 24, 0),
+            sliver: SliverToBoxAdapter(child: _SectionLabel('Otras métricas')),
+          ),
+
+          // ── Grid de KPIs secundarios (denso) ─────────────────────────
           SliverPadding(
             padding: const EdgeInsets.fromLTRB(24, 12, 24, 0),
             sliver: SliverLayoutBuilder(
               builder: (context, constraints) {
-                final cols = constraints.crossAxisExtent >= 900
-                    ? 3
-                    : constraints.crossAxisExtent >= 560
-                        ? 2
-                        : 1;
+                final w = constraints.crossAxisExtent;
+                final cols = w >= 1200
+                    ? 6
+                    : w >= 900
+                        ? 3
+                        : w >= 560
+                            ? 2
+                            : 1;
+                final ratio = cols == 1
+                    ? 3.4
+                    : cols == 2
+                        ? 2.6
+                        : cols == 3
+                            ? 2.1
+                            : 1.55;
                 return SliverGrid(
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: cols,
-                    crossAxisSpacing: 14,
-                    mainAxisSpacing: 14,
-                    childAspectRatio: cols == 1 ? 3.5 : 2.2,
+                    crossAxisSpacing: 12,
+                    mainAxisSpacing: 12,
+                    childAspectRatio: ratio,
                   ),
                   delegate: SliverChildBuilderDelegate(
-                    (ctx, i) => _KpiCard(data: kpis[i])
-                        .animate(delay: Duration(milliseconds: i * 55))
-                        .fadeIn(duration: 300.ms)
-                        .slideY(begin: 0.08),
-                    childCount: kpis.length,
+                    (ctx, i) => _KpiCard(data: secondaryKpis[i])
+                        .animate(delay: Duration(milliseconds: i * 45))
+                        .fadeIn(duration: 280.ms)
+                        .slideY(begin: 0.06),
+                    childCount: secondaryKpis.length,
                   ),
                 );
               },
@@ -373,9 +431,11 @@ class _AlertsRow extends StatelessWidget {
   const _AlertsRow({
     required this.ordersPending,
     required this.contactsUnread,
+    required this.eventsPending,
   });
   final int ordersPending;
   final int contactsUnread;
+  final int eventsPending;
 
   @override
   Widget build(BuildContext context) {
@@ -399,7 +459,16 @@ class _AlertsRow extends StatelessWidget {
                 '$contactsUnread mensaje${contactsUnread > 1 ? "s" : ""} sin leer',
             color: AppTokens.danger,
             bg: AppTokens.dangerBg,
-            onTap: () => context.go('/admin/config'),
+            onTap: () => context.go('/admin/support'),
+          ),
+        if (eventsPending > 0)
+          _AlertChip(
+            icon: Icons.celebration_rounded,
+            label:
+                '$eventsPending evento${eventsPending > 1 ? "s" : ""} de catering por revisar',
+            color: const Color(0xFF7C3AED),
+            bg: const Color(0xFFEFE6FE),
+            onTap: () => context.go('/admin/catering'),
           ),
       ],
     );
@@ -486,77 +555,411 @@ class _KpiCard extends StatelessWidget {
         border: Border.all(color: const Color(0xFFEEF2F7)),
         boxShadow: [AppTokens.cardShadow],
       ),
-      child: Row(
+      padding: const EdgeInsets.fromLTRB(14, 12, 12, 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          // Barra de acento izquierda
-          Container(
-            width: 4,
-            decoration: BoxDecoration(
-              color: data.color,
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(AppTokens.radiusMd),
-                bottomLeft: Radius.circular(AppTokens.radiusMd),
+          Row(
+            children: [
+              Container(
+                width: 30,
+                height: 30,
+                decoration: BoxDecoration(
+                  color: data.color.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(data.icon, size: 16, color: data.color),
               ),
-            ),
-          ),
-          // Contenido central
-          Expanded(
-            child: Padding(
-              padding:
-                  const EdgeInsets.fromLTRB(16, 14, 12, 14),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    data.label.toUpperCase(),
-                    style: GoogleFonts.inter(
-                      fontSize: 10,
-                      fontWeight: FontWeight.w600,
-                      color: const Color(0xFF9CA3AF),
-                      letterSpacing: 0.7,
-                    ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  data.label.toUpperCase(),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.inter(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w600,
+                    color: const Color(0xFF9CA3AF),
+                    letterSpacing: 0.6,
                   ),
-                  const SizedBox(height: 6),
-                  Text(
-                    data.value,
-                    style: GoogleFonts.inter(
-                      fontSize: 26,
-                      fontWeight: FontWeight.w700,
-                      color: data.color,
-                      height: 1.1,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    data.subtitle,
-                    style: GoogleFonts.inter(
-                      fontSize: 12,
-                      color: const Color(0xFF6B7280),
-                    ),
-                  ),
-                ],
+                ),
               ),
-            ),
+            ],
           ),
-          // Icono a la derecha
           Padding(
-            padding: const EdgeInsets.all(16),
-            child: Container(
-              width: 44,
-              height: 44,
-              decoration: BoxDecoration(
-                color: data.color.withValues(alpha: 0.1),
-                borderRadius:
-                    BorderRadius.circular(AppTokens.radiusSm),
+            padding: const EdgeInsets.only(top: 4),
+            child: Text(
+              data.value,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: GoogleFonts.inter(
+                fontSize: 22,
+                fontWeight: FontWeight.w700,
+                color: const Color(0xFF111111),
+                height: 1.05,
               ),
-              child: Icon(data.icon, size: 22, color: data.color),
+            ),
+          ),
+          Text(
+            data.subtitle,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: GoogleFonts.inter(
+              fontSize: 11.5,
+              color: const Color(0xFF6B7280),
             ),
           ),
         ],
       ),
     );
   }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// TARJETA DESTACADA — RESUMEN DEL DÍA con sparkline
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _TodayHeroCard extends StatelessWidget {
+  const _TodayHeroCard({
+    required this.revenueToday,
+    required this.ordersToday,
+    required this.ordersPending,
+    required this.avgTicket,
+    required this.series,
+    required this.deltaPct,
+  });
+
+  final double revenueToday;
+  final int ordersToday;
+  final int ordersPending;
+  final double avgTicket;
+  final List<double> series;
+  final double? deltaPct;
+
+  @override
+  Widget build(BuildContext context) {
+    final delta = deltaPct;
+    final positive = (delta ?? 0) >= 0;
+    final deltaColor = positive ? AppTokens.success : AppTokens.danger;
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final narrow = constraints.maxWidth < 720;
+        final leftBlock = Padding(
+          padding: const EdgeInsets.fromLTRB(24, 22, 24, 22),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 9, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.18),
+                      borderRadius:
+                          BorderRadius.circular(AppTokens.radiusPill),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.payments_rounded,
+                            size: 13, color: Colors.white),
+                        const SizedBox(width: 6),
+                        Text(
+                          'INGRESOS DE HOY',
+                          style: GoogleFonts.inter(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.white,
+                            letterSpacing: 1,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  if (delta != null) ...[
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: deltaColor.withValues(alpha: 0.18),
+                        borderRadius:
+                            BorderRadius.circular(AppTokens.radiusPill),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            positive
+                                ? Icons.trending_up_rounded
+                                : Icons.trending_down_rounded,
+                            size: 13,
+                            color: Colors.white,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            '${positive ? '+' : ''}${delta.toStringAsFixed(1)}%',
+                            style: GoogleFonts.inter(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      'vs ayer',
+                      style: GoogleFonts.inter(
+                        fontSize: 11,
+                        color: Colors.white.withValues(alpha: 0.7),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+              const SizedBox(height: 12),
+              Text(
+                Formatters.price(revenueToday),
+                style: GoogleFonts.inter(
+                  fontSize: 44,
+                  fontWeight: FontWeight.w800,
+                  color: Colors.white,
+                  height: 1,
+                  letterSpacing: -1,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'Facturación del día en curso',
+                style: GoogleFonts.inter(
+                  fontSize: 12.5,
+                  color: Colors.white.withValues(alpha: 0.75),
+                ),
+              ),
+              const SizedBox(height: 18),
+              Wrap(
+                spacing: 24,
+                runSpacing: 10,
+                children: [
+                  _MiniStat(
+                      label: 'Pedidos hoy',
+                      value: '$ordersToday',
+                      icon: Icons.receipt_long_rounded),
+                  _MiniStat(
+                      label: 'Pendientes',
+                      value: '$ordersPending',
+                      icon: Icons.pending_actions_rounded,
+                      highlight: ordersPending > 0),
+                  _MiniStat(
+                      label: 'Ticket medio',
+                      value: Formatters.price(avgTicket),
+                      icon: Icons.local_atm_rounded),
+                ],
+              ),
+            ],
+          ),
+        );
+
+        final rightBlock = Padding(
+          padding: narrow
+              ? const EdgeInsets.fromLTRB(20, 0, 20, 18)
+              : const EdgeInsets.fromLTRB(0, 22, 24, 22),
+          child: SizedBox(
+            height: narrow ? 120 : double.infinity,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'EVOLUCIÓN · 7 DÍAS',
+                  style: GoogleFonts.inter(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white.withValues(alpha: 0.7),
+                    letterSpacing: 1,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Expanded(
+                  child: series.isEmpty
+                      ? Center(
+                          child: Text(
+                            'Sin datos disponibles',
+                            style: GoogleFonts.inter(
+                              fontSize: 12,
+                              color: Colors.white.withValues(alpha: 0.6),
+                            ),
+                          ),
+                        )
+                      : CustomPaint(
+                          painter: _SparklinePainter(series: series),
+                          size: Size.infinite,
+                        ),
+                ),
+              ],
+            ),
+          ),
+        );
+
+        return Container(
+          width: double.infinity,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(AppTokens.radiusLg),
+            gradient: const LinearGradient(
+              colors: [Color(0xFF0F6E56), Color(0xFF1D9E75), Color(0xFF22B47C)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: AppTokens.brandPrimary.withValues(alpha: 0.25),
+                blurRadius: 24,
+                offset: const Offset(0, 6),
+              ),
+            ],
+          ),
+          child: narrow
+              ? Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [leftBlock, rightBlock],
+                )
+              : IntrinsicHeight(
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Expanded(flex: 5, child: leftBlock),
+                      Expanded(flex: 4, child: rightBlock),
+                    ],
+                  ),
+                ),
+        );
+      },
+    );
+  }
+}
+
+class _MiniStat extends StatelessWidget {
+  const _MiniStat({
+    required this.label,
+    required this.value,
+    required this.icon,
+    this.highlight = false,
+  });
+  final String label;
+  final String value;
+  final IconData icon;
+  final bool highlight;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon,
+            size: 16,
+            color: highlight
+                ? const Color(0xFFFFD27A)
+                : Colors.white.withValues(alpha: 0.85)),
+        const SizedBox(width: 8),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              value,
+              style: GoogleFonts.inter(
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+                color: Colors.white,
+                height: 1.1,
+              ),
+            ),
+            Text(
+              label,
+              style: GoogleFonts.inter(
+                fontSize: 10.5,
+                color: Colors.white.withValues(alpha: 0.7),
+                letterSpacing: 0.3,
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+class _SparklinePainter extends CustomPainter {
+  _SparklinePainter({required this.series});
+  final List<double> series;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (series.isEmpty) return;
+    final maxV = series.reduce((a, b) => a > b ? a : b);
+    final minV = series.reduce((a, b) => a < b ? a : b);
+    final range = (maxV - minV).abs() < 0.01 ? 1.0 : (maxV - minV);
+    final stepX = series.length > 1 ? size.width / (series.length - 1) : 0.0;
+
+    Offset pointAt(int i) {
+      final v = series[i];
+      final norm = (v - minV) / range;
+      final y = size.height - (norm * (size.height - 8)) - 4;
+      return Offset(stepX * i, y);
+    }
+
+    final path = Path();
+    final fill = Path();
+    for (var i = 0; i < series.length; i++) {
+      final p = pointAt(i);
+      if (i == 0) {
+        path.moveTo(p.dx, p.dy);
+        fill.moveTo(p.dx, size.height);
+        fill.lineTo(p.dx, p.dy);
+      } else {
+        final prev = pointAt(i - 1);
+        final cx = (prev.dx + p.dx) / 2;
+        path.cubicTo(cx, prev.dy, cx, p.dy, p.dx, p.dy);
+        fill.cubicTo(cx, prev.dy, cx, p.dy, p.dx, p.dy);
+      }
+    }
+    fill.lineTo(size.width, size.height);
+    fill.close();
+
+    final fillPaint = Paint()
+      ..shader = LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [
+          Colors.white.withValues(alpha: 0.32),
+          Colors.white.withValues(alpha: 0.0),
+        ],
+      ).createShader(Rect.fromLTWH(0, 0, size.width, size.height));
+    canvas.drawPath(fill, fillPaint);
+
+    final linePaint = Paint()
+      ..color = Colors.white
+      ..strokeWidth = 2.4
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round;
+    canvas.drawPath(path, linePaint);
+
+    // Punto final destacado
+    final last = pointAt(series.length - 1);
+    canvas.drawCircle(last, 5, Paint()..color = Colors.white);
+    canvas.drawCircle(
+        last, 3, Paint()..color = const Color(0xFF0F6E56));
+  }
+
+  @override
+  bool shouldRepaint(covariant _SparklinePainter oldDelegate) =>
+      oldDelegate.series != series;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

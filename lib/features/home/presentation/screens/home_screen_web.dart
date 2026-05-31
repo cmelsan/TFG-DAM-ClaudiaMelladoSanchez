@@ -53,7 +53,6 @@ class _HomeScreenWebState extends ConsumerState<HomeScreenWeb> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
       endDrawer: const _WebCartDrawer(),
       body: Stack(
         children: [

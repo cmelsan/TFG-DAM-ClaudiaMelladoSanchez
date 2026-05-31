@@ -51,7 +51,6 @@ class _ScaffoldWithNavBarState extends ConsumerState<ScaffoldWithNavBar> {
     final cartCount = ref.watch(cartItemsCountProvider);
 
     return Scaffold(
-      backgroundColor: AppTokens.pageBg,
       body: widget.navigationShell,
       floatingActionButton: AppFab(
         onPressed: () => context.push('/chat'),
@@ -145,13 +144,14 @@ class _ModernNavBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? const Color(0xFF1A1A1A) : Colors.white,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.09),
+            color: Colors.black.withValues(alpha: isDark ? 0.4 : 0.09),
             blurRadius: 28,
             offset: const Offset(0, -4),
           ),
@@ -211,8 +211,10 @@ class _NavItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color =
-        selected ? AppTokens.brandPrimary : const Color(0xFFAAAAAA);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final color = selected
+        ? AppTokens.brandPrimary
+        : (isDark ? const Color(0xFF888888) : const Color(0xFFAAAAAA));
 
     return GestureDetector(
       onTap: onTap,

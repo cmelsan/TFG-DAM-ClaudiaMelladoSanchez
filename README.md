@@ -288,6 +288,8 @@ Implementado con **GoRouter 14** + hash routing en web (`/#/ruta`).
 | `event_request_extras` | Extras seleccionados en cada solicitud |
 | `event_calendar` | Fechas bloqueadas para catering |
 | `contact_messages` | Mensajes del formulario de contacto |
+| `support_threads` | Conversaciones internas cliente-admin |
+| `support_messages` | Mensajes de cada conversación interna |
 | `push_tokens` | Tokens FCM para notificaciones push (por dispositivo) |
 | `business_config` | Configuración del negocio (clave-valor) |
 
@@ -596,3 +598,9 @@ El QR se muestra en `OrderConfirmationScreen` y `OrderDetailScreen` para que el 
 - El formulario de solicitud valida antelación mínima: 1 mes para eventos pequeños, 6 meses para comuniones/eventos grandes y 8 meses para bodas.
 - El panel admin permite editar tipo de evento, imagen, etiqueta, antelación y disponibilidad de prueba de menú.
 - Las tarjetas de home (`_TopDishCard`, `DishCard`) ya mostraban `imageUrl` vía `CachedNetworkImage` — ahora se visualizan correctamente al tener URL real en BD
+
+### v0.11 — Contacto y soporte interno
+- `ContactScreen` rediseñado como centro de ayuda web con hero visual, canales de contacto, WhatsApp, formulario publico y soporte interno.
+- Añadidas tablas `support_threads` y `support_messages` para conversaciones cliente-admin con RLS por propietario/admin.
+- Nueva bandeja admin `/admin/support` para filtrar, leer, responder y cerrar conversaciones internas.
+- El contador de mensajes sin leer del dashboard admin suma formularios publicos y conversaciones internas pendientes.

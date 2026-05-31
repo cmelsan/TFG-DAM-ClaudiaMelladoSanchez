@@ -319,6 +319,81 @@ Mensajes recibidos desde el formulario de contacto.
 
 ---
 
+### `support_threads`
+Conversaciones internas entre clientes registrados y administracion.
+
+| Columna | Tipo | Descripción |
+|---------|------|-------------|
+| `id` | UUID PK | |
+| `user_id` | UUID FK → profiles | Cliente propietario |
+| `subject` | TEXT | Asunto visible en la bandeja |
+| `category` | TEXT | `general`, `order`, `catering`, `incident` |
+| `status` | TEXT | `open`, `waiting_admin`, `waiting_customer`, `closed` |
+| `last_message` | TEXT | Resumen del ultimo mensaje |
+| `last_message_at` | TIMESTAMPTZ | Ordenacion de bandeja |
+| `unread_for_admin` | INTEGER | Contador de no leidos admin |
+| `unread_for_customer` | INTEGER | Contador de no leidos cliente |
+| `created_at` | TIMESTAMPTZ | |
+| `updated_at` | TIMESTAMPTZ | |
+
+---
+
+### `support_messages`
+Mensajes pertenecientes a cada hilo de soporte interno.
+
+| Columna | Tipo | Descripción |
+|---------|------|-------------|
+| `id` | UUID PK | |
+| `thread_id` | UUID FK → support_threads | ON DELETE CASCADE |
+| `sender_id` | UUID FK → profiles | Usuario que envia |
+| `sender_role` | TEXT | `client` o `admin` |
+| `body` | TEXT | Cuerpo del mensaje |
+| `created_at` | TIMESTAMPTZ | |
+
+---
+
+### `testimonials`
+Reseñas / testimonios mostrados en la home pública. Gestionables desde el panel admin.
+
+| Columna | Tipo | Descripción |
+|---------|------|-------------|
+| `id` | UUID PK | |
+| `author_name` | TEXT NOT NULL | Nombre visible del autor |
+| `body` | TEXT NOT NULL | Texto de la reseña |
+| `rating` | INTEGER | 1..5 (estrellas) |
+| `is_featured` | BOOLEAN | DEFAULT FALSE — Si aparece en la home |
+| `position` | INTEGER | DEFAULT 0 — Orden de visualización |
+| `created_at` | TIMESTAMPTZ | Auto |
+
+Definida en `00019_testimonials.sql`. Ampliada por usos del panel admin (`adminTestimonialsProvider`).
+
+---
+
+### `newsletter_subscribers`
+Suscriptores opt-in del formulario público de newsletter (pie de `/contacto`).
+
+| Columna | Tipo | Descripción |
+|---------|------|-------------|
+| `id` | UUID PK | DEFAULT `gen_random_uuid()` |
+| `email` | TEXT UNIQUE | Email del suscriptor |
+| `full_name` | TEXT | Nombre opcional |
+| `status` | TEXT | CHECK `active | unsubscribed | bounced`, DEFAULT `'active'` |
+| `source` | TEXT | DEFAULT `'web'` — Origen de la alta (`web`, `contact_page`, `admin`, ...) |
+| `locale` | TEXT | DEFAULT `'es'` |
+| `user_id` | UUID FK → profiles | ON DELETE SET NULL (si el usuario también es cliente registrado) |
+| `created_at` | TIMESTAMPTZ | Auto |
+| `unsubscribed_at` | TIMESTAMPTZ | Fecha de baja (NULL si activo) |
+
+Índices:
+```sql
+idx_newsletter_status     → newsletter_subscribers(status)
+idx_newsletter_created_at → newsletter_subscribers(created_at DESC)
+```
+
+Definida en `00028_newsletter_subscribers.sql` — **aplicar en Studio SQL Editor**.
+
+---
+
 ### `push_tokens`
 Tokens FCM de dispositivos Android para notificaciones push.
 
@@ -371,6 +446,10 @@ idx_favorites_user_id          → favorites(user_id)
 idx_event_requests_user_id     → event_requests(user_id)
 idx_event_requests_status      → event_requests(status)
 idx_contact_messages_is_read   → contact_messages(is_read)
+idx_support_threads_user_id    → support_threads(user_id)
+idx_support_threads_status     → support_threads(status)
+idx_support_threads_last_message_at → support_threads(last_message_at DESC)
+idx_support_messages_thread_id_created → support_messages(thread_id, created_at)
 idx_push_tokens_user_id        → push_tokens(user_id)
 ```
 
@@ -452,6 +531,23 @@ RLS habilitado en **todas** las tablas. Resumen de políticas:
 ### `contact_messages`
 - `INSERT`: anónimo permitido (no requiere auth)
 - `SELECT/UPDATE`: solo admin
+
+### `support_threads`
+- `SELECT`: propietario del hilo o admin
+- `INSERT`: cliente autenticado creando su propio hilo
+- `UPDATE`: propietario del hilo o admin
+
+### `support_messages`
+- `SELECT`: propietario del hilo o admin
+- `INSERT`: cliente propietario del hilo o admin
+
+### `testimonials`
+- `SELECT`: público (cualquiera puede leer los testimonios para mostrarlos en la home)
+- `ALL` (write): solo admin
+
+### `newsletter_subscribers`
+- `INSERT`: público (cualquiera puede suscribirse, incluso anónimo)
+- `SELECT/UPDATE/DELETE`: solo admin (usando `get_my_role() = 'admin'`)
 
 ### `push_tokens`
 - `SELECT/INSERT/UPDATE/DELETE`: el propio usuario
@@ -570,16 +666,94 @@ _client.functions.invoke(
 
 ---
 
+### `send-encargo-confirmation`
+**Ruta**: `POST /functions/v1/send-encargo-confirmation`
+
+**Propósito**: Envía email Brevo al cliente confirmando la creación de un encargo con fecha y franja horaria. Se dispara desde Flutter inmediatamente tras crear el pedido tipo `encargo`.
+
+**Payload**: `{ orderId, userId, pickupDate, pickupSlot }`
+
+---
+
+### `send-encargo-reminders`
+**Ruta**: `POST /functions/v1/send-encargo-reminders`
+
+**Propósito**: Trabajo programable (cron) que recorre los encargos pendientes con recogida en las próximas 24 h y envía recordatorios por email y push. Pensado para invocar vía Scheduled Function.
+
+---
+
+### `send-catering-notification`
+**Ruta**: `POST /functions/v1/send-catering-notification`
+
+**Propósito**: Notifica al cliente cambios de estado de su solicitud de catering (`quoted`, `accepted`, `rejected`, `completed`). Envía email Brevo con el presupuesto adjunto cuando el admin marca como `quoted`.
+
+**Payload**: `{ requestId, newStatus, userId }`
+
+---
+
+### `send-newsletter`
+**Ruta**: `POST /functions/v1/send-newsletter`
+
+**Propósito**: Envía una campaña de newsletter en lote a todos los suscriptores con `status = 'active'`. Acepta el HTML / asunto / segmentación opcional desde el panel admin. Usa Brevo para el envío masivo.
+
+**Payload**: `{ subject, html, segment? }`
+
+**Secrets requeridos**: `BREVO_API_KEY`, `BREVO_SENDER_EMAIL`.
+
+---
+
+### `send-welcome-email`
+**Ruta**: `POST /functions/v1/send-welcome-email`
+
+**Propósito**: Email de bienvenida tras el registro de un nuevo cliente. Se invoca desde el `auth.signUp` de Flutter (o desde un trigger de BD) con `{ userId, email, fullName }`.
+
+---
+
+### `chat-bot`
+**Ruta**: `POST /functions/v1/chat-bot`
+
+**Propósito**: Backend del asistente conversacional de la app (sugerencias de menú, dudas de pedidos, recomendaciones por alérgenos). Recibe el historial reciente y devuelve la respuesta del modelo.
+
+**Payload**: `{ messages: [{ role, content }], userId? }`
+
+**Respuesta**: `{ reply, suggestedDishes?: [uuid] }`
+
+---
+
 ## 8. Migraciones SQL
 
-Ejecutar en orden en el SQL Editor de Supabase (**Dashboard → SQL Editor**):
+Ejecutar en orden en el SQL Editor de Supabase (**Dashboard → SQL Editor**). El CLI `supabase db push` puede estar bloqueado por desfase de historial; en ese caso aplicar manualmente cada SQL en el editor.
 
 | Orden | Archivo | Contenido |
 |-------|---------|-----------|
-| 1 | `00001_initial_schema.sql` | ENUMs, todas las tablas, índices, triggers, funciones, RLS completo |
-| 2 | `00002_sample_data.sql` | Categorías, platos de ejemplo, horarios, menús de catering de demostración |
-| 3 | `00003_test_users.sql` | Asigna roles a usuarios de prueba (creados previamente en Dashboard) |
+| 1 | `00001_initial_schema.sql` | ENUMs, todas las tablas iniciales, índices, triggers, funciones, RLS completo |
+| 2 | `00002_sample_data.sql` | Categorías, platos, horarios y menús de catering de demostración |
+| 3 | `00003_test_users.sql` | Asigna roles a usuarios de prueba creados en el dashboard |
 | 4 | `00004_encargo_config.sql` | Inserta `encargo_min_days_advance = '2'` en `business_config` |
+| 5 | `00005_dishes_offer_seasonal.sql` | Añade columnas `is_offer`, `is_seasonal`, `offer_price` a `dishes` |
+| 6 | `00006_sample_offers.sql` | Datos de ejemplo para ofertas |
+| 7 | `00007_offers_section_config.sql` | Configuración de la sección Ofertas en home |
+| 8 | `00008_seasonal_section_config.sql` | Configuración de la sección Temporada en home |
+| 9 | `00009_extend_daily_special.sql` | Amplía el modelo `daily_special` (descripción, multi-plato) |
+| 10 | `00010_create_subscriptions.sql` | Tabla `subscriptions` para alertas/avisos |
+| 11 | `00011_daily_special_image_url.sql` | Campo `image_url` en `daily_special` |
+| 12 | `00012_storage_update_policy.sql` | Políticas adicionales sobre buckets de Storage |
+| 13 | `00013_first_order_discount.sql` | Lógica de descuento para el primer pedido |
+| 14 | `00014_orders_discount_column.sql` | Columna `discount` en `orders` |
+| 15 | `00015_email_webhooks.sql` | Triggers para webhooks de email transaccional |
+| 16 | `00016_accepting_orders.sql` | Flag global `accepting_orders` para abrir/cerrar pedidos |
+| 17 | `00017_fix_order_email_trigger.sql` | Hotfix del trigger de email de pedidos |
+| 18 | `00018_add_tpv_payment_method.sql` | Añade método de pago `tpv` |
+| 19 | `00019_testimonials.sql` | Tabla `testimonials` (reseñas en home) |
+| 20 | `00020_notifications.sql` | Configuración / preferencias de notificaciones |
+| 21 | `00021_orders_date_indexes.sql` | Índices adicionales por fecha en `orders` |
+| 22 | `00022_order_display_ids.sql` | Campo `display_id` (identificador corto humano) en `orders` |
+| 23 | `00023_catering_menus_and_requests.sql` | Refuerzo de menús de catering y solicitudes |
+| 24 | `00024_detailed_catering_menus.sql` | Menús de catering detallados por curso |
+| 25 | `00025_rename_categories_caseras.sql` | Renombrado de categorías "caseras" |
+| 26 | `00026_catering_event_rules_and_menus.sql` | Reglas de eventos y menús asociados |
+| 27 | `00027_support_threads_messages.sql` | Tablas `support_threads` y `support_messages` |
+| 28 | `00028_newsletter_subscribers.sql` | Tabla `newsletter_subscribers` (opt-in público) |
 
 **Usuarios de prueba** (crear primero en Dashboard → Authentication → Add User con "Auto Confirm"):
 
@@ -598,6 +772,12 @@ Ejecutar en orden en el SQL Editor de Supabase (**Dashboard → SQL Editor**):
 ```bash
 supabase functions deploy create-payment-intent
 supabase functions deploy send-order-notification
+supabase functions deploy send-encargo-confirmation
+supabase functions deploy send-encargo-reminders
+supabase functions deploy send-catering-notification
+supabase functions deploy send-newsletter
+supabase functions deploy send-welcome-email
+supabase functions deploy chat-bot
 ```
 
 ### Configurar secrets

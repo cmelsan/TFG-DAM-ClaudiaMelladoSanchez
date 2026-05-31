@@ -140,7 +140,6 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
     final hPad = screenW > 1200 ? (screenW - 1200) / 2 + 24.0 : 24.0;
 
     return Scaffold(
-      backgroundColor: Colors.white,
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(80),
         child: WebNavbar(

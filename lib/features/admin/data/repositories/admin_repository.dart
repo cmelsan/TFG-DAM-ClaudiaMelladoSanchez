@@ -29,12 +29,23 @@ class AdminRepository {
 
   final SupabaseClient _client;
 
-  Future<Map<String, double>> getDashboardStats() async {
+  /// Devuelve un mapa rico de métricas reales para el dashboard y estadísticas.
+  /// Segmenta por hoy / semana / mes / total y agrega alertas.
+  Future<Map<String, dynamic>> getDashboardStats() async {
     try {
-      final ordersData = await _client.from(SupabaseConstants.orders).select();
+      final now = DateTime.now();
+      final startToday = DateTime(now.year, now.month, now.day);
+      final startWeek = startToday.subtract(
+        Duration(days: now.weekday - 1),
+      ); // lunes
+      final startMonth = DateTime(now.year, now.month, 1);
+
+      final ordersData = await _client
+          .from(SupabaseConstants.orders)
+          .select('total, status, created_at, scheduled_at, order_type');
       final usersData = await _client
           .from(SupabaseConstants.profiles)
-          .select('id, role, is_active');
+          .select('id, role, is_active, created_at');
       final eventData = await _client
           .from(SupabaseConstants.eventRequests)
           .select('id, status');
@@ -42,22 +53,264 @@ class AdminRepository {
           .from(SupabaseConstants.contactMessages)
           .select('id, is_read');
 
-      final orders = ordersData.map(Order.fromJson).toList();
-      final delivered = orders.where((o) => o.status == 'delivered');
-      final pending = orders.where((o) => o.status == 'pending').length;
-      final revenue = delivered.fold<double>(0, (sum, o) => sum + o.total);
+      // Tolerante a esquema: si support_threads aún no existe en remoto,
+      // no debe romper el dashboard ni las estadísticas.
+      double supportUnread = 0;
+      try {
+        final supportData = await _client
+            .from('support_threads')
+            .select('id, unread_for_admin');
+        supportUnread = supportData.fold<double>(
+          0,
+          (sum, thread) =>
+              sum + ((thread['unread_for_admin'] as num?)?.toDouble() ?? 0),
+        );
+      } on PostgrestException {
+        supportUnread = 0;
+      }
 
-      return {
-        'orders_total': orders.length.toDouble(),
-        'orders_pending': pending.toDouble(),
-        'revenue_total': revenue,
-        'users_total': usersData.length.toDouble(),
-        'events_total': eventData.length.toDouble(),
-        'contacts_unread': contactsData
-            .where((c) => (c['is_read'] as bool?) == false)
-            .length
-            .toDouble(),
+      // Acumuladores
+      int ordersTotal = 0,
+          ordersToday = 0,
+          ordersWeek = 0,
+          ordersMonth = 0;
+      int pending = 0, confirmed = 0, preparing = 0, ready = 0, cancelled = 0;
+      double revenueTotal = 0,
+          revenueToday = 0,
+          revenueWeek = 0,
+          revenueMonth = 0;
+
+      for (final row in ordersData) {
+        ordersTotal++;
+        final status = (row['status'] as String?) ?? '';
+        final total = (row['total'] as num?)?.toDouble() ?? 0;
+        final createdAt =
+            DateTime.tryParse(row['created_at'] as String? ?? '') ?? now;
+        final scheduledAt = DateTime.tryParse(
+          row['scheduled_at'] as String? ?? '',
+        );
+        final orderType = (row['order_type'] as String?) ?? '';
+        // Fecha lógica del pedido: encargos usan scheduled_at; resto created_at
+        final refDate = orderType == 'encargo' && scheduledAt != null
+            ? scheduledAt
+            : createdAt;
+
+        switch (status) {
+          case 'pending':
+            pending++;
+            break;
+          case 'confirmed':
+            confirmed++;
+            break;
+          case 'preparing':
+            preparing++;
+            break;
+          case 'ready':
+            ready++;
+            break;
+          case 'cancelled':
+            cancelled++;
+            break;
+        }
+
+        // Sólo contabilizamos ingresos de pedidos no cancelados.
+        if (status != 'cancelled') {
+          if (!refDate.isBefore(startToday)) {
+            ordersToday++;
+            revenueToday += total;
+          }
+          if (!refDate.isBefore(startWeek)) {
+            ordersWeek++;
+            revenueWeek += total;
+          }
+          if (!refDate.isBefore(startMonth)) {
+            ordersMonth++;
+            revenueMonth += total;
+          }
+          revenueTotal += total;
+        }
+      }
+
+      // Usuarios
+      final usersTotal = usersData.length;
+      final clientsTotal = usersData
+          .where((u) => (u['role'] as String?) == 'client')
+          .length;
+      final usersNewWeek = usersData.where((u) {
+        final c = DateTime.tryParse(u['created_at'] as String? ?? '');
+        return c != null && !c.isBefore(startWeek);
+      }).length;
+
+      final contactsUnread = contactsData
+          .where((c) => (c['is_read'] as bool?) == false)
+          .length;
+
+      final eventsPending = eventData
+          .where((e) => (e['status'] as String?) == 'pending')
+          .length;
+
+      return <String, dynamic>{
+        // Pedidos
+        'orders_total': ordersTotal,
+        'orders_today': ordersToday,
+        'orders_week': ordersWeek,
+        'orders_month': ordersMonth,
+        'orders_pending': pending,
+        'orders_confirmed': confirmed,
+        'orders_preparing': preparing,
+        'orders_ready': ready,
+        'orders_cancelled': cancelled,
+        // Ingresos
+        'revenue_total': revenueTotal,
+        'revenue_today': revenueToday,
+        'revenue_week': revenueWeek,
+        'revenue_month': revenueMonth,
+        // Ticket medio
+        'avg_ticket_today': ordersToday == 0 ? 0.0 : revenueToday / ordersToday,
+        'avg_ticket_month': ordersMonth == 0
+            ? 0.0
+            : revenueMonth / ordersMonth,
+        // Usuarios
+        'users_total': usersTotal,
+        'clients_total': clientsTotal,
+        'users_new_week': usersNewWeek,
+        // Alertas
+        'contacts_unread': contactsUnread,
+        'support_unread': supportUnread.toInt(),
+        'events_pending': eventsPending,
+        'events_total': eventData.length,
       };
+    } on PostgrestException catch (e) {
+      throw DatabaseFailure(message: e.message, code: e.code);
+    } catch (e) {
+      throw UnexpectedFailure(message: e.toString());
+    }
+  }
+
+  /// Serie de ingresos por día para los últimos [days] días (incluyendo hoy).
+  /// Devuelve la lista ordenada cronológicamente: cada elemento `{date, total}`.
+  Future<List<Map<String, dynamic>>> getRevenueLastDays(int days) async {
+    try {
+      final now = DateTime.now();
+      final start = DateTime(
+        now.year,
+        now.month,
+        now.day,
+      ).subtract(Duration(days: days - 1));
+
+      final data = await _client
+          .from(SupabaseConstants.orders)
+          .select('total, status, created_at, scheduled_at, order_type')
+          .neq('status', 'cancelled')
+          .gte('created_at', start.toIso8601String());
+
+      // Inicializa buckets a 0
+      final buckets = <DateTime, double>{};
+      for (var i = 0; i < days; i++) {
+        final d = start.add(Duration(days: i));
+        buckets[DateTime(d.year, d.month, d.day)] = 0;
+      }
+
+      for (final row in data) {
+        final total = (row['total'] as num?)?.toDouble() ?? 0;
+        final createdAt =
+            DateTime.tryParse(row['created_at'] as String? ?? '') ?? now;
+        final scheduledAt = DateTime.tryParse(
+          row['scheduled_at'] as String? ?? '',
+        );
+        final orderType = (row['order_type'] as String?) ?? '';
+        final ref = orderType == 'encargo' && scheduledAt != null
+            ? scheduledAt
+            : createdAt;
+        final key = DateTime(ref.year, ref.month, ref.day);
+        if (buckets.containsKey(key)) {
+          buckets[key] = buckets[key]! + total;
+        }
+      }
+
+      return buckets.entries
+          .map((e) => {'date': e.key, 'total': e.value})
+          .toList();
+    } on PostgrestException catch (e) {
+      throw DatabaseFailure(message: e.message, code: e.code);
+    } catch (e) {
+      throw UnexpectedFailure(message: e.toString());
+    }
+  }
+
+  /// Top platos por unidades vendidas (últimos 30 días).
+  Future<List<Map<String, dynamic>>> getTopDishes({int limit = 5}) async {
+    try {
+      final since = DateTime.now()
+          .subtract(const Duration(days: 30))
+          .toIso8601String();
+
+      // Trae order_items recientes con datos del plato
+      final data = await _client
+          .from(SupabaseConstants.orderItems)
+          .select(
+            'quantity, unit_price, dish_id, orders!inner(created_at, status), dishes(name)',
+          )
+          .gte('orders.created_at', since)
+          .neq('orders.status', 'cancelled');
+
+      final agg = <String, Map<String, dynamic>>{};
+      for (final row in data) {
+        final dishId = row['dish_id'] as String? ?? '';
+        if (dishId.isEmpty) continue;
+        final qty = (row['quantity'] as num?)?.toInt() ?? 0;
+        final unit = (row['unit_price'] as num?)?.toDouble() ?? 0;
+        final dish = row['dishes'];
+        final name = dish is Map<String, dynamic>
+            ? (dish['name'] as String? ?? '—')
+            : '—';
+        final cur = agg.putIfAbsent(
+          dishId,
+          () => {'dish_id': dishId, 'name': name, 'quantity': 0, 'revenue': 0.0},
+        );
+        cur['quantity'] = (cur['quantity'] as int) + qty;
+        cur['revenue'] = (cur['revenue'] as double) + (qty * unit);
+      }
+
+      final list = agg.values.toList()
+        ..sort(
+          (a, b) => (b['quantity'] as int).compareTo(a['quantity'] as int),
+        );
+      return list.take(limit).toList();
+    } on PostgrestException catch (e) {
+      throw DatabaseFailure(message: e.message, code: e.code);
+    } catch (e) {
+      throw UnexpectedFailure(message: e.toString());
+    }
+  }
+
+  /// Estadísticas enriquecidas por usuario: nº pedidos y total gastado.
+  /// Devuelve un mapa `userId -> {orders_count, total_spent, last_order_at}`.
+  Future<Map<String, Map<String, dynamic>>> getUsersStats() async {
+    try {
+      final data = await _client
+          .from(SupabaseConstants.orders)
+          .select('user_id, total, status, created_at')
+          .neq('status', 'cancelled');
+
+      final agg = <String, Map<String, dynamic>>{};
+      for (final row in data) {
+        final uid = row['user_id'] as String?;
+        if (uid == null || uid.isEmpty) continue;
+        final total = (row['total'] as num?)?.toDouble() ?? 0;
+        final createdAt = DateTime.tryParse(row['created_at'] as String? ?? '');
+        final cur = agg.putIfAbsent(
+          uid,
+          () => {'orders_count': 0, 'total_spent': 0.0, 'last_order_at': null},
+        );
+        cur['orders_count'] = (cur['orders_count'] as int) + 1;
+        cur['total_spent'] = (cur['total_spent'] as double) + total;
+        final prev = cur['last_order_at'] as DateTime?;
+        if (createdAt != null && (prev == null || createdAt.isAfter(prev))) {
+          cur['last_order_at'] = createdAt;
+        }
+      }
+      return agg;
     } on PostgrestException catch (e) {
       throw DatabaseFailure(message: e.message, code: e.code);
     } catch (e) {

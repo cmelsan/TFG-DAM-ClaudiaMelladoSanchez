@@ -14,7 +14,6 @@ class MyCateringRequestsScreen extends ConsumerWidget {
     final requestsAsync = ref.watch(myCateringRequestsProvider);
 
     return Scaffold(
-      backgroundColor: AppTokens.pageBg,
       appBar: AppBar(
         title: const Text('Mis solicitudes de catering'),
         centerTitle: true,

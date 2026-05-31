@@ -7,12 +7,12 @@ part of 'admin_provider.dart';
 // **************************************************************************
 
 String _$adminDashboardStatsHash() =>
-    r'01d7998362099682fa73a7da923ef8109174c161';
+    r'be2959862901c8c8d5dd9aa6aba2870d4aad5503';
 
 /// See also [adminDashboardStats].
 @ProviderFor(adminDashboardStats)
 final adminDashboardStatsProvider =
-    AutoDisposeFutureProvider<Map<String, double>>.internal(
+    AutoDisposeFutureProvider<Map<String, dynamic>>.internal(
       adminDashboardStats,
       name: r'adminDashboardStatsProvider',
       debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
@@ -25,7 +25,93 @@ final adminDashboardStatsProvider =
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef AdminDashboardStatsRef =
-    AutoDisposeFutureProviderRef<Map<String, double>>;
+    AutoDisposeFutureProviderRef<Map<String, dynamic>>;
+String _$adminRevenueLast7DaysHash() =>
+    r'7651523e1e2aee29a4f3da8dbb148ce17d7dbbb2';
+
+/// Serie de ingresos por día (últimos 7) para gráficos.
+///
+/// Copied from [adminRevenueLast7Days].
+@ProviderFor(adminRevenueLast7Days)
+final adminRevenueLast7DaysProvider =
+    AutoDisposeFutureProvider<List<Map<String, dynamic>>>.internal(
+      adminRevenueLast7Days,
+      name: r'adminRevenueLast7DaysProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$adminRevenueLast7DaysHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef AdminRevenueLast7DaysRef =
+    AutoDisposeFutureProviderRef<List<Map<String, dynamic>>>;
+String _$adminRevenueLast30DaysHash() =>
+    r'1a777d95448cea3755d99a3769a527f2b5cf88d9';
+
+/// Serie de ingresos por día (últimos 30) para estadísticas.
+///
+/// Copied from [adminRevenueLast30Days].
+@ProviderFor(adminRevenueLast30Days)
+final adminRevenueLast30DaysProvider =
+    AutoDisposeFutureProvider<List<Map<String, dynamic>>>.internal(
+      adminRevenueLast30Days,
+      name: r'adminRevenueLast30DaysProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$adminRevenueLast30DaysHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef AdminRevenueLast30DaysRef =
+    AutoDisposeFutureProviderRef<List<Map<String, dynamic>>>;
+String _$adminTopDishesHash() => r'1ac30349323b66334ad89818072ffdf4a0dadd7f';
+
+/// Top platos por unidades vendidas (últimos 30 días).
+///
+/// Copied from [adminTopDishes].
+@ProviderFor(adminTopDishes)
+final adminTopDishesProvider =
+    AutoDisposeFutureProvider<List<Map<String, dynamic>>>.internal(
+      adminTopDishes,
+      name: r'adminTopDishesProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$adminTopDishesHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef AdminTopDishesRef =
+    AutoDisposeFutureProviderRef<List<Map<String, dynamic>>>;
+String _$adminUsersStatsHash() => r'ab1342c323d1837b532d6bdfc699fa4453f8bd1b';
+
+/// Estadísticas agregadas por usuario (orders_count, total_spent, last_order_at).
+///
+/// Copied from [adminUsersStats].
+@ProviderFor(adminUsersStats)
+final adminUsersStatsProvider =
+    AutoDisposeFutureProvider<Map<String, Map<String, dynamic>>>.internal(
+      adminUsersStats,
+      name: r'adminUsersStatsProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$adminUsersStatsHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef AdminUsersStatsRef =
+    AutoDisposeFutureProviderRef<Map<String, Map<String, dynamic>>>;
 String _$adminOrdersHash() => r'e7eb8705e4c04a4e38622dea686bd7e6c47b33a3';
 
 /// See also [adminOrders].

@@ -38,6 +38,8 @@ class WebNavbar extends ConsumerWidget {
     final profile = authState.valueOrNull;
     final screenW = MediaQuery.sizeOf(context).width;
     final hPad = screenW < 500 ? 16.0 : 40.0;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final navBg = isDark ? const Color(0xFF1A1A1A) : Colors.white;
 
     return ClipRect(
       child: BackdropFilter(
@@ -46,9 +48,7 @@ class WebNavbar extends ConsumerWidget {
           duration: const Duration(milliseconds: 220),
           curve: Curves.easeOut,
           decoration: BoxDecoration(
-            color: isScrolled
-                ? Colors.white.withValues(alpha: 0.92)
-                : Colors.white,
+            color: isScrolled ? navBg.withValues(alpha: 0.92) : navBg,
             border: const Border(
               top: BorderSide(color: AppTokens.brandPrimary, width: 4),
             ),
@@ -250,13 +250,17 @@ class WebNavbar extends ConsumerWidget {
                                 style: GoogleFonts.inter(
                                   fontWeight: FontWeight.w600,
                                   fontSize: 14,
-                                  color: const Color(0xFF111111),
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onSurface,
                                 ),
                               ),
-                              const Icon(
+                              Icon(
                                 Icons.keyboard_arrow_down,
                                 size: 18,
-                                color: Color(0xFF111111),
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onSurface,
                               ),
                             ],
                           ),
@@ -296,6 +300,9 @@ class _WebNavLinkState extends State<WebNavLink> {
   @override
   Widget build(BuildContext context) {
     final highlight = _hovered || widget.isActive;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final inactiveColor =
+        isDark ? const Color(0xFFD0D0D0) : const Color(0xFF222222);
     return MouseRegion(
       onEnter: (_) => setState(() => _hovered = true),
       onExit: (_) => setState(() => _hovered = false),
@@ -314,9 +321,7 @@ class _WebNavLinkState extends State<WebNavLink> {
                   fontWeight:
                       highlight ? FontWeight.w700 : FontWeight.w600,
                   letterSpacing: 0.4,
-                  color: highlight
-                      ? AppTokens.brandPrimary
-                      : const Color(0xFF222222),
+                  color: highlight ? AppTokens.brandPrimary : inactiveColor,
                 ),
               ),
               const SizedBox(height: 3),

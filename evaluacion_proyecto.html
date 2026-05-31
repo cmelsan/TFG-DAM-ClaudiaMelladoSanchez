@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Evaluación del Proyecto — Sabor de Casa</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; color: #1a1a2e; line-height: 1.8; background: #f8f9fa; }
+        @media print { body { background: white; } .page-break { page-break-before: always; } .cover { page-break-after: always; } section { page-break-inside: avoid; } }
+
+        .cover { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; background: linear-gradient(135deg, #0f0c29, #302b63, #24243e); color: white; text-align: center; padding: 2rem; }
+        .cover-icon { font-size: 5rem; margin-bottom: 1.5rem; }
+        .cover h1 { font-size: 2.4rem; font-weight: 700; margin-bottom: 0.5rem; letter-spacing: -0.5px; }
+        .cover h2 { font-size: 1.3rem; font-weight: 300; color: #a8a8d0; margin-bottom: 3rem; }
+        .cover-meta { display: flex; flex-direction: column; gap: 0.5rem; font-size: 1rem; color: #c0c0e0; }
+        .cover-meta strong { color: white; }
+        .cover-line { width: 80px; height: 3px; background: linear-gradient(90deg, #6c63ff, #e94560); border-radius: 2px; margin: 2rem auto; }
+
+        .content { max-width: 920px; margin: 0 auto; padding: 3rem 2rem; }
+        section { background: white; border-radius: 12px; padding: 2.5rem; margin-bottom: 2rem; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+        h2 { font-size: 1.6rem; font-weight: 700; color: #302b63; margin-bottom: 1.5rem; padding-bottom: 0.5rem; border-bottom: 3px solid #6c63ff; display: inline-block; }
+        h3 { font-size: 1.15rem; font-weight: 600; color: #1a1a2e; margin-top: 1.5rem; margin-bottom: 0.8rem; }
+        p { margin-bottom: 1rem; text-align: justify; color: #333; }
+        ul, ol { margin: 0.8rem 0 1.2rem 1.5rem; color: #333; }
+        li { margin-bottom: 0.4rem; }
+
+        .highlight-box { background: linear-gradient(135deg, #f0efff, #e8e6ff); border-left: 4px solid #6c63ff; padding: 1.2rem 1.5rem; border-radius: 0 8px 8px 0; margin: 1.2rem 0; }
+        .highlight-box p { margin: 0; color: #302b63; font-weight: 500; }
+        .highlight-box.good { background: linear-gradient(135deg, #e1f5ee, #d0f0e3); border-color: #1d9e75; }
+        .highlight-box.good p { color: #0f6e56; }
+        .highlight-box.warn { background: linear-gradient(135deg, #fff3d6, #ffe6b0); border-color: #ef9f27; }
+        .highlight-box.warn p { color: #8a5a00; }
+
+        .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin: 1.5rem 0; }
+        .stat-card { background: linear-gradient(135deg, #302b63, #24243e); color: white; padding: 1.2rem; border-radius: 10px; text-align: center; }
+        .stat-card .number { font-size: 1.8rem; font-weight: 700; color: #6c63ff; }
+        .stat-card .label { font-size: 0.8rem; color: #a8a8d0; margin-top: 0.3rem; }
+
+        table { width: 100%; border-collapse: collapse; margin: 1.2rem 0; font-size: 0.9rem; }
+        thead th { background: #302b63; color: white; padding: 0.8rem 1rem; text-align: left; font-weight: 600; }
+        thead th:first-child { border-radius: 8px 0 0 0; } thead th:last-child { border-radius: 0 8px 0 0; }
+        tbody td { padding: 0.7rem 1rem; border-bottom: 1px solid #eee; color: #333; vertical-align: top; }
+        tbody tr:hover { background: #f8f7ff; }
+
+        .badge { display: inline-block; padding: 0.2rem 0.6rem; border-radius: 12px; font-size: 0.75rem; font-weight: 600; }
+        .badge.ok { background: #e1f5ee; color: #0f6e56; }
+        .badge.warn { background: #fff3d6; color: #8a5a00; }
+        .badge.err { background: #fde2e1; color: #a51c1a; }
+        .badge.info { background: #d6e7fa; color: #0a4f9a; }
+
+        .kpi-bar { display: flex; align-items: center; gap: 0.7rem; margin: 0.5rem 0; }
+        .kpi-bar .label { min-width: 220px; font-weight: 500; color: #1a1a2e; font-size: 0.9rem; }
+        .kpi-bar .bar { flex: 1; height: 16px; background: #f0efff; border-radius: 8px; overflow: hidden; }
+        .kpi-bar .bar > span { display: block; height: 100%; background: linear-gradient(90deg, #6c63ff, #e94560); }
+        .kpi-bar .pct { min-width: 50px; text-align: right; font-weight: 600; color: #302b63; font-size: 0.9rem; }
+
+        .footer { text-align: center; padding: 2rem; color: #999; font-size: 0.8rem; }
+    </style>
+</head>
+<body>
+
+<div class="cover">
+    <div class="cover-icon">📊</div>
+    <h1>Seguimiento, Evaluación y Documentación</h1>
+    <h2>Indicadores, incidencias, mejoras y lecciones aprendidas</h2>
+    <div class="cover-line"></div>
+    <div class="cover-meta">
+        <span><strong>Proyecto Final</strong> — Desarrollo de Aplicaciones Multiplataforma (DAM)</span>
+        <span><strong>Aplicación:</strong> Sabor de Casa</span>
+        <span><strong>Alumna:</strong> Claudia Mellado</span>
+        <span><strong>Fecha:</strong> Mayo 2026</span>
+    </div>
+</div>
+
+<div class="content">
+
+<section>
+<h2>1. Procedimiento de seguimiento</h2>
+<p>Durante todo el ciclo de vida del proyecto se ha mantenido un procedimiento sistemático de control con tres mecanismos:</p>
+<ul>
+    <li><strong>Tutoría semanal</strong> con el profesor responsable: review de avances, validación de hitos y resolución de dudas técnicas.</li>
+    <li><strong>Tablero de tareas en GitHub Issues</strong>: cada feature, bug o mejora se crea como issue, se etiqueta y se mueve por estados.</li>
+    <li><strong>Historial de commits semanticos</strong>: <code>feat:</code>, <code>fix:</code>, <code>docs:</code>, <code>refactor:</code>, <code>chore:</code>. El log de git constituye la trazabilidad completa.</li>
+</ul>
+</section>
+
+<section class="page-break">
+<h2>2. Indicadores de calidad (KPIs)</h2>
+<p>Se establecieron 8 indicadores cuantitativos al inicio del proyecto. A continuación, el cumplimiento real medido al cierre:</p>
+
+<div class="kpi-bar"><div class="label">Pantallas implementadas (41)</div><div class="bar"><span style="width:100%"></span></div><div class="pct">100 %</div></div>
+<div class="kpi-bar"><div class="label">Migraciones SQL aplicadas (28)</div><div class="bar"><span style="width:100%"></span></div><div class="pct">100 %</div></div>
+<div class="kpi-bar"><div class="label">Edge Functions desplegadas (8)</div><div class="bar"><span style="width:100%"></span></div><div class="pct">100 %</div></div>
+<div class="kpi-bar"><div class="label">Roles funcionales (3)</div><div class="bar"><span style="width:100%"></span></div><div class="pct">100 %</div></div>
+<div class="kpi-bar"><div class="label">Errores de <code>dart analyze</code></div><div class="bar"><span style="width:100%"></span></div><div class="pct">0 / 0</div></div>
+<div class="kpi-bar"><div class="label">Build web sin warnings críticos</div><div class="bar"><span style="width:100%"></span></div><div class="pct">OK</div></div>
+<div class="kpi-bar"><div class="label">Cobertura de tests críticos</div><div class="bar"><span style="width:60%"></span></div><div class="pct">60 %</div></div>
+<div class="kpi-bar"><div class="label">Documentación entregada (11/11)</div><div class="bar"><span style="width:100%"></span></div><div class="pct">100 %</div></div>
+
+<div class="stat-grid">
+    <div class="stat-card"><div class="number">~265 h</div><div class="label">Horas dedicadas al proyecto</div></div>
+    <div class="stat-card"><div class="number">~ 400</div><div class="label">Commits realizados</div></div>
+    <div class="stat-card"><div class="number">130</div><div class="label">Archivos generados por codegen</div></div>
+    <div class="stat-card"><div class="number">20 MB</div><div class="label">Tamaño main.dart.js (web debug)</div></div>
+</div>
+
+<div class="highlight-box good">
+    <p><strong>Resultado global:</strong> los 8 KPIs principales se han alcanzado en su totalidad o por encima del objetivo. Únicamente la cobertura de tests automáticos queda en el 60 % planificado para esta entrega, complementada por pruebas manuales sistemáticas.</p>
+</div>
+</section>
+
+<section class="page-break">
+<h2>3. Registro de incidencias</h2>
+<p>Listado de las incidencias relevantes detectadas durante el desarrollo, su causa raíz, la solución aplicada y el estado final.</p>
+
+<table>
+    <thead><tr><th>#</th><th>Incidencia</th><th>Causa</th><th>Solución</th><th>Estado</th></tr></thead>
+    <tbody>
+        <tr>
+            <td>I-01</td>
+            <td>Error PGRST205 al consultar <code>support_threads</code> antes de aplicar la migración 00027.</td>
+            <td>Migración no aplicada en la BD remota; la tabla no existía.</td>
+            <td>Se envolvió la query en try/catch que devuelve lista vacía. Migración aplicada en Studio.</td>
+            <td><span class="badge ok">Resuelto</span></td>
+        </tr>
+        <tr>
+            <td>I-02</td>
+            <td>Corrupción UTF-8 en <code>app_router.dart</code> y <code>contact_screen.dart</code>: aparecía <em>autenticaciÃ³n</em>.</td>
+            <td>Uso de PowerShell <code>Add-Content @"..."@</code> con acentos escribió CP1252.</td>
+            <td>Restauración desde <code>git checkout HEAD</code> + recuperación de versión limpia desde el historial local de VS Code. Re-aplicación de cambios con la API de edición correcta.</td>
+            <td><span class="badge ok">Resuelto</span></td>
+        </tr>
+        <tr>
+            <td>I-03</td>
+            <td>build_runner falla con <em>"Cannot recurse at later or equal phase"</em>.</td>
+            <td>Caché de codegen inconsistente tras añadir un nuevo feature con providers Riverpod.</td>
+            <td><code>dart run build_runner clean</code> seguido de <code>build --delete-conflicting-outputs</code>.</td>
+            <td><span class="badge ok">Resuelto</span></td>
+        </tr>
+        <tr>
+            <td>I-04</td>
+            <td>Colisión <code>TestimonialAction.update</code> con <code>AsyncNotifierBase.update</code> de Riverpod.</td>
+            <td>Nombre de método reservado por la clase base.</td>
+            <td>Renombrado a <code>updateOne</code> y propagado a todos los call-sites.</td>
+            <td><span class="badge ok">Resuelto</span></td>
+        </tr>
+        <tr>
+            <td>I-05</td>
+            <td><code>supabase db push</code> bloqueado por desfase de historial entre local y remoto.</td>
+            <td>Algunas migraciones se aplicaron manualmente en Studio antes del primer push.</td>
+            <td>Aplicación de cada migración nueva manualmente en Studio SQL Editor; documentado en SUPABASE.md.</td>
+            <td><span class="badge ok">Resuelto</span></td>
+        </tr>
+        <tr>
+            <td>I-06</td>
+            <td>Web: <code>Spacer</code>/<code>Expanded</code> dentro de Slivers sin altura fija reventaba el render.</td>
+            <td>Mal uso de widgets flexibles dentro de un CustomScrollView.</td>
+            <td>Sustituidos por <code>SizedBox</code> con altura concreta o envueltos en <code>SliverToBoxAdapter</code>.</td>
+            <td><span class="badge ok">Resuelto</span></td>
+        </tr>
+        <tr>
+            <td>I-07</td>
+            <td>Pagos en Web: redirección de Stripe rompía el state de GoRouter al volver.</td>
+            <td>Uso del path-based routing en una app con hash routing.</td>
+            <td>Configurado <code>UrlPathStrategy.hash</code> y query params para recuperar el contexto del checkout.</td>
+            <td><span class="badge ok">Resuelto</span></td>
+        </tr>
+        <tr>
+            <td>I-08</td>
+            <td>Notificaciones push duplicadas en algunos Android.</td>
+            <td>Múltiples tokens FCM por usuario sin constraint de unicidad.</td>
+            <td><code>UNIQUE(user_id, token)</code> en <code>push_tokens</code> + upsert en lugar de insert.</td>
+            <td><span class="badge ok">Resuelto</span></td>
+        </tr>
+        <tr>
+            <td>I-09</td>
+            <td>Dashboard admin con datos incoherentes ("avg ticket" calculado sobre pedidos cancelados).</td>
+            <td>El SQL agregaba todos los pedidos sin filtrar por estado.</td>
+            <td>Reescritura de <code>getDashboardStats()</code> segmentando por estado y periodo; nuevos providers (<code>adminRevenueLast7DaysProvider</code>, <code>adminUsersStatsProvider</code>...).</td>
+            <td><span class="badge ok">Resuelto</span></td>
+        </tr>
+        <tr>
+            <td>I-10</td>
+            <td>Brevo bloquea emails por dominio sin SPF/DKIM.</td>
+            <td>Dominio de pruebas no autenticado.</td>
+            <td>Documentado el procedimiento de configuración SPF/DKIM en manual técnico; en pruebas, uso de remitente Brevo por defecto.</td>
+            <td><span class="badge warn">Pendiente prod</span></td>
+        </tr>
+    </tbody>
+</table>
+</section>
+
+<section class="page-break">
+<h2>4. Cambios y mejoras introducidas</h2>
+<p>Durante el desarrollo se incorporaron varias mejoras no previstas inicialmente que aportaron valor real al producto:</p>
+
+<table>
+    <thead><tr><th>Mejora</th><th>Origen</th><th>Beneficio</th></tr></thead>
+    <tbody>
+        <tr><td>Newsletter opt-in en el pie de <code>/contacto</code></td><td>Feedback del tutor</td><td>Captación pasiva de leads desde la web pública</td></tr>
+        <tr><td>Sección de testimonios editables desde el panel admin</td><td>Iteración propia</td><td>Marketing dinámico sin tocar código</td></tr>
+        <tr><td>Resumen oscuro con gradiente en <code>/admin/stats</code></td><td>Rediseño UX</td><td>Mejor jerarquía visual de KPIs</td></tr>
+        <tr><td>Export CSV de usuarios y suscriptores</td><td>Necesidad operativa</td><td>Compatibilidad con herramientas externas</td></tr>
+        <tr><td>Bottom sheet de detalle de cliente con KPIs personales</td><td>UX</td><td>Información rica sin cambiar de pantalla</td></tr>
+        <tr><td>Chat de soporte interno (<code>support_threads</code>)</td><td>Iteración propia</td><td>Atención al cliente sin depender de WhatsApp externo</td></tr>
+        <tr><td>Tipografía dual: Syne (público) + Inter (admin)</td><td>Diseño</td><td>Personalidad de marca en la web; legibilidad en la herramienta</td></tr>
+    </tbody>
+</table>
+</section>
+
+<section class="page-break">
+<h2>5. Feedback recogido</h2>
+
+<h3>5.1 Tutor del proyecto</h3>
+<ul>
+    <li>Valoración positiva del alcance y de la cobertura multi-rol.</li>
+    <li>Sugerencia: añadir Gantt visual al documento de planificación (incorporado).</li>
+    <li>Sugerencia: documentar las migraciones más allá de la cuarta (incorporado en <code>SUPABASE.md</code>).</li>
+</ul>
+
+<h3>5.2 Pruebas con usuarios reales (informales)</h3>
+<p>Se han realizado pruebas no estructuradas con 4 usuarios voluntarios (familiares y compañeros) que ejecutaron flujos típicos:</p>
+<ul>
+    <li>3/4 completaron el flujo de registro + pedido + pago sin ayuda.</li>
+    <li>4/4 entendieron a la primera el panel de "Mis pedidos".</li>
+    <li>2/4 sugirieron mejoras en el flujo de catering (más visual). Anotado para v2.</li>
+    <li>4/4 destacaron la velocidad de respuesta y la coherencia visual entre web y móvil.</li>
+</ul>
+</section>
+
+<section class="page-break">
+<h2>6. Mejoras futuras propuestas</h2>
+<p>El producto entregado es funcional y completo, pero quedan oportunidades de evolución identificadas:</p>
+
+<table>
+    <thead><tr><th>Categoría</th><th>Propuesta</th><th>Prioridad</th></tr></thead>
+    <tbody>
+        <tr><td>Marketing</td><td>Módulo de promociones / banners gestionables desde admin con fecha de inicio/fin.</td><td><span class="badge info">Alta</span></td></tr>
+        <tr><td>Operativa</td><td>Composer visual de notificaciones push masivas con segmentación.</td><td><span class="badge info">Media</span></td></tr>
+        <tr><td>Seguridad</td><td>Audit log de acciones admin (quién creó / modificó qué y cuándo).</td><td><span class="badge info">Media</span></td></tr>
+        <tr><td>Internacionalización</td><td>Soporte multilenguaje (i18n) con catalanes y portugués para el sur peninsular.</td><td><span class="badge info">Baja</span></td></tr>
+        <tr><td>Analítica</td><td>Integración con Posthog o Plausible para análisis de comportamiento.</td><td><span class="badge info">Baja</span></td></tr>
+        <tr><td>Performance</td><td>Lazy-loading de la carta y precarga de imágenes con <code>cached_network_image</code>.</td><td><span class="badge info">Media</span></td></tr>
+        <tr><td>Testing</td><td>Aumentar cobertura de pruebas automáticas al 80 % en repositorios.</td><td><span class="badge info">Alta</span></td></tr>
+        <tr><td>Despliegue</td><td>Pipeline CI/CD en GitHub Actions con builds automáticos web + APK por tag.</td><td><span class="badge info">Media</span></td></tr>
+    </tbody>
+</table>
+</section>
+
+<section>
+<h2>7. Lecciones aprendidas</h2>
+
+<div class="highlight-box">
+    <p><strong>Lección 1 — Documentar desde el primer día.</strong> Cada feature implementada y luego documentada implica el doble de trabajo. Mantener <code>README.md</code> y <code>SUPABASE.md</code> al día semanalmente ha sido determinante.</p>
+</div>
+
+<div class="highlight-box">
+    <p><strong>Lección 2 — RLS es la única seguridad real.</strong> Confiar la autorización solo al cliente Flutter habría sido un agujero. Centralizar las políticas en Postgres permite que cualquier consumidor (app, web, herramienta SQL) reciba el mismo trato.</p>
+</div>
+
+<div class="highlight-box">
+    <p><strong>Lección 3 — Codegen libera tiempo pero exige higiene.</strong> Riverpod + Freezed eliminan toneladas de boilerplate, pero al menor error de orden de fase obligan a un <code>clean</code>. Aprender a leer los logs de build_runner ha sido crítico.</p>
+</div>
+
+<div class="highlight-box">
+    <p><strong>Lección 4 — Probar en ambas plataformas tras cada feature.</strong> Acumular cambios sin verificar Web y Android multiplica los bugs. El test "smoke" en cada plataforma cuesta 2 minutos y ahorra horas.</p>
+</div>
+
+<div class="highlight-box">
+    <p><strong>Lección 5 — La codificación importa.</strong> Un único comando de PowerShell mal escogido puede corromper acentos en todos los archivos de UI. Editar siempre desde el IDE y mantener <code>UTF-8 sin BOM</code> como estándar.</p>
+</div>
+</section>
+
+<section>
+<h2>8. Valoración personal</h2>
+<p>El proyecto ha superado en alcance lo planificado inicialmente: se previeron 36 pantallas y se han entregado 41; se previeron 4 migraciones documentadas y se han desplegado 28; se planificó un único canal de notificación y se han integrado tres (push, email y soporte interno). El resultado es una aplicación realmente usable en un negocio real, no un simulacro académico.</p>
+<p>El aprendizaje técnico ha sido muy intenso (Flutter avanzado, Riverpod con codegen, RLS de Postgres, Edge Functions en Deno, Stripe cross-platform) y se considera plenamente alcanzado el objetivo del ciclo formativo: ser capaz de <strong>diseñar, planificar, ejecutar, documentar y evaluar</strong> una aplicación multiplataforma de calidad profesional.</p>
+</section>
+
+</div>
+
+<div class="footer">Sabor de Casa — Evaluación del Proyecto · Proyecto Final DAM 2025/26</div>
+
+</body>
+</html>

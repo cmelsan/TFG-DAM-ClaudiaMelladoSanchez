@@ -19,8 +19,42 @@ part 'admin_provider.g.dart';
 
 @riverpod
 // ignore: deprecated_member_use_from_same_package, Riverpod 2.x typed Ref
-Future<Map<String, double>> adminDashboardStats(AdminDashboardStatsRef ref) {
+Future<Map<String, dynamic>> adminDashboardStats(AdminDashboardStatsRef ref) {
   return ref.watch(adminRepositoryProvider).getDashboardStats();
+}
+
+/// Serie de ingresos por día (últimos 7) para gráficos.
+@riverpod
+// ignore: deprecated_member_use_from_same_package, Riverpod 2.x typed Ref
+Future<List<Map<String, dynamic>>> adminRevenueLast7Days(
+  AdminRevenueLast7DaysRef ref,
+) {
+  return ref.watch(adminRepositoryProvider).getRevenueLastDays(7);
+}
+
+/// Serie de ingresos por día (últimos 30) para estadísticas.
+@riverpod
+// ignore: deprecated_member_use_from_same_package, Riverpod 2.x typed Ref
+Future<List<Map<String, dynamic>>> adminRevenueLast30Days(
+  AdminRevenueLast30DaysRef ref,
+) {
+  return ref.watch(adminRepositoryProvider).getRevenueLastDays(30);
+}
+
+/// Top platos por unidades vendidas (últimos 30 días).
+@riverpod
+// ignore: deprecated_member_use_from_same_package, Riverpod 2.x typed Ref
+Future<List<Map<String, dynamic>>> adminTopDishes(AdminTopDishesRef ref) {
+  return ref.watch(adminRepositoryProvider).getTopDishes();
+}
+
+/// Estadísticas agregadas por usuario (orders_count, total_spent, last_order_at).
+@riverpod
+// ignore: deprecated_member_use_from_same_package, Riverpod 2.x typed Ref
+Future<Map<String, Map<String, dynamic>>> adminUsersStats(
+  AdminUsersStatsRef ref,
+) {
+  return ref.watch(adminRepositoryProvider).getUsersStats();
 }
 
 @riverpod

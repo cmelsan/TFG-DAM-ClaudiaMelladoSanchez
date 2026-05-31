@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Desarrollo e Implementación — Sabor de Casa</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; color: #1a1a2e; line-height: 1.8; background: #f8f9fa; }
+        @media print { body { background: white; } .page-break { page-break-before: always; } .cover { page-break-after: always; } section { page-break-inside: avoid; } }
+
+        .cover { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; background: linear-gradient(135deg, #0f0c29, #302b63, #24243e); color: white; text-align: center; padding: 2rem; }
+        .cover-icon { font-size: 5rem; margin-bottom: 1.5rem; }
+        .cover h1 { font-size: 2.4rem; font-weight: 700; margin-bottom: 0.5rem; letter-spacing: -0.5px; }
+        .cover h2 { font-size: 1.3rem; font-weight: 300; color: #a8a8d0; margin-bottom: 3rem; }
+        .cover-meta { display: flex; flex-direction: column; gap: 0.5rem; font-size: 1rem; color: #c0c0e0; }
+        .cover-meta strong { color: white; }
+        .cover-line { width: 80px; height: 3px; background: linear-gradient(90deg, #6c63ff, #e94560); border-radius: 2px; margin: 2rem auto; }
+
+        .content { max-width: 920px; margin: 0 auto; padding: 3rem 2rem; }
+        section { background: white; border-radius: 12px; padding: 2.5rem; margin-bottom: 2rem; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+        h2 { font-size: 1.6rem; font-weight: 700; color: #302b63; margin-bottom: 1.5rem; padding-bottom: 0.5rem; border-bottom: 3px solid #6c63ff; display: inline-block; }
+        h3 { font-size: 1.15rem; font-weight: 600; color: #1a1a2e; margin-top: 1.5rem; margin-bottom: 0.8rem; }
+        h4 { font-size: 1rem; font-weight: 600; color: #302b63; margin-top: 1rem; margin-bottom: 0.5rem; }
+        p { margin-bottom: 1rem; text-align: justify; color: #333; }
+        ul, ol { margin: 0.8rem 0 1.2rem 1.5rem; color: #333; }
+        li { margin-bottom: 0.4rem; }
+        code, .mono { font-family: 'JetBrains Mono', monospace; background: #f0efff; color: #302b63; padding: 0.1rem 0.4rem; border-radius: 4px; font-size: 0.88em; }
+        pre { background: #1a1a2e; color: #e6e6f0; padding: 1rem 1.2rem; border-radius: 8px; overflow-x: auto; font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; line-height: 1.6; margin: 1rem 0; }
+        pre code { background: transparent; color: inherit; padding: 0; }
+
+        .highlight-box { background: linear-gradient(135deg, #f0efff, #e8e6ff); border-left: 4px solid #6c63ff; padding: 1.2rem 1.5rem; border-radius: 0 8px 8px 0; margin: 1.2rem 0; }
+        .highlight-box p { margin: 0; color: #302b63; font-weight: 500; }
+
+        .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin: 1.5rem 0; }
+        .stat-card { background: linear-gradient(135deg, #302b63, #24243e); color: white; padding: 1.2rem; border-radius: 10px; text-align: center; }
+        .stat-card .number { font-size: 1.8rem; font-weight: 700; color: #6c63ff; }
+        .stat-card .label { font-size: 0.8rem; color: #a8a8d0; margin-top: 0.3rem; }
+
+        table { width: 100%; border-collapse: collapse; margin: 1.2rem 0; font-size: 0.9rem; }
+        thead th { background: #302b63; color: white; padding: 0.8rem 1rem; text-align: left; font-weight: 600; }
+        thead th:first-child { border-radius: 8px 0 0 0; } thead th:last-child { border-radius: 0 8px 0 0; }
+        tbody td { padding: 0.7rem 1rem; border-bottom: 1px solid #eee; color: #333; vertical-align: top; }
+        tbody tr:hover { background: #f8f7ff; }
+
+        .tech-stack { display: flex; flex-wrap: wrap; gap: 0.6rem; margin: 1rem 0; }
+        .tech-badge { background: #f0efff; color: #302b63; padding: 0.4rem 1rem; border-radius: 20px; font-size: 0.85rem; font-weight: 500; border: 1px solid #d0cfff; }
+
+        .arch-layers { display: flex; flex-direction: column; gap: 0.6rem; margin: 1.2rem 0; }
+        .arch-layer { padding: 1rem 1.2rem; border-radius: 10px; color: white; font-weight: 600; display: flex; justify-content: space-between; align-items: center; }
+        .arch-layer.l1 { background: linear-gradient(90deg, #6c63ff, #8b85ff); }
+        .arch-layer.l2 { background: linear-gradient(90deg, #4a3eb8, #6c63ff); }
+        .arch-layer.l3 { background: linear-gradient(90deg, #302b63, #4a3eb8); }
+        .arch-layer.l4 { background: linear-gradient(90deg, #1a1a2e, #302b63); }
+        .arch-layer small { color: #d0cfff; font-weight: 400; font-size: 0.8rem; }
+
+        .footer { text-align: center; padding: 2rem; color: #999; font-size: 0.8rem; }
+    </style>
+</head>
+<body>
+
+<div class="cover">
+    <div class="cover-icon">⚙️</div>
+    <h1>Desarrollo e Implementación</h1>
+    <h2>Metodología, arquitectura, módulos y pruebas de la aplicación</h2>
+    <div class="cover-line"></div>
+    <div class="cover-meta">
+        <span><strong>Proyecto Final</strong> — Desarrollo de Aplicaciones Multiplataforma (DAM)</span>
+        <span><strong>Aplicación:</strong> Sabor de Casa</span>
+        <span><strong>Alumna:</strong> Claudia Mellado</span>
+        <span><strong>Fecha:</strong> Mayo 2026</span>
+    </div>
+</div>
+
+<div class="content">
+
+<section>
+<h2>1. Resumen ejecutivo</h2>
+<p>El desarrollo de "Sabor de Casa" se ha ejecutado siguiendo una <strong>metodología ágil incremental</strong>, organizando el trabajo en iteraciones cortas (mini-sprints semanales) con un objetivo funcional verificable al final de cada uno. Esta sección documenta el proceso de implementación: arquitectura adoptada, decisiones técnicas, módulos construidos, integración de servicios externos y estrategia de pruebas.</p>
+
+<div class="stat-grid">
+    <div class="stat-card"><div class="number">41</div><div class="label">Pantallas implementadas</div></div>
+    <div class="stat-card"><div class="number">28</div><div class="label">Migraciones SQL</div></div>
+    <div class="stat-card"><div class="number">8</div><div class="label">Edge Functions</div></div>
+    <div class="stat-card"><div class="number">0</div><div class="label">Errores de análisis</div></div>
+</div>
+</section>
+
+<section class="page-break">
+<h2>2. Metodología de desarrollo</h2>
+<p>Aunque el equipo es individual, se han adoptado prácticas inspiradas en <strong>Scrum/Kanban ligero</strong>:</p>
+<ul>
+    <li><strong>Iteraciones semanales</strong> con objetivo único (ej: "auth + perfiles", "carrito + checkout", "panel admin estadísticas").</li>
+    <li><strong>Tablero de tareas</strong> en GitHub Issues (To do / In progress / Done).</li>
+    <li><strong>Commits atómicos</strong> con mensaje convencional (<code>feat:</code>, <code>fix:</code>, <code>docs:</code>, <code>refactor:</code>).</li>
+    <li><strong>Pruebas tras cada feature</strong>: análisis estático, prueba manual web y Android, validación de RLS en Supabase.</li>
+    <li><strong>Tutorías semanales</strong> con el profesor como ceremonia de review.</li>
+</ul>
+
+<div class="highlight-box">
+    <p><strong>Principio guía:</strong> "primero funcional, luego pulido". Cada feature se ha cerrado con una versión navegable antes de pasar a la siguiente, evitando estados a medio terminar.</p>
+</div>
+</section>
+
+<section class="page-break">
+<h2>3. Arquitectura del software</h2>
+<p>El proyecto sigue la <strong>arquitectura recomendada por Flutter</strong> en capas, con separación estricta UI / Lógica / Datos y un patrón <em>feature-first</em>:</p>
+
+<div class="arch-layers">
+    <div class="arch-layer l1">Capa de Presentación (UI)<small>Widgets, screens, theming, GoRouter</small></div>
+    <div class="arch-layer l2">Capa de Estado / Lógica<small>Providers Riverpod 2 + codegen</small></div>
+    <div class="arch-layer l3">Capa de Datos<small>Repositorios + Supabase Client + Stripe + FCM</small></div>
+    <div class="arch-layer l4">Capa de Dominio<small>Modelos Freezed inmutables (JSON serializable)</small></div>
+</div>
+
+<h3>3.1 Stack tecnológico</h3>
+<div class="tech-stack">
+    <span class="tech-badge">Flutter 3.38</span>
+    <span class="tech-badge">Dart 3.5</span>
+    <span class="tech-badge">flutter_riverpod 2.6</span>
+    <span class="tech-badge">riverpod_annotation</span>
+    <span class="tech-badge">freezed 2.5</span>
+    <span class="tech-badge">json_serializable</span>
+    <span class="tech-badge">go_router 14</span>
+    <span class="tech-badge">supabase_flutter 2.9</span>
+    <span class="tech-badge">flutter_stripe 11</span>
+    <span class="tech-badge">stripe_js 6</span>
+    <span class="tech-badge">firebase_messaging 15</span>
+    <span class="tech-badge">fl_chart 1.2</span>
+    <span class="tech-badge">google_fonts</span>
+    <span class="tech-badge">lottie</span>
+    <span class="tech-badge">qr_flutter</span>
+    <span class="tech-badge">mobile_scanner</span>
+    <span class="tech-badge">speech_to_text</span>
+    <span class="tech-badge">printing / pdf</span>
+    <span class="tech-badge">cached_network_image</span>
+</div>
+
+<h3>3.2 Estructura de carpetas</h3>
+<pre><code>lib/
+├── main.dart           // Entry point: runs bootstrap()
+├── bootstrap.dart      // Init Supabase, Stripe, Firebase, locale
+├── app.dart            // MaterialApp.router + theme
+├── core/               // Router, theming, widgets compartidos
+│   ├── router/         // app_router.dart + route_names.dart
+│   ├── theme/          // AppTokens (colores, radios, sombras)
+│   └── widgets/        // WebNavbar, WebFooter, ErrorView, LoadingIndicator
+├── services/           // Singletons: SupabaseService, NotificationsService
+└── features/           // 1 carpeta por feature (auth, menu, cart, orders, ...)
+    └── &lt;feature&gt;/
+        ├── data/
+        │   └── repositories/   // Lógica de acceso a datos
+        ├── domain/
+        │   └── models/         // Freezed inmutables
+        └── presentation/
+            ├── providers/      // @riverpod state
+            ├── screens/        // Pantallas
+            └── widgets/        // Componentes específicos del feature</code></pre>
+</section>
+
+<section class="page-break">
+<h2>4. Módulos implementados</h2>
+<p>El proyecto cuenta con <strong>20 features</strong> agrupadas por rol de usuario:</p>
+
+<h3>4.1 Features de cliente</h3>
+<table>
+    <thead><tr><th>Feature</th><th>Descripción</th><th>Rutas</th></tr></thead>
+    <tbody>
+        <tr><td><code>auth</code></td><td>Login, registro, recuperación de contraseña, sesión persistente</td><td><code>/login</code> · <code>/register</code></td></tr>
+        <tr><td><code>home</code></td><td>Landing pública: hero, ofertas, plato del día, temporada, testimonios, contacto</td><td><code>/</code></td></tr>
+        <tr><td><code>menu</code></td><td>Catálogo navegable por categorías, detalle de plato, alérgenos, favoritos</td><td><code>/menu</code> · <code>/menu/:id</code></td></tr>
+        <tr><td><code>cart</code></td><td>Carrito persistente, checkout multi-modalidad (mostrador / encargo / domicilio), pago Stripe</td><td><code>/cart</code> · <code>/checkout</code></td></tr>
+        <tr><td><code>orders</code></td><td>Historial de pedidos, detalle con tracking en tiempo real, valoración post-entrega</td><td><code>/orders</code> · <code>/orders/:id</code></td></tr>
+        <tr><td><code>catering</code></td><td>Selección de menú de evento, configuración de cursos y extras, solicitud de presupuesto</td><td><code>/catering</code> · <code>/catering/request</code></td></tr>
+        <tr><td><code>contact</code></td><td>Formulario de contacto público, opt-in a newsletter integrado</td><td><code>/contacto</code></td></tr>
+        <tr><td><code>profile</code></td><td>Datos personales, direcciones, alérgenos, preferencias, cerrar sesión</td><td><code>/profile</code></td></tr>
+        <tr><td><code>support</code></td><td>Chat de soporte interno con el administrador (hilos por categoría)</td><td><code>/support</code></td></tr>
+        <tr><td><code>chat</code></td><td>Asistente conversacional con IA (recomendaciones, dudas)</td><td><code>/chat</code></td></tr>
+    </tbody>
+</table>
+
+<h3>4.2 Features de empleado</h3>
+<table>
+    <thead><tr><th>Feature</th><th>Descripción</th><th>Rutas</th></tr></thead>
+    <tbody>
+        <tr><td><code>kitchen</code></td><td>Cola de pedidos en cocina, actualización de estado en tiempo real, escaneo QR</td><td><code>/employee/kitchen</code></td></tr>
+        <tr><td><code>delivery</code></td><td>Pedidos asignados al repartidor, mapa, marcar entregado</td><td><code>/employee/delivery</code></td></tr>
+        <tr><td><code>pos</code></td><td>Punto de venta en mostrador, ticket, cobro mixto (efectivo / tarjeta / TPV)</td><td><code>/employee/pos</code></td></tr>
+    </tbody>
+</table>
+
+<h3>4.3 Features de administración</h3>
+<table>
+    <thead><tr><th>Feature</th><th>Descripción</th><th>Rutas</th></tr></thead>
+    <tbody>
+        <tr><td><code>admin · dashboard</code></td><td>8 KPI por periodo, hero banner, alertas, accesos rápidos</td><td><code>/admin</code></td></tr>
+        <tr><td><code>admin · stats</code></td><td>Resumen oscuro, gráfica fl_chart de ingresos 30d, barras por estado, top platos</td><td><code>/admin/stats</code></td></tr>
+        <tr><td><code>admin · users</code></td><td>Clientes con KPIs personales, filtros, búsqueda, CSV, detalle modal</td><td><code>/admin/users</code></td></tr>
+        <tr><td><code>admin · dishes / categories / daily_special</code></td><td>CRUD del catálogo y promociones</td><td><code>/admin/dishes</code> · etc.</td></tr>
+        <tr><td><code>admin · orders / encargos / catering / schedule</code></td><td>Gestión operativa de pedidos y eventos</td><td><code>/admin/orders</code> · etc.</td></tr>
+        <tr><td><code>admin · support</code></td><td>Bandeja de chats internos con clientes</td><td><code>/admin/support</code></td></tr>
+        <tr><td><code>newsletter</code></td><td>Suscriptores opt-in, KPIs, alta manual, export CSV</td><td><code>/admin/newsletter</code></td></tr>
+        <tr><td><code>testimonials</code></td><td>CRUD de reseñas mostradas en home, rating interactivo, toggle destacar</td><td><code>/admin/testimonials</code></td></tr>
+        <tr><td><code>admin · config</code></td><td>Parámetros del negocio (horarios, antelación encargos, etc.)</td><td><code>/admin/config</code></td></tr>
+    </tbody>
+</table>
+</section>
+
+<section class="page-break">
+<h2>5. Decisiones técnicas clave</h2>
+
+<h3>5.1 Riverpod 2 con codegen</h3>
+<p>Se eligió Riverpod sobre alternativas (Provider, Bloc) por su tipado fuerte, su capacidad de invalidar dependencias granulares y la <strong>generación automática</strong> con <code>@riverpod</code>, que elimina el boilerplate de declarar manualmente cada provider:</p>
+<pre><code>@riverpod
+Future&lt;List&lt;Dish&gt;&gt; menuDishes(MenuDishesRef ref) async {
+  return ref.read(menuRepositoryProvider).list();
+}
+
+// Uso en widgets:
+final dishes = ref.watch(menuDishesProvider);
+dishes.when(
+  data: (list) =&gt; DishGrid(items: list),
+  loading: () =&gt; const LoadingIndicator(),
+  error: (e, _) =&gt; ErrorView(error: e),
+);</code></pre>
+
+<h3>5.2 Freezed para los modelos de dominio</h3>
+<p>Todos los modelos de dominio son inmutables con <code>@freezed</code> y serializables JSON con <code>fieldRename: FieldRename.snake</code> para casar con las columnas Postgres:</p>
+<pre><code>@freezed
+class Order with _$Order {
+  const factory Order({
+    required String id,
+    @JsonKey(name: 'user_id') required String userId,
+    @JsonKey(name: 'order_type') required OrderType orderType,
+    required OrderStatus status,
+    required double total,
+    @JsonKey(name: 'created_at') required DateTime createdAt,
+  }) = _Order;
+
+  factory Order.fromJson(Map&lt;String, dynamic&gt; json) =&gt; _$OrderFromJson(json);
+}</code></pre>
+
+<h3>5.3 GoRouter con ShellRoute</h3>
+<p>Una única definición de rutas para Web (URL hash) y Android. Se usa <code>ShellRoute</code> para mantener la navegación principal (tabs) y rutas anidadas con redirecciones para guards de autenticación y rol.</p>
+
+<h3>5.4 Supabase Realtime para el estado del pedido</h3>
+<p>El detalle de pedido se suscribe vía <code>supabase.channel('orders:&lt;id&gt;').onPostgresChanges(...)</code> y refresca el provider sin polling. El cliente ve los cambios de estado (preparando → listo → en reparto → entregado) en tiempo real.</p>
+
+<h3>5.5 RLS como única fuente de autorización</h3>
+<p>Toda la seguridad se delega a las políticas RLS de Postgres. El cliente Flutter <strong>nunca</strong> filtra por <code>user_id</code> manualmente: Supabase lo hace por nosotros vía la sesión JWT. Esto elimina toda clase de bypass por manipulación de cliente.</p>
+
+<h3>5.6 Edge Functions para integraciones críticas</h3>
+<p>Las claves secretas (Stripe, Brevo, FCM) nunca viven en el cliente. Se usan 8 Edge Functions en Deno como proxy seguro: <code>create-payment-intent</code>, <code>send-order-notification</code>, <code>send-encargo-confirmation</code>, <code>send-encargo-reminders</code>, <code>send-catering-notification</code>, <code>send-newsletter</code>, <code>send-welcome-email</code>, <code>chat-bot</code>.</p>
+
+<h3>5.7 Pagos cross-platform</h3>
+<p>Stripe se integra con <code>flutter_stripe</code> en Android (Payment Sheet) y con <code>stripe_js</code> en Web (redirect + Webhooks). El switch se hace con <code>kIsWeb</code> en la capa de checkout.</p>
+</section>
+
+<section class="page-break">
+<h2>6. Integración de servicios externos</h2>
+
+<table>
+    <thead><tr><th>Servicio</th><th>Uso</th><th>Plan</th></tr></thead>
+    <tbody>
+        <tr><td>Supabase</td><td>Postgres + Auth + Storage + Realtime + Edge Functions</td><td>Free</td></tr>
+        <tr><td>Stripe</td><td>Pagos con tarjeta (móvil + web)</td><td>Test mode</td></tr>
+        <tr><td>Firebase Cloud Messaging</td><td>Notificaciones push a Android</td><td>Free</td></tr>
+        <tr><td>Brevo (ex-Sendinblue)</td><td>Emails transaccionales (confirmación pedido, recordatorios, newsletter)</td><td>Free 300 emails/día</td></tr>
+        <tr><td>GitHub</td><td>Control de versiones, backup, CI/CD futuro</td><td>Free</td></tr>
+        <tr><td>Google Fonts</td><td>Tipografías Inter (admin) y Syne (público)</td><td>Free</td></tr>
+    </tbody>
+</table>
+</section>
+
+<section class="page-break">
+<h2>7. Pruebas realizadas</h2>
+
+<h3>7.1 Análisis estático</h3>
+<pre><code>$ dart analyze
+0 errors found.
+46 issues found.   # info/warnings cosméticos (const, EOL, deprecaciones menores)</code></pre>
+
+<h3>7.2 Pruebas unitarias y de widget</h3>
+<p>El directorio <code>test/</code> contiene pruebas para los repositorios críticos y para componentes de UI compartidos. Ejemplo: <code>test/features/auth/data/repositories/auth_repository_test.dart</code> verifica el flujo de login, refresh de sesión y manejo de errores.</p>
+
+<h3>7.3 Pruebas manuales por rol</h3>
+<p>Para cada rol se ha ejecutado un checklist end-to-end:</p>
+<ul>
+    <li><strong>Cliente</strong>: registro → catálogo → carrito → pago → recibir notificación push → ver pedido en realtime → valoración.</li>
+    <li><strong>Empleado cocina</strong>: ver cola de pedidos → marcar en preparación → marcar listo → escanear QR del cliente.</li>
+    <li><strong>Empleado repartidor</strong>: ver asignados → mapa → marcar entregado → liberar pedido.</li>
+    <li><strong>Admin</strong>: crear plato → activar oferta → revisar dashboard → responder chat soporte → enviar newsletter → publicar reseña.</li>
+</ul>
+
+<h3>7.4 Pruebas de integración con Supabase</h3>
+<ul>
+    <li>Validación de políticas RLS por rol (cliente no puede leer pedidos ajenos, empleado no puede modificar precios, admin tiene acceso total).</li>
+    <li>Disparo de triggers (creación de perfil en <code>handle_new_user</code>, actualización de <code>updated_at</code>).</li>
+    <li>Verificación de constraints (unicidad de email en newsletter, claves foráneas en order_items).</li>
+</ul>
+
+<h3>7.5 Build de producción</h3>
+<pre><code>$ flutter build web --debug --no-wasm-dry-run
+✓ Built build\web   (main.dart.js ≈ 20 MB)
+
+$ flutter build apk --release
+✓ Built build\app\outputs\flutter-apk\app-release.apk</code></pre>
+</section>
+
+<section>
+<h2>8. Generación de código</h2>
+<p>Tras cualquier cambio en modelos Freezed o providers Riverpod hay que regenerar:</p>
+<pre><code>dart run build_runner build --delete-conflicting-outputs</code></pre>
+<p>Si el codegen falla con <em>"Cannot recurse at later or equal phase"</em>, ejecutar primero un <code>clean</code>:</p>
+<pre><code>dart run build_runner clean
+dart run build_runner build --delete-conflicting-outputs</code></pre>
+
+<div class="highlight-box">
+    <p><strong>Última ejecución estable:</strong> 130 outputs escritos en 37 s sobre 298 inputs. Sin colisiones de fase ni errores de FormatException.</p>
+</div>
+</section>
+
+</div>
+
+<div class="footer">Sabor de Casa — Desarrollo e Implementación · Proyecto Final DAM 2025/26</div>
+
+</body>
+</html>

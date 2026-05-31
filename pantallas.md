@@ -6,8 +6,8 @@
 |-----|-----------|-----------|
 | Cliente | 16 | Android + Web |
 | Empleado | 6 | Android + Web |
-| Admin | 14 | Web + Android |
-| **TOTAL** | **36** | |
+| Admin | 19 | Web + Android |
+| **TOTAL** | **41** | |
 
 ---
 
@@ -99,7 +99,7 @@ orders.type = 'mostrador' | 'encargo' | 'domicilio' | 'recogida'
 
 ---
 
-## ROL 3: ADMIN (14 pantallas — Web + Android)
+## ROL 3: ADMIN (17 pantallas — Web + Android)
 
 | # | Pantalla | Descripción |
 |---|----------|-------------|
@@ -113,10 +113,15 @@ orders.type = 'mostrador' | 'encargo' | 'domicilio' | 'recogida'
 | 3.8 | **Solicitudes de Catering** | Lista solicitudes. Detalle, generar presupuesto (calculado o manual), enviar al cliente, marcar aceptado/rechazado |
 | 3.9 | **Calendario de Eventos** | Vista calendario de eventos confirmados. Detalle: fecha, lugar, menú, nº comensales |
 | 3.10 | **Buzón de Consultas** | Mensajes del formulario Contacto. Clasificados por tipo. Marcar leído, responder por email (Brevo), archivar |
-| 3.11 | **Gestión de Empleados** | CRUD: nombre, email, rol (cocinero/repartidor/ambos), activo/inactivo |
-| 3.12 | **Gestión de Usuarios** | Lista clientes registrados, historial pedidos, desactivar cuenta |
-| 3.13 | **Configuración** | Datos negocio (nombre, dirección, teléfono, horarios), zonas de reparto, precio mínimo domicilio, tiempo máx antelación encargos |
-| 3.14 | **Mi perfil admin** | Datos personales, cambiar contraseña |
+| 3.11 | **Soporte interno (chat)** | Bandeja de hilos `support_threads` por cliente. Conversación en tiempo real, contador de no leídos, estados (open / waiting_admin / waiting_customer / closed). Ruta `/admin/support` |
+| 3.12 | **Newsletter** | Suscriptores opt-in del formulario público (`/contacto`). KPI activos/bajas, búsqueda, filtros por estado, alta manual, export CSV. Ruta `/admin/newsletter` |
+| 3.13 | **Reseñas / Testimonios** | CRUD de testimonios mostrados en la home. Toggle "destacar", rating interactivo 1-5★, orden visual. Ruta `/admin/testimonials` |
+| 3.14 | **Notificaciones admin** | Bandeja unificada de eventos (nuevos pedidos, mensajes contacto, hilos soporte, solicitudes catering). Ruta `/notifications` |
+| 3.15 | **Gestión de Empleados** | CRUD: nombre, email, rol (cocinero/repartidor/ambos), activo/inactivo |
+| 3.16 | **Gestión de Usuarios** | Lista clientes registrados con KPIs por cliente (pedidos, gasto, último pedido), búsqueda, filtros por rol/estado, export CSV, bottom sheet de detalle |
+| 3.17 | **Estadísticas** | Resumen oscuro con KPIs por periodo, gráfica fl_chart de ingresos 30 días, barras por estado, top platos. Ruta `/admin/stats` |
+| 3.18 | **Configuración** | Datos negocio (nombre, dirección, teléfono, horarios), zonas de reparto, precio mínimo domicilio, tiempo máx antelación encargos |
+| 3.19 | **Mi perfil admin** | Datos personales, cambiar contraseña |
 
 ---
 

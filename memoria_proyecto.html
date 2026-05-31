@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memoria del Proyecto — Sabor de Casa</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; color: #1a1a2e; line-height: 1.8; background: #f8f9fa; }
+        @media print { body { background: white; } .page-break { page-break-before: always; } .cover { page-break-after: always; } section { page-break-inside: avoid; } }
+
+        .cover { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; background: linear-gradient(135deg, #0f0c29, #302b63, #24243e); color: white; text-align: center; padding: 2rem; }
+        .cover-icon { font-size: 5rem; margin-bottom: 1.5rem; }
+        .cover h1 { font-size: 2.6rem; font-weight: 700; margin-bottom: 0.5rem; letter-spacing: -0.5px; }
+        .cover h2 { font-size: 1.3rem; font-weight: 300; color: #a8a8d0; margin-bottom: 3rem; }
+        .cover-meta { display: flex; flex-direction: column; gap: 0.5rem; font-size: 1rem; color: #c0c0e0; }
+        .cover-meta strong { color: white; }
+        .cover-line { width: 80px; height: 3px; background: linear-gradient(90deg, #6c63ff, #e94560); border-radius: 2px; margin: 2rem auto; }
+
+        .content { max-width: 920px; margin: 0 auto; padding: 3rem 2rem; }
+        section { background: white; border-radius: 12px; padding: 2.5rem; margin-bottom: 2rem; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+        h2 { font-size: 1.6rem; font-weight: 700; color: #302b63; margin-bottom: 1.5rem; padding-bottom: 0.5rem; border-bottom: 3px solid #6c63ff; display: inline-block; }
+        h3 { font-size: 1.15rem; font-weight: 600; color: #1a1a2e; margin-top: 1.5rem; margin-bottom: 0.8rem; }
+        p { margin-bottom: 1rem; text-align: justify; color: #333; }
+        ul, ol { margin: 0.8rem 0 1.2rem 1.5rem; color: #333; }
+        li { margin-bottom: 0.4rem; }
+        a { color: #6c63ff; text-decoration: none; font-weight: 500; }
+        a:hover { text-decoration: underline; }
+
+        .toc { background: linear-gradient(135deg, #f0efff, #e8e6ff); padding: 2rem; border-radius: 12px; }
+        .toc h3 { margin-top: 0; color: #302b63; }
+        .toc ol { list-style: decimal; margin-left: 1.5rem; }
+        .toc li { padding: 0.3rem 0; }
+
+        .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin: 1.5rem 0; }
+        .stat-card { background: linear-gradient(135deg, #302b63, #24243e); color: white; padding: 1.2rem; border-radius: 10px; text-align: center; }
+        .stat-card .number { font-size: 1.8rem; font-weight: 700; color: #6c63ff; }
+        .stat-card .label { font-size: 0.8rem; color: #a8a8d0; margin-top: 0.3rem; }
+
+        .doc-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem; margin: 1.5rem 0; }
+        .doc-card { background: white; border: 1px solid #e0deff; border-radius: 10px; padding: 1.2rem; transition: all .2s; }
+        .doc-card:hover { box-shadow: 0 4px 12px rgba(108,99,255,0.15); transform: translateY(-2px); border-color: #6c63ff; }
+        .doc-card .doc-icon { font-size: 1.8rem; margin-bottom: 0.4rem; }
+        .doc-card h4 { color: #302b63; margin: 0 0 0.3rem 0; font-size: 1rem; }
+        .doc-card p { font-size: 0.85rem; color: #666; margin: 0 0 0.6rem 0; }
+        .doc-card a { font-size: 0.85rem; }
+
+        .highlight-box { background: linear-gradient(135deg, #f0efff, #e8e6ff); border-left: 4px solid #6c63ff; padding: 1.2rem 1.5rem; border-radius: 0 8px 8px 0; margin: 1.2rem 0; }
+        .highlight-box p { margin: 0; color: #302b63; font-weight: 500; }
+
+        .phase { display: flex; align-items: flex-start; gap: 1rem; margin: 1.2rem 0; padding: 1rem; background: #fafaff; border-radius: 8px; }
+        .phase-num { flex-shrink: 0; width: 50px; height: 50px; background: linear-gradient(135deg, #6c63ff, #302b63); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.1rem; }
+        .phase-content h4 { color: #302b63; margin: 0 0 0.3rem 0; }
+        .phase-content p { margin: 0; font-size: 0.9rem; }
+
+        .footer { text-align: center; padding: 2rem; color: #999; font-size: 0.8rem; }
+    </style>
+</head>
+<body>
+
+<div class="cover">
+    <div class="cover-icon">📘</div>
+    <h1>Memoria del Proyecto</h1>
+    <h2>Documento maestro · Sabor de Casa</h2>
+    <div class="cover-line"></div>
+    <div class="cover-meta">
+        <span><strong>Proyecto Final</strong> — CFGS Desarrollo de Aplicaciones Multiplataforma</span>
+        <span><strong>Alumna:</strong> Claudia Mellado</span>
+        <span><strong>Centro:</strong> IES</span>
+        <span><strong>Curso:</strong> 2025 / 2026</span>
+        <span><strong>Tutor:</strong> [Nombre del tutor]</span>
+        <span><strong>Convocatoria:</strong> Junio 2026</span>
+    </div>
+</div>
+
+<div class="content">
+
+<section>
+<h2>Resumen ejecutivo</h2>
+<p><strong>Sabor de Casa</strong> es una aplicación multiplataforma (Android nativa + Web responsive) desarrollada con Flutter 3.38 y respaldada por un backend serverless construido sobre Supabase. Soluciona la necesidad de un restaurante familiar de digitalizar todo su flujo de negocio: catálogo, pedidos, pagos online, catering, comunicación con clientes y gestión interna.</p>
+<p>El proyecto entrega un producto funcional, seguro y desplegable: 41 pantallas en producción, 28 migraciones de base de datos, 8 funciones serverless y 3 roles diferenciados con permisos garantizados a nivel de base de datos mediante Row Level Security.</p>
+
+<div class="stat-grid">
+    <div class="stat-card"><div class="number">41</div><div class="label">Pantallas</div></div>
+    <div class="stat-card"><div class="number">28</div><div class="label">Migraciones SQL</div></div>
+    <div class="stat-card"><div class="number">8</div><div class="label">Edge Functions</div></div>
+    <div class="stat-card"><div class="number">3</div><div class="label">Roles diferenciados</div></div>
+    <div class="stat-card"><div class="number">~265 h</div><div class="label">Horas invertidas</div></div>
+    <div class="stat-card"><div class="number">2</div><div class="label">Plataformas (Web + Android)</div></div>
+</div>
+</section>
+
+<section class="page-break">
+<div class="toc">
+    <h3>Índice general</h3>
+    <ol>
+        <li>Introducción y motivación</li>
+        <li>Objetivos del proyecto</li>
+        <li>Marco tecnológico</li>
+        <li>Fases del proyecto (resumen)</li>
+        <li>Estructura documental entregada</li>
+        <li>Resultados obtenidos</li>
+        <li>Conclusiones</li>
+        <li>Agradecimientos</li>
+    </ol>
+</div>
+</section>
+
+<section class="page-break">
+<h2>1. Introducción y motivación</h2>
+<p>El proyecto nace de una necesidad real observada en un restaurante familiar de carácter tradicional: la gestión de pedidos para llevar y de encargos para eventos se realizaba telefónicamente, lo que generaba errores, pérdida de pedidos y una pésima trazabilidad. La presencia digital se reducía a una página de Facebook desactualizada.</p>
+<p>Como alumna del CFGS DAM, identifiqué este contexto como una oportunidad perfecta para aplicar de forma integrada todos los conocimientos adquiridos durante el ciclo: desarrollo multiplataforma con Flutter, bases de datos relacionales, servicios web, autenticación, pagos en línea, notificaciones push, seguridad y despliegue.</p>
+<p>La motivación principal ha sido entregar un producto real, no un prototipo académico: una aplicación capaz de funcionar en producción desde el primer día, con un nivel de calidad equiparable al de soluciones comerciales.</p>
+</section>
+
+<section class="page-break">
+<h2>2. Objetivos del proyecto</h2>
+<h3>2.1 Objetivos generales</h3>
+<ul>
+    <li>Diseñar y desarrollar una aplicación multiplataforma (Android + Web) usable en producción.</li>
+    <li>Cubrir el ciclo completo de un pedido, desde la captación del cliente hasta la entrega.</li>
+    <li>Implementar la seguridad como pilar transversal, no como añadido.</li>
+    <li>Producir documentación profesional cumpliendo la guía oficial del proyecto final DAM.</li>
+</ul>
+
+<h3>2.2 Objetivos específicos</h3>
+<ul>
+    <li>Carta digital gestionable por el administrador desde la propia app.</li>
+    <li>Carrito y checkout con pago en línea integrado.</li>
+    <li>Tres roles (cliente, empleado, administrador) con paneles dedicados.</li>
+    <li>Notificaciones push y emails transaccionales automáticos.</li>
+    <li>Sistema de catering, soporte interno, newsletter y testimonios.</li>
+    <li>Despliegue real y replicable mediante manuales técnicos.</li>
+</ul>
+</section>
+
+<section class="page-break">
+<h2>3. Marco tecnológico</h2>
+<p>La elección tecnológica responde a tres criterios: <strong>productividad</strong> de la persona desarrolladora individual, <strong>cobertura multiplataforma</strong> sin duplicar código, y <strong>coste cero o casi cero</strong> en infraestructura.</p>
+
+<h3>3.1 Frontend</h3>
+<ul>
+    <li><strong>Flutter 3.38 / Dart 3.5</strong> como framework multiplataforma.</li>
+    <li><strong>Riverpod 2.6</strong> con codegen para gestión reactiva del estado.</li>
+    <li><strong>Freezed + json_serializable</strong> para modelos inmutables y serialización Supabase.</li>
+    <li><strong>GoRouter</strong> para navegación declarativa.</li>
+    <li><strong>Material 3</strong> con tema personalizado de marca.</li>
+</ul>
+
+<h3>3.2 Backend (BaaS)</h3>
+<ul>
+    <li><strong>Supabase</strong>: PostgreSQL gestionado, Auth, Storage, Realtime y Edge Functions (Deno).</li>
+    <li><strong>Row Level Security (RLS)</strong> activado en todas las tablas con datos sensibles.</li>
+</ul>
+
+<h3>3.3 Servicios externos</h3>
+<ul>
+    <li><strong>Stripe</strong> — pagos con tarjeta.</li>
+    <li><strong>Brevo</strong> — email transaccional y newsletter.</li>
+    <li><strong>Firebase Cloud Messaging</strong> — notificaciones push.</li>
+</ul>
+</section>
+
+<section class="page-break">
+<h2>4. Fases del proyecto</h2>
+
+<div class="phase"><div class="phase-num">1</div><div class="phase-content"><h4>Análisis del contexto</h4><p>Estudio del restaurante, observación de carencias actuales, entrevistas con propietarios y personal. Definición del problema y oportunidad.</p></div></div>
+
+<div class="phase"><div class="phase-num">2</div><div class="phase-content"><h4>Diseño</h4><p>Arquitectura por capas, modelado del esquema de base de datos, definición de los 3 roles, prototipado de las 41 pantallas y elección del stack tecnológico.</p></div></div>
+
+<div class="phase"><div class="phase-num">3</div><div class="phase-content"><h4>Planificación</h4><p>División en 11 semanas, diagrama de Gantt con 13 tareas, análisis de 10 riesgos con plan de mitigación, definición de 7 entregables intermedios.</p></div></div>
+
+<div class="phase"><div class="phase-num">4</div><div class="phase-content"><h4>Desarrollo e implementación</h4><p>Construcción iterativa por features. Despliegue progresivo de migraciones SQL, Edge Functions y servicios externos. Pruebas continuas en Android y Web.</p></div></div>
+
+<div class="phase"><div class="phase-num">5</div><div class="phase-content"><h4>Seguimiento y evaluación</h4><p>Tutorías semanales, registro de incidencias, medición de KPIs, recogida de feedback de usuarios reales y lecciones aprendidas.</p></div></div>
+</section>
+
+<section class="page-break">
+<h2>5. Estructura documental entregada</h2>
+<p>Esta memoria es el documento maestro y sintetiza los siguientes documentos detallados, todos disponibles como archivos HTML autocontenidos en la raíz del proyecto:</p>
+
+<div class="doc-grid">
+    <div class="doc-card"><div class="doc-icon">📋</div><h4>Análisis del Contexto</h4><p>Justificación, problema, oportunidad y stakeholders.</p><a href="analisis_contexto.html">analisis_contexto.html</a></div>
+    <div class="doc-card"><div class="doc-icon">🎨</div><h4>Diseño del Proyecto</h4><p>Arquitectura, modelo de datos, pantallas y stack.</p><a href="diseno_proyecto.html">diseno_proyecto.html</a></div>
+    <div class="doc-card"><div class="doc-icon">📅</div><h4>Planificación</h4><p>Gantt, recursos, riesgos y entregables.</p><a href="planificacion_proyecto.html">planificacion_proyecto.html</a></div>
+    <div class="doc-card"><div class="doc-icon">⚙️</div><h4>Desarrollo</h4><p>Metodología, arquitectura técnica y decisiones.</p><a href="desarrollo_proyecto.html">desarrollo_proyecto.html</a></div>
+    <div class="doc-card"><div class="doc-icon">📊</div><h4>Evaluación y Seguimiento</h4><p>KPIs, incidencias, mejoras y lecciones.</p><a href="evaluacion_proyecto.html">evaluacion_proyecto.html</a></div>
+    <div class="doc-card"><div class="doc-icon">🛠️</div><h4>Manual Técnico</h4><p>Instalación, despliegue y troubleshooting.</p><a href="manual_tecnico.html">manual_tecnico.html</a></div>
+    <div class="doc-card"><div class="doc-icon">📖</div><h4>Manual de Usuario</h4><p>Guía paso a paso por rol.</p><a href="manual_usuario.html">manual_usuario.html</a></div>
+    <div class="doc-card"><div class="doc-icon">🎤</div><h4>Presentación Final</h4><p>Slides para la defensa del proyecto.</p><a href="presentacion_final.html">presentacion_final.html</a></div>
+</div>
+
+<h3>Documentación técnica complementaria</h3>
+<ul>
+    <li><a href="docs/ARCHITECTURE.md">docs/ARCHITECTURE.md</a> — arquitectura interna del código.</li>
+    <li><a href="docs/SUPABASE.md">docs/SUPABASE.md</a> — esquema completo de base de datos y RLS.</li>
+    <li><a href="pantallas.md">pantallas.md</a> — inventario completo de las 41 pantallas.</li>
+    <li><a href="README.md">README.md</a> — guía rápida para nuevos desarrolladores.</li>
+</ul>
+</section>
+
+<section class="page-break">
+<h2>6. Resultados obtenidos</h2>
+
+<h3>6.1 Producto final</h3>
+<ul>
+    <li>Aplicación Android (APK firmable) y Web (build estático desplegable en cualquier hosting).</li>
+    <li>Backend con 28 migraciones, 8 Edge Functions y políticas RLS completas.</li>
+    <li>Integración real con Stripe (modo test), Brevo y Firebase Cloud Messaging.</li>
+    <li>0 errores en <code>dart analyze</code>; build web sin warnings críticos.</li>
+</ul>
+
+<h3>6.2 Cobertura funcional respecto al plan inicial</h3>
+
+<div class="stat-grid">
+    <div class="stat-card"><div class="number">100 %</div><div class="label">Pantallas planificadas entregadas</div></div>
+    <div class="stat-card"><div class="number">+5</div><div class="label">Pantallas extra sobre el plan</div></div>
+    <div class="stat-card"><div class="number">100 %</div><div class="label">Migraciones desplegadas</div></div>
+    <div class="stat-card"><div class="number">100 %</div><div class="label">Roles operativos</div></div>
+</div>
+
+<h3>6.3 Calidad y mantenibilidad</h3>
+<ul>
+    <li>Código organizado por features con separación estricta de capas.</li>
+    <li>Modelos inmutables con codegen, evitando errores de mutación accidental.</li>
+    <li>Seguridad centralizada en la base de datos: el frontend no puede saltarse permisos.</li>
+    <li>Documentación exhaustiva que permite a una nueva persona desarrolladora ponerse al día en 1 día.</li>
+</ul>
+</section>
+
+<section class="page-break">
+<h2>7. Conclusiones</h2>
+
+<div class="highlight-box">
+    <p>El proyecto ha cumplido y superado todos los objetivos planteados. Sabor de Casa es hoy una aplicación lista para producción que aporta valor inmediato al restaurante real para el que fue concebida.</p>
+</div>
+
+<p>A nivel personal y formativo, el proyecto ha exigido integrar todos los módulos del ciclo formativo en una única solución coherente. La combinación de Flutter con Supabase ha demostrado ser una elección sólida para una persona desarrolladora individual con ambición de cobertura multiplataforma.</p>
+
+<p>Los retos más relevantes han sido la curva de aprendizaje del codegen de Riverpod, la gestión de seguridad mediante RLS y la integración cross-platform de Stripe. Cada uno ha aportado conocimiento aplicable a proyectos futuros, dentro y fuera del entorno académico.</p>
+
+<p>La principal conclusión es que el rol de la persona desarrolladora moderna no se limita a escribir código: planificar, documentar, comunicar avances y evaluar críticamente el propio trabajo son competencias igual de relevantes y han sido especialmente trabajadas en este proyecto.</p>
+</section>
+
+<section>
+<h2>8. Agradecimientos</h2>
+<p>Al tutor del proyecto por las orientaciones semanales y el seguimiento atento. Al equipo docente del CFGS DAM por la base técnica adquirida durante el ciclo. A los familiares y voluntarios que probaron la aplicación y aportaron feedback honesto. A las comunidades open source de Flutter, Supabase, Riverpod y Freezed, sin las cuales un proyecto de esta envergadura no sería abordable individualmente.</p>
+</section>
+
+</div>
+
+<div class="footer">Sabor de Casa — Memoria del Proyecto · Proyecto Final DAM 2025/26</div>
+
+</body>
+</html>

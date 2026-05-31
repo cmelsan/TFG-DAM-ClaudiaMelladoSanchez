@@ -36,6 +36,7 @@ import 'package:sabor_de_casa/features/kitchen/presentation/screens/pickup_scree
 import 'package:sabor_de_casa/features/menu/presentation/screens/dish_detail_screen.dart';
 import 'package:sabor_de_casa/features/menu/presentation/screens/favorites_screen.dart';
 import 'package:sabor_de_casa/features/menu/presentation/screens/menu_screen.dart';
+import 'package:sabor_de_casa/features/newsletter/presentation/screens/admin_newsletter_screen.dart';
 import 'package:sabor_de_casa/features/notifications/presentation/screens/notifications_screen.dart';
 import 'package:sabor_de_casa/features/orders/presentation/screens/order_confirmation_screen.dart';
 import 'package:sabor_de_casa/features/orders/presentation/screens/order_detail_screen.dart';
@@ -44,6 +45,7 @@ import 'package:sabor_de_casa/features/pos/presentation/screens/pos_screen.dart'
 import 'package:sabor_de_casa/features/profile/presentation/screens/profile_screen.dart';
 import 'package:sabor_de_casa/features/splash/presentation/screens/onboarding_screen.dart';
 import 'package:sabor_de_casa/features/splash/presentation/screens/splash_screen.dart';
+import 'package:sabor_de_casa/features/testimonials/presentation/screens/admin_testimonials_screen.dart';
 
 part 'app_router.g.dart';
 
@@ -338,6 +340,16 @@ GoRouter appRouter(AppRouterRef ref) {
         path: '/admin/daily-special',
         name: RouteNames.adminDailySpecial,
         builder: (_, __) => const AdminDailySpecialScreen(),
+      ),
+      GoRoute(
+        path: '/admin/newsletter',
+        name: RouteNames.adminNewsletter,
+        builder: (_, __) => const AdminNewsletterScreen(),
+      ),
+      GoRoute(
+        path: '/admin/testimonials',
+        name: RouteNames.adminTestimonials,
+        builder: (_, __) => const AdminTestimonialsScreen(),
       ),
 
       // --- Pago web (retorno desde Stripe Checkout) ---

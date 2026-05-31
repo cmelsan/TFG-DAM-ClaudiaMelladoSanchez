@@ -46,7 +46,6 @@ class _CartScreenState extends ConsumerState<CartScreen> {
     final cartState = ref.watch(cartNotifierProvider);
 
     return Scaffold(
-      backgroundColor: AppTokens.pageBg,
       body: Column(
         children: [
           // ── Navbar web ──────────────────────────────────────────────────────

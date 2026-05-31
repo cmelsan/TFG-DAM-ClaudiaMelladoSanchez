@@ -61,7 +61,6 @@ class _CateringScreenState extends ConsumerState<CateringScreen>
     final sidePad = screenW > maxW ? (screenW - maxW) / 2 : 0.0;
 
     return Scaffold(
-      backgroundColor: AppTokens.pageBg,
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(80),
         child: WebNavbar(

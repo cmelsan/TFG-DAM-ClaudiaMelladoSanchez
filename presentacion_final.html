@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Presentación Final — Sabor de Casa</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; color: #1a1a2e; background: #0f0c29; }
+        @media print { .slide { page-break-after: always; min-height: 100vh; } body { background: white; } }
+
+        .slide { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 4rem 3rem; text-align: center; position: relative; }
+        .slide-num { position: absolute; bottom: 1.5rem; right: 2rem; color: rgba(255,255,255,0.4); font-size: 0.8rem; font-weight: 500; letter-spacing: 2px; }
+        .slide-brand { position: absolute; bottom: 1.5rem; left: 2rem; color: rgba(255,255,255,0.4); font-size: 0.8rem; font-weight: 500; }
+
+        /* Slide types by background */
+        .slide.dark { background: linear-gradient(135deg, #0f0c29, #302b63, #24243e); color: white; }
+        .slide.light { background: linear-gradient(135deg, #f8f9fa, #ffffff); color: #1a1a2e; }
+        .slide.accent { background: linear-gradient(135deg, #6c63ff, #302b63); color: white; }
+        .slide.red { background: linear-gradient(135deg, #e94560, #b13854); color: white; }
+        .slide.light .slide-num, .slide.light .slide-brand { color: #999; }
+
+        .icon-xl { font-size: 6rem; margin-bottom: 1.5rem; }
+        h1 { font-size: 3.5rem; font-weight: 800; letter-spacing: -1px; margin-bottom: 1rem; line-height: 1.1; }
+        h2 { font-size: 2.4rem; font-weight: 700; margin-bottom: 1.5rem; line-height: 1.2; }
+        h3 { font-size: 1.6rem; font-weight: 600; margin-bottom: 1rem; opacity: 0.85; }
+        p.lead { font-size: 1.4rem; line-height: 1.5; max-width: 800px; margin-bottom: 1.5rem; opacity: 0.85; }
+        p.small { font-size: 1rem; opacity: 0.7; max-width: 700px; }
+
+        .accent-line { width: 100px; height: 4px; background: linear-gradient(90deg, #6c63ff, #e94560); margin: 1.5rem auto; border-radius: 2px; }
+        .slide.accent .accent-line, .slide.red .accent-line { background: white; }
+
+        .three-cols { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem; max-width: 1100px; width: 100%; margin-top: 2rem; }
+        .col-card { background: rgba(255,255,255,0.08); padding: 2rem 1.5rem; border-radius: 16px; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
+        .col-card .num { font-size: 3rem; font-weight: 800; background: linear-gradient(135deg, #6c63ff, #e94560); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .col-card h4 { font-size: 1.1rem; margin: 0.5rem 0; }
+        .col-card p { font-size: 0.85rem; opacity: 0.75; line-height: 1.4; }
+        .slide.light .col-card { background: white; border-color: #e0deff; box-shadow: 0 4px 20px rgba(108,99,255,0.08); }
+
+        .stack-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; max-width: 1000px; width: 100%; margin-top: 2rem; }
+        .tech { background: rgba(255,255,255,0.1); padding: 1.2rem; border-radius: 10px; }
+        .tech .t-icon { font-size: 2rem; margin-bottom: 0.5rem; }
+        .tech .t-name { font-weight: 700; font-size: 1rem; }
+        .tech .t-role { font-size: 0.75rem; opacity: 0.7; }
+        .slide.light .tech { background: #f0efff; color: #302b63; }
+
+        .big-num-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem; max-width: 1100px; width: 100%; margin-top: 2rem; }
+        .big-stat { background: rgba(255,255,255,0.08); padding: 2rem 1rem; border-radius: 14px; border: 1px solid rgba(255,255,255,0.1); }
+        .big-stat .v { font-size: 3rem; font-weight: 800; color: white; line-height: 1; }
+        .big-stat .l { font-size: 0.85rem; opacity: 0.75; margin-top: 0.5rem; }
+
+        .flow { display: flex; align-items: center; justify-content: center; gap: 1rem; flex-wrap: wrap; max-width: 1100px; margin-top: 2rem; }
+        .step { background: rgba(255,255,255,0.1); padding: 1.2rem 1.5rem; border-radius: 12px; font-size: 0.95rem; }
+        .arrow { font-size: 1.5rem; opacity: 0.5; }
+
+        .role-list { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; max-width: 1100px; width: 100%; margin-top: 2rem; }
+        .role-box { padding: 2rem 1.5rem; border-radius: 14px; text-align: left; }
+        .role-box.cliente { background: linear-gradient(135deg, #f0efff, #e8e6ff); color: #302b63; }
+        .role-box.empleado { background: linear-gradient(135deg, #fff8e8, #ffeec9); color: #8a5a00; }
+        .role-box.admin { background: linear-gradient(135deg, #ffe8ec, #ffd1d8); color: #a51c1a; }
+        .role-box h4 { font-size: 1.3rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
+        .role-box ul { list-style: none; padding: 0; }
+        .role-box li { padding: 0.4rem 0; font-size: 0.95rem; opacity: 0.9; padding-left: 1.2rem; position: relative; }
+        .role-box li::before { content: "▸"; position: absolute; left: 0; }
+
+        .two-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; max-width: 1100px; width: 100%; margin-top: 2rem; text-align: left; }
+        .demo-card { background: rgba(255,255,255,0.08); padding: 2rem; border-radius: 14px; }
+        .demo-card h4 { color: white; font-size: 1.3rem; margin-bottom: 1rem; }
+        .demo-card ol { padding-left: 1.5rem; }
+        .demo-card li { padding: 0.4rem 0; font-size: 1rem; opacity: 0.85; }
+
+        .arch-diag { background: rgba(255,255,255,0.05); padding: 2rem; border-radius: 14px; max-width: 800px; margin-top: 2rem; }
+        .arch-layer { background: rgba(255,255,255,0.1); padding: 1rem; border-radius: 8px; margin-bottom: 0.6rem; font-weight: 600; }
+        .arch-layer.ui { background: linear-gradient(90deg, #6c63ff, #8a82ff); }
+        .arch-layer.logic { background: linear-gradient(90deg, #e94560, #ff6b81); }
+        .arch-layer.data { background: linear-gradient(90deg, #1d9e75, #2dbf90); }
+        .arch-layer.backend { background: linear-gradient(90deg, #302b63, #4a4288); }
+
+        .reto { background: rgba(255,255,255,0.08); padding: 1.5rem; border-radius: 12px; text-align: left; max-width: 900px; width: 100%; margin: 0.6rem auto; display: grid; grid-template-columns: 60px 1fr; gap: 1rem; align-items: center; }
+        .reto .r-icon { font-size: 2rem; }
+        .reto h4 { color: white; margin-bottom: 0.3rem; }
+        .reto p { font-size: 0.9rem; opacity: 0.8; margin: 0; }
+
+        .conclusion-list { max-width: 800px; text-align: left; margin-top: 2rem; }
+        .conclusion-list li { font-size: 1.1rem; padding: 0.6rem 0; opacity: 0.9; }
+
+        .thanks-icon { font-size: 8rem; margin-bottom: 1rem; }
+    </style>
+</head>
+<body>
+
+<!-- SLIDE 1 — PORTADA -->
+<div class="slide dark">
+    <div class="icon-xl">🍽️</div>
+    <h1>Sabor de Casa</h1>
+    <div class="accent-line"></div>
+    <p class="lead">Aplicación multiplataforma para la gestión integral de un restaurante familiar</p>
+    <p class="small" style="margin-top: 2rem;">
+        Proyecto Final · CFGS Desarrollo de Aplicaciones Multiplataforma<br>
+        Claudia Mellado · Curso 2025/26
+    </p>
+    <div class="slide-brand">Sabor de Casa</div>
+    <div class="slide-num">01</div>
+</div>
+
+<!-- SLIDE 2 — PROBLEMA -->
+<div class="slide light">
+    <div class="icon-xl">⚠️</div>
+    <h2>El problema</h2>
+    <div class="accent-line"></div>
+    <p class="lead">Un restaurante familiar gestionaba sus pedidos por teléfono, sin canal digital propio, perdiendo ventas y trazabilidad cada día.</p>
+    <div class="three-cols">
+        <div class="col-card"><div class="num">∼30 %</div><h4>Pedidos perdidos</h4><p>Por línea telefónica ocupada en horas punta.</p></div>
+        <div class="col-card"><div class="num">0</div><h4>Datos analíticos</h4><p>Sin información sobre platos top o clientes recurrentes.</p></div>
+        <div class="col-card"><div class="num">0 €</div><h4>Presencia online</h4><p>Sin web propia ni canal de marketing directo.</p></div>
+    </div>
+    <div class="slide-brand">Sabor de Casa</div>
+    <div class="slide-num">02</div>
+</div>
+
+<!-- SLIDE 3 — SOLUCIÓN -->
+<div class="slide accent">
+    <div class="icon-xl">💡</div>
+    <h2>La solución</h2>
+    <div class="accent-line"></div>
+    <p class="lead">Una aplicación multiplataforma (Web + Android) que digitaliza el restaurante de extremo a extremo: catálogo, pedidos, pagos, cocina, reparto y atención al cliente.</p>
+    <p class="small">Sin coste de infraestructura. Una persona desarrolladora. Lista para producción.</p>
+    <div class="slide-brand">Sabor de Casa</div>
+    <div class="slide-num">03</div>
+</div>
+
+<!-- SLIDE 4 — STACK -->
+<div class="slide dark">
+    <h2>Stack tecnológico</h2>
+    <div class="accent-line"></div>
+    <p class="lead">Tecnologías modernas, gratuitas y de calidad profesional.</p>
+    <div class="stack-grid">
+        <div class="tech"><div class="t-icon">📱</div><div class="t-name">Flutter 3.38</div><div class="t-role">UI multiplataforma</div></div>
+        <div class="tech"><div class="t-icon">🎯</div><div class="t-name">Dart 3.5</div><div class="t-role">Lenguaje principal</div></div>
+        <div class="tech"><div class="t-icon">⚡</div><div class="t-name">Riverpod</div><div class="t-role">Estado reactivo</div></div>
+        <div class="tech"><div class="t-icon">🧊</div><div class="t-name">Freezed</div><div class="t-role">Modelos inmutables</div></div>
+        <div class="tech"><div class="t-icon">🗄️</div><div class="t-name">Supabase</div><div class="t-role">Backend + Postgres</div></div>
+        <div class="tech"><div class="t-icon">🔒</div><div class="t-name">Row Level Security</div><div class="t-role">Seguridad nativa</div></div>
+        <div class="tech"><div class="t-icon">💳</div><div class="t-name">Stripe</div><div class="t-role">Pagos online</div></div>
+        <div class="tech"><div class="t-icon">📧</div><div class="t-name">Brevo + FCM</div><div class="t-role">Email + Push</div></div>
+    </div>
+    <div class="slide-brand">Sabor de Casa</div>
+    <div class="slide-num">04</div>
+</div>
+
+<!-- SLIDE 5 — ARQUITECTURA -->
+<div class="slide light">
+    <h2>Arquitectura por capas</h2>
+    <div class="accent-line"></div>
+    <p class="lead">Separación estricta de responsabilidades para un mantenimiento sostenible.</p>
+    <div class="arch-diag">
+        <div class="arch-layer ui">🎨 UI · Widgets, GoRouter, Themes</div>
+        <div class="arch-layer logic">🧠 Logic · Riverpod providers + AsyncNotifiers</div>
+        <div class="arch-layer data">📦 Data · Repositories + Freezed models</div>
+        <div class="arch-layer backend">☁️ Backend · Supabase (Postgres + RLS + Edge Functions)</div>
+    </div>
+    <div class="slide-brand">Sabor de Casa</div>
+    <div class="slide-num">05</div>
+</div>
+
+<!-- SLIDE 6 — TRES ROLES -->
+<div class="slide light">
+    <h2>Tres roles, una sola app</h2>
+    <div class="accent-line"></div>
+    <p class="lead">El mismo binario sirve a clientes, empleados y administradores, mostrando solo lo que cada uno necesita.</p>
+    <div class="role-list">
+        <div class="role-box cliente">
+            <h4>👤 Cliente</h4>
+            <ul>
+                <li>Carta y favoritos</li>
+                <li>Carrito y pago online</li>
+                <li>Catering y encargos</li>
+                <li>Seguimiento en vivo</li>
+                <li>Soporte y testimonios</li>
+            </ul>
+        </div>
+        <div class="role-box empleado">
+            <h4>👨‍🍳 Empleado</h4>
+            <ul>
+                <li>Cola de cocina</li>
+                <li>Marcar estados de pedidos</li>
+                <li>Repartos por zonas</li>
+                <li>Encargos del día</li>
+                <li>Mi horario</li>
+            </ul>
+        </div>
+        <div class="role-box admin">
+            <h4>👔 Administrador</h4>
+            <ul>
+                <li>Dashboard con KPIs</li>
+                <li>Carta y catálogo</li>
+                <li>Usuarios y empleados</li>
+                <li>Newsletter y testimonios</li>
+                <li>Estadísticas avanzadas</li>
+            </ul>
+        </div>
+    </div>
+    <div class="slide-brand">Sabor de Casa</div>
+    <div class="slide-num">06</div>
+</div>
+
+<!-- SLIDE 7 — DEMO FLOW CLIENTE -->
+<div class="slide dark">
+    <h2>Demo · Flujo del cliente</h2>
+    <div class="accent-line"></div>
+    <p class="lead">Del descubrimiento al plato en menos de 5 minutos.</p>
+    <div class="flow">
+        <div class="step">Explorar carta</div>
+        <div class="arrow">→</div>
+        <div class="step">Añadir al carrito</div>
+        <div class="arrow">→</div>
+        <div class="step">Checkout Stripe</div>
+        <div class="arrow">→</div>
+        <div class="step">Confirmación email + push</div>
+        <div class="arrow">→</div>
+        <div class="step">Seguimiento en vivo</div>
+    </div>
+    <div class="slide-brand">Sabor de Casa</div>
+    <div class="slide-num">07</div>
+</div>
+
+<!-- SLIDE 8 — DEMO PANEL ADMIN -->
+<div class="slide dark">
+    <h2>Demo · Panel del administrador</h2>
+    <div class="accent-line"></div>
+    <div class="two-cols">
+        <div class="demo-card">
+            <h4>📊 Dashboard</h4>
+            <ol>
+                <li>Pedidos e ingresos del día</li>
+                <li>Top 5 platos vendidos</li>
+                <li>Comparativa semanal</li>
+                <li>Mapa de calor de zonas</li>
+            </ol>
+        </div>
+        <div class="demo-card">
+            <h4>⚙️ Gestión integral</h4>
+            <ol>
+                <li>Carta editable en caliente</li>
+                <li>Pedidos filtrables y exportables</li>
+                <li>Newsletter masiva</li>
+                <li>Testimonios destacables</li>
+            </ol>
+        </div>
+    </div>
+    <div class="slide-brand">Sabor de Casa</div>
+    <div class="slide-num">08</div>
+</div>
+
+<!-- SLIDE 9 — RETOS SUPERADOS -->
+<div class="slide red">
+    <h2>Retos superados</h2>
+    <div class="accent-line"></div>
+    <div style="max-width:900px;width:100%;margin-top:1rem;">
+        <div class="reto"><div class="r-icon">🔐</div><div><h4>Seguridad en la base de datos</h4><p>RLS en todas las tablas — la autorización nunca depende del cliente.</p></div></div>
+        <div class="reto"><div class="r-icon">💳</div><div><h4>Stripe cross-platform</h4><p>Plugin nativo Android + redirect web con hash routing.</p></div></div>
+        <div class="reto"><div class="r-icon">⚡</div><div><h4>Codegen disciplinado</h4><p>Riverpod + Freezed + JsonSerializable orquestados sin colisiones.</p></div></div>
+        <div class="reto"><div class="r-icon">🌐</div><div><h4>Migraciones controladas</h4><p>28 archivos SQL aplicados con trazabilidad completa.</p></div></div>
+    </div>
+    <div class="slide-brand">Sabor de Casa</div>
+    <div class="slide-num">09</div>
+</div>
+
+<!-- SLIDE 10 — MÉTRICAS -->
+<div class="slide dark">
+    <h2>Métricas del proyecto</h2>
+    <div class="accent-line"></div>
+    <div class="big-num-grid">
+        <div class="big-stat"><div class="v">41</div><div class="l">Pantallas</div></div>
+        <div class="big-stat"><div class="v">28</div><div class="l">Migraciones SQL</div></div>
+        <div class="big-stat"><div class="v">8</div><div class="l">Edge Functions</div></div>
+        <div class="big-stat"><div class="v">3</div><div class="l">Roles</div></div>
+        <div class="big-stat"><div class="v">~265 h</div><div class="l">Horas</div></div>
+        <div class="big-stat"><div class="v">~400</div><div class="l">Commits</div></div>
+        <div class="big-stat"><div class="v">0</div><div class="l">Errores analyze</div></div>
+        <div class="big-stat"><div class="v">0 €</div><div class="l">Coste infra</div></div>
+    </div>
+    <div class="slide-brand">Sabor de Casa</div>
+    <div class="slide-num">10</div>
+</div>
+
+<!-- SLIDE 11 — CONCLUSIONES -->
+<div class="slide light">
+    <div class="icon-xl">🎯</div>
+    <h2>Conclusiones</h2>
+    <div class="accent-line"></div>
+    <ul class="conclusion-list">
+        <li>✓ Producto listo para producción, no un prototipo académico.</li>
+        <li>✓ Cobertura total de la guía del proyecto final DAM.</li>
+        <li>✓ Stack moderno y sostenible para una persona desarrolladora individual.</li>
+        <li>✓ Documentación exhaustiva replicable por terceros.</li>
+        <li>✓ Aprendizaje integral: análisis, diseño, desarrollo, despliegue y evaluación.</li>
+    </ul>
+    <div class="slide-brand">Sabor de Casa</div>
+    <div class="slide-num">11</div>
+</div>
+
+<!-- SLIDE 12 — GRACIAS -->
+<div class="slide accent">
+    <div class="thanks-icon">🙏</div>
+    <h1>Gracias</h1>
+    <div class="accent-line"></div>
+    <p class="lead">¿Preguntas?</p>
+    <p class="small" style="margin-top: 2rem;">
+        Claudia Mellado · Proyecto Final DAM 2025/26<br>
+        Sabor de Casa · Mayo 2026
+    </p>
+    <div class="slide-brand">Sabor de Casa</div>
+    <div class="slide-num">12</div>
+</div>
+
+</body>
+</html>

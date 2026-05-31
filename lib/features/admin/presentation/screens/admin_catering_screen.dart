@@ -228,18 +228,29 @@ class _MenuAdminCard extends ConsumerWidget {
             ],
             const SizedBox(height: 14),
             // Datos numéricos
-            Row(
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
               children: [
                 _DataChip(
                   icon: Icons.euro,
                   label: '${Formatters.price(menu.pricePerPerson)} / pax',
                   primary: true,
                 ),
-                const SizedBox(width: 8),
                 _DataChip(
                   icon: Icons.people_outline,
                   label: '${menu.minGuests}–${menu.maxGuests} personas',
                 ),
+                _DataChip(
+                  icon: Icons.calendar_month_outlined,
+                  label:
+                      '${menu.leadTimeMonths} ${menu.leadTimeMonths == 1 ? 'mes' : 'meses'} antes',
+                ),
+                if (menu.tastingAvailable)
+                  const _DataChip(
+                    icon: Icons.room_service_outlined,
+                    label: 'Prueba de menú',
+                  ),
               ],
             ),
           ],
@@ -485,6 +496,20 @@ class _RequestAdminCardState extends ConsumerState<_RequestAdminCard> {
                   ? 'Personalizado'
                   : widget.request.eventMenuName ?? 'Menú cerrado',
             ),
+            if (widget.request.eventMenuLeadTimeMonths != null)
+              _InfoRow(
+                icon: Icons.calendar_month_outlined,
+                label: 'Antelación',
+                value:
+                    '${widget.request.eventMenuLeadTimeMonths} ${widget.request.eventMenuLeadTimeMonths == 1 ? 'mes' : 'meses'} mínimo',
+              ),
+            if (widget.request.eventMenuTastingAvailable ?? false)
+              const _InfoRow(
+                icon: Icons.room_service_outlined,
+                label: 'Prueba',
+                value: 'Disponible para coordinar',
+                highlight: true,
+              ),
             if ((widget.request.eventType ?? '').isNotEmpty)
               _InfoRow(
                 icon: Icons.celebration_outlined,
@@ -767,6 +792,11 @@ class _MenuFormDialogState extends State<_MenuFormDialog> {
   late final TextEditingController _minCtrl;
   late final TextEditingController _maxCtrl;
   late final TextEditingController _descCtrl;
+  late final TextEditingController _imageCtrl;
+  late final TextEditingController _highlightCtrl;
+  late String _eventKind;
+  late int _leadTimeMonths;
+  late bool _tastingAvailable;
   late bool _isActive;
   bool _saving = false;
 
@@ -783,6 +813,11 @@ class _MenuFormDialogState extends State<_MenuFormDialog> {
       text: m != null ? '${m.maxGuests}' : '100',
     );
     _descCtrl = TextEditingController(text: m?.description ?? '');
+    _imageCtrl = TextEditingController(text: m?.imageUrl ?? '');
+    _highlightCtrl = TextEditingController(text: m?.highlightLabel ?? '');
+    _eventKind = m?.eventKind ?? 'small';
+    _leadTimeMonths = m?.leadTimeMonths ?? 1;
+    _tastingAvailable = m?.tastingAvailable ?? false;
     _isActive = m?.isActive ?? true;
   }
 
@@ -793,6 +828,8 @@ class _MenuFormDialogState extends State<_MenuFormDialog> {
     _minCtrl.dispose();
     _maxCtrl.dispose();
     _descCtrl.dispose();
+    _imageCtrl.dispose();
+    _highlightCtrl.dispose();
     super.dispose();
   }
 
@@ -876,6 +913,98 @@ class _MenuFormDialogState extends State<_MenuFormDialog> {
                   maxLines: 3,
                 ),
                 const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(
+                      child: DropdownButtonFormField<String>(
+                        initialValue: _eventKind,
+                        decoration: _fieldDecoration('Tipo de evento'),
+                        items: const [
+                          DropdownMenuItem(
+                            value: 'small',
+                            child: Text('Cumpleaños / pequeño'),
+                          ),
+                          DropdownMenuItem(
+                            value: 'family',
+                            child: Text('Familiar / grande'),
+                          ),
+                          DropdownMenuItem(
+                            value: 'communion',
+                            child: Text('Comunión'),
+                          ),
+                          DropdownMenuItem(
+                            value: 'wedding',
+                            child: Text('Boda'),
+                          ),
+                          DropdownMenuItem(
+                            value: 'business',
+                            child: Text('Empresa'),
+                          ),
+                          DropdownMenuItem(
+                            value: 'custom',
+                            child: Text('A medida'),
+                          ),
+                        ],
+                        onChanged: (value) {
+                          if (value == null) return;
+                          setState(() {
+                            _eventKind = value;
+                            if (value == 'wedding') {
+                              _leadTimeMonths = 8;
+                              _tastingAvailable = true;
+                            } else if (value == 'communion' ||
+                                value == 'family') {
+                              _leadTimeMonths = 6;
+                              _tastingAvailable = false;
+                            } else {
+                              _leadTimeMonths = 1;
+                              _tastingAvailable = false;
+                            }
+                          });
+                        },
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: DropdownButtonFormField<int>(
+                        initialValue: _leadTimeMonths,
+                        decoration: _fieldDecoration('Antelación mínima'),
+                        items: const [
+                          DropdownMenuItem(value: 1, child: Text('1 mes')),
+                          DropdownMenuItem(value: 6, child: Text('6 meses')),
+                          DropdownMenuItem(value: 8, child: Text('8 meses')),
+                        ],
+                        onChanged: (value) {
+                          if (value == null) return;
+                          setState(() => _leadTimeMonths = value);
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                _Field(
+                  controller: _imageCtrl,
+                  label: 'URL de imagen (opcional)',
+                  hint: 'https://...',
+                ),
+                const SizedBox(height: 12),
+                _Field(
+                  controller: _highlightCtrl,
+                  label: 'Etiqueta destacada (opcional)',
+                  hint: 'Ej: Prueba incluida, Comuniones, Tradicional',
+                ),
+                const SizedBox(height: 12),
+                SwitchListTile.adaptive(
+                  contentPadding: EdgeInsets.zero,
+                  title: const Text('Permite prueba de menú'),
+                  subtitle: const Text('Especialmente recomendado para bodas'),
+                  value: _tastingAvailable,
+                  activeThumbColor: AppTokens.brandPrimary,
+                  onChanged: (value) =>
+                      setState(() => _tastingAvailable = value),
+                ),
+                const SizedBox(height: 4),
                 SwitchListTile.adaptive(
                   contentPadding: EdgeInsets.zero,
                   title: const Text('Menú activo (visible a clientes)'),
@@ -923,6 +1052,12 @@ class _MenuFormDialogState extends State<_MenuFormDialog> {
     final min = int.parse(_minCtrl.text.trim());
     final max = int.parse(_maxCtrl.text.trim());
     final desc = _descCtrl.text.trim().isEmpty ? null : _descCtrl.text.trim();
+    final image = _imageCtrl.text.trim().isEmpty
+        ? null
+        : _imageCtrl.text.trim();
+    final highlight = _highlightCtrl.text.trim().isEmpty
+        ? null
+        : _highlightCtrl.text.trim();
 
     final notifier = widget.ref.read(adminActionProvider.notifier);
 
@@ -934,6 +1069,11 @@ class _MenuFormDialogState extends State<_MenuFormDialog> {
         minGuests: min,
         maxGuests: max,
         description: desc,
+        imageUrl: image,
+        eventKind: _eventKind,
+        leadTimeMonths: _leadTimeMonths,
+        tastingAvailable: _tastingAvailable,
+        highlightLabel: highlight,
         isActive: _isActive,
       );
     } else {
@@ -943,6 +1083,11 @@ class _MenuFormDialogState extends State<_MenuFormDialog> {
         minGuests: min,
         maxGuests: max,
         description: desc,
+        imageUrl: image,
+        eventKind: _eventKind,
+        leadTimeMonths: _leadTimeMonths,
+        tastingAvailable: _tastingAvailable,
+        highlightLabel: highlight,
         isActive: _isActive,
       );
     }
@@ -998,4 +1143,24 @@ class _Field extends StatelessWidget {
       ),
     );
   }
+}
+
+InputDecoration _fieldDecoration(String label) {
+  return InputDecoration(
+    labelText: label,
+    filled: true,
+    fillColor: AppTokens.pageBg,
+    border: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(12),
+      borderSide: BorderSide.none,
+    ),
+    enabledBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(12),
+      borderSide: BorderSide(color: Colors.grey.shade200),
+    ),
+    focusedBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(12),
+      borderSide: const BorderSide(color: AppTokens.brandPrimary, width: 1.5),
+    ),
+  );
 }

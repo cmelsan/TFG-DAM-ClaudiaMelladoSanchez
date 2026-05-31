@@ -51,6 +51,29 @@ class _CateringRequestScreenState extends ConsumerState<CateringRequestScreen> {
   int get _guests => int.tryParse(_guestsCtrl.text) ?? 0;
   double get _estimated =>
       _customMenu ? 0 : (_selectedMenu?.pricePerPerson ?? 0) * _guests;
+  int get _requiredLeadTimeMonths {
+    if (!_customMenu && _selectedMenu != null) {
+      return _selectedMenu!.leadTimeMonths;
+    }
+    final eventType = _eventTypeCtrl.text.trim().toLowerCase();
+    if (eventType.contains('boda')) return 8;
+    if (eventType.contains('comunion') ||
+        eventType.contains('comunión') ||
+        eventType.contains('grande')) {
+      return 6;
+    }
+    return 1;
+  }
+
+  DateTime get _earliestEventDate =>
+      _addMonths(DateTime.now(), _requiredLeadTimeMonths);
+
+  bool get _tastingAvailable {
+    if (!_customMenu && _selectedMenu != null) {
+      return _selectedMenu!.tastingAvailable;
+    }
+    return _eventTypeCtrl.text.trim().toLowerCase().contains('boda');
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -148,6 +171,10 @@ class _CateringRequestScreenState extends ConsumerState<CateringRequestScreen> {
                           onTap: () => setState(() {
                             _customMenu = false;
                             _selectedMenu = m;
+                            if (_eventDate != null &&
+                                _eventDate!.isBefore(_earliestEventDate)) {
+                              _eventDate = null;
+                            }
                           }),
                         ),
                       ),
@@ -156,6 +183,10 @@ class _CateringRequestScreenState extends ConsumerState<CateringRequestScreen> {
                         onTap: () => setState(() {
                           _customMenu = true;
                           _selectedMenu = null;
+                          if (_eventDate != null &&
+                              _eventDate!.isBefore(_earliestEventDate)) {
+                            _eventDate = null;
+                          }
                         }),
                       ),
                     ],
@@ -207,8 +238,19 @@ class _CateringRequestScreenState extends ConsumerState<CateringRequestScreen> {
                 ),
                 const SizedBox(height: 10),
                 _EventTypeSuggestions(
-                  onSelected: (value) =>
-                      setState(() => _eventTypeCtrl.text = value),
+                  onSelected: (value) => setState(() {
+                    _eventTypeCtrl.text = value;
+                    if (_eventDate != null &&
+                        _eventDate!.isBefore(_earliestEventDate)) {
+                      _eventDate = null;
+                    }
+                  }),
+                ),
+                const SizedBox(height: 16),
+                _LeadTimeNotice(
+                  months: _requiredLeadTimeMonths,
+                  earliestDate: _earliestEventDate,
+                  tastingAvailable: _tastingAvailable,
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
@@ -351,6 +393,8 @@ class _CateringRequestScreenState extends ConsumerState<CateringRequestScreen> {
               customMenuDescription: _customMenuCtrl.text,
               notes: _notesCtrl.text,
               estimated: _estimated,
+              leadTimeMonths: _requiredLeadTimeMonths,
+              tastingAvailable: _tastingAvailable,
             ),
           ),
         ],
@@ -360,10 +404,14 @@ class _CateringRequestScreenState extends ConsumerState<CateringRequestScreen> {
 
   Future<void> _pickDate() async {
     final now = DateTime.now();
+    final firstAvailableDate = _earliestEventDate;
     final picked = await showDatePicker(
       context: context,
-      initialDate: _eventDate ?? now.add(const Duration(days: 14)),
-      firstDate: now.add(const Duration(days: 7)),
+      initialDate:
+          _eventDate != null && !_eventDate!.isBefore(firstAvailableDate)
+          ? _eventDate!
+          : firstAvailableDate,
+      firstDate: firstAvailableDate,
       lastDate: now.add(const Duration(days: 730)),
     );
     if (picked != null) setState(() => _eventDate = picked);
@@ -407,6 +455,19 @@ class _CateringRequestScreenState extends ConsumerState<CateringRequestScreen> {
       if (_eventDate == null) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Selecciona la fecha del evento')),
+        );
+        return;
+      }
+      if (_eventDate!.isBefore(_earliestEventDate)) {
+        final leadTime = _requiredLeadTimeMonths == 1
+            ? '1 mes'
+            : '$_requiredLeadTimeMonths meses';
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Este evento necesita reservarse con $leadTime de antelación',
+            ),
+          ),
         );
         return;
       }
@@ -526,6 +587,86 @@ class _EventTypeSuggestions extends StatelessWidget {
   }
 }
 
+class _LeadTimeNotice extends StatelessWidget {
+  const _LeadTimeNotice({
+    required this.months,
+    required this.earliestDate,
+    required this.tastingAvailable,
+  });
+
+  final int months;
+  final DateTime earliestDate;
+  final bool tastingAvailable;
+
+  @override
+  Widget build(BuildContext context) {
+    final timeLabel = months == 1 ? '1 mes' : '$months meses';
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: AppTokens.brandPrimary.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: AppTokens.brandPrimary.withValues(alpha: 0.2),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(
+                Icons.calendar_month_outlined,
+                color: AppTokens.brandPrimary,
+                size: 18,
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  'Reserva mínima: $timeLabel de antelación',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w700,
+                    color: Color(0xFF111111),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Text(
+            'Primera fecha disponible: ${Formatters.date(earliestDate)}. El catering lo confirma y gestiona el administrador.',
+            style: const TextStyle(
+              fontSize: 12,
+              color: Colors.black54,
+              height: 1.45,
+            ),
+          ),
+          if (tastingAvailable) ...[
+            const SizedBox(height: 8),
+            const Row(
+              children: [
+                Icon(
+                  Icons.room_service_outlined,
+                  size: 16,
+                  color: AppTokens.brandPrimary,
+                ),
+                SizedBox(width: 6),
+                Expanded(
+                  child: Text(
+                    'Este evento permite concertar prueba de menú.',
+                    style: TextStyle(fontSize: 12, color: Colors.black87),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
 class _MenuCard extends StatelessWidget {
   const _MenuCard({
     required this.menu,
@@ -595,26 +736,24 @@ class _MenuCard extends StatelessWidget {
                       ),
                     ],
                     const SizedBox(height: 6),
-                    Row(
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 6,
                       children: [
-                        Text(
-                          Formatters.price(menu.pricePerPerson),
-                          style: const TextStyle(
-                            color: AppTokens.brandPrimary,
-                            fontWeight: FontWeight.bold,
-                          ),
+                        _RequestMenuPill(
+                          text:
+                              '${Formatters.price(menu.pricePerPerson)} /persona',
+                          primary: true,
                         ),
-                        const Text(
-                          '/persona  ·  ',
-                          style: TextStyle(color: Colors.black45, fontSize: 12),
+                        _RequestMenuPill(
+                          text: '${menu.minGuests}–${menu.maxGuests} pax',
                         ),
-                        Text(
-                          '${menu.minGuests}–${menu.maxGuests} pax',
-                          style: const TextStyle(
-                            color: Colors.black54,
-                            fontSize: 12,
-                          ),
+                        _RequestMenuPill(
+                          text:
+                              'Reserva ${menu.leadTimeMonths} ${menu.leadTimeMonths == 1 ? 'mes' : 'meses'} antes',
                         ),
+                        if (menu.tastingAvailable)
+                          const _RequestMenuPill(text: 'Prueba de menú'),
                       ],
                     ),
                   ],
@@ -624,6 +763,33 @@ class _MenuCard extends StatelessWidget {
                 const Icon(Icons.check_circle, color: AppTokens.brandPrimary),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _RequestMenuPill extends StatelessWidget {
+  const _RequestMenuPill({required this.text, this.primary = false});
+  final String text;
+  final bool primary;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+      decoration: BoxDecoration(
+        color: primary
+            ? AppTokens.brandPrimary.withValues(alpha: 0.1)
+            : Colors.grey.shade100,
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Text(
+        text,
+        style: TextStyle(
+          fontSize: 12,
+          color: primary ? AppTokens.brandPrimary : Colors.black54,
+          fontWeight: primary ? FontWeight.w700 : FontWeight.w500,
         ),
       ),
     );
@@ -764,6 +930,8 @@ class _ConfirmCard extends StatelessWidget {
     required this.customMenuDescription,
     required this.notes,
     required this.estimated,
+    required this.leadTimeMonths,
+    required this.tastingAvailable,
   });
   final EventMenu? menu;
   final bool customMenu;
@@ -775,6 +943,8 @@ class _ConfirmCard extends StatelessWidget {
   final String customMenuDescription;
   final String notes;
   final double estimated;
+  final int leadTimeMonths;
+  final bool tastingAvailable;
 
   @override
   Widget build(BuildContext context) {
@@ -793,6 +963,15 @@ class _ConfirmCard extends StatelessWidget {
           ),
           _SummaryRow(label: 'Tipo de evento', value: eventType),
           _SummaryRow(label: 'Comensales', value: '$guests personas'),
+          _SummaryRow(
+            label: 'Antelación mínima',
+            value: leadTimeMonths == 1 ? '1 mes' : '$leadTimeMonths meses',
+          ),
+          if (tastingAvailable)
+            const _SummaryRow(
+              label: 'Prueba',
+              value: 'Disponible para coordinar',
+            ),
           if (eventDate != null)
             _SummaryRow(label: 'Fecha', value: Formatters.date(eventDate!)),
           _SummaryRow(label: 'Teléfono', value: phone.isNotEmpty ? phone : '—'),
@@ -815,6 +994,10 @@ class _ConfirmCard extends StatelessWidget {
       ),
     );
   }
+}
+
+DateTime _addMonths(DateTime date, int months) {
+  return DateTime(date.year, date.month + months, date.day);
 }
 
 class _SummaryRow extends StatelessWidget {

@@ -19,6 +19,10 @@ _$AdminEventRequestImpl _$$AdminEventRequestImplFromJson(
   eventMenuName: json['event_menu_name'] as String?,
   eventMenuPricePerPerson: (json['event_menu_price_per_person'] as num?)
       ?.toDouble(),
+  eventMenuEventKind: json['event_menu_event_kind'] as String?,
+  eventMenuLeadTimeMonths: (json['event_menu_lead_time_months'] as num?)
+      ?.toInt(),
+  eventMenuTastingAvailable: json['event_menu_tasting_available'] as bool?,
   eventType: json['event_type'] as String?,
   contactPhone: json['contact_phone'] as String?,
   menuType: json['menu_type'] as String?,
@@ -48,6 +52,9 @@ Map<String, dynamic> _$$AdminEventRequestImplToJson(
   'event_menu_id': instance.eventMenuId,
   'event_menu_name': instance.eventMenuName,
   'event_menu_price_per_person': instance.eventMenuPricePerPerson,
+  'event_menu_event_kind': instance.eventMenuEventKind,
+  'event_menu_lead_time_months': instance.eventMenuLeadTimeMonths,
+  'event_menu_tasting_available': instance.eventMenuTastingAvailable,
   'event_type': instance.eventType,
   'contact_phone': instance.contactPhone,
   'menu_type': instance.menuType,

@@ -135,6 +135,13 @@ class _RequestCard extends StatelessWidget {
     final pricePerPerson =
         (request['event_menus'] as Map<String, dynamic>?)?['price_per_person']
             as num?;
+    final leadTimeMonths =
+        (request['event_menus'] as Map<String, dynamic>?)?['lead_time_months']
+            as int?;
+    final tastingAvailable =
+        (request['event_menus'] as Map<String, dynamic>?)?['tasting_available']
+            as bool? ??
+        false;
     final createdAt = request['created_at'] != null
         ? DateTime.tryParse(request['created_at'] as String)
         : null;
@@ -214,6 +221,21 @@ class _RequestCard extends StatelessWidget {
                 if (eventType != null && eventType.isNotEmpty) ...[
                   const SizedBox(height: 8),
                   _InfoRow(icon: Icons.celebration_outlined, text: eventType),
+                ],
+                if (leadTimeMonths != null) ...[
+                  const SizedBox(height: 8),
+                  _InfoRow(
+                    icon: Icons.calendar_month_outlined,
+                    text:
+                        'Antelación mínima: $leadTimeMonths ${leadTimeMonths == 1 ? 'mes' : 'meses'}',
+                  ),
+                ],
+                if (tastingAvailable) ...[
+                  const SizedBox(height: 8),
+                  const _InfoRow(
+                    icon: Icons.room_service_outlined,
+                    text: 'Prueba de menú disponible para coordinar',
+                  ),
                 ],
                 if (eventDate != null) ...[
                   const SizedBox(height: 8),

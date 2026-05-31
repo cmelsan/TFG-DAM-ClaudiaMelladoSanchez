@@ -14,6 +14,10 @@ class EventMenu with _$EventMenu {
     required int maxGuests,
     String? description,
     String? imageUrl,
+    @Default('small') String eventKind,
+    @Default(1) int leadTimeMonths,
+    @Default(false) bool tastingAvailable,
+    String? highlightLabel,
     @Default(true) bool isActive,
     DateTime? createdAt,
   }) = _EventMenu;

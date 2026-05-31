@@ -442,6 +442,7 @@ Ejecutar en orden en el SQL Editor de Supabase:
 | `00003_test_users.sql` | 3 usuarios de prueba (client, employee, admin) con contraseña conocida |
 | `00004_encargo_config.sql` | Configuración de negocio para pedidos encargados (días de antelación, franjas horarias) |
 | `00005_dishes_offer_seasonal.sql` | Campos `is_offer`, `is_seasonal`, `offer_price` en dishes; campo `cancellation_reason` en orders |
+| `00026_catering_event_rules_and_menus.sql` | Reglas de catering por tipo de evento, bodas/comuniones, plazos y prueba de menú |
 
 ---
 
@@ -588,4 +589,10 @@ El QR se muestra en `OrderConfirmationScreen` y `OrderDetailScreen` para que el 
 - `AdminRepository.updateDishImageUrl()`: actualiza la columna `image_url` de la tabla `dishes`
 - `AdminAction.uploadDishImage()`: orquesta subida + actualización, invalida `adminDishesProvider`
 - `AdminDishesScreen` rediseñado: cada plato muestra miniatura 60×60 (con `CachedNetworkImage`) + botón `camera_alt` para subir nueva imagen + switch de disponibilidad
+
+### v0.10 — Catering por tipo de evento
+- Rediseñada la página pública de catering con menús caseros, plazos de reserva y sección de menús personalizados.
+- Añadidos menús de comunión y boda, con prueba de menú disponible para bodas.
+- El formulario de solicitud valida antelación mínima: 1 mes para eventos pequeños, 6 meses para comuniones/eventos grandes y 8 meses para bodas.
+- El panel admin permite editar tipo de evento, imagen, etiqueta, antelación y disponibilidad de prueba de menú.
 - Las tarjetas de home (`_TopDishCard`, `DishCard`) ya mostraban `imageUrl` vía `CachedNetworkImage` — ahora se visualizan correctamente al tener URL real en BD

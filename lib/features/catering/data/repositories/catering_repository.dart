@@ -76,7 +76,9 @@ class CateringRepository {
     try {
       final data = await _client
           .from(SupabaseConstants.eventRequests)
-          .select('*, ${SupabaseConstants.eventMenus}(name, price_per_person)')
+          .select(
+            '*, ${SupabaseConstants.eventMenus}(name, price_per_person, event_kind, lead_time_months, tasting_available)',
+          )
           .eq('user_id', userId)
           .order('created_at', ascending: false);
       return List<Map<String, dynamic>>.from(data);

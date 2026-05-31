@@ -267,7 +267,9 @@ class AdminRepository {
     try {
       final data = await _client
           .from(SupabaseConstants.eventRequests)
-          .select('*, ${SupabaseConstants.eventMenus}(name, price_per_person)')
+          .select(
+            '*, ${SupabaseConstants.eventMenus}(name, price_per_person, event_kind, lead_time_months, tasting_available)',
+          )
           .order('created_at', ascending: false);
       return data.map((row) {
         final json = Map<String, dynamic>.from(row);
@@ -275,7 +277,10 @@ class AdminRepository {
         if (menu is Map<String, dynamic>) {
           json
             ..['event_menu_name'] = menu['name']
-            ..['event_menu_price_per_person'] = menu['price_per_person'];
+            ..['event_menu_price_per_person'] = menu['price_per_person']
+            ..['event_menu_event_kind'] = menu['event_kind']
+            ..['event_menu_lead_time_months'] = menu['lead_time_months']
+            ..['event_menu_tasting_available'] = menu['tasting_available'];
         }
         return AdminEventRequest.fromJson(json);
       }).toList();
@@ -712,6 +717,11 @@ class AdminRepository {
     required int minGuests,
     required int maxGuests,
     String? description,
+    String? imageUrl,
+    String eventKind = 'small',
+    int leadTimeMonths = 1,
+    bool tastingAvailable = false,
+    String? highlightLabel,
     bool isActive = true,
   }) async {
     try {
@@ -721,6 +731,11 @@ class AdminRepository {
         'min_guests': minGuests,
         'max_guests': maxGuests,
         'description': description,
+        'image_url': imageUrl,
+        'event_kind': eventKind,
+        'lead_time_months': leadTimeMonths,
+        'tasting_available': tastingAvailable,
+        'highlight_label': highlightLabel,
         'is_active': isActive,
       };
       final data = await _client
@@ -744,6 +759,11 @@ class AdminRepository {
     required int maxGuests,
     required bool isActive,
     String? description,
+    String? imageUrl,
+    String eventKind = 'small',
+    int leadTimeMonths = 1,
+    bool tastingAvailable = false,
+    String? highlightLabel,
   }) async {
     try {
       await _client
@@ -754,6 +774,11 @@ class AdminRepository {
             'min_guests': minGuests,
             'max_guests': maxGuests,
             'description': description,
+            'image_url': imageUrl,
+            'event_kind': eventKind,
+            'lead_time_months': leadTimeMonths,
+            'tasting_available': tastingAvailable,
+            'highlight_label': highlightLabel,
             'is_active': isActive,
           })
           .eq('id', id);

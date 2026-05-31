@@ -583,7 +583,7 @@ final acceptingOrdersProvider = AutoDisposeFutureProvider<bool>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef AcceptingOrdersRef = AutoDisposeFutureProviderRef<bool>;
-String _$adminActionHash() => r'377be3576feed75b996de3778d14c9eb473aba68';
+String _$adminActionHash() => r'9ecfe4fa70f5f25edd0e18c7649107aa2541c549';
 
 /// See also [AdminAction].
 @ProviderFor(AdminAction)

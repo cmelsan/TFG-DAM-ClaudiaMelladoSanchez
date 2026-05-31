@@ -13,7 +13,7 @@ import 'package:sabor_de_casa/features/catering/presentation/providers/catering_
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 const _heroImageUrl =
-    'https://images.unsplash.com/photo-1530103862676-de8c9debad1d'
+    'https://images.unsplash.com/photo-1514986888952-8cd320577b68'
     '?q=80&w=1600&auto=format&fit=crop';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -76,9 +76,6 @@ class _CateringScreenState extends ConsumerState<CateringScreen>
           children: [
             // ── Hero ────────────────────────────────────────────────
             _CateringHero(fadeCtrl: _heroFade, isLoggedIn: _isLoggedIn),
-
-            // ── Stats ────────────────────────────────────────────────
-            _StatsSection(sidePad: sidePad),
 
             // ── Sección "Nuestros menús de evento" ───────────────────
             Padding(
@@ -193,6 +190,10 @@ class _CateringScreenState extends ConsumerState<CateringScreen>
                     ),
             ),
 
+            _PersonalizedMenuSection(sidePad: sidePad, isLoggedIn: _isLoggedIn),
+
+            _LeadTimeSection(sidePad: sidePad),
+
             // ── CTA banner ────────────────────────────────────────────
             _CtaBanner(sidePad: sidePad, isLoggedIn: _isLoggedIn),
 
@@ -218,7 +219,7 @@ class _MenuGrid extends StatelessWidget {
     return Wrap(
       spacing: 20,
       runSpacing: 20,
-      children: menus.map((m) {
+      children: menus.map((menu) {
         return SizedBox(
           width:
               (MediaQuery.sizeOf(context).width -
@@ -229,7 +230,7 @@ class _MenuGrid extends StatelessWidget {
                   20) /
               2,
           height: 460,
-          child: _MenuCard(menu: m),
+          child: _MenuCard(menu: menu),
         );
       }).toList(),
     );
@@ -245,9 +246,9 @@ class _MenuList extends StatelessWidget {
     return Column(
       children: menus
           .map(
-            (m) => Padding(
+            (menu) => Padding(
               padding: const EdgeInsets.only(bottom: 20),
-              child: SizedBox(height: 460, child: _MenuCard(menu: m)),
+              child: SizedBox(height: 460, child: _MenuCard(menu: menu)),
             ),
           )
           .toList(),
@@ -332,7 +333,7 @@ class _CateringHero extends StatelessWidget {
                         borderRadius: BorderRadius.circular(100),
                       ),
                       child: Text(
-                        'EVENTOS & CATERING',
+                        'CATERING CASERO',
                         style: GoogleFonts.inter(
                           fontSize: 11,
                           fontWeight: FontWeight.w700,
@@ -362,7 +363,7 @@ class _CateringHero extends StatelessWidget {
                           ),
                         ),
                     child: Text(
-                      'Haz tu evento\ninolvidable',
+                      'Celebraciones\ncon sabor de casa',
                       style: GoogleFonts.inter(
                         fontSize: screenW < 600 ? 40 : 54,
                         fontWeight: FontWeight.w900,
@@ -392,7 +393,7 @@ class _CateringHero extends StatelessWidget {
                           ),
                         ),
                     child: Text(
-                      'Bodas, cumpleaños, reuniones de empresa\no cualquier celebración con sabor casero.',
+                      'Bodas, comuniones, cumpleaños y reuniones familiares\ncon menús preparados a medida por nuestro equipo.',
                       style: GoogleFonts.inter(
                         fontSize: screenW < 600 ? 14 : 16,
                         color: Colors.white.withValues(alpha: 0.80),
@@ -415,19 +416,19 @@ class _CateringHero extends StatelessWidget {
                       children: [
                         _HeroChip(
                           icon: Icons.people_outline,
-                          label: 'Desde 10 personas',
+                          label: 'Eventos pequeños y grandes',
                         ),
                         _HeroChip(
                           icon: Icons.restaurant_menu,
                           label: 'Menús a medida',
                         ),
                         _HeroChip(
-                          icon: Icons.euro_outlined,
-                          label: 'Presupuesto gratis',
+                          icon: Icons.calendar_month_outlined,
+                          label: 'Reserva con antelación',
                         ),
                         _HeroChip(
-                          icon: Icons.location_on_outlined,
-                          label: 'En tu espacio',
+                          icon: Icons.room_service_outlined,
+                          label: 'Prueba para bodas',
                         ),
                       ],
                     ),
@@ -458,7 +459,7 @@ class _CateringHero extends StatelessWidget {
                             size: 18,
                           ),
                           label: Text(
-                            'Solicitar presupuesto',
+                            'Concertar catering',
                             style: GoogleFonts.inter(
                               fontWeight: FontWeight.w700,
                               fontSize: 15,
@@ -552,117 +553,6 @@ class _HeroChip extends StatelessWidget {
   }
 }
 
-// ── Stats ─────────────────────────────────────────────────────────────────────
-
-class _StatsSection extends StatelessWidget {
-  const _StatsSection({required this.sidePad});
-  final double sidePad;
-
-  @override
-  Widget build(BuildContext context) {
-    final screenW = MediaQuery.sizeOf(context).width;
-    final cols = screenW > 760 ? 4 : 2;
-
-    return Container(
-      color: Colors.white,
-      padding: EdgeInsets.fromLTRB(sidePad + 24, 40, sidePad + 24, 40),
-      child: GridView.count(
-        crossAxisCount: cols,
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        crossAxisSpacing: 16,
-        mainAxisSpacing: 16,
-        childAspectRatio: screenW > 760 ? 2.2 : 2.0,
-        children: const [
-          _StatCard(
-            icon: Icons.celebration_outlined,
-            value: '+200',
-            label: 'eventos realizados',
-          ),
-          _StatCard(
-            icon: Icons.star_outline_rounded,
-            value: '4.9',
-            label: 'valoración media',
-          ),
-          _StatCard(
-            icon: Icons.people_outline,
-            value: '+5.000',
-            label: 'personas atendidas',
-          ),
-          _StatCard(
-            icon: Icons.restaurant_menu_outlined,
-            value: '100%',
-            label: 'ingredientes frescos',
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _StatCard extends StatelessWidget {
-  const _StatCard({
-    required this.icon,
-    required this.value,
-    required this.label,
-  });
-
-  final IconData icon;
-  final String value;
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      decoration: BoxDecoration(
-        color: AppTokens.pageBg,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: AppTokens.brandPrimary.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(icon, size: 20, color: AppTokens.brandPrimary),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  value,
-                  style: GoogleFonts.inter(
-                    fontSize: 22,
-                    fontWeight: FontWeight.w900,
-                    color: const Color(0xFF111111),
-                    height: 1,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  label,
-                  style: GoogleFonts.inter(
-                    fontSize: 12,
-                    color: Colors.black54,
-                    fontWeight: FontWeight.w500,
-                  ),
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 // ── Menu Card ─────────────────────────────────────────────────────────────────
 
 class _MenuCard extends StatefulWidget {
@@ -745,6 +635,24 @@ class _MenuCardState extends State<_MenuCard> {
 
                     // Badge precio
                     Positioned(
+                      top: 12,
+                      left: 14,
+                      child: _MenuBadge(
+                        text:
+                            menu.highlightLabel ??
+                            _eventKindLabel(menu.eventKind),
+                      ),
+                    ),
+
+                    if (menu.tastingAvailable)
+                      const Positioned(
+                        top: 12,
+                        right: 14,
+                        child: _MenuBadge(text: 'Prueba disponible'),
+                      ),
+
+                    // Badge precio
+                    Positioned(
                       bottom: 10,
                       left: 14,
                       child: Container(
@@ -797,10 +705,31 @@ class _MenuCardState extends State<_MenuCard> {
                             color: Colors.black54,
                             height: 1.42,
                           ),
-                          maxLines: 8,
+                          maxLines: 6,
                           overflow: TextOverflow.ellipsis,
                         ),
                       const Spacer(),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: [
+                          _InfoPill(
+                            icon: _eventKindIcon(menu.eventKind),
+                            label: _eventKindLabel(menu.eventKind),
+                          ),
+                          _InfoPill(
+                            icon: Icons.calendar_month_outlined,
+                            label:
+                                'Reserva ${menu.leadTimeMonths} ${menu.leadTimeMonths == 1 ? 'mes' : 'meses'} antes',
+                          ),
+                          if (menu.tastingAvailable)
+                            const _InfoPill(
+                              icon: Icons.room_service_outlined,
+                              label: 'Prueba de menú',
+                            ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
                       Row(
                         children: [
                           const Icon(
@@ -852,6 +781,321 @@ class _CardImagePlaceholder extends StatelessWidget {
           size: 48,
           color: AppTokens.brandPrimary,
         ),
+      ),
+    );
+  }
+}
+
+class _MenuBadge extends StatelessWidget {
+  const _MenuBadge({required this.text});
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.92),
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Text(
+        text,
+        style: GoogleFonts.inter(
+          fontSize: 11,
+          fontWeight: FontWeight.w800,
+          color: AppTokens.brandDark,
+        ),
+      ),
+    );
+  }
+}
+
+class _InfoPill extends StatelessWidget {
+  const _InfoPill({required this.icon, required this.label});
+  final IconData icon;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 6),
+      decoration: BoxDecoration(
+        color: AppTokens.brandPrimary.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 14, color: AppTokens.brandPrimary),
+          const SizedBox(width: 5),
+          Text(
+            label,
+            style: GoogleFonts.inter(
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+              color: AppTokens.brandDark,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Menú personalizado ───────────────────────────────────────────────────────
+
+class _PersonalizedMenuSection extends StatelessWidget {
+  const _PersonalizedMenuSection({
+    required this.sidePad,
+    required this.isLoggedIn,
+  });
+
+  final double sidePad;
+  final bool isLoggedIn;
+
+  @override
+  Widget build(BuildContext context) {
+    final screenW = MediaQuery.sizeOf(context).width;
+
+    return Container(
+      margin: EdgeInsets.fromLTRB(sidePad + 16, 28, sidePad + 16, 0),
+      padding: const EdgeInsets.all(28),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: const Color(0xFFE8E8E6)),
+        boxShadow: [AppTokens.cardShadow],
+      ),
+      child: screenW > 760
+          ? Row(
+              children: [
+                const Expanded(child: _PersonalizedCopy()),
+                const SizedBox(width: 28),
+                _PersonalizedActions(isLoggedIn: isLoggedIn),
+              ],
+            )
+          : Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const _PersonalizedCopy(),
+                const SizedBox(height: 20),
+                _PersonalizedActions(isLoggedIn: isLoggedIn),
+              ],
+            ),
+    );
+  }
+}
+
+class _PersonalizedCopy extends StatelessWidget {
+  const _PersonalizedCopy();
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Menús personalizados para cada celebración',
+          style: GoogleFonts.inter(
+            fontSize: 24,
+            fontWeight: FontWeight.w900,
+            color: const Color(0xFF111111),
+            height: 1.12,
+          ),
+        ),
+        const SizedBox(height: 10),
+        Text(
+          'Si ningún menú encaja exactamente, adaptamos la propuesta al evento que desee el cliente: número de invitados, presupuesto, alergias, platos favoritos, montaje y tiempos del servicio.',
+          style: GoogleFonts.inter(
+            fontSize: 14,
+            color: Colors.black54,
+            height: 1.6,
+          ),
+        ),
+        const SizedBox(height: 16),
+        const Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            _InfoPill(icon: Icons.tune_outlined, label: 'A medida'),
+            _InfoPill(icon: Icons.no_food_outlined, label: 'Alergias'),
+            _InfoPill(icon: Icons.groups_outlined, label: 'Invitados'),
+            _InfoPill(icon: Icons.payments_outlined, label: 'Presupuesto'),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+class _PersonalizedActions extends StatelessWidget {
+  const _PersonalizedActions({required this.isLoggedIn});
+  final bool isLoggedIn;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 220,
+      child: FilledButton.icon(
+        onPressed: () {
+          if (isLoggedIn) {
+            context.pushNamed(RouteNames.cateringRequest);
+          } else {
+            context.pushNamed(RouteNames.login);
+          }
+        },
+        icon: const Icon(Icons.edit_note_outlined, size: 18),
+        label: Text(isLoggedIn ? 'Diseñar mi menú' : 'Iniciar sesión'),
+        style: FilledButton.styleFrom(
+          backgroundColor: AppTokens.brandPrimary,
+          padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 14),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ── Plazos de reserva ────────────────────────────────────────────────────────
+
+class _LeadTimeSection extends StatelessWidget {
+  const _LeadTimeSection({required this.sidePad});
+  final double sidePad;
+
+  @override
+  Widget build(BuildContext context) {
+    final screenW = MediaQuery.sizeOf(context).width;
+    final cards = [
+      const _LeadTimeCard(
+        icon: Icons.cake_outlined,
+        title: 'Cumpleaños y eventos pequeños',
+        time: '1 mes',
+        description:
+            'Reservas para celebraciones familiares, reuniones privadas y eventos sencillos.',
+      ),
+      const _LeadTimeCard(
+        icon: Icons.celebration_outlined,
+        title: 'Comuniones y eventos grandes',
+        time: '6 meses',
+        description:
+            'Necesitamos margen para ajustar invitados, montaje, menú infantil y detalles del servicio.',
+      ),
+      const _LeadTimeCard(
+        icon: Icons.favorite_border,
+        title: 'Bodas',
+        time: '8 meses',
+        description:
+            'Incluye planificación completa y posibilidad de concertar prueba de menú.',
+      ),
+    ];
+
+    return Padding(
+      padding: EdgeInsets.fromLTRB(sidePad + 24, 56, sidePad + 24, 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Plazos para concertar catering',
+            style: GoogleFonts.inter(
+              fontSize: 26,
+              fontWeight: FontWeight.w900,
+              color: const Color(0xFF111111),
+              height: 1.1,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'El catering lo gestiona nuestro equipo administrador. El cliente envía la solicitud y nosotros confirmamos disponibilidad, presupuesto y cita si hace falta.',
+            style: GoogleFonts.inter(
+              fontSize: 14,
+              color: Colors.black54,
+              height: 1.6,
+            ),
+          ),
+          const SizedBox(height: 22),
+          if (screenW > 800)
+            Row(
+              children: [
+                Expanded(child: cards[0]),
+                const SizedBox(width: 16),
+                Expanded(child: cards[1]),
+                const SizedBox(width: 16),
+                Expanded(child: cards[2]),
+              ],
+            )
+          else
+            Column(
+              children: [
+                cards[0],
+                const SizedBox(height: 14),
+                cards[1],
+                const SizedBox(height: 14),
+                cards[2],
+              ],
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _LeadTimeCard extends StatelessWidget {
+  const _LeadTimeCard({
+    required this.icon,
+    required this.title,
+    required this.time,
+    required this.description,
+  });
+
+  final IconData icon;
+  final String title;
+  final String time;
+  final String description;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: const Color(0xFFE8E8E6)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, color: AppTokens.brandPrimary, size: 26),
+          const SizedBox(height: 14),
+          Text(
+            time,
+            style: GoogleFonts.inter(
+              fontSize: 28,
+              fontWeight: FontWeight.w900,
+              color: AppTokens.brandPrimary,
+              height: 1,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            title,
+            style: GoogleFonts.inter(
+              fontSize: 15,
+              fontWeight: FontWeight.w800,
+              color: const Color(0xFF111111),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            description,
+            style: GoogleFonts.inter(
+              fontSize: 13,
+              color: Colors.black54,
+              height: 1.45,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -1235,5 +1479,41 @@ class _StepCard extends StatelessWidget {
         ],
       ),
     );
+  }
+}
+
+String _eventKindLabel(String eventKind) {
+  switch (eventKind) {
+    case 'wedding':
+      return 'Bodas';
+    case 'communion':
+      return 'Comuniones';
+    case 'business':
+      return 'Empresa';
+    case 'family':
+      return 'Familiar';
+    case 'custom':
+      return 'A medida';
+    case 'small':
+    default:
+      return 'Evento pequeño';
+  }
+}
+
+IconData _eventKindIcon(String eventKind) {
+  switch (eventKind) {
+    case 'wedding':
+      return Icons.favorite_border;
+    case 'communion':
+      return Icons.celebration_outlined;
+    case 'business':
+      return Icons.business_center_outlined;
+    case 'family':
+      return Icons.groups_outlined;
+    case 'custom':
+      return Icons.tune_outlined;
+    case 'small':
+    default:
+      return Icons.cake_outlined;
   }
 }

@@ -617,57 +617,62 @@ class _DishDetailModalState extends ConsumerState<_DishDetailModal> {
       clipBehavior: Clip.antiAlias,
       insetPadding: const EdgeInsets.symmetric(horizontal: 80, vertical: 48),
       child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 820),
-        child: Stack(
-          children: [
-            dishAsync.when(
-              data: (dish) => SingleChildScrollView(
-                child: Column(
+        constraints: const BoxConstraints(maxWidth: 760),
+        child: SizedBox(
+          height: 460,
+          child: Stack(
+            children: [
+              dishAsync.when(
+                data: (dish) => Row(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
-                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    // Imagen banner superior — full width, altura fija
+                    // ── Imagen izquierda ──────────────────────────────
                     SizedBox(
-                      height: 320,
+                      width: 260,
                       child: _DishImage(dish: dish),
                     ),
-                    // Info debajo
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(40, 32, 40, 40),
-                      child: _DishInfo(
-                        dish: dish,
-                        isFavAsync: isFavAsync,
-                        quantity: _quantity,
-                        onQuantityChanged: (v) => setState(() => _quantity = v),
-                        onAddToCart: dish.isAvailable ? () => _addToCart(dish) : null,
-                        dishId: widget.dishId,
-                        ref: ref,
-                        theme: theme,
-                        padding: EdgeInsets.zero,
+                    // ── Info derecha (scrollable) ─────────────────────
+                    Expanded(
+                      child: SingleChildScrollView(
+                        padding: const EdgeInsets.fromLTRB(32, 52, 52, 32),
+                        child: _DishInfo(
+                          dish: dish,
+                          isFavAsync: isFavAsync,
+                          quantity: _quantity,
+                          onQuantityChanged: (v) =>
+                              setState(() => _quantity = v),
+                          onAddToCart:
+                              dish.isAvailable ? () => _addToCart(dish) : null,
+                          dishId: widget.dishId,
+                          ref: ref,
+                          theme: theme,
+                          padding: EdgeInsets.zero,
+                        ),
                       ),
                     ),
                   ],
                 ),
+                loading: () => const Center(child: LoadingIndicator()),
+                error: (e, _) =>
+                    Center(child: ErrorView(message: e.toString())),
               ),
-              loading: () => const SizedBox(
-                height: 200,
-                child: Center(child: LoadingIndicator()),
-              ),
-              error: (e, _) => Center(child: ErrorView(message: e.toString())),
-            ),
-            Positioned(
-              top: 8,
-              right: 8,
-              child: IconButton(
-                icon: const Icon(Icons.close, size: 20),
-                style: IconButton.styleFrom(
-                  backgroundColor: Colors.black54,
-                  foregroundColor: Colors.white,
+              // ── Botón cerrar ────────────────────────────────────────
+              Positioned(
+                top: 10,
+                right: 10,
+                child: IconButton(
+                  icon: const Icon(Icons.close, size: 18),
+                  style: IconButton.styleFrom(
+                    backgroundColor: Colors.black12,
+                    foregroundColor: const Color(0xFF333333),
+                    minimumSize: const Size(36, 36),
+                    padding: EdgeInsets.zero,
+                  ),
+                  onPressed: () => Navigator.of(context).pop(),
                 ),
-                onPressed: () => Navigator.of(context).pop(),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

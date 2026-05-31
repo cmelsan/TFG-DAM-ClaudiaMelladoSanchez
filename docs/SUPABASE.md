@@ -209,6 +209,10 @@ Menús disponibles para catering.
 | `min_guests` | INT | DEFAULT 10 |
 | `max_guests` | INT | DEFAULT 200 |
 | `image_url` | TEXT | |
+| `event_kind` | TEXT | Tipo funcional: `small`, `family`, `communion`, `wedding`, `business`, `custom` |
+| `lead_time_months` | INT | Antelación mínima: 1, 6 u 8 meses |
+| `tasting_available` | BOOLEAN | Indica si se puede concertar prueba de menú |
+| `highlight_label` | TEXT | Etiqueta destacada para cliente/admin |
 | `is_active` | BOOLEAN | DEFAULT TRUE |
 | `created_at` | TIMESTAMPTZ | |
 

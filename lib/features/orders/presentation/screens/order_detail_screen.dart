@@ -1,4 +1,4 @@
-﻿import 'package:cached_network_image/cached_network_image.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lottie/lottie.dart';
@@ -75,7 +75,7 @@ class OrderDetailScreen extends ConsumerWidget {
     final items = itemsAsync.value!;
 
     final screenW = MediaQuery.sizeOf(context).width;
-    final hPad = screenW > 900 ? (screenW - 900) / 2 : 16.0;
+    final hPad = screenW > 1180 ? (screenW - 1120) / 2 : 16.0;
 
     return Scaffold(
       backgroundColor: AppTokens.pageBg,
@@ -90,126 +90,58 @@ class OrderDetailScreen extends ConsumerWidget {
           ),
         ],
       ),
-      body: ListView(
-        padding: EdgeInsets.symmetric(horizontal: hPad, vertical: 16),
-        children: [
-          // â”€â”€ Estado con Lottie â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-          _StatusCard(order: order),
-          const SizedBox(height: 16),
-
-          // â”€â”€ QR de recogida â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-          if (_showQr(order)) ...[
-            _QrSection(orderId: order.id),
-            const SizedBox(height: 16),
-          ],
-
-          // â”€â”€ Info del pedido â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-          _OrderInfoCard(order: order),
-          const SizedBox(height: 24),
-
-          const Text(
-            'Tu pedido',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: Color(0xFF111111),
-            ),
-          ),
-          const SizedBox(height: 12),
-
-          // â”€â”€ Lista de productos â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-          if (items.isEmpty)
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: const Color(0xFFE5E5E3)),
-              ),
-              child: const Text('No hay productos asociados a este pedido.'),
-            )
-          else
-            Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: const Color(0xFFE5E5E3)),
-              ),
-              child: Column(
-                children: [
-                  for (int i = 0; i < items.length; i++) ...[
-                    _OrderItemTile(items[i]),
-                    if (i < items.length - 1)
-                      const Divider(
-                        height: 1,
-                        indent: 16,
-                        endIndent: 16,
-                        color: Color(0xFFE5E5E3),
-                      ),
-                  ],
-                ],
-              ),
-            ),
-
-          const SizedBox(height: 16),
-
-          // â”€â”€ Desglose de costes â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: const Color(0xFFE5E5E3)),
-            ),
-            child: Column(
-              children: [
-                _CostRow(
-                  label: 'Subtotal',
-                  amount: Formatters.price(order.subtotal),
-                ),
-                const SizedBox(height: 8),
-                _CostRow(
-                  label: 'Gastos de envío',
-                  amount: Formatters.price(order.deliveryFee),
-                ),
-                const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 12),
-                  child: Divider(height: 1, color: Color(0xFFE5E5E3)),
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text(
-                      'Total',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 18,
-                      ),
-                    ),
-                    Text(
-                      Formatters.price(order.total),
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 18,
-                        color: AppTokens.brandPrimary,
-                      ),
-                    ),
-                  ],
-                ),
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final wide = constraints.maxWidth >= 980;
+          final leftColumn = Column(
+            children: [
+              _StatusCard(order: order),
+              const SizedBox(height: 16),
+              if (_showQr(order)) ...[
+                _QrSection(orderId: order.id),
+                const SizedBox(height: 16),
               ],
-            ),
-          ),
+              _OrderInfoCard(order: order),
+            ],
+          );
+          final rightColumn = Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _OrderProductsCard(items: items),
+              const SizedBox(height: 16),
+              _CostsCard(order: order),
+              const SizedBox(height: 16),
+              _TicketCard(
+                onDownload: () => _downloadPdf(context, order, items),
+              ),
+              if (order.status == 'delivered') ...[
+                const SizedBox(height: 16),
+                _RatingSection(orderId: order.id),
+              ],
+            ],
+          );
 
-          const SizedBox(height: 16),
-
-          // â”€â”€ Valoración â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-          if (order.status == 'delivered') ...[
-            _RatingSection(orderId: order.id),
-            const SizedBox(height: 16),
-          ],
-
-          const SizedBox(height: 16),
-        ],
+          return ListView(
+            padding: EdgeInsets.symmetric(horizontal: hPad, vertical: 20),
+            children: [
+              if (wide)
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(width: 360, child: leftColumn),
+                    const SizedBox(width: 24),
+                    Expanded(child: rightColumn),
+                  ],
+                )
+              else ...[
+                leftColumn,
+                const SizedBox(height: 16),
+                rightColumn,
+              ],
+              const SizedBox(height: 24),
+            ],
+          );
+        },
       ),
     );
   }
@@ -253,7 +185,9 @@ class OrderDetailScreen extends ConsumerWidget {
                 child: pw.Text(
                   'Calle Principal 1 · 28001 Madrid · Tel: +34 910 000 000',
                   style: const pw.TextStyle(
-                      fontSize: 9, color: PdfColors.grey600),
+                    fontSize: 9,
+                    color: PdfColors.grey600,
+                  ),
                 ),
               ),
               pw.SizedBox(height: 6),
@@ -345,11 +279,9 @@ class OrderDetailScreen extends ConsumerWidget {
               // ── Líneas de productos ─────────────────────────────────
               for (final item in items) ...[
                 pw.Padding(
-                  padding:
-                      const pw.EdgeInsets.symmetric(vertical: 4),
+                  padding: const pw.EdgeInsets.symmetric(vertical: 4),
                   child: pw.Column(
-                    crossAxisAlignment:
-                        pw.CrossAxisAlignment.start,
+                    crossAxisAlignment: pw.CrossAxisAlignment.start,
                     children: [
                       pw.Row(
                         children: [
@@ -357,16 +289,14 @@ class OrderDetailScreen extends ConsumerWidget {
                             flex: 4,
                             child: pw.Text(
                               item.dishName ?? 'Plato',
-                              style:
-                                  const pw.TextStyle(fontSize: 12),
+                              style: const pw.TextStyle(fontSize: 12),
                             ),
                           ),
                           pw.SizedBox(
                             width: 36,
                             child: pw.Text(
                               '${item.quantity}',
-                              style:
-                                  const pw.TextStyle(fontSize: 12),
+                              style: const pw.TextStyle(fontSize: 12),
                               textAlign: pw.TextAlign.center,
                             ),
                           ),
@@ -374,8 +304,7 @@ class OrderDetailScreen extends ConsumerWidget {
                             width: 52,
                             child: pw.Text(
                               Formatters.price(item.unitPrice),
-                              style:
-                                  const pw.TextStyle(fontSize: 12),
+                              style: const pw.TextStyle(fontSize: 12),
                               textAlign: pw.TextAlign.right,
                             ),
                           ),
@@ -392,11 +321,9 @@ class OrderDetailScreen extends ConsumerWidget {
                           ),
                         ],
                       ),
-                      if (item.notes != null &&
-                          item.notes!.isNotEmpty)
+                      if (item.notes != null && item.notes!.isNotEmpty)
                         pw.Padding(
-                          padding:
-                              const pw.EdgeInsets.only(top: 2, left: 4),
+                          padding: const pw.EdgeInsets.only(top: 2, left: 4),
                           child: pw.Text(
                             '↳ ${item.notes}',
                             style: const pw.TextStyle(
@@ -414,12 +341,12 @@ class OrderDetailScreen extends ConsumerWidget {
               // ── Desglose costes ──────────────────────────────────────
               _pdfRow('Subtotal', Formatters.price(order.subtotal)),
               if (order.deliveryFee > 0)
-                _pdfRow(
-                    'Gastos de envío', Formatters.price(order.deliveryFee)),
+                _pdfRow('Gastos de envío', Formatters.price(order.deliveryFee)),
               if (order.discountAmount > 0)
                 _pdfRow(
-                    '− Descuento',
-                    '−${Formatters.price(order.discountAmount)}'),
+                  '− Descuento',
+                  '−${Formatters.price(order.discountAmount)}',
+                ),
               pw.SizedBox(height: 4),
               pw.Divider(thickness: 1.5, color: PdfColors.black),
               pw.Padding(
@@ -462,7 +389,9 @@ class OrderDetailScreen extends ConsumerWidget {
                       pw.Text(
                         refId,
                         style: const pw.TextStyle(
-                            fontSize: 10, color: PdfColors.grey600),
+                          fontSize: 10,
+                          color: PdfColors.grey600,
+                        ),
                       ),
                     ],
                   ),
@@ -483,7 +412,9 @@ class OrderDetailScreen extends ConsumerWidget {
                 child: pw.Text(
                   'www.sabordecasa.es',
                   style: const pw.TextStyle(
-                      fontSize: 9, color: PdfColors.grey400),
+                    fontSize: 9,
+                    color: PdfColors.grey400,
+                  ),
                 ),
               ),
             ],
@@ -512,6 +443,160 @@ class OrderDetailScreen extends ConsumerWidget {
       ],
     ),
   );
+}
+
+class _OrderProductsCard extends StatelessWidget {
+  const _OrderProductsCard({required this.items});
+  final List<OrderItem> items;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Tu pedido',
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: Color(0xFF111111),
+          ),
+        ),
+        const SizedBox(height: 12),
+        Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: const Color(0xFFE5E5E3)),
+          ),
+          child: items.isEmpty
+              ? const Padding(
+                  padding: EdgeInsets.all(16),
+                  child: Text('No hay productos asociados a este pedido.'),
+                )
+              : Column(
+                  children: [
+                    for (int i = 0; i < items.length; i++) ...[
+                      _OrderItemTile(items[i]),
+                      if (i < items.length - 1)
+                        const Divider(
+                          height: 1,
+                          indent: 16,
+                          endIndent: 16,
+                          color: Color(0xFFE5E5E3),
+                        ),
+                    ],
+                  ],
+                ),
+        ),
+      ],
+    );
+  }
+}
+
+class _CostsCard extends StatelessWidget {
+  const _CostsCard({required this.order});
+  final Order order;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFE5E5E3)),
+      ),
+      child: Column(
+        children: [
+          _CostRow(label: 'Subtotal', amount: Formatters.price(order.subtotal)),
+          const SizedBox(height: 8),
+          _CostRow(
+            label: 'Gastos de envío',
+            amount: Formatters.price(order.deliveryFee),
+          ),
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 12),
+            child: Divider(height: 1, color: Color(0xFFE5E5E3)),
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                'Total',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+              ),
+              Text(
+                Formatters.price(order.total),
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 20,
+                  color: AppTokens.brandPrimary,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _TicketCard extends StatelessWidget {
+  const _TicketCard({required this.onDownload});
+  final VoidCallback onDownload;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: AppTokens.brandLight,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: AppTokens.brandPrimary.withValues(alpha: 0.18),
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: const Icon(
+              Icons.picture_as_pdf_outlined,
+              color: AppTokens.brandPrimary,
+            ),
+          ),
+          const SizedBox(width: 14),
+          const Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Ticket del pedido',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                ),
+                SizedBox(height: 3),
+                Text(
+                  'Descarga el justificante en PDF.',
+                  style: TextStyle(color: Colors.black54, fontSize: 13),
+                ),
+              ],
+            ),
+          ),
+          FilledButton.icon(
+            onPressed: onDownload,
+            icon: const Icon(Icons.download_rounded, size: 18),
+            label: const Text('PDF'),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 // â”€â”€â”€ _StatusCard â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
@@ -657,7 +742,8 @@ class _OrderInfoCard extends StatelessWidget {
           _InfoRow(
             icon: Icons.access_time_outlined,
             label: 'Hora del pedido',
-            value: '${order.createdAt.hour.toString().padLeft(2, '0')}:${order.createdAt.minute.toString().padLeft(2, '0')}',
+            value:
+                '${order.createdAt.hour.toString().padLeft(2, '0')}:${order.createdAt.minute.toString().padLeft(2, '0')}',
           ),
           const SizedBox(height: 10),
           _InfoRow(
@@ -1100,30 +1186,35 @@ class _OrderItemTile extends StatelessWidget {
                 Text(
                   item.dishName ?? 'Plato',
                   style: const TextStyle(
-                      fontWeight: FontWeight.w600, fontSize: 15),
+                    fontWeight: FontWeight.w600,
+                    fontSize: 15,
+                  ),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   '${Formatters.price(item.unitPrice)} / ud.',
-                  style: const TextStyle(
-                      color: Colors.black45, fontSize: 12),
+                  style: const TextStyle(color: Colors.black45, fontSize: 12),
                 ),
                 if (item.notes != null && item.notes!.isNotEmpty) ...[
                   const SizedBox(height: 5),
                   Container(
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 8, vertical: 3),
+                      horizontal: 8,
+                      vertical: 3,
+                    ),
                     decoration: BoxDecoration(
                       color: AppTokens.pageBg,
                       borderRadius: BorderRadius.circular(6),
-                      border: Border.all(
-                          color: const Color(0xFFE5E5E3)),
+                      border: Border.all(color: const Color(0xFFE5E5E3)),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(Icons.notes_rounded,
-                            size: 11, color: Colors.black38),
+                        const Icon(
+                          Icons.notes_rounded,
+                          size: 11,
+                          color: Colors.black38,
+                        ),
                         const SizedBox(width: 4),
                         Flexible(
                           child: Text(
@@ -1148,8 +1239,7 @@ class _OrderItemTile extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Container(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 9, vertical: 4),
+                padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
                 decoration: BoxDecoration(
                   color: AppTokens.brandPrimary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(6),
@@ -1167,7 +1257,9 @@ class _OrderItemTile extends StatelessWidget {
               Text(
                 Formatters.price(item.subtotal),
                 style: const TextStyle(
-                    fontWeight: FontWeight.w700, fontSize: 14),
+                  fontWeight: FontWeight.w700,
+                  fontSize: 14,
+                ),
               ),
             ],
           ),
@@ -1185,9 +1277,7 @@ class _DishImagePlaceholder extends StatelessWidget {
     return Container(
       width: 64,
       height: 64,
-      decoration: const BoxDecoration(
-        color: Color(0xFFF5F5F3),
-      ),
+      decoration: const BoxDecoration(color: Color(0xFFF5F5F3)),
       child: const Icon(
         Icons.restaurant_outlined,
         color: Color(0xFFBBBBBB),
@@ -1295,10 +1385,10 @@ Color _statusColor(String status) {
 }
 
 String _paymentMethodLabel(String method) => switch (method) {
-      'cash' => 'Efectivo',
-      'card' => 'Tarjeta bancaria',
-      'stripe' => 'Tarjeta (online)',
-      'tpv' => 'TPV (en tienda)',
-      'transfer' => 'Transferencia',
-      _ => method,
-    };
+  'cash' => 'Efectivo',
+  'card' => 'Tarjeta bancaria',
+  'stripe' => 'Tarjeta (online)',
+  'tpv' => 'TPV (en tienda)',
+  'transfer' => 'Transferencia',
+  _ => method,
+};

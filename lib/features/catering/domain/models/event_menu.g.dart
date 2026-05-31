@@ -15,6 +15,10 @@ _$EventMenuImpl _$$EventMenuImplFromJson(Map<String, dynamic> json) =>
       maxGuests: (json['max_guests'] as num).toInt(),
       description: json['description'] as String?,
       imageUrl: json['image_url'] as String?,
+      eventKind: json['event_kind'] as String? ?? 'small',
+      leadTimeMonths: (json['lead_time_months'] as num?)?.toInt() ?? 1,
+      tastingAvailable: json['tasting_available'] as bool? ?? false,
+      highlightLabel: json['highlight_label'] as String?,
       isActive: json['is_active'] as bool? ?? true,
       createdAt: json['created_at'] == null
           ? null
@@ -30,6 +34,10 @@ Map<String, dynamic> _$$EventMenuImplToJson(_$EventMenuImpl instance) =>
       'max_guests': instance.maxGuests,
       'description': instance.description,
       'image_url': instance.imageUrl,
+      'event_kind': instance.eventKind,
+      'lead_time_months': instance.leadTimeMonths,
+      'tasting_available': instance.tastingAvailable,
+      'highlight_label': instance.highlightLabel,
       'is_active': instance.isActive,
       'created_at': instance.createdAt?.toIso8601String(),
     };

@@ -28,6 +28,10 @@ mixin _$EventMenu {
   int get maxGuests => throw _privateConstructorUsedError;
   String? get description => throw _privateConstructorUsedError;
   String? get imageUrl => throw _privateConstructorUsedError;
+  String get eventKind => throw _privateConstructorUsedError;
+  int get leadTimeMonths => throw _privateConstructorUsedError;
+  bool get tastingAvailable => throw _privateConstructorUsedError;
+  String? get highlightLabel => throw _privateConstructorUsedError;
   bool get isActive => throw _privateConstructorUsedError;
   DateTime? get createdAt => throw _privateConstructorUsedError;
 
@@ -54,6 +58,10 @@ abstract class $EventMenuCopyWith<$Res> {
     int maxGuests,
     String? description,
     String? imageUrl,
+    String eventKind,
+    int leadTimeMonths,
+    bool tastingAvailable,
+    String? highlightLabel,
     bool isActive,
     DateTime? createdAt,
   });
@@ -81,6 +89,10 @@ class _$EventMenuCopyWithImpl<$Res, $Val extends EventMenu>
     Object? maxGuests = null,
     Object? description = freezed,
     Object? imageUrl = freezed,
+    Object? eventKind = null,
+    Object? leadTimeMonths = null,
+    Object? tastingAvailable = null,
+    Object? highlightLabel = freezed,
     Object? isActive = null,
     Object? createdAt = freezed,
   }) {
@@ -114,6 +126,22 @@ class _$EventMenuCopyWithImpl<$Res, $Val extends EventMenu>
                 ? _value.imageUrl
                 : imageUrl // ignore: cast_nullable_to_non_nullable
                       as String?,
+            eventKind: null == eventKind
+                ? _value.eventKind
+                : eventKind // ignore: cast_nullable_to_non_nullable
+                      as String,
+            leadTimeMonths: null == leadTimeMonths
+                ? _value.leadTimeMonths
+                : leadTimeMonths // ignore: cast_nullable_to_non_nullable
+                      as int,
+            tastingAvailable: null == tastingAvailable
+                ? _value.tastingAvailable
+                : tastingAvailable // ignore: cast_nullable_to_non_nullable
+                      as bool,
+            highlightLabel: freezed == highlightLabel
+                ? _value.highlightLabel
+                : highlightLabel // ignore: cast_nullable_to_non_nullable
+                      as String?,
             isActive: null == isActive
                 ? _value.isActive
                 : isActive // ignore: cast_nullable_to_non_nullable
@@ -145,6 +173,10 @@ abstract class _$$EventMenuImplCopyWith<$Res>
     int maxGuests,
     String? description,
     String? imageUrl,
+    String eventKind,
+    int leadTimeMonths,
+    bool tastingAvailable,
+    String? highlightLabel,
     bool isActive,
     DateTime? createdAt,
   });
@@ -171,6 +203,10 @@ class __$$EventMenuImplCopyWithImpl<$Res>
     Object? maxGuests = null,
     Object? description = freezed,
     Object? imageUrl = freezed,
+    Object? eventKind = null,
+    Object? leadTimeMonths = null,
+    Object? tastingAvailable = null,
+    Object? highlightLabel = freezed,
     Object? isActive = null,
     Object? createdAt = freezed,
   }) {
@@ -204,6 +240,22 @@ class __$$EventMenuImplCopyWithImpl<$Res>
             ? _value.imageUrl
             : imageUrl // ignore: cast_nullable_to_non_nullable
                   as String?,
+        eventKind: null == eventKind
+            ? _value.eventKind
+            : eventKind // ignore: cast_nullable_to_non_nullable
+                  as String,
+        leadTimeMonths: null == leadTimeMonths
+            ? _value.leadTimeMonths
+            : leadTimeMonths // ignore: cast_nullable_to_non_nullable
+                  as int,
+        tastingAvailable: null == tastingAvailable
+            ? _value.tastingAvailable
+            : tastingAvailable // ignore: cast_nullable_to_non_nullable
+                  as bool,
+        highlightLabel: freezed == highlightLabel
+            ? _value.highlightLabel
+            : highlightLabel // ignore: cast_nullable_to_non_nullable
+                  as String?,
         isActive: null == isActive
             ? _value.isActive
             : isActive // ignore: cast_nullable_to_non_nullable
@@ -229,6 +281,10 @@ class _$EventMenuImpl implements _EventMenu {
     required this.maxGuests,
     this.description,
     this.imageUrl,
+    this.eventKind = 'small',
+    this.leadTimeMonths = 1,
+    this.tastingAvailable = false,
+    this.highlightLabel,
     this.isActive = true,
     this.createdAt,
   });
@@ -252,13 +308,24 @@ class _$EventMenuImpl implements _EventMenu {
   final String? imageUrl;
   @override
   @JsonKey()
+  final String eventKind;
+  @override
+  @JsonKey()
+  final int leadTimeMonths;
+  @override
+  @JsonKey()
+  final bool tastingAvailable;
+  @override
+  final String? highlightLabel;
+  @override
+  @JsonKey()
   final bool isActive;
   @override
   final DateTime? createdAt;
 
   @override
   String toString() {
-    return 'EventMenu(id: $id, name: $name, pricePerPerson: $pricePerPerson, minGuests: $minGuests, maxGuests: $maxGuests, description: $description, imageUrl: $imageUrl, isActive: $isActive, createdAt: $createdAt)';
+    return 'EventMenu(id: $id, name: $name, pricePerPerson: $pricePerPerson, minGuests: $minGuests, maxGuests: $maxGuests, description: $description, imageUrl: $imageUrl, eventKind: $eventKind, leadTimeMonths: $leadTimeMonths, tastingAvailable: $tastingAvailable, highlightLabel: $highlightLabel, isActive: $isActive, createdAt: $createdAt)';
   }
 
   @override
@@ -278,6 +345,14 @@ class _$EventMenuImpl implements _EventMenu {
                 other.description == description) &&
             (identical(other.imageUrl, imageUrl) ||
                 other.imageUrl == imageUrl) &&
+            (identical(other.eventKind, eventKind) ||
+                other.eventKind == eventKind) &&
+            (identical(other.leadTimeMonths, leadTimeMonths) ||
+                other.leadTimeMonths == leadTimeMonths) &&
+            (identical(other.tastingAvailable, tastingAvailable) ||
+                other.tastingAvailable == tastingAvailable) &&
+            (identical(other.highlightLabel, highlightLabel) ||
+                other.highlightLabel == highlightLabel) &&
             (identical(other.isActive, isActive) ||
                 other.isActive == isActive) &&
             (identical(other.createdAt, createdAt) ||
@@ -295,6 +370,10 @@ class _$EventMenuImpl implements _EventMenu {
     maxGuests,
     description,
     imageUrl,
+    eventKind,
+    leadTimeMonths,
+    tastingAvailable,
+    highlightLabel,
     isActive,
     createdAt,
   );
@@ -322,6 +401,10 @@ abstract class _EventMenu implements EventMenu {
     required final int maxGuests,
     final String? description,
     final String? imageUrl,
+    final String eventKind,
+    final int leadTimeMonths,
+    final bool tastingAvailable,
+    final String? highlightLabel,
     final bool isActive,
     final DateTime? createdAt,
   }) = _$EventMenuImpl;
@@ -343,6 +426,14 @@ abstract class _EventMenu implements EventMenu {
   String? get description;
   @override
   String? get imageUrl;
+  @override
+  String get eventKind;
+  @override
+  int get leadTimeMonths;
+  @override
+  bool get tastingAvailable;
+  @override
+  String? get highlightLabel;
   @override
   bool get isActive;
   @override

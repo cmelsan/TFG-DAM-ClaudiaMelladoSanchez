@@ -30,6 +30,9 @@ mixin _$AdminEventRequest {
   String? get eventMenuId => throw _privateConstructorUsedError;
   String? get eventMenuName => throw _privateConstructorUsedError;
   double? get eventMenuPricePerPerson => throw _privateConstructorUsedError;
+  String? get eventMenuEventKind => throw _privateConstructorUsedError;
+  int? get eventMenuLeadTimeMonths => throw _privateConstructorUsedError;
+  bool? get eventMenuTastingAvailable => throw _privateConstructorUsedError;
   String? get eventType => throw _privateConstructorUsedError;
   String? get contactPhone => throw _privateConstructorUsedError;
   String? get menuType => throw _privateConstructorUsedError;
@@ -69,6 +72,9 @@ abstract class $AdminEventRequestCopyWith<$Res> {
     String? eventMenuId,
     String? eventMenuName,
     double? eventMenuPricePerPerson,
+    String? eventMenuEventKind,
+    int? eventMenuLeadTimeMonths,
+    bool? eventMenuTastingAvailable,
     String? eventType,
     String? contactPhone,
     String? menuType,
@@ -107,6 +113,9 @@ class _$AdminEventRequestCopyWithImpl<$Res, $Val extends AdminEventRequest>
     Object? eventMenuId = freezed,
     Object? eventMenuName = freezed,
     Object? eventMenuPricePerPerson = freezed,
+    Object? eventMenuEventKind = freezed,
+    Object? eventMenuLeadTimeMonths = freezed,
+    Object? eventMenuTastingAvailable = freezed,
     Object? eventType = freezed,
     Object? contactPhone = freezed,
     Object? menuType = freezed,
@@ -157,6 +166,18 @@ class _$AdminEventRequestCopyWithImpl<$Res, $Val extends AdminEventRequest>
                 ? _value.eventMenuPricePerPerson
                 : eventMenuPricePerPerson // ignore: cast_nullable_to_non_nullable
                       as double?,
+            eventMenuEventKind: freezed == eventMenuEventKind
+                ? _value.eventMenuEventKind
+                : eventMenuEventKind // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            eventMenuLeadTimeMonths: freezed == eventMenuLeadTimeMonths
+                ? _value.eventMenuLeadTimeMonths
+                : eventMenuLeadTimeMonths // ignore: cast_nullable_to_non_nullable
+                      as int?,
+            eventMenuTastingAvailable: freezed == eventMenuTastingAvailable
+                ? _value.eventMenuTastingAvailable
+                : eventMenuTastingAvailable // ignore: cast_nullable_to_non_nullable
+                      as bool?,
             eventType: freezed == eventType
                 ? _value.eventType
                 : eventType // ignore: cast_nullable_to_non_nullable
@@ -226,6 +247,9 @@ abstract class _$$AdminEventRequestImplCopyWith<$Res>
     String? eventMenuId,
     String? eventMenuName,
     double? eventMenuPricePerPerson,
+    String? eventMenuEventKind,
+    int? eventMenuLeadTimeMonths,
+    bool? eventMenuTastingAvailable,
     String? eventType,
     String? contactPhone,
     String? menuType,
@@ -263,6 +287,9 @@ class __$$AdminEventRequestImplCopyWithImpl<$Res>
     Object? eventMenuId = freezed,
     Object? eventMenuName = freezed,
     Object? eventMenuPricePerPerson = freezed,
+    Object? eventMenuEventKind = freezed,
+    Object? eventMenuLeadTimeMonths = freezed,
+    Object? eventMenuTastingAvailable = freezed,
     Object? eventType = freezed,
     Object? contactPhone = freezed,
     Object? menuType = freezed,
@@ -313,6 +340,18 @@ class __$$AdminEventRequestImplCopyWithImpl<$Res>
             ? _value.eventMenuPricePerPerson
             : eventMenuPricePerPerson // ignore: cast_nullable_to_non_nullable
                   as double?,
+        eventMenuEventKind: freezed == eventMenuEventKind
+            ? _value.eventMenuEventKind
+            : eventMenuEventKind // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        eventMenuLeadTimeMonths: freezed == eventMenuLeadTimeMonths
+            ? _value.eventMenuLeadTimeMonths
+            : eventMenuLeadTimeMonths // ignore: cast_nullable_to_non_nullable
+                  as int?,
+        eventMenuTastingAvailable: freezed == eventMenuTastingAvailable
+            ? _value.eventMenuTastingAvailable
+            : eventMenuTastingAvailable // ignore: cast_nullable_to_non_nullable
+                  as bool?,
         eventType: freezed == eventType
             ? _value.eventType
             : eventType // ignore: cast_nullable_to_non_nullable
@@ -376,6 +415,9 @@ class _$AdminEventRequestImpl implements _AdminEventRequest {
     this.eventMenuId,
     this.eventMenuName,
     this.eventMenuPricePerPerson,
+    this.eventMenuEventKind,
+    this.eventMenuLeadTimeMonths,
+    this.eventMenuTastingAvailable,
     this.eventType,
     this.contactPhone,
     this.menuType,
@@ -411,6 +453,12 @@ class _$AdminEventRequestImpl implements _AdminEventRequest {
   @override
   final double? eventMenuPricePerPerson;
   @override
+  final String? eventMenuEventKind;
+  @override
+  final int? eventMenuLeadTimeMonths;
+  @override
+  final bool? eventMenuTastingAvailable;
+  @override
   final String? eventType;
   @override
   final String? contactPhone;
@@ -435,7 +483,7 @@ class _$AdminEventRequestImpl implements _AdminEventRequest {
 
   @override
   String toString() {
-    return 'AdminEventRequest(id: $id, userId: $userId, eventDate: $eventDate, guestCount: $guestCount, location: $location, status: $status, eventMenuId: $eventMenuId, eventMenuName: $eventMenuName, eventMenuPricePerPerson: $eventMenuPricePerPerson, eventType: $eventType, contactPhone: $contactPhone, menuType: $menuType, customMenuDescription: $customMenuDescription, notes: $notes, quotedTotal: $quotedTotal, adminNotes: $adminNotes, appointmentAt: $appointmentAt, appointmentNotes: $appointmentNotes, createdAt: $createdAt, displayId: $displayId)';
+    return 'AdminEventRequest(id: $id, userId: $userId, eventDate: $eventDate, guestCount: $guestCount, location: $location, status: $status, eventMenuId: $eventMenuId, eventMenuName: $eventMenuName, eventMenuPricePerPerson: $eventMenuPricePerPerson, eventMenuEventKind: $eventMenuEventKind, eventMenuLeadTimeMonths: $eventMenuLeadTimeMonths, eventMenuTastingAvailable: $eventMenuTastingAvailable, eventType: $eventType, contactPhone: $contactPhone, menuType: $menuType, customMenuDescription: $customMenuDescription, notes: $notes, quotedTotal: $quotedTotal, adminNotes: $adminNotes, appointmentAt: $appointmentAt, appointmentNotes: $appointmentNotes, createdAt: $createdAt, displayId: $displayId)';
   }
 
   @override
@@ -461,6 +509,18 @@ class _$AdminEventRequestImpl implements _AdminEventRequest {
                   eventMenuPricePerPerson,
                 ) ||
                 other.eventMenuPricePerPerson == eventMenuPricePerPerson) &&
+            (identical(other.eventMenuEventKind, eventMenuEventKind) ||
+                other.eventMenuEventKind == eventMenuEventKind) &&
+            (identical(
+                  other.eventMenuLeadTimeMonths,
+                  eventMenuLeadTimeMonths,
+                ) ||
+                other.eventMenuLeadTimeMonths == eventMenuLeadTimeMonths) &&
+            (identical(
+                  other.eventMenuTastingAvailable,
+                  eventMenuTastingAvailable,
+                ) ||
+                other.eventMenuTastingAvailable == eventMenuTastingAvailable) &&
             (identical(other.eventType, eventType) ||
                 other.eventType == eventType) &&
             (identical(other.contactPhone, contactPhone) ||
@@ -497,6 +557,9 @@ class _$AdminEventRequestImpl implements _AdminEventRequest {
     eventMenuId,
     eventMenuName,
     eventMenuPricePerPerson,
+    eventMenuEventKind,
+    eventMenuLeadTimeMonths,
+    eventMenuTastingAvailable,
     eventType,
     contactPhone,
     menuType,
@@ -538,6 +601,9 @@ abstract class _AdminEventRequest implements AdminEventRequest {
     final String? eventMenuId,
     final String? eventMenuName,
     final double? eventMenuPricePerPerson,
+    final String? eventMenuEventKind,
+    final int? eventMenuLeadTimeMonths,
+    final bool? eventMenuTastingAvailable,
     final String? eventType,
     final String? contactPhone,
     final String? menuType,
@@ -572,6 +638,12 @@ abstract class _AdminEventRequest implements AdminEventRequest {
   String? get eventMenuName;
   @override
   double? get eventMenuPricePerPerson;
+  @override
+  String? get eventMenuEventKind;
+  @override
+  int? get eventMenuLeadTimeMonths;
+  @override
+  bool? get eventMenuTastingAvailable;
   @override
   String? get eventType;
   @override

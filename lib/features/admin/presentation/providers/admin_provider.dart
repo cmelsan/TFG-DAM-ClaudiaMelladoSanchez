@@ -476,6 +476,11 @@ class AdminAction extends _$AdminAction {
     required int minGuests,
     required int maxGuests,
     String? description,
+    String? imageUrl,
+    String eventKind = 'small',
+    int leadTimeMonths = 1,
+    bool tastingAvailable = false,
+    String? highlightLabel,
     bool isActive = true,
   }) async {
     state = const AsyncLoading();
@@ -488,6 +493,11 @@ class AdminAction extends _$AdminAction {
             minGuests: minGuests,
             maxGuests: maxGuests,
             description: description,
+            imageUrl: imageUrl,
+            eventKind: eventKind,
+            leadTimeMonths: leadTimeMonths,
+            tastingAvailable: tastingAvailable,
+            highlightLabel: highlightLabel,
             isActive: isActive,
           ),
     );
@@ -502,6 +512,11 @@ class AdminAction extends _$AdminAction {
     required int maxGuests,
     required bool isActive,
     String? description,
+    String? imageUrl,
+    String eventKind = 'small',
+    int leadTimeMonths = 1,
+    bool tastingAvailable = false,
+    String? highlightLabel,
   }) async {
     state = const AsyncLoading();
     state = await AsyncValue.guard(
@@ -514,6 +529,11 @@ class AdminAction extends _$AdminAction {
             minGuests: minGuests,
             maxGuests: maxGuests,
             description: description,
+            imageUrl: imageUrl,
+            eventKind: eventKind,
+            leadTimeMonths: leadTimeMonths,
+            tastingAvailable: tastingAvailable,
+            highlightLabel: highlightLabel,
             isActive: isActive,
           ),
     );

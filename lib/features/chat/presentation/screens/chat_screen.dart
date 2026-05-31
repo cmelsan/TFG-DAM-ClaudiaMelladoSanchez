@@ -86,7 +86,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             const _PoweredBy(),
             _InputBar(
               ctrl: _ctrl,
-              onSend: () => _send(),
+              onSend: _send,
               isLoading: chatState.isLoading,
             ),
           ],
@@ -429,11 +429,11 @@ class _SuggestionChips extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Padding(
-            padding: const EdgeInsets.only(left: 4, bottom: 6),
+          const Padding(
+            padding: EdgeInsets.only(left: 4, bottom: 6),
             child: Text(
               'Preguntas frecuentes',
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 11,
                 color: Colors.black45,
                 fontWeight: FontWeight.w600,
@@ -474,9 +474,9 @@ class _SuggestionChips extends StatelessWidget {
                       Flexible(
                         child: Text(
                           label,
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontSize: 12.5,
-                            color: const Color(0xFF1A1A1A),
+                            color: Color(0xFF1A1A1A),
                             fontWeight: FontWeight.w500,
                           ),
                         ),

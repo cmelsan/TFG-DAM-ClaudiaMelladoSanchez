@@ -79,6 +79,77 @@ class AdminRepository {
     }
   }
 
+  /// Todos los pedidos del día actual.
+  /// Pedidos regulares → filtro por created_at.
+  /// Encargos → filtro por scheduled_at (fecha programada).
+  Future<List<Order>> getOrdersToday() async {
+    try {
+      final now = DateTime.now();
+      final start = DateTime(now.year, now.month, now.day);
+      final end = start.add(const Duration(days: 1));
+
+      final regularData = await _client
+          .from(SupabaseConstants.orders)
+          .select()
+          .neq('order_type', 'encargo')
+          .gte('created_at', start.toIso8601String())
+          .lt('created_at', end.toIso8601String())
+          .order('created_at', ascending: false);
+
+      final encargoData = await _client
+          .from(SupabaseConstants.orders)
+          .select()
+          .eq('order_type', 'encargo')
+          .gte('scheduled_at', start.toIso8601String())
+          .lt('scheduled_at', end.toIso8601String())
+          .order('scheduled_at', ascending: true);
+
+      final regular = regularData.map(Order.fromJson).toList();
+      final encargos = encargoData.map(Order.fromJson).toList();
+      return [...regular, ...encargos]
+        ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    } on PostgrestException catch (e) {
+      throw DatabaseFailure(message: e.message, code: e.code);
+    } catch (e) {
+      throw UnexpectedFailure(message: e.toString());
+    }
+  }
+
+  /// Todos los pedidos de la semana actual (lunes–domingo).
+  /// Pedidos regulares → created_at. Encargos → scheduled_at.
+  Future<List<Order>> getOrdersWeek() async {
+    try {
+      final now = DateTime.now();
+      final monday = DateTime(now.year, now.month, now.day - (now.weekday - 1));
+      final sunday = monday.add(const Duration(days: 7));
+
+      final regularData = await _client
+          .from(SupabaseConstants.orders)
+          .select()
+          .neq('order_type', 'encargo')
+          .gte('created_at', monday.toIso8601String())
+          .lt('created_at', sunday.toIso8601String())
+          .order('created_at', ascending: false);
+
+      final encargoData = await _client
+          .from(SupabaseConstants.orders)
+          .select()
+          .eq('order_type', 'encargo')
+          .gte('scheduled_at', monday.toIso8601String())
+          .lt('scheduled_at', sunday.toIso8601String())
+          .order('scheduled_at', ascending: true);
+
+      final regular = regularData.map(Order.fromJson).toList();
+      final encargos = encargoData.map(Order.fromJson).toList();
+      return [...regular, ...encargos]
+        ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    } on PostgrestException catch (e) {
+      throw DatabaseFailure(message: e.message, code: e.code);
+    } catch (e) {
+      throw UnexpectedFailure(message: e.toString());
+    }
+  }
+
   /// Obtiene el perfil de un usuario por su ID (para mostrar en pedidos).
   Future<AdminUser?> getUserProfile(String userId) async {
     try {
@@ -143,12 +214,19 @@ class AdminRepository {
           .update({'status': status})
           .eq('id', orderId);
 
+      final orderType = row['order_type'] as String? ?? '';
+
       _sendStatusNotification(
         orderId: orderId,
         newStatus: status,
         userId: row['user_id'] as String? ?? '',
-        orderType: row['order_type'] as String? ?? '',
+        orderType: orderType,
       );
+
+      // Email con QR al confirmar un encargo
+      if (status == 'confirmed' && orderType == 'encargo') {
+        _sendEncargoConfirmation(orderId);
+      }
     } on PostgrestException catch (e) {
       throw DatabaseFailure(message: e.message, code: e.code);
     } catch (e) {
@@ -189,9 +267,18 @@ class AdminRepository {
     try {
       final data = await _client
           .from(SupabaseConstants.eventRequests)
-          .select()
+          .select('*, ${SupabaseConstants.eventMenus}(name, price_per_person)')
           .order('created_at', ascending: false);
-      return data.map(AdminEventRequest.fromJson).toList();
+      return data.map((row) {
+        final json = Map<String, dynamic>.from(row);
+        final menu = json[SupabaseConstants.eventMenus];
+        if (menu is Map<String, dynamic>) {
+          json
+            ..['event_menu_name'] = menu['name']
+            ..['event_menu_price_per_person'] = menu['price_per_person'];
+        }
+        return AdminEventRequest.fromJson(json);
+      }).toList();
     } on PostgrestException catch (e) {
       throw DatabaseFailure(message: e.message, code: e.code);
     } catch (e) {
@@ -679,10 +766,7 @@ class AdminRepository {
 
   Future<void> deleteEventMenu(String id) async {
     try {
-      await _client
-          .from(SupabaseConstants.eventMenus)
-          .delete()
-          .eq('id', id);
+      await _client.from(SupabaseConstants.eventMenus).delete().eq('id', id);
     } on PostgrestException catch (e) {
       throw DatabaseFailure(message: e.message, code: e.code);
     } catch (e) {
@@ -694,6 +778,9 @@ class AdminRepository {
     required String requestId,
     required String status,
     double? quotedTotal,
+    String? adminNotes,
+    DateTime? appointmentAt,
+    String? appointmentNotes,
   }) async {
     try {
       await _client
@@ -701,8 +788,12 @@ class AdminRepository {
           .update({
             'status': status,
             if (quotedTotal != null) 'quoted_total': quotedTotal,
+            'admin_notes': adminNotes,
+            'appointment_at': appointmentAt?.toIso8601String(),
+            'appointment_notes': appointmentNotes,
           })
           .eq('id', requestId);
+      _sendCateringNotification(requestId: requestId, status: status);
     } on PostgrestException catch (e) {
       throw DatabaseFailure(message: e.message, code: e.code);
     } catch (e) {
@@ -743,6 +834,27 @@ class AdminRepository {
   }
 
   /// Fire-and-forget: notifica al cliente via Edge Function.
+  /// Fire-and-forget: envía email de confirmación con QR al cliente del encargo.
+  void _sendEncargoConfirmation(String orderId) {
+    _client.functions
+        .invoke('send-encargo-confirmation', body: {'orderId': orderId})
+        // ignore: avoid_redundant_argument_values
+        .catchError((_) => FunctionResponse(data: null, status: 200));
+  }
+
+  void _sendCateringNotification({
+    required String requestId,
+    required String status,
+  }) {
+    _client.functions
+        .invoke(
+          'send-catering-notification',
+          body: {'requestId': requestId, 'status': status},
+        )
+        // ignore: avoid_redundant_argument_values
+        .catchError((_) => FunctionResponse(data: null, status: 200));
+  }
+
   void _sendStatusNotification({
     required String orderId,
     required String newStatus,

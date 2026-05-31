@@ -23,6 +23,7 @@ class Order with _$Order {
     DateTime? scheduledAt,
     String? notes,
     String? assignedDriverId,
+    String? displayId,
   }) = _Order;
 
   factory Order.fromJson(Map<String, dynamic> json) => _$OrderFromJson(json);

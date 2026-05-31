@@ -1318,11 +1318,25 @@ class _DatePickerTile extends ConsumerWidget {
   final DateTime? selectedDate;
   final ValueChanged<DateTime> onDateSelected;
 
+  static TimeOfDay _parseTime(String t) {
+    final parts = t.split(':');
+    return TimeOfDay(
+      hour: int.parse(parts[0]),
+      minute: int.parse(parts[1]),
+    );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final minDaysAsync = ref.watch(encargoMinDaysProvider);
     final minDays = minDaysAsync.valueOrNull ?? 2;
     final firstDate = DateTime.now().add(Duration(days: minDays));
+    final scheduleAsync = ref.watch(adminScheduleProvider);
+    final schedule = scheduleAsync.valueOrNull ?? [];
+    final closedWeekdays = schedule
+        .where((e) => !e.isOpen)
+        .map((e) => e.dayOfWeek)
+        .toSet();
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -1335,6 +1349,9 @@ class _DatePickerTile extends ConsumerWidget {
             lastDate: DateTime.now().add(const Duration(days: 365)),
             helpText: 'Selecciona la fecha del encargo',
             locale: const Locale('es'),
+            selectableDayPredicate: closedWeekdays.isEmpty
+                ? null
+                : (day) => !closedWeekdays.contains(day.weekday),
             builder: (ctx, child) {
               final wide = MediaQuery.sizeOf(ctx).width > 850;
               if (!wide) return child!;
@@ -1348,14 +1365,44 @@ class _DatePickerTile extends ConsumerWidget {
           );
           if (date == null || !context.mounted) return;
 
+          final entry = schedule.where(
+            (e) => e.dayOfWeek == date.weekday && e.isOpen,
+          );
+          final scheduleEntry = entry.isNotEmpty ? entry.first : null;
+
+          final initialTime = selectedDate != null
+              ? TimeOfDay.fromDateTime(selectedDate!)
+              : scheduleEntry != null
+                  ? _parseTime(scheduleEntry.openTime)
+                  : const TimeOfDay(hour: 12, minute: 0);
+
           final time = await showTimePicker(
             context: context,
-            initialTime: selectedDate != null
-                ? TimeOfDay.fromDateTime(selectedDate!)
-                : const TimeOfDay(hour: 12, minute: 0),
+            initialTime: initialTime,
             helpText: 'Selecciona la hora de recogida',
           );
-          if (time == null) return;
+          if (time == null || !context.mounted) return;
+
+          // Validate against schedule
+          if (scheduleEntry != null) {
+            final open = _parseTime(scheduleEntry.openTime);
+            final close = _parseTime(scheduleEntry.closeTime);
+            final pickedMinutes = time.hour * 60 + time.minute;
+            final openMinutes = open.hour * 60 + open.minute;
+            final closeMinutes = close.hour * 60 + close.minute;
+            if (pickedMinutes < openMinutes || pickedMinutes > closeMinutes) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    'El horario de recogida debe ser entre '
+                    '${scheduleEntry.openTime} y ${scheduleEntry.closeTime}',
+                  ),
+                  backgroundColor: Colors.orange.shade700,
+                ),
+              );
+              return;
+            }
+          }
 
           onDateSelected(DateTime(date.year, date.month, date.day, time.hour, time.minute));
         },

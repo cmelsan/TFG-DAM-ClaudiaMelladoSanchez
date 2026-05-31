@@ -208,12 +208,14 @@ class OrderCard extends StatelessWidget {
     required this.orderType,
     required this.price,
     super.key,
+    this.displayId,
     this.relativeTime,
     this.time,
     this.onTap,
   });
 
   final String orderId;
+  final String? displayId;
   final String status;
   final String orderType;
   final String price;
@@ -250,7 +252,7 @@ class OrderCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      '#${orderId.substring(0, 8).toUpperCase()}',
+                      '#${displayId ?? orderId.substring(0, 8).toUpperCase()}',
                       style: GoogleFonts.jetBrainsMono(
                         fontSize: 14,
                         fontWeight: FontWeight.w500,

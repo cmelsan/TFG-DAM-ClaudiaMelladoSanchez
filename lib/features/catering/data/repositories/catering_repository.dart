@@ -35,10 +35,14 @@ class CateringRepository {
   }
 
   Future<void> sendRequest({
-    required String menuId,
     required int guestCount,
     required DateTime eventDate,
     required String location,
+    required String eventType,
+    required String contactPhone,
+    required String menuType,
+    String? menuId,
+    String? customMenuDescription,
     String? notes,
   }) async {
     final userId = _client.auth.currentUser?.id;
@@ -46,10 +50,15 @@ class CateringRepository {
     try {
       await _client.from(SupabaseConstants.eventRequests).insert({
         'user_id': userId,
-        'menu_id': menuId,
+        'event_menu_id': menuId,
         'guest_count': guestCount,
         'event_date': eventDate.toIso8601String(),
         'location': location,
+        'event_type': eventType,
+        'contact_phone': contactPhone,
+        'menu_type': menuType,
+        if (customMenuDescription != null && customMenuDescription.isNotEmpty)
+          'custom_menu_description': customMenuDescription,
         if (notes != null && notes.isNotEmpty) 'notes': notes,
         'status': 'pending',
         'created_at': DateTime.now().toIso8601String(),

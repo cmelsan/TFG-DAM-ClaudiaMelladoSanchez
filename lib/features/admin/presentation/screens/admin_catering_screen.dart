@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:sabor_de_casa/core/theme/app_tokens.dart';
@@ -6,6 +6,7 @@ import 'package:sabor_de_casa/core/utils/formatters.dart';
 import 'package:sabor_de_casa/core/widgets/error_view.dart';
 import 'package:sabor_de_casa/core/widgets/loading_indicator.dart';
 import 'package:sabor_de_casa/features/admin/domain/models/admin_event_request.dart';
+import 'package:sabor_de_casa/features/admin/domain/models/admin_event_request_extensions.dart';
 import 'package:sabor_de_casa/features/admin/presentation/providers/admin_provider.dart';
 import 'package:sabor_de_casa/features/admin/presentation/widgets/admin_shell.dart';
 import 'package:sabor_de_casa/features/catering/domain/models/event_menu.dart';
@@ -44,8 +45,10 @@ class _AdminCateringScreenState extends ConsumerState<AdminCateringScreen>
               backgroundColor: AppTokens.brandPrimary,
               foregroundColor: Colors.white,
               icon: const Icon(Icons.add),
-              label: const Text('Nuevo menú',
-                  style: TextStyle(fontWeight: FontWeight.bold)),
+              label: const Text(
+                'Nuevo menú',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
               onPressed: () => _showMenuDialog(context, ref, null),
             )
           : null,
@@ -78,10 +81,7 @@ class _AdminCateringScreenState extends ConsumerState<AdminCateringScreen>
           Expanded(
             child: TabBarView(
               controller: _tab,
-              children: const [
-                _MenusTab(),
-                _RequestsTab(),
-              ],
+              children: const [_MenusTab(), _RequestsTab()],
             ),
           ),
         ],
@@ -110,8 +110,11 @@ class _MenusTab extends ConsumerWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.restaurant_menu,
-                    size: 56, color: Colors.grey.shade300),
+                Icon(
+                  Icons.restaurant_menu,
+                  size: 56,
+                  color: Colors.grey.shade300,
+                ),
                 const SizedBox(height: 16),
                 Text(
                   'No hay menús de evento',
@@ -163,8 +166,10 @@ class _MenuAdminCard extends ConsumerWidget {
               children: [
                 // Badge activo/inactivo
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: menu.isActive
                         ? AppTokens.brandPrimary.withValues(alpha: 0.1)
@@ -176,8 +181,9 @@ class _MenuAdminCard extends ConsumerWidget {
                     style: TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.w700,
-                      color:
-                          menu.isActive ? AppTokens.brandPrimary : Colors.grey,
+                      color: menu.isActive
+                          ? AppTokens.brandPrimary
+                          : Colors.grey,
                     ),
                   ),
                 ),
@@ -185,8 +191,10 @@ class _MenuAdminCard extends ConsumerWidget {
                 // Acciones
                 IconButton(
                   tooltip: 'Editar',
-                  icon: const Icon(Icons.edit_outlined,
-                      color: AppTokens.brandPrimary),
+                  icon: const Icon(
+                    Icons.edit_outlined,
+                    color: AppTokens.brandPrimary,
+                  ),
                   onPressed: () => _showMenuDialog(context, ref, menu),
                 ),
                 IconButton(
@@ -210,7 +218,10 @@ class _MenuAdminCard extends ConsumerWidget {
               Text(
                 menu.description!,
                 style: GoogleFonts.inter(
-                    fontSize: 14, color: Colors.black54, height: 1.4),
+                  fontSize: 14,
+                  color: Colors.black54,
+                  height: 1.4,
+                ),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -237,14 +248,14 @@ class _MenuAdminCard extends ConsumerWidget {
     );
   }
 
-  void _confirmDelete(
-      BuildContext ctx, WidgetRef ref, EventMenu menu) {
+  void _confirmDelete(BuildContext ctx, WidgetRef ref, EventMenu menu) {
     showDialog<void>(
       context: ctx,
       builder: (_) => AlertDialog(
         title: const Text('¿Eliminar menú?'),
         content: Text(
-            'Se eliminará "${menu.name}" de forma permanente. Las solicitudes existentes no se verán afectadas.'),
+          'Se eliminará "${menu.name}" de forma permanente. Las solicitudes existentes no se verán afectadas.',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
@@ -253,9 +264,7 @@ class _MenuAdminCard extends ConsumerWidget {
           TextButton(
             onPressed: () {
               Navigator.pop(ctx);
-              ref
-                  .read(adminActionProvider.notifier)
-                  .deleteEventMenu(menu.id);
+              ref.read(adminActionProvider.notifier).deleteEventMenu(menu.id);
             },
             style: TextButton.styleFrom(foregroundColor: Colors.red),
             child: const Text('Eliminar'),
@@ -267,7 +276,11 @@ class _MenuAdminCard extends ConsumerWidget {
 }
 
 class _DataChip extends StatelessWidget {
-  const _DataChip({required this.icon, required this.label, this.primary = false});
+  const _DataChip({
+    required this.icon,
+    required this.label,
+    this.primary = false,
+  });
   final IconData icon;
   final String label;
   final bool primary;
@@ -285,9 +298,11 @@ class _DataChip extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon,
-              size: 14,
-              color: primary ? AppTokens.brandPrimary : Colors.black45),
+          Icon(
+            icon,
+            size: 14,
+            color: primary ? AppTokens.brandPrimary : Colors.black45,
+          ),
           const SizedBox(width: 5),
           Text(
             label,
@@ -323,8 +338,11 @@ class _RequestsTab extends ConsumerWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.event_note_outlined,
-                    size: 56, color: Colors.grey.shade300),
+                Icon(
+                  Icons.event_note_outlined,
+                  size: 56,
+                  color: Colors.grey.shade300,
+                ),
                 const SizedBox(height: 16),
                 Text(
                   'Sin solicitudes de catering',
@@ -360,13 +378,19 @@ class _RequestAdminCard extends ConsumerStatefulWidget {
 class _RequestAdminCardState extends ConsumerState<_RequestAdminCard> {
   late String _status;
   final _quoteCtrl = TextEditingController();
+  final _adminNotesCtrl = TextEditingController();
+  final _appointmentCtrl = TextEditingController();
+  final _appointmentNotesCtrl = TextEditingController();
   bool _showQuote = false;
+  bool _showAppointment = false;
 
   static const _statuses = {
     'pending': ('Pendiente', Colors.orange),
+    'appointment': ('Cita', Colors.teal),
     'quoted': ('Presupuestado', Colors.blue),
     'accepted': ('Aceptado', Color(0xFF1D9E75)),
     'rejected': ('Rechazado', Colors.red),
+    'cancelled': ('Cancelado', Colors.grey),
     'completed': ('Completado', Colors.purple),
   };
 
@@ -377,12 +401,23 @@ class _RequestAdminCardState extends ConsumerState<_RequestAdminCard> {
     if (widget.request.quotedTotal != null) {
       _quoteCtrl.text = widget.request.quotedTotal!.toStringAsFixed(2);
     }
+    _adminNotesCtrl.text = widget.request.adminNotes ?? '';
+    _appointmentNotesCtrl.text = widget.request.appointmentNotes ?? '';
+    if (widget.request.appointmentAt != null) {
+      final value = widget.request.appointmentAt!;
+      _appointmentCtrl.text =
+          '${value.year}-${value.month.toString().padLeft(2, '0')}-${value.day.toString().padLeft(2, '0')} ${value.hour.toString().padLeft(2, '0')}:${value.minute.toString().padLeft(2, '0')}';
+    }
     _showQuote = _status == 'quoted';
+    _showAppointment = _status == 'appointment';
   }
 
   @override
   void dispose() {
     _quoteCtrl.dispose();
+    _adminNotesCtrl.dispose();
+    _appointmentCtrl.dispose();
+    _appointmentNotesCtrl.dispose();
     super.dispose();
   }
 
@@ -407,8 +442,10 @@ class _RequestAdminCardState extends ConsumerState<_RequestAdminCard> {
             Row(
               children: [
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: statusColor.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(100),
@@ -424,7 +461,7 @@ class _RequestAdminCardState extends ConsumerState<_RequestAdminCard> {
                 ),
                 const Spacer(),
                 Text(
-                  '#${widget.request.id.substring(0, 8).toUpperCase()}',
+                  '#${widget.request.shortId}',
                   style: const TextStyle(
                     fontFamily: 'monospace',
                     fontSize: 12,
@@ -442,15 +479,40 @@ class _RequestAdminCardState extends ConsumerState<_RequestAdminCard> {
               value: '${widget.request.guestCount} personas',
             ),
             _InfoRow(
+              icon: Icons.restaurant_menu_outlined,
+              label: 'Menú',
+              value: widget.request.menuType == 'custom'
+                  ? 'Personalizado'
+                  : widget.request.eventMenuName ?? 'Menú cerrado',
+            ),
+            if ((widget.request.eventType ?? '').isNotEmpty)
+              _InfoRow(
+                icon: Icons.celebration_outlined,
+                label: 'Evento',
+                value: widget.request.eventType!,
+              ),
+            _InfoRow(
               icon: Icons.calendar_today_outlined,
               label: 'Fecha evento',
               value: Formatters.date(widget.request.eventDate),
             ),
+            if ((widget.request.contactPhone ?? '').isNotEmpty)
+              _InfoRow(
+                icon: Icons.phone_outlined,
+                label: 'Teléfono',
+                value: widget.request.contactPhone!,
+              ),
             _InfoRow(
               icon: Icons.location_on_outlined,
               label: 'Lugar',
               value: widget.request.location,
             ),
+            if ((widget.request.customMenuDescription ?? '').isNotEmpty)
+              _InfoRow(
+                icon: Icons.edit_note_outlined,
+                label: 'Idea menú',
+                value: widget.request.customMenuDescription!,
+              ),
             if ((widget.request.notes ?? '').isNotEmpty)
               _InfoRow(
                 icon: Icons.notes_outlined,
@@ -462,6 +524,14 @@ class _RequestAdminCardState extends ConsumerState<_RequestAdminCard> {
                 icon: Icons.euro,
                 label: 'Presupuesto',
                 value: Formatters.price(widget.request.quotedTotal!),
+                highlight: true,
+              ),
+            if (widget.request.appointmentAt != null)
+              _InfoRow(
+                icon: Icons.event_available_outlined,
+                label: 'Cita',
+                value:
+                    '${Formatters.date(widget.request.appointmentAt!)} ${widget.request.appointmentAt!.hour.toString().padLeft(2, '0')}:${widget.request.appointmentAt!.minute.toString().padLeft(2, '0')}',
                 highlight: true,
               ),
 
@@ -488,11 +558,11 @@ class _RequestAdminCardState extends ConsumerState<_RequestAdminCard> {
                   onSelected: (_) => setState(() {
                     _status = e.key;
                     _showQuote = _status == 'quoted';
+                    _showAppointment = _status == 'appointment';
                   }),
                   selectedColor: e.value.$2.withValues(alpha: 0.15),
                   labelStyle: TextStyle(
-                    fontWeight:
-                        selected ? FontWeight.w700 : FontWeight.normal,
+                    fontWeight: selected ? FontWeight.w700 : FontWeight.normal,
                     color: selected ? e.value.$2 : Colors.black54,
                     fontSize: 13,
                   ),
@@ -506,7 +576,8 @@ class _RequestAdminCardState extends ConsumerState<_RequestAdminCard> {
               TextFormField(
                 controller: _quoteCtrl,
                 keyboardType: const TextInputType.numberWithOptions(
-                    decimal: true),
+                  decimal: true,
+                ),
                 decoration: InputDecoration(
                   labelText: 'Importe presupuestado (€)',
                   prefixIcon: const Icon(Icons.euro_outlined),
@@ -519,6 +590,56 @@ class _RequestAdminCardState extends ConsumerState<_RequestAdminCard> {
                 ),
               ),
             ],
+
+            if (_showAppointment) ...[
+              const SizedBox(height: 12),
+              TextFormField(
+                controller: _appointmentCtrl,
+                decoration: InputDecoration(
+                  labelText: 'Fecha y hora de cita',
+                  hintText: '2026-06-15 18:30',
+                  prefixIcon: const Icon(Icons.event_available_outlined),
+                  filled: true,
+                  fillColor: AppTokens.pageBg,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              TextFormField(
+                controller: _appointmentNotesCtrl,
+                maxLines: 2,
+                decoration: InputDecoration(
+                  labelText: 'Mensaje de cita para el cliente',
+                  hintText: 'Proponemos reunirnos para diseñar el menú.',
+                  filled: true,
+                  fillColor: AppTokens.pageBg,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none,
+                  ),
+                ),
+              ),
+            ],
+
+            const SizedBox(height: 12),
+            TextFormField(
+              controller: _adminNotesCtrl,
+              maxLines: 3,
+              decoration: InputDecoration(
+                labelText: 'Notas para el cliente',
+                hintText:
+                    'Detalles del presupuesto o condiciones del servicio.',
+                filled: true,
+                fillColor: AppTokens.pageBg,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide.none,
+                ),
+              ),
+            ),
 
             const SizedBox(height: 14),
 
@@ -550,15 +671,27 @@ class _RequestAdminCardState extends ConsumerState<_RequestAdminCard> {
     if (_showQuote && _quoteCtrl.text.isNotEmpty) {
       quoted = double.tryParse(_quoteCtrl.text.replaceAll(',', '.'));
     }
-    await ref.read(adminActionProvider.notifier).updateEventRequestQuote(
+    final appointmentAt = _showAppointment && _appointmentCtrl.text.isNotEmpty
+        ? DateTime.tryParse(_appointmentCtrl.text.replaceFirst(' ', 'T'))
+        : null;
+    await ref
+        .read(adminActionProvider.notifier)
+        .updateEventRequestQuote(
           requestId: widget.request.id,
           status: _status,
           quotedTotal: quoted,
+          adminNotes: _adminNotesCtrl.text.trim().isEmpty
+              ? null
+              : _adminNotesCtrl.text.trim(),
+          appointmentAt: appointmentAt,
+          appointmentNotes: _appointmentNotesCtrl.text.trim().isEmpty
+              ? null
+              : _appointmentNotesCtrl.text.trim(),
         );
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Solicitud actualizada')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Solicitud actualizada')));
     }
   }
 }
@@ -600,8 +733,7 @@ class _InfoRow extends StatelessWidget {
                 color: highlight
                     ? AppTokens.brandPrimary
                     : const Color(0xFF222222),
-                fontWeight:
-                    highlight ? FontWeight.w700 : FontWeight.w500,
+                fontWeight: highlight ? FontWeight.w700 : FontWeight.w500,
               ),
             ),
           ),
@@ -612,8 +744,7 @@ class _InfoRow extends StatelessWidget {
 }
 
 // ══════════════════════════════════════════════ MENU DIALOG ════════════════════
-void _showMenuDialog(
-    BuildContext context, WidgetRef ref, EventMenu? existing) {
+void _showMenuDialog(BuildContext context, WidgetRef ref, EventMenu? existing) {
   showDialog<void>(
     context: context,
     builder: (_) => _MenuFormDialog(existing: existing, ref: ref),
@@ -645,11 +776,12 @@ class _MenuFormDialogState extends State<_MenuFormDialog> {
     final m = widget.existing;
     _nameCtrl = TextEditingController(text: m?.name ?? '');
     _priceCtrl = TextEditingController(
-        text: m != null ? m.pricePerPerson.toStringAsFixed(2) : '');
-    _minCtrl =
-        TextEditingController(text: m != null ? '${m.minGuests}' : '10');
-    _maxCtrl =
-        TextEditingController(text: m != null ? '${m.maxGuests}' : '100');
+      text: m != null ? m.pricePerPerson.toStringAsFixed(2) : '',
+    );
+    _minCtrl = TextEditingController(text: m != null ? '${m.minGuests}' : '10');
+    _maxCtrl = TextEditingController(
+      text: m != null ? '${m.maxGuests}' : '100',
+    );
     _descCtrl = TextEditingController(text: m?.description ?? '');
     _isActive = m?.isActive ?? true;
   }
@@ -686,16 +818,18 @@ class _MenuFormDialogState extends State<_MenuFormDialog> {
                   controller: _nameCtrl,
                   label: 'Nombre del menú',
                   hint: 'Ej: Menú Boda Premium',
-                  validator: (v) =>
-                      (v == null || v.trim().isEmpty) ? 'Campo obligatorio' : null,
+                  validator: (v) => (v == null || v.trim().isEmpty)
+                      ? 'Campo obligatorio'
+                      : null,
                 ),
                 const SizedBox(height: 12),
                 _Field(
                   controller: _priceCtrl,
                   label: 'Precio por persona (€)',
                   hint: 'Ej: 35.00',
-                  keyboardType:
-                      const TextInputType.numberWithOptions(decimal: true),
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
                   validator: (v) {
                     if (v == null || v.trim().isEmpty) return 'Obligatorio';
                     if (double.tryParse(v.replaceAll(',', '.')) == null) {
@@ -738,8 +872,7 @@ class _MenuFormDialogState extends State<_MenuFormDialog> {
                 _Field(
                   controller: _descCtrl,
                   label: 'Descripción (opcional)',
-                  hint:
-                      'Detalla los platos incluidos, modalidades, etc.',
+                  hint: 'Detalla los platos incluidos, modalidades, etc.',
                   maxLines: 3,
                 ),
                 const SizedBox(height: 12),
@@ -771,7 +904,9 @@ class _MenuFormDialogState extends State<_MenuFormDialog> {
                   width: 18,
                   height: 18,
                   child: CircularProgressIndicator(
-                      strokeWidth: 2, color: Colors.white),
+                    strokeWidth: 2,
+                    color: Colors.white,
+                  ),
                 )
               : Text(isEdit ? 'Guardar' : 'Crear menú'),
         ),
@@ -784,12 +919,10 @@ class _MenuFormDialogState extends State<_MenuFormDialog> {
     setState(() => _saving = true);
 
     final name = _nameCtrl.text.trim();
-    final price =
-        double.parse(_priceCtrl.text.trim().replaceAll(',', '.'));
+    final price = double.parse(_priceCtrl.text.trim().replaceAll(',', '.'));
     final min = int.parse(_minCtrl.text.trim());
     final max = int.parse(_maxCtrl.text.trim());
-    final desc =
-        _descCtrl.text.trim().isEmpty ? null : _descCtrl.text.trim();
+    final desc = _descCtrl.text.trim().isEmpty ? null : _descCtrl.text.trim();
 
     final notifier = widget.ref.read(adminActionProvider.notifier);
 
@@ -857,8 +990,10 @@ class _Field extends StatelessWidget {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide:
-              const BorderSide(color: AppTokens.brandPrimary, width: 1.5),
+          borderSide: const BorderSide(
+            color: AppTokens.brandPrimary,
+            width: 1.5,
+          ),
         ),
       ),
     );

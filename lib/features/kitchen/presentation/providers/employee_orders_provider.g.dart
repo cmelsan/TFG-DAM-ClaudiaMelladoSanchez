@@ -235,8 +235,80 @@ class _OrderForPickupProviderElement
   String get orderId => (origin as OrderForPickupProvider).orderId;
 }
 
+String _$encargosHoyHash() => r'f5751e4b488a2e7d4b9794657219514b621972d9';
+
+/// See also [encargosHoy].
+@ProviderFor(encargosHoy)
+final encargosHoyProvider = AutoDisposeFutureProvider<List<Order>>.internal(
+  encargosHoy,
+  name: r'encargosHoyProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$encargosHoyHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef EncargosHoyRef = AutoDisposeFutureProviderRef<List<Order>>;
+String _$encargosSemanaHash() => r'33c41252245c54835de465f8a69a19ee48270420';
+
+/// See also [encargosSemana].
+@ProviderFor(encargosSemana)
+final encargosSemanaProvider = AutoDisposeFutureProvider<List<Order>>.internal(
+  encargosSemana,
+  name: r'encargosSemanaProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$encargosSemanaHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef EncargosSemanaRef = AutoDisposeFutureProviderRef<List<Order>>;
+String _$counterOrdersTodayHash() =>
+    r'fcaaa9350e3a107ae054e7f6d05eb9459f314e57';
+
+/// See also [counterOrdersToday].
+@ProviderFor(counterOrdersToday)
+final counterOrdersTodayProvider =
+    AutoDisposeFutureProvider<List<Order>>.internal(
+      counterOrdersToday,
+      name: r'counterOrdersTodayProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$counterOrdersTodayHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef CounterOrdersTodayRef = AutoDisposeFutureProviderRef<List<Order>>;
+String _$allKitchenOrdersTodayHash() =>
+    r'7f7ccf59f3dcf200bb4b6dc7086211e8ed2f701d';
+
+/// See also [allKitchenOrdersToday].
+@ProviderFor(allKitchenOrdersToday)
+final allKitchenOrdersTodayProvider =
+    AutoDisposeFutureProvider<List<Order>>.internal(
+      allKitchenOrdersToday,
+      name: r'allKitchenOrdersTodayProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$allKitchenOrdersTodayHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef AllKitchenOrdersTodayRef = AutoDisposeFutureProviderRef<List<Order>>;
 String _$employeeOrderActionHash() =>
-    r'4c2893fec416a04fe5af018d1c21d50cfb8da716';
+    r'520c45437adac3d71caf5c6a9152096da9f38610';
 
 /// See also [EmployeeOrderAction].
 @ProviderFor(EmployeeOrderAction)

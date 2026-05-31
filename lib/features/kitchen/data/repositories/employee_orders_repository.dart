@@ -90,6 +90,63 @@ class EmployeeOrdersRepository {
     }
   }
 
+  Future<List<Map<String, dynamic>>> getDeliveredOrdersWithDetailsToday()
+      async {
+    try {
+      final now = DateTime.now();
+      final start = DateTime(now.year, now.month, now.day);
+      final end = start.add(const Duration(days: 1));
+
+      final data = await _client
+          .from(SupabaseConstants.orders)
+          .select(
+            '*, '
+            '${SupabaseConstants.addresses}(label, street, city, postal_code), '
+            '${SupabaseConstants.profiles}!user_id(full_name, phone)',
+          )
+          .eq('status', 'delivered')
+          .eq('order_type', 'domicilio')
+          .gte('created_at', start.toIso8601String())
+          .lt('created_at', end.toIso8601String())
+          .order('created_at', ascending: false);
+      return List<Map<String, dynamic>>.from(data as List);
+    } on PostgrestException catch (e) {
+      throw DatabaseFailure(message: e.message, code: e.code);
+    } catch (e) {
+      throw UnexpectedFailure(message: e.toString());
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> getDeliveredOrdersWithDetailsWeek()
+      async {
+    try {
+      final now = DateTime.now();
+      final startOfWeek = now.subtract(Duration(days: now.weekday - 1));
+      final start = DateTime(
+        startOfWeek.year,
+        startOfWeek.month,
+        startOfWeek.day,
+      );
+
+      final data = await _client
+          .from(SupabaseConstants.orders)
+          .select(
+            '*, '
+            '${SupabaseConstants.addresses}(label, street, city, postal_code), '
+            '${SupabaseConstants.profiles}!user_id(full_name, phone)',
+          )
+          .eq('status', 'delivered')
+          .eq('order_type', 'domicilio')
+          .gte('created_at', start.toIso8601String())
+          .order('created_at', ascending: false);
+      return List<Map<String, dynamic>>.from(data as List);
+    } on PostgrestException catch (e) {
+      throw DatabaseFailure(message: e.message, code: e.code);
+    } catch (e) {
+      throw UnexpectedFailure(message: e.toString());
+    }
+  }
+
   Future<List<Order>> getPosOrders() async {
     try {
       final today = DateTime.now();
@@ -244,6 +301,168 @@ class EmployeeOrdersRepository {
           .maybeSingle();
       if (data == null) return null;
       return Order.fromJson(data);
+    } on PostgrestException catch (e) {
+      throw DatabaseFailure(message: e.message, code: e.code);
+    } catch (e) {
+      throw UnexpectedFailure(message: e.toString());
+    }
+  }
+
+  // ── Mostrador: Encargos del día ──────────────────────────────────────────
+
+  /// Encargos programados para hoy (todos los estados excepto cancelado).
+  Future<List<Order>> getEncargosToday() async {
+    try {
+      final now = DateTime.now();
+      final start = DateTime(now.year, now.month, now.day);
+      final end = start.add(const Duration(days: 1));
+      final data = await _client
+          .from(SupabaseConstants.orders)
+          .select()
+          .eq('order_type', 'encargo')
+          .neq('status', 'cancelled')
+          .gte('scheduled_at', start.toIso8601String())
+          .lt('scheduled_at', end.toIso8601String())
+          .order('scheduled_at', ascending: true);
+      return data.map(Order.fromJson).toList();
+    } on PostgrestException catch (e) {
+      throw DatabaseFailure(message: e.message, code: e.code);
+    } catch (e) {
+      throw UnexpectedFailure(message: e.toString());
+    }
+  }
+
+  /// Encargos programados para esta semana (lunes a domingo).
+  Future<List<Order>> getEncargosWeek() async {
+    try {
+      final now = DateTime.now();
+      // Lunes de esta semana
+      final monday =
+          DateTime(now.year, now.month, now.day - (now.weekday - 1));
+      final sunday = monday.add(const Duration(days: 7));
+      final data = await _client
+          .from(SupabaseConstants.orders)
+          .select()
+          .eq('order_type', 'encargo')
+          .neq('status', 'cancelled')
+          .gte('scheduled_at', monday.toIso8601String())
+          .lt('scheduled_at', sunday.toIso8601String())
+          .order('scheduled_at', ascending: true);
+      return data.map(Order.fromJson).toList();
+    } on PostgrestException catch (e) {
+      throw DatabaseFailure(message: e.message, code: e.code);
+    } catch (e) {
+      throw UnexpectedFailure(message: e.toString());
+    }
+  }
+
+  /// Todos los pedidos de hoy para historial de cocina (cualquier estado, excluye encargos).
+  Future<List<Order>> getAllKitchenOrdersToday() async {
+    try {
+      final now = DateTime.now();
+      final start = DateTime(now.year, now.month, now.day);
+      final end = start.add(const Duration(days: 1));
+      final data = await _client
+          .from(SupabaseConstants.orders)
+          .select()
+          .neq('order_type', 'encargo')
+          .gte('created_at', start.toIso8601String())
+          .lt('created_at', end.toIso8601String())
+          .order('created_at', ascending: false);
+      return data.map(Order.fromJson).toList();
+    } on PostgrestException catch (e) {
+      throw DatabaseFailure(message: e.message, code: e.code);
+    } catch (e) {
+      throw UnexpectedFailure(message: e.toString());
+    }
+  }
+
+  /// Pedidos de mostrador y recogida de hoy (para la vista general del mostrador).
+  Future<List<Order>> getCounterOrdersToday() async {
+    try {
+      final now = DateTime.now();
+      final start = DateTime(now.year, now.month, now.day);
+      final end = start.add(const Duration(days: 1));
+      final data = await _client
+          .from(SupabaseConstants.orders)
+          .select()
+          .inFilter('order_type', ['mostrador', 'recogida'])
+          .gte('created_at', start.toIso8601String())
+          .lt('created_at', end.toIso8601String())
+          .order('created_at', ascending: false);
+      return data.map(Order.fromJson).toList();
+    } on PostgrestException catch (e) {
+      throw DatabaseFailure(message: e.message, code: e.code);
+    } catch (e) {
+      throw UnexpectedFailure(message: e.toString());
+    }
+  }
+
+  /// Crea un pedido de mostrador (sin cuenta de cliente, ya cobrado).
+  Future<(String id, String? displayId)> createMostradorOrder({
+    required List<Map<String, dynamic>> items,
+    required String paymentMethod,
+    String? notes,
+  }) async {
+    try {
+      final subtotal = items.fold<double>(
+        0,
+        (sum, i) =>
+            sum + ((i['unitPrice'] as double) * (i['quantity'] as int)),
+      );
+
+      final order = await _client
+          .from(SupabaseConstants.orders)
+          .insert({
+            'user_id': null,
+            'order_type': 'mostrador',
+            'status': 'confirmed',      // Va directamente a cocina
+            'payment_status': 'paid',   // Ya cobrado en el mostrador
+            'payment_method': paymentMethod,
+            'subtotal': subtotal,
+            'delivery_fee': 0.0,
+            'discount_amount': 0.0,
+            'total': subtotal,
+            if (notes != null && notes.trim().isNotEmpty)
+              'notes': notes.trim(),
+          })
+          .select('id, display_id')
+          .single();
+
+      final orderId = order['id'] as String;
+      final displayId = order['display_id'] as String?;
+      final orderItems = items
+          .map(
+            (i) => {
+              'order_id': orderId,
+              'dish_id': i['dishId'],
+              'quantity': i['quantity'],
+              'unit_price': i['unitPrice'],
+              'subtotal':
+                  (i['unitPrice'] as double) * (i['quantity'] as int),
+            },
+          )
+          .toList();
+
+      await _client
+          .from(SupabaseConstants.orderItems)
+          .insert(orderItems);
+
+      return (orderId, displayId);
+    } on PostgrestException catch (e) {
+      throw DatabaseFailure(message: e.message, code: e.code);
+    } catch (e) {
+      throw UnexpectedFailure(message: e.toString());
+    }
+  }
+
+  /// Marca solo el estado como entregado (para encargos ya pagados online).
+  Future<void> markDelivered(String orderId) async {
+    try {
+      await _client
+          .from(SupabaseConstants.orders)
+          .update({'status': 'delivered'})
+          .eq('id', orderId);
     } on PostgrestException catch (e) {
       throw DatabaseFailure(message: e.message, code: e.code);
     } catch (e) {

@@ -41,6 +41,7 @@ class NotificationsNotifier extends _$NotificationsNotifier {
 
 /// Número de notificaciones no leídas (para el badge en la campana).
 @riverpod
+// ignore: deprecated_member_use_from_same_package
 int unreadNotificationsCount(UnreadNotificationsCountRef ref) {
   final notificationsAsync = ref.watch(notificationsNotifierProvider);
   return notificationsAsync.maybeWhen(

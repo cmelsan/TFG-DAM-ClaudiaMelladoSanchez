@@ -7,7 +7,6 @@ import 'package:sabor_de_casa/features/admin/presentation/screens/admin_categori
 import 'package:sabor_de_casa/features/admin/presentation/screens/admin_catering_screen.dart';
 import 'package:sabor_de_casa/features/admin/presentation/screens/admin_config_screen.dart';
 import 'package:sabor_de_casa/features/admin/presentation/screens/admin_daily_special_screen.dart';
-import 'package:sabor_de_casa/features/admin/presentation/screens/admin_newsletter_screen.dart';
 import 'package:sabor_de_casa/features/admin/presentation/screens/admin_dashboard_screen.dart';
 import 'package:sabor_de_casa/features/admin/presentation/screens/admin_dishes_screen.dart';
 import 'package:sabor_de_casa/features/admin/presentation/screens/admin_encargos_screen.dart';
@@ -31,13 +30,13 @@ import 'package:sabor_de_casa/features/contact/presentation/screens/contact_scre
 import 'package:sabor_de_casa/features/delivery/presentation/screens/delivery_screen.dart';
 import 'package:sabor_de_casa/features/delivery/presentation/screens/scanner_screen.dart';
 import 'package:sabor_de_casa/features/group_order/presentation/screens/group_order_screen.dart';
-import 'package:sabor_de_casa/features/notifications/presentation/screens/notifications_screen.dart';
 import 'package:sabor_de_casa/features/home/presentation/screens/home_screen.dart';
 import 'package:sabor_de_casa/features/kitchen/presentation/screens/kitchen_screen.dart';
 import 'package:sabor_de_casa/features/kitchen/presentation/screens/pickup_screen.dart';
 import 'package:sabor_de_casa/features/menu/presentation/screens/dish_detail_screen.dart';
 import 'package:sabor_de_casa/features/menu/presentation/screens/favorites_screen.dart';
 import 'package:sabor_de_casa/features/menu/presentation/screens/menu_screen.dart';
+import 'package:sabor_de_casa/features/notifications/presentation/screens/notifications_screen.dart';
 import 'package:sabor_de_casa/features/orders/presentation/screens/order_confirmation_screen.dart';
 import 'package:sabor_de_casa/features/orders/presentation/screens/order_detail_screen.dart';
 import 'package:sabor_de_casa/features/orders/presentation/screens/orders_screen.dart';
@@ -72,7 +71,7 @@ GoRouter appRouter(AppRouterRef ref) {
     ..onDispose(authNotifier.dispose);
 
   return GoRouter(
-    initialLocation: kIsWeb ? '/' : '/splash',
+    initialLocation: kIsWeb ? null : '/splash',
     debugLogDiagnostics: kDebugMode,
     refreshListenable: authNotifier,
     redirect: (context, state) {
@@ -339,11 +338,6 @@ GoRouter appRouter(AppRouterRef ref) {
         path: '/admin/daily-special',
         name: RouteNames.adminDailySpecial,
         builder: (_, __) => const AdminDailySpecialScreen(),
-      ),
-      GoRoute(
-        path: '/admin/newsletter',
-        name: RouteNames.adminNewsletter,
-        builder: (_, __) => const AdminNewsletterScreen(),
       ),
 
       // --- Pago web (retorno desde Stripe Checkout) ---

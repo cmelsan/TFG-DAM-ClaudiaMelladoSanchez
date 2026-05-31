@@ -1,7 +1,8 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:sabor_de_casa/core/router/route_names.dart';
 import 'package:sabor_de_casa/core/theme/app_tokens.dart';
 import 'package:sabor_de_casa/core/utils/formatters.dart';
@@ -10,6 +11,15 @@ import 'package:sabor_de_casa/core/widgets/loading_indicator.dart';
 import 'package:sabor_de_casa/core/widgets/status_badge.dart';
 import 'package:sabor_de_casa/features/kitchen/presentation/providers/employee_orders_provider.dart';
 import 'package:sabor_de_casa/features/orders/domain/models/order.dart';
+import 'package:sabor_de_casa/features/orders/domain/models/order_extensions.dart';
+
+// ── Design tokens (unificados) ──────────────────────────────────────────────
+
+const _kBg = Color(0xFFF7F8FA);
+const _kSurface = Color(0xFFFFFFFF);
+const _kBorder = Color(0xFFEAEBF0);
+const _kTextPrimary = Color(0xFF111827);
+const _kTextMuted = Color(0xFF6B7280);
 
 class PickupScreen extends ConsumerWidget {
   const PickupScreen({super.key});
@@ -19,17 +29,34 @@ class PickupScreen extends ConsumerWidget {
     final asyncOrders = ref.watch(pickupReadyOrdersProvider);
 
     return Scaffold(
+      backgroundColor: _kBg,
       appBar: AppBar(
-        title: const Text('Recogidas listas'),
+        backgroundColor: _kSurface,
+        elevation: 0,
+        surfaceTintColor: Colors.transparent,
+        title: Text(
+          'Recogidas listas',
+          style: GoogleFonts.inter(
+            fontSize: 18,
+            fontWeight: FontWeight.w700,
+            color: _kTextPrimary,
+          ),
+        ),
         centerTitle: true,
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1),
+          child: Container(height: 1, color: _kBorder),
+        ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.qr_code_scanner_rounded),
+            icon:
+                const Icon(Icons.qr_code_scanner_rounded, color: _kTextPrimary),
             tooltip: 'Escanear QR',
             onPressed: () => context.pushNamed(RouteNames.scanner),
           ),
           IconButton(
-            icon: const Icon(Icons.refresh_rounded),
+            icon: const Icon(Icons.refresh_rounded,
+                color: AppTokens.brandPrimary),
             tooltip: 'Actualizar',
             onPressed: () => ref.invalidate(pickupReadyOrdersProvider),
           ),
@@ -47,24 +74,33 @@ class PickupScreen extends ConsumerWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
-                    Icons.shopping_bag_outlined,
-                    size: 72,
-                    color: Colors.grey.shade300,
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Sin pedidos listos para recoger',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.grey.shade500,
-                      fontWeight: FontWeight.w500,
+                  Container(
+                    width: 80,
+                    height: 80,
+                    decoration: const BoxDecoration(
+                      color: AppTokens.brandLight,
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.shopping_bag_outlined,
+                      size: 38,
+                      color: AppTokens.brandPrimary,
                     ),
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 18),
+                  Text(
+                    'Sin pedidos listos para recoger',
+                    style: GoogleFonts.inter(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      color: _kTextPrimary,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
                   Text(
                     'Los pedidos de recogida listos aparecerán aquí',
-                    style: TextStyle(fontSize: 13, color: Colors.grey.shade400),
+                    style: GoogleFonts.inter(
+                        fontSize: 13, color: _kTextMuted),
                   ),
                 ],
               ),
@@ -72,6 +108,7 @@ class PickupScreen extends ConsumerWidget {
           }
 
           return RefreshIndicator(
+            color: AppTokens.brandPrimary,
             onRefresh: () async => ref.invalidate(pickupReadyOrdersProvider),
             child: ListView.builder(
               padding: const EdgeInsets.all(16),
@@ -104,25 +141,25 @@ class _PickupOrderCard extends ConsumerWidget {
     return Container(
           margin: const EdgeInsets.only(bottom: 12),
           decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surface,
-            borderRadius: BorderRadius.circular(16),
-            border: Border(
-              left: BorderSide(
-                color: isUrgent
-                    ? AppTokens.danger
-                    : AppTokens.badgeRecogidaFg,
-                width: 4,
-              ),
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.06),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
+            color: _kSurface,
+            borderRadius: BorderRadius.circular(AppTokens.radiusMd),
+            border: Border.all(color: _kBorder),
+            boxShadow: [AppTokens.cardShadow],
           ),
-          child: Padding(
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(AppTokens.radiusMd),
+            child: Container(
+              decoration: BoxDecoration(
+                border: Border(
+                  left: BorderSide(
+                    color: isUrgent
+                        ? AppTokens.danger
+                        : AppTokens.badgeRecogidaFg,
+                    width: 4,
+                  ),
+                ),
+              ),
+            child: Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -135,18 +172,19 @@ class _PickupOrderCard extends ConsumerWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            '#${order.id.substring(0, 8).toUpperCase()}',
-                            style: const TextStyle(
+                            '#${order.shortId}',
+                            style: GoogleFonts.jetBrainsMono(
                               fontWeight: FontWeight.w800,
-                              fontSize: 16,
+                              fontSize: 15,
+                              color: _kTextPrimary,
                             ),
                           ),
                           const SizedBox(height: 2),
                           Text(
                             Formatters.dateTime(order.createdAt),
-                            style: TextStyle(
+                            style: GoogleFonts.inter(
                               fontSize: 12,
-                              color: Colors.grey.shade500,
+                              color: _kTextMuted,
                             ),
                           ),
                         ],
@@ -161,7 +199,7 @@ class _PickupOrderCard extends ConsumerWidget {
                       decoration: BoxDecoration(
                         color: (isUrgent ? AppTokens.danger : AppTokens.badgeRecogidaFg)
                             .withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(20),
+                        borderRadius: BorderRadius.circular(AppTokens.radiusPill),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
@@ -176,7 +214,7 @@ class _PickupOrderCard extends ConsumerWidget {
                           const SizedBox(width: 4),
                           Text(
                             '${elapsed}min',
-                            style: TextStyle(
+                            style: GoogleFonts.inter(
                               fontSize: 12,
                               fontWeight: FontWeight.w700,
                               color: isUrgent
@@ -206,17 +244,18 @@ class _PickupOrderCard extends ConsumerWidget {
                   children: [
                     Text(
                       'Total:',
-                      style: TextStyle(
+                      style: GoogleFonts.inter(
                         fontSize: 13,
-                        color: Colors.grey.shade600,
+                        color: _kTextMuted,
                       ),
                     ),
                     const SizedBox(width: 6),
                     Text(
                       Formatters.price(order.total),
-                      style: const TextStyle(
+                      style: GoogleFonts.inter(
                         fontSize: 16,
                         fontWeight: FontWeight.w800,
+                        color: _kTextPrimary,
                       ),
                     ),
                     const Spacer(),
@@ -258,7 +297,9 @@ class _PickupOrderCard extends ConsumerWidget {
               ],
             ),
           ),
-        )
+        ),   // close inner Container (left border decoration)
+        ),   // close ClipRRect
+        )    // close outer Container
         .animate()
         .fadeIn(duration: 250.ms, delay: (index * 40).ms)
         .slideX(begin: -0.04, end: 0, duration: 250.ms, delay: (index * 40).ms);
@@ -271,7 +312,7 @@ class _PickupOrderCard extends ConsumerWidget {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: const Text('Confirmar entrega'),
         content: Text(
-          '¿Entregar el pedido #${order.id.substring(0, 8).toUpperCase()} '
+          '¿Entregar el pedido #${order.shortId} '
           'y marcarlo como cobrado?',
         ),
         actions: [

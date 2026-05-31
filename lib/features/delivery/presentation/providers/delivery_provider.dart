@@ -66,3 +66,36 @@ final deliveryDetailProvider =
     );
   }).toList();
 });
+
+// ── Historial de entregas ─────────────────────────────────────────────────────
+
+DeliveryDetail _mapRaw(Map<String, dynamic> raw) {
+  final order = Order.fromJson(raw);
+  final addr = raw['addresses'] as Map<String, dynamic>?;
+  final profile = raw['profiles'] as Map<String, dynamic>?;
+  return DeliveryDetail(
+    order: order,
+    addressLabel: addr?['label'] as String?,
+    addressStreet: addr?['street'] as String?,
+    addressCity: addr?['city'] as String?,
+    addressPostalCode: addr?['postal_code'] as String?,
+    clientName: profile?['full_name'] as String?,
+    clientPhone: profile?['phone'] as String?,
+  );
+}
+
+final deliveryHistoryTodayProvider =
+    FutureProvider.autoDispose<List<DeliveryDetail>>((ref) async {
+  final rawList = await ref
+      .watch(employeeOrdersRepositoryProvider)
+      .getDeliveredOrdersWithDetailsToday();
+  return rawList.map(_mapRaw).toList();
+});
+
+final deliveryHistoryWeekProvider =
+    FutureProvider.autoDispose<List<DeliveryDetail>>((ref) async {
+  final rawList = await ref
+      .watch(employeeOrdersRepositoryProvider)
+      .getDeliveredOrdersWithDetailsWeek();
+  return rawList.map(_mapRaw).toList();
+});

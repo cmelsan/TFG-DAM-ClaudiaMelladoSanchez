@@ -1,4 +1,4 @@
-import 'package:flutter/foundation.dart';
+﻿import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
@@ -9,6 +9,7 @@ import 'package:sabor_de_casa/core/widgets/status_badge.dart';
 import 'package:sabor_de_casa/features/kitchen/data/repositories/employee_orders_repository.dart';
 import 'package:sabor_de_casa/features/kitchen/presentation/providers/employee_orders_provider.dart';
 import 'package:sabor_de_casa/features/orders/domain/models/order.dart';
+import 'package:sabor_de_casa/features/orders/domain/models/order_extensions.dart';
 
 class ScannerScreen extends ConsumerStatefulWidget {
   const ScannerScreen({super.key});
@@ -477,7 +478,7 @@ class _OrderFoundPanel extends ConsumerWidget {
                   children: [
                     Expanded(
                       child: Text(
-                        '#${order.id.substring(0, 8).toUpperCase()}',
+                        '#${order.shortId}',
                         style: const TextStyle(
                           fontWeight: FontWeight.w800,
                           fontSize: 18,

@@ -25,6 +25,7 @@ _$OrderImpl _$$OrderImplFromJson(Map<String, dynamic> json) => _$OrderImpl(
       : DateTime.parse(json['scheduled_at'] as String),
   notes: json['notes'] as String?,
   assignedDriverId: json['assigned_driver_id'] as String?,
+  displayId: json['display_id'] as String?,
 );
 
 Map<String, dynamic> _$$OrderImplToJson(_$OrderImpl instance) =>
@@ -45,4 +46,5 @@ Map<String, dynamic> _$$OrderImplToJson(_$OrderImpl instance) =>
       'scheduled_at': instance.scheduledAt?.toIso8601String(),
       'notes': instance.notes,
       'assigned_driver_id': instance.assignedDriverId,
+      'display_id': instance.displayId,
     };

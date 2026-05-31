@@ -13,9 +13,20 @@ class AdminEventRequest with _$AdminEventRequest {
     required int guestCount,
     required String location,
     required String status,
+    String? eventMenuId,
+    String? eventMenuName,
+    double? eventMenuPricePerPerson,
+    String? eventType,
+    String? contactPhone,
+    String? menuType,
+    String? customMenuDescription,
     String? notes,
     double? quotedTotal,
+    String? adminNotes,
+    DateTime? appointmentAt,
+    String? appointmentNotes,
     DateTime? createdAt,
+    String? displayId,
   }) = _AdminEventRequest;
 
   factory AdminEventRequest.fromJson(Map<String, dynamic> json) =>

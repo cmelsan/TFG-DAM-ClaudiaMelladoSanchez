@@ -1,3 +1,5 @@
+﻿import 'dart:async';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -13,6 +15,9 @@ import 'package:sabor_de_casa/core/widgets/loading_indicator.dart';
 import 'package:sabor_de_casa/features/admin/presentation/providers/admin_provider.dart';
 import 'package:sabor_de_casa/features/admin/presentation/widgets/admin_shell.dart';
 import 'package:sabor_de_casa/features/orders/domain/models/order.dart';
+import 'package:sabor_de_casa/features/orders/domain/models/order_extensions.dart';
+import 'package:sabor_de_casa/services/supabase_service.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 // ── Constantes de mapeo ───────────────────────────────────────────────────────
 
@@ -67,89 +72,423 @@ class AdminOrdersScreen extends ConsumerStatefulWidget {
   ConsumerState<AdminOrdersScreen> createState() => _AdminOrdersScreenState();
 }
 
-class _AdminOrdersScreenState extends ConsumerState<AdminOrdersScreen> {
+class _AdminOrdersScreenState extends ConsumerState<AdminOrdersScreen>
+    with TickerProviderStateMixin {
+  late TabController _tabCtrl;
   String _statusFilter = 'all';
   String _typeFilter = 'all';
+  Timer? _autoRefresh;
+  RealtimeChannel? _realtimeChannel;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabCtrl = TabController(length: 3, vsync: this);
+    _autoRefresh = Timer.periodic(
+      const Duration(seconds: 30),
+      (_) => _refreshAll(),
+    );
+    _setupRealtime();
+  }
+
+  void _setupRealtime() {
+    _realtimeChannel = ref
+        .read(supabaseClientProvider)
+        .channel('admin-orders-rt')
+        .onPostgresChanges(
+          event: PostgresChangeEvent.all,
+          schema: 'public',
+          table: 'orders',
+          callback: (_) {
+            if (mounted) _refreshAll();
+          },
+        )
+        .subscribe();
+  }
+
+  void _refreshAll() {
+    ref
+      ..invalidate(adminOrdersProvider)
+      ..invalidate(adminOrdersTodayProvider)
+      ..invalidate(adminOrdersWeekProvider);
+  }
+
+  @override
+  void dispose() {
+    _tabCtrl.dispose();
+    _autoRefresh?.cancel();
+    _realtimeChannel?.unsubscribe();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    final ordersAsync = ref.watch(adminOrdersProvider);
-
     return AdminShell(
       title: 'Pedidos',
       actions: [
         IconButton(
           icon: const Icon(Icons.refresh_rounded, color: AppTokens.brandPrimary),
           tooltip: 'Actualizar',
-          onPressed: () => ref.invalidate(adminOrdersProvider),
+          onPressed: _refreshAll,
         ),
         const SizedBox(width: 8),
       ],
-      child: ordersAsync.when(
-        loading: () => const Center(child: LoadingIndicator()),
-        error: (e, _) => Center(
-          child: ErrorView(
-            message: e.toString(),
-            onRetry: () => ref.invalidate(adminOrdersProvider),
+      child: Column(
+        children: [
+          // ── Tab bar strip ─────────────────────────────────────────────
+          Container(
+            color: Colors.white,
+            child: TabBar(
+              controller: _tabCtrl,
+              indicatorColor: AppTokens.brandPrimary,
+              indicatorWeight: 3,
+              labelColor: AppTokens.brandPrimary,
+              unselectedLabelColor: const Color(0xFF6B7280),
+              labelStyle: GoogleFonts.inter(
+                  fontSize: 13, fontWeight: FontWeight.w600),
+              unselectedLabelStyle:
+                  GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w500),
+              tabs: const [
+                Tab(
+                  icon: Icon(Icons.today_rounded, size: 18),
+                  text: 'Hoy',
+                  iconMargin: EdgeInsets.only(bottom: 2),
+                ),
+                Tab(
+                  icon: Icon(Icons.date_range_rounded, size: 18),
+                  text: 'Semana',
+                  iconMargin: EdgeInsets.only(bottom: 2),
+                ),
+                Tab(
+                  icon: Icon(Icons.history_rounded, size: 18),
+                  text: 'Histórico',
+                  iconMargin: EdgeInsets.only(bottom: 2),
+                ),
+              ],
+            ),
           ),
-        ),
-        data: (orders) {
-          final filtered = orders.where((o) {
-            final statusOk = _statusFilter == 'all' || o.status == _statusFilter;
-            final typeOk = _typeFilter == 'all' || o.orderType == _typeFilter;
-            return statusOk && typeOk;
-          }).toList()
-            ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+          const Divider(height: 1, color: Color(0xFFEAEBF0)),
+          // ── Tab content ────────────────────────────────────────────────
+          Expanded(
+            child: TabBarView(
+              controller: _tabCtrl,
+              children: [
+                _TodayTab(
+                  statusFilter: _statusFilter,
+                  typeFilter: _typeFilter,
+                  onStatusChanged: (v) => setState(() => _statusFilter = v),
+                  onTypeChanged: (v) => setState(() => _typeFilter = v),
+                ),
+                _WeekTab(
+                  statusFilter: _statusFilter,
+                  typeFilter: _typeFilter,
+                  onStatusChanged: (v) => setState(() => _statusFilter = v),
+                  onTypeChanged: (v) => setState(() => _typeFilter = v),
+                ),
+                _HistoricoTab(
+                  statusFilter: _statusFilter,
+                  typeFilter: _typeFilter,
+                  onStatusChanged: (v) => setState(() => _statusFilter = v),
+                  onTypeChanged: (v) => setState(() => _typeFilter = v),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
 
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              _FilterSection(
-                orders: orders,
-                statusFilter: _statusFilter,
-                typeFilter: _typeFilter,
-                onStatusChanged: (v) => setState(() => _statusFilter = v),
-                onTypeChanged: (v) => setState(() => _typeFilter = v),
-              ),
-              Expanded(
-                child: filtered.isEmpty
-                    ? Center(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
+// ── Tab Hoy ──────────────────────────────────────────────────────────────────────
+
+class _TodayTab extends ConsumerWidget {
+  const _TodayTab({
+    required this.statusFilter,
+    required this.typeFilter,
+    required this.onStatusChanged,
+    required this.onTypeChanged,
+  });
+  final String statusFilter;
+  final String typeFilter;
+  final ValueChanged<String> onStatusChanged;
+  final ValueChanged<String> onTypeChanged;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final ordersAsync = ref.watch(adminOrdersTodayProvider);
+    return ordersAsync.when(
+      loading: () => const Center(child: LoadingIndicator()),
+      error: (e, _) => Center(
+          child: ErrorView(
+              message: e.toString(),
+              onRetry: () => ref.invalidate(adminOrdersTodayProvider))),
+      data: (orders) => _OrdersTabContent(
+        orders: orders,
+        statusFilter: statusFilter,
+        typeFilter: typeFilter,
+        onStatusChanged: onStatusChanged,
+        onTypeChanged: onTypeChanged,
+        emptyLabel: 'Sin pedidos hoy',
+        emptyIcon: Icons.today_rounded,
+      ),
+    );
+  }
+}
+
+// ── Tab Semana ──────────────────────────────────────────────────────────────────
+
+class _WeekTab extends ConsumerWidget {
+  const _WeekTab({
+    required this.statusFilter,
+    required this.typeFilter,
+    required this.onStatusChanged,
+    required this.onTypeChanged,
+  });
+  final String statusFilter;
+  final String typeFilter;
+  final ValueChanged<String> onStatusChanged;
+  final ValueChanged<String> onTypeChanged;
+
+  static const _dayNames = [
+    'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo',
+  ];
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final ordersAsync = ref.watch(adminOrdersWeekProvider);
+    return ordersAsync.when(
+      loading: () => const Center(child: LoadingIndicator()),
+      error: (e, _) => Center(
+          child: ErrorView(
+              message: e.toString(),
+              onRetry: () => ref.invalidate(adminOrdersWeekProvider))),
+      data: (allOrders) {
+        // Apply filters
+        final filtered = allOrders.where((o) {
+          final statusOk =
+              statusFilter == 'all' || o.status == statusFilter;
+          final typeOk = typeFilter == 'all' || o.orderType == typeFilter;
+          return statusOk && typeOk;
+        }).toList()
+          ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+
+        // Group by date
+        final Map<String, List<Order>> grouped = {};
+        for (final o in filtered) {
+          final d = o.createdAt;
+          final key =
+              '${_dayNames[d.weekday - 1]} ${d.day}/${d.month}';
+          grouped.putIfAbsent(key, () => []).add(o);
+        }
+
+        return Column(
+          children: [
+            _FilterSection(
+              orders: allOrders,
+              statusFilter: statusFilter,
+              typeFilter: typeFilter,
+              onStatusChanged: onStatusChanged,
+              onTypeChanged: onTypeChanged,
+            ),
+            Expanded(
+              child: filtered.isEmpty
+                  ? _EmptyState(
+                      icon: Icons.date_range_rounded,
+                      label: 'Sin pedidos esta semana con estos filtros',
+                    )
+                  : ListView.builder(
+                      padding:
+                          const EdgeInsets.fromLTRB(20, 16, 20, 40),
+                      itemCount: grouped.length,
+                      itemBuilder: (_, gi) {
+                        final day = grouped.keys.elementAt(gi);
+                        final dayOrders = grouped[day]!;
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Container(
-                              width: 64,
-                              height: 64,
-                              decoration: const BoxDecoration(
-                                color: Color(0xFFF0F0F0),
-                                shape: BoxShape.circle,
+                            Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(vertical: 12),
+                              child: Row(
+                                children: [
+                                  const Icon(
+                                    Icons.calendar_today_rounded,
+                                    size: 14,
+                                    color: Color(0xFF6B7280),
+                                  ),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    day,
+                                    style: GoogleFonts.inter(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w700,
+                                      color: const Color(0xFF6B7280),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 8, vertical: 2),
+                                    decoration: BoxDecoration(
+                                      color: AppTokens.brandPrimary
+                                          .withValues(alpha: 0.10),
+                                      borderRadius: BorderRadius.circular(
+                                          AppTokens.radiusPill),
+                                    ),
+                                    child: Text(
+                                      '${dayOrders.length}',
+                                      style: GoogleFonts.inter(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w700,
+                                        color: AppTokens.brandPrimary,
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
-                              child: const Icon(Icons.inbox_rounded,
-                                  size: 28, color: Color(0xFF9E9E9E)),
                             ),
-                            const SizedBox(height: 12),
-                            Text(
-                              'No hay pedidos con estos filtros',
-                              style: GoogleFonts.inter(
-                                color: const Color(0xFF9E9E9E),
-                                fontSize: 14,
-                              ),
-                            ),
+                            ...dayOrders.asMap().entries.map((e) =>
+                                Padding(
+                                  padding: const EdgeInsets.only(bottom: 10),
+                                  child: _OrderCard(
+                                      order: e.value, index: e.key),
+                                )),
                           ],
-                        ),
-                      )
-                    : ListView.separated(
-                        padding: const EdgeInsets.fromLTRB(20, 16, 20, 40),
-                        itemCount: filtered.length,
-                        separatorBuilder: (_, __) =>
-                            const SizedBox(height: 10),
-                        itemBuilder: (ctx, i) =>
-                            _OrderCard(order: filtered[i], index: i),
-                      ),
-              ),
-            ],
-          );
-        },
+                        );
+                      },
+                    ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+// ── Tab Histórico ───────────────────────────────────────────────────────────────
+
+class _HistoricoTab extends ConsumerWidget {
+  const _HistoricoTab({
+    required this.statusFilter,
+    required this.typeFilter,
+    required this.onStatusChanged,
+    required this.onTypeChanged,
+  });
+  final String statusFilter;
+  final String typeFilter;
+  final ValueChanged<String> onStatusChanged;
+  final ValueChanged<String> onTypeChanged;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final ordersAsync = ref.watch(adminOrdersProvider);
+    return ordersAsync.when(
+      loading: () => const Center(child: LoadingIndicator()),
+      error: (e, _) => Center(
+          child: ErrorView(
+              message: e.toString(),
+              onRetry: () => ref.invalidate(adminOrdersProvider))),
+      data: (orders) => _OrdersTabContent(
+        orders: orders,
+        statusFilter: statusFilter,
+        typeFilter: typeFilter,
+        onStatusChanged: onStatusChanged,
+        onTypeChanged: onTypeChanged,
+        emptyLabel: 'No hay pedidos con estos filtros',
+        emptyIcon: Icons.inbox_rounded,
+      ),
+    );
+  }
+}
+
+// ── Contenido de tab común ───────────────────────────────────────────────────
+
+class _OrdersTabContent extends StatelessWidget {
+  const _OrdersTabContent({
+    required this.orders,
+    required this.statusFilter,
+    required this.typeFilter,
+    required this.onStatusChanged,
+    required this.onTypeChanged,
+    required this.emptyLabel,
+    required this.emptyIcon,
+  });
+
+  final List<Order> orders;
+  final String statusFilter;
+  final String typeFilter;
+  final ValueChanged<String> onStatusChanged;
+  final ValueChanged<String> onTypeChanged;
+  final String emptyLabel;
+  final IconData emptyIcon;
+
+  @override
+  Widget build(BuildContext context) {
+    final filtered = orders.where((o) {
+      final statusOk = statusFilter == 'all' || o.status == statusFilter;
+      final typeOk = typeFilter == 'all' || o.orderType == typeFilter;
+      return statusOk && typeOk;
+    }).toList()
+      ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _FilterSection(
+          orders: orders,
+          statusFilter: statusFilter,
+          typeFilter: typeFilter,
+          onStatusChanged: onStatusChanged,
+          onTypeChanged: onTypeChanged,
+        ),
+        Expanded(
+          child: filtered.isEmpty
+              ? _EmptyState(icon: emptyIcon, label: emptyLabel)
+              : ListView.separated(
+                  padding: const EdgeInsets.fromLTRB(20, 16, 20, 40),
+                  itemCount: filtered.length,
+                  separatorBuilder: (_, __) => const SizedBox(height: 10),
+                  itemBuilder: (ctx, i) =>
+                      _OrderCard(order: filtered[i], index: i),
+                ),
+        ),
+      ],
+    );
+  }
+}
+
+// ── Empty state ──────────────────────────────────────────────────────────────────
+
+class _EmptyState extends StatelessWidget {
+  const _EmptyState({required this.icon, required this.label});
+  final IconData icon;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 64,
+            height: 64,
+            decoration: const BoxDecoration(
+              color: Color(0xFFF0F0F0),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, size: 28, color: const Color(0xFF9E9E9E)),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            label,
+            style: GoogleFonts.inter(
+              color: const Color(0xFF9E9E9E),
+              fontSize: 14,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -405,7 +744,7 @@ class _OrderCardState extends ConsumerState<_OrderCard> {
               ),
               pw.Divider(thickness: 1, color: PdfColors.grey400),
               pw.SizedBox(height: 8),
-              _pdfRow('Pedido', '#${o.id.substring(0, 6).toUpperCase()}'),
+              _pdfRow('Pedido', '#${o.shortId}'),
               _pdfRow('Tipo', _typeLabels[o.orderType] ?? o.orderType),
               _pdfRow('Fecha', Formatters.dateTime(o.createdAt)),
               _pdfRow('Estado', _statusLabels[o.status] ?? o.status),
@@ -470,7 +809,7 @@ class _OrderCardState extends ConsumerState<_OrderCard> {
       );
     await Printing.layoutPdf(
       onLayout: (_) async => pdf.save(),
-      name: 'ticket_${o.id.substring(0, 6).toUpperCase()}.pdf',
+      name: 'ticket_${o.shortId}.pdf',
     );
   }
 
@@ -504,7 +843,7 @@ class _OrderCardState extends ConsumerState<_OrderCard> {
         ? await ref.read(adminUserProfileProvider(o.userId!).future)
         : null;
 
-    final facturaNum = 'FAC-${o.id.substring(0, 8).toUpperCase()}';
+    final facturaNum = 'FAC-${o.shortId}';
     final fecha =
         '${o.createdAt.day.toString().padLeft(2, '0')}/${o.createdAt.month.toString().padLeft(2, '0')}/${o.createdAt.year}';
     final hora =
@@ -902,7 +1241,7 @@ class _OrderCardState extends ConsumerState<_OrderCard> {
       );
     await Printing.layoutPdf(
       onLayout: (_) async => pdf.save(),
-      name: 'factura_${o.id.substring(0, 8).toUpperCase()}.pdf',
+      name: 'factura_${o.shortId}.pdf',
     );
   }
 
@@ -967,7 +1306,7 @@ class _OrderCardState extends ConsumerState<_OrderCard> {
                 children: [
                   // ID
                   Text(
-                    '#${o.id.substring(0, 8).toUpperCase()}',
+                    '#${o.shortId}',
                     style: GoogleFonts.jetBrainsMono(
                       fontSize: 14,
                       fontWeight: FontWeight.w700,

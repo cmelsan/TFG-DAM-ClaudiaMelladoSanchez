@@ -30,18 +30,30 @@ Future<List<Order>> adminOrders(AdminOrdersRef ref) {
 }
 
 @riverpod
+// ignore: deprecated_member_use_from_same_package, Riverpod 2.x typed Ref
+Future<List<Order>> adminOrdersToday(AdminOrdersTodayRef ref) {
+  return ref.watch(adminRepositoryProvider).getOrdersToday();
+}
+
+@riverpod
+// ignore: deprecated_member_use_from_same_package, Riverpod 2.x typed Ref
+Future<List<Order>> adminOrdersWeek(AdminOrdersWeekRef ref) {
+  return ref.watch(adminRepositoryProvider).getOrdersWeek();
+}
+
+@riverpod
 // ignore: deprecated_member_use_from_same_package
-Future<List<OrderItem>> adminOrderItems(AdminOrderItemsRef ref, String orderId) {
+Future<List<OrderItem>> adminOrderItems(
+  AdminOrderItemsRef ref,
+  String orderId,
+) {
   return ref.watch(ordersRepositoryProvider).getOrderItems(orderId);
 }
 
 @riverpod
 // ignore: deprecated_member_use_from_same_package
-Future<AdminUser?> adminUserProfile(
-  AdminUserProfileRef ref,
-  String userId,
-) {
-  if (userId.isEmpty) return Future.value(null);
+Future<AdminUser?> adminUserProfile(AdminUserProfileRef ref, String userId) {
+  if (userId.isEmpty) return Future.value();
   return ref.watch(adminRepositoryProvider).getUserProfile(userId);
 }
 
@@ -333,7 +345,9 @@ class AdminAction extends _$AdminAction {
   }) async {
     state = const AsyncLoading();
     state = await AsyncValue.guard(
-      () => ref.read(adminRepositoryProvider).updateDishOffer(
+      () => ref
+          .read(adminRepositoryProvider)
+          .updateDishOffer(
             dishId: dishId,
             isOffer: isOffer,
             offerPrice: offerPrice,
@@ -356,7 +370,9 @@ class AdminAction extends _$AdminAction {
   Future<void> toggleAcceptingOrders({required bool accepting}) async {
     state = const AsyncLoading();
     state = await AsyncValue.guard(
-      () => ref.read(adminRepositoryProvider).updateBusinessConfigByKey(
+      () => ref
+          .read(adminRepositoryProvider)
+          .updateBusinessConfigByKey(
             key: 'accepting_orders',
             value: accepting ? 'true' : 'false',
           ),
@@ -464,7 +480,9 @@ class AdminAction extends _$AdminAction {
   }) async {
     state = const AsyncLoading();
     state = await AsyncValue.guard(
-      () => ref.read(adminRepositoryProvider).createEventMenu(
+      () => ref
+          .read(adminRepositoryProvider)
+          .createEventMenu(
             name: name,
             pricePerPerson: pricePerPerson,
             minGuests: minGuests,
@@ -487,7 +505,9 @@ class AdminAction extends _$AdminAction {
   }) async {
     state = const AsyncLoading();
     state = await AsyncValue.guard(
-      () => ref.read(adminRepositoryProvider).updateEventMenu(
+      () => ref
+          .read(adminRepositoryProvider)
+          .updateEventMenu(
             id: id,
             name: name,
             pricePerPerson: pricePerPerson,
@@ -512,16 +532,25 @@ class AdminAction extends _$AdminAction {
     required String requestId,
     required String status,
     double? quotedTotal,
+    String? adminNotes,
+    DateTime? appointmentAt,
+    String? appointmentNotes,
   }) async {
     state = const AsyncLoading();
     state = await AsyncValue.guard(
-      () => ref.read(adminRepositoryProvider).updateEventRequestQuote(
+      () => ref
+          .read(adminRepositoryProvider)
+          .updateEventRequestQuote(
             requestId: requestId,
             status: status,
             quotedTotal: quotedTotal,
+            adminNotes: adminNotes,
+            appointmentAt: appointmentAt,
+            appointmentNotes: appointmentNotes,
           ),
     );
     ref
       ..invalidate(adminEventRequestsProvider)
       ..invalidate(adminDashboardStatsProvider);
-  }}
+  }
+}

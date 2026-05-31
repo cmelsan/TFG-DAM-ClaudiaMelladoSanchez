@@ -11,16 +11,16 @@ class TestimonialModel {
     required this.rating,
   });
 
-  final String authorName;
-  final String body;
-  final int rating;
-
   factory TestimonialModel.fromJson(Map<String, dynamic> json) =>
       TestimonialModel(
         authorName: json['author_name'] as String? ?? 'Cliente',
         body: json['body'] as String? ?? '',
         rating: json['rating'] as int? ?? 5,
       );
+
+  final String authorName;
+  final String body;
+  final int rating;
 }
 
 /// Obtiene los testimonios destacados desde Supabase.

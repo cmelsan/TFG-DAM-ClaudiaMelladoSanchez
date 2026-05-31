@@ -37,6 +37,7 @@ mixin _$Order {
   DateTime? get scheduledAt => throw _privateConstructorUsedError;
   String? get notes => throw _privateConstructorUsedError;
   String? get assignedDriverId => throw _privateConstructorUsedError;
+  String? get displayId => throw _privateConstructorUsedError;
 
   /// Serializes this Order to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -69,6 +70,7 @@ abstract class $OrderCopyWith<$Res> {
     DateTime? scheduledAt,
     String? notes,
     String? assignedDriverId,
+    String? displayId,
   });
 }
 
@@ -103,6 +105,7 @@ class _$OrderCopyWithImpl<$Res, $Val extends Order>
     Object? scheduledAt = freezed,
     Object? notes = freezed,
     Object? assignedDriverId = freezed,
+    Object? displayId = freezed,
   }) {
     return _then(
       _value.copyWith(
@@ -170,6 +173,10 @@ class _$OrderCopyWithImpl<$Res, $Val extends Order>
                 ? _value.assignedDriverId
                 : assignedDriverId // ignore: cast_nullable_to_non_nullable
                       as String?,
+            displayId: freezed == displayId
+                ? _value.displayId
+                : displayId // ignore: cast_nullable_to_non_nullable
+                      as String?,
           )
           as $Val,
     );
@@ -201,6 +208,7 @@ abstract class _$$OrderImplCopyWith<$Res> implements $OrderCopyWith<$Res> {
     DateTime? scheduledAt,
     String? notes,
     String? assignedDriverId,
+    String? displayId,
   });
 }
 
@@ -234,6 +242,7 @@ class __$$OrderImplCopyWithImpl<$Res>
     Object? scheduledAt = freezed,
     Object? notes = freezed,
     Object? assignedDriverId = freezed,
+    Object? displayId = freezed,
   }) {
     return _then(
       _$OrderImpl(
@@ -301,6 +310,10 @@ class __$$OrderImplCopyWithImpl<$Res>
             ? _value.assignedDriverId
             : assignedDriverId // ignore: cast_nullable_to_non_nullable
                   as String?,
+        displayId: freezed == displayId
+            ? _value.displayId
+            : displayId // ignore: cast_nullable_to_non_nullable
+                  as String?,
       ),
     );
   }
@@ -327,6 +340,7 @@ class _$OrderImpl implements _Order {
     this.scheduledAt,
     this.notes,
     this.assignedDriverId,
+    this.displayId,
   });
 
   factory _$OrderImpl.fromJson(Map<String, dynamic> json) =>
@@ -365,10 +379,12 @@ class _$OrderImpl implements _Order {
   final String? notes;
   @override
   final String? assignedDriverId;
+  @override
+  final String? displayId;
 
   @override
   String toString() {
-    return 'Order(id: $id, orderType: $orderType, status: $status, paymentStatus: $paymentStatus, subtotal: $subtotal, deliveryFee: $deliveryFee, total: $total, createdAt: $createdAt, updatedAt: $updatedAt, discountAmount: $discountAmount, userId: $userId, paymentMethod: $paymentMethod, addressId: $addressId, scheduledAt: $scheduledAt, notes: $notes, assignedDriverId: $assignedDriverId)';
+    return 'Order(id: $id, orderType: $orderType, status: $status, paymentStatus: $paymentStatus, subtotal: $subtotal, deliveryFee: $deliveryFee, total: $total, createdAt: $createdAt, updatedAt: $updatedAt, discountAmount: $discountAmount, userId: $userId, paymentMethod: $paymentMethod, addressId: $addressId, scheduledAt: $scheduledAt, notes: $notes, assignedDriverId: $assignedDriverId, displayId: $displayId)';
   }
 
   @override
@@ -402,7 +418,9 @@ class _$OrderImpl implements _Order {
                 other.scheduledAt == scheduledAt) &&
             (identical(other.notes, notes) || other.notes == notes) &&
             (identical(other.assignedDriverId, assignedDriverId) ||
-                other.assignedDriverId == assignedDriverId));
+                other.assignedDriverId == assignedDriverId) &&
+            (identical(other.displayId, displayId) ||
+                other.displayId == displayId));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -425,6 +443,7 @@ class _$OrderImpl implements _Order {
     scheduledAt,
     notes,
     assignedDriverId,
+    displayId,
   );
 
   /// Create a copy of Order
@@ -459,6 +478,7 @@ abstract class _Order implements Order {
     final DateTime? scheduledAt,
     final String? notes,
     final String? assignedDriverId,
+    final String? displayId,
   }) = _$OrderImpl;
 
   factory _Order.fromJson(Map<String, dynamic> json) = _$OrderImpl.fromJson;
@@ -495,6 +515,8 @@ abstract class _Order implements Order {
   String? get notes;
   @override
   String? get assignedDriverId;
+  @override
+  String? get displayId;
 
   /// Create a copy of Order
   /// with the given fields replaced by the non-null parameter values.

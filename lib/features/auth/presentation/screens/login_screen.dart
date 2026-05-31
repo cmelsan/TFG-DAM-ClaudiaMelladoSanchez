@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sabor_de_casa/core/router/route_names.dart';
 import 'package:sabor_de_casa/core/theme/app_tokens.dart';
+import 'package:sabor_de_casa/core/utils/auth_error_messages.dart';
 import 'package:sabor_de_casa/core/utils/validators.dart';
 import 'package:sabor_de_casa/core/widgets/app_logo_text.dart';
 import 'package:sabor_de_casa/features/auth/presentation/providers/auth_provider.dart';
@@ -124,8 +125,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       if (next.hasError) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(next.error.toString()),
-            backgroundColor: Colors.red,
+            content: Text(translateAuthError(next.error)),
+            backgroundColor: Colors.red.shade700,
+            behavior: SnackBarBehavior.floating,
+            margin: const EdgeInsets.all(16),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           ),
         );
       }

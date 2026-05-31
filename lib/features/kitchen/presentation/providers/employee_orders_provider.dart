@@ -44,6 +44,32 @@ Future<Order?> orderForPickup(OrderForPickupRef ref, String orderId) {
 }
 
 @riverpod
+// ignore: deprecated_member_use_from_same_package, Riverpod 2.x typed Ref
+Future<List<Order>> encargosHoy(EncargosHoyRef ref) {
+  return ref.watch(employeeOrdersRepositoryProvider).getEncargosToday();
+}
+
+@riverpod
+// ignore: deprecated_member_use_from_same_package, Riverpod 2.x typed Ref
+Future<List<Order>> encargosSemana(EncargosSemanaRef ref) {
+  return ref.watch(employeeOrdersRepositoryProvider).getEncargosWeek();
+}
+
+@riverpod
+// ignore: deprecated_member_use_from_same_package, Riverpod 2.x typed Ref
+Future<List<Order>> counterOrdersToday(CounterOrdersTodayRef ref) {
+  return ref.watch(employeeOrdersRepositoryProvider).getCounterOrdersToday();
+}
+
+@riverpod
+// ignore: deprecated_member_use_from_same_package, Riverpod 2.x typed Ref
+Future<List<Order>> allKitchenOrdersToday(AllKitchenOrdersTodayRef ref) {
+  return ref
+      .watch(employeeOrdersRepositoryProvider)
+      .getAllKitchenOrdersToday();
+}
+
+@riverpod
 class EmployeeOrderAction extends _$EmployeeOrderAction {
   @override
   FutureOr<void> build() {}
@@ -90,6 +116,38 @@ class EmployeeOrderAction extends _$EmployeeOrderAction {
     _refreshLists();
   }
 
+  /// Para encargos ya pagados online: solo marca entregado.
+  Future<void> markDelivered(String orderId) async {
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(
+      () => ref
+          .read(employeeOrdersRepositoryProvider)
+          .markDelivered(orderId),
+    );
+    _refreshLists();
+  }
+
+  /// Crea un pedido de mostrador (sin cuenta, ya cobrado) y refresca listas.
+  Future<(String id, String? displayId)?> createMostradorOrder({
+    required List<Map<String, dynamic>> items,
+    required String paymentMethod,
+    String? notes,
+  }) async {
+    state = const AsyncLoading();
+    (String, String?)? result;
+    state = await AsyncValue.guard(() async {
+      result = await ref
+          .read(employeeOrdersRepositoryProvider)
+          .createMostradorOrder(
+            items: items,
+            paymentMethod: paymentMethod,
+            notes: notes,
+          );
+    });
+    _refreshLists();
+    return result;
+  }
+
   void _refreshLists() {
     ref
       ..invalidate(kitchenOrdersProvider)
@@ -97,6 +155,9 @@ class EmployeeOrderAction extends _$EmployeeOrderAction {
       ..invalidate(deliveryDetailProvider)
       ..invalidate(posOrdersProvider)
       ..invalidate(encargoKitchenOrdersProvider)
-      ..invalidate(pickupReadyOrdersProvider);
+      ..invalidate(pickupReadyOrdersProvider)
+      ..invalidate(encargosHoyProvider)
+      ..invalidate(encargosSemanaProvider)
+      ..invalidate(counterOrdersTodayProvider);
   }
 }

@@ -106,6 +106,7 @@ interface OrderData {
   scheduled_at: string | null;
   notes: string | null;
   created_at: string;
+  display_id: string | null;
   addresses: {
     street: string;
     city: string;
@@ -169,7 +170,7 @@ serve(async (req: Request) => {
         .from("orders")
         .select(`id, order_type, status, payment_method, payment_status,
                  subtotal, delivery_fee, total, discount_amount, scheduled_at,
-                 notes, created_at,
+                 notes, created_at, display_id,
                  addresses(street, city, postal_code, notes)`)
         .eq("id", orderId)
         .single(),
@@ -222,7 +223,7 @@ serve(async (req: Request) => {
       const brevoKey = Deno.env.get("BREVO_API_KEY");
       if (brevoKey) {
         try {
-          const orderShortId = orderId.substring(0, 8).toUpperCase();
+          const orderShortId = (orderData?.display_id as string | undefined) ?? orderId.substring(0, 8).toUpperCase();
 
           const emailSubject = eventType === "INSERT"
             ? `✅ Pedido confirmado #${orderShortId} · Sabor de Casa`

@@ -22,13 +22,17 @@ class _CateringRequestScreenState extends ConsumerState<CateringRequestScreen> {
 
   // Paso 1 – selección de menú
   EventMenu? _selectedMenu;
+  bool _customMenu = false;
 
   // Paso 2 – detalles del evento
   final _guestsCtrl = TextEditingController(text: '20');
   DateTime? _eventDate;
+  final _eventTypeCtrl = TextEditingController(text: 'Cumpleaños');
+  final _phoneCtrl = TextEditingController();
   final _locationCtrl = TextEditingController();
 
   // Paso 3 – notas
+  final _customMenuCtrl = TextEditingController();
   final _notesCtrl = TextEditingController();
 
   bool _submitting = false;
@@ -36,13 +40,17 @@ class _CateringRequestScreenState extends ConsumerState<CateringRequestScreen> {
   @override
   void dispose() {
     _guestsCtrl.dispose();
+    _eventTypeCtrl.dispose();
+    _phoneCtrl.dispose();
     _locationCtrl.dispose();
+    _customMenuCtrl.dispose();
     _notesCtrl.dispose();
     super.dispose();
   }
 
   int get _guests => int.tryParse(_guestsCtrl.text) ?? 0;
-  double get _estimated => (_selectedMenu?.pricePerPerson ?? 0) * _guests;
+  double get _estimated =>
+      _customMenu ? 0 : (_selectedMenu?.pricePerPerson ?? 0) * _guests;
 
   @override
   Widget build(BuildContext context) {
@@ -82,11 +90,13 @@ class _CateringRequestScreenState extends ConsumerState<CateringRequestScreen> {
               if (_step < 3)
                 FilledButton(
                   onPressed: details.onStepContinue,
+                  style: FilledButton.styleFrom(minimumSize: const Size(0, 40)),
                   child: const Text('Continuar'),
                 )
               else
                 FilledButton(
                   onPressed: _submitting ? null : _submit,
+                  style: FilledButton.styleFrom(minimumSize: const Size(0, 40)),
                   child: _submitting
                       ? const SizedBox(
                           width: 18,
@@ -102,6 +112,9 @@ class _CateringRequestScreenState extends ConsumerState<CateringRequestScreen> {
                 const SizedBox(width: 12),
                 OutlinedButton(
                   onPressed: details.onStepCancel,
+                  style: OutlinedButton.styleFrom(
+                    minimumSize: const Size(0, 40),
+                  ),
                   child: const Text('Atrás'),
                 ),
               ],
@@ -111,24 +124,41 @@ class _CateringRequestScreenState extends ConsumerState<CateringRequestScreen> {
         steps: [
           Step(
             title: const Text('Selecciona un menú'),
-            subtitle: _selectedMenu != null ? Text(_selectedMenu!.name) : null,
+            subtitle: _customMenu
+                ? const Text('Menú personalizado')
+                : _selectedMenu != null
+                ? Text(_selectedMenu!.name)
+                : null,
             isActive: _step >= 0,
             state: _step > 0 ? StepState.complete : StepState.indexed,
             content: menus.isEmpty
-                ? const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 8),
-                    child: Text('No hay menús disponibles en este momento.'),
+                ? _CustomMenuCard(
+                    selected: _customMenu,
+                    onTap: () => setState(() {
+                      _customMenu = true;
+                      _selectedMenu = null;
+                    }),
                   )
                 : Column(
-                    children: menus
-                        .map(
-                          (m) => _MenuCard(
-                            menu: m,
-                            selected: _selectedMenu?.id == m.id,
-                            onTap: () => setState(() => _selectedMenu = m),
-                          ),
-                        )
-                        .toList(),
+                    children: [
+                      ...menus.map(
+                        (m) => _MenuCard(
+                          menu: m,
+                          selected: !_customMenu && _selectedMenu?.id == m.id,
+                          onTap: () => setState(() {
+                            _customMenu = false;
+                            _selectedMenu = m;
+                          }),
+                        ),
+                      ),
+                      _CustomMenuCard(
+                        selected: _customMenu,
+                        onTap: () => setState(() {
+                          _customMenu = true;
+                          _selectedMenu = null;
+                        }),
+                      ),
+                    ],
                   ),
           ),
           Step(
@@ -145,11 +175,48 @@ class _CateringRequestScreenState extends ConsumerState<CateringRequestScreen> {
                   controller: _guestsCtrl,
                   keyboardType: TextInputType.number,
                   decoration: InputDecoration(
-                    labelText: 'NÂº de comensales',
+                    labelText: 'Nº de comensales',
                     prefixIcon: const Icon(Icons.people_outline),
-                    helperText: _selectedMenu != null
+                    helperText: !_customMenu && _selectedMenu != null
                         ? 'Mín. ${_selectedMenu!.minGuests} · Máx. ${_selectedMenu!.maxGuests}'
                         : null,
+                    filled: true,
+                    fillColor: Colors.white,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide.none,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _eventTypeCtrl,
+                  textCapitalization: TextCapitalization.sentences,
+                  decoration: InputDecoration(
+                    labelText: 'Tipo de evento',
+                    hintText:
+                        'Ej: bautizo, comunión, inauguración, reunión privada...',
+                    prefixIcon: const Icon(Icons.celebration_outlined),
+                    filled: true,
+                    fillColor: Colors.white,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide.none,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 10),
+                _EventTypeSuggestions(
+                  onSelected: (value) =>
+                      setState(() => _eventTypeCtrl.text = value),
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _phoneCtrl,
+                  keyboardType: TextInputType.phone,
+                  decoration: InputDecoration(
+                    labelText: 'Teléfono de contacto',
+                    prefixIcon: const Icon(Icons.phone_outlined),
                     filled: true,
                     fillColor: Colors.white,
                     border: OutlineInputBorder(
@@ -224,6 +291,25 @@ class _CateringRequestScreenState extends ConsumerState<CateringRequestScreen> {
             state: _step > 2 ? StepState.complete : StepState.indexed,
             content: Column(
               children: [
+                if (_customMenu) ...[
+                  TextFormField(
+                    controller: _customMenuCtrl,
+                    maxLines: 4,
+                    decoration: InputDecoration(
+                      labelText: 'Qué menú quieres diseñar',
+                      hintText:
+                          'Cuéntanos estilo, platos favoritos, alergias, servicio o cualquier idea inicial.',
+                      alignLabelWithHint: true,
+                      filled: true,
+                      fillColor: Colors.white,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide.none,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                ],
                 TextFormField(
                   controller: _notesCtrl,
                   maxLines: 4,
@@ -240,7 +326,7 @@ class _CateringRequestScreenState extends ConsumerState<CateringRequestScreen> {
                     ),
                   ),
                 ),
-                if (_selectedMenu != null && _guests > 0) ...[
+                if (!_customMenu && _selectedMenu != null && _guests > 0) ...[
                   const SizedBox(height: 20),
                   _CostEstimate(
                     menu: _selectedMenu!,
@@ -256,9 +342,13 @@ class _CateringRequestScreenState extends ConsumerState<CateringRequestScreen> {
             isActive: _step >= 3,
             content: _ConfirmCard(
               menu: _selectedMenu,
+              customMenu: _customMenu,
               guests: _guests,
               eventDate: _eventDate,
+              eventType: _eventTypeCtrl.text.trim(),
+              phone: _phoneCtrl.text,
               location: _locationCtrl.text,
+              customMenuDescription: _customMenuCtrl.text,
               notes: _notesCtrl.text,
               estimated: _estimated,
             ),
@@ -280,21 +370,37 @@ class _CateringRequestScreenState extends ConsumerState<CateringRequestScreen> {
   }
 
   void _continue() {
-    if (_step == 0 && _selectedMenu == null) {
+    if (_step == 0 && !_customMenu && _selectedMenu == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Selecciona un menú para continuar')),
+        const SnackBar(
+          content: Text('Selecciona un menú o elige menú personalizado'),
+        ),
       );
       return;
     }
     if (_step == 1) {
       final n = int.tryParse(_guestsCtrl.text);
-      final min = _selectedMenu?.minGuests ?? 1;
-      final max = _selectedMenu?.maxGuests ?? 9999;
+      final min = _customMenu ? 10 : _selectedMenu?.minGuests ?? 1;
+      final max = _customMenu ? 9999 : _selectedMenu?.maxGuests ?? 9999;
       if (n == null || n < min || n > max) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('El nÂº de comensales debe estar entre $min y $max'),
+            content: Text('El nº de comensales debe estar entre $min y $max'),
           ),
+        );
+        return;
+      }
+      if (_phoneCtrl.text.trim().length < 6) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Indica un teléfono de contacto válido'),
+          ),
+        );
+        return;
+      }
+      if (_eventTypeCtrl.text.trim().length < 3) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Indica el tipo de evento')),
         );
         return;
       }
@@ -311,20 +417,34 @@ class _CateringRequestScreenState extends ConsumerState<CateringRequestScreen> {
         return;
       }
     }
+    if (_step == 2 && _customMenu && _customMenuCtrl.text.trim().length < 10) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Cuéntanos un poco más sobre el menú personalizado'),
+        ),
+      );
+      return;
+    }
     if (_step < 3) setState(() => _step++);
   }
 
   Future<void> _submit() async {
-    if (_selectedMenu == null || _eventDate == null) return;
+    if ((!_customMenu && _selectedMenu == null) || _eventDate == null) return;
     setState(() => _submitting = true);
     try {
       await ref
           .read(cateringRepositoryProvider)
           .sendRequest(
-            menuId: _selectedMenu!.id,
+            menuId: _customMenu ? null : _selectedMenu!.id,
             guestCount: _guests,
             eventDate: _eventDate!,
             location: _locationCtrl.text.trim(),
+            eventType: _eventTypeCtrl.text.trim(),
+            contactPhone: _phoneCtrl.text.trim(),
+            menuType: _customMenu ? 'custom' : 'closed',
+            customMenuDescription: _customMenu
+                ? _customMenuCtrl.text.trim()
+                : null,
             notes: _notesCtrl.text.trim().isEmpty
                 ? null
                 : _notesCtrl.text.trim(),
@@ -371,6 +491,40 @@ class _CateringRequestScreenState extends ConsumerState<CateringRequestScreen> {
 }
 
 // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ Widgets privados â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+
+class _EventTypeSuggestions extends StatelessWidget {
+  const _EventTypeSuggestions({required this.onSelected});
+
+  final ValueChanged<String> onSelected;
+
+  static const _suggestions = [
+    'Cumpleaños',
+    'Boda',
+    'Empresa',
+    'Reunión familiar',
+    'Comunión',
+    'Bautizo',
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: _suggestions
+          .map(
+            (eventType) => ActionChip(
+              label: Text(eventType),
+              onPressed: () => onSelected(eventType),
+              backgroundColor: Colors.white,
+              side: BorderSide(color: Colors.grey.shade200),
+              labelStyle: const TextStyle(fontSize: 12),
+            ),
+          )
+          .toList(),
+    );
+  }
+}
 
 class _MenuCard extends StatelessWidget {
   const _MenuCard({
@@ -433,11 +587,10 @@ class _MenuCard extends StatelessWidget {
                       const SizedBox(height: 4),
                       Text(
                         menu.description!,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
                           color: Colors.black54,
                           fontSize: 13,
+                          height: 1.45,
                         ),
                       ),
                     ],
@@ -463,6 +616,77 @@ class _MenuCard extends StatelessWidget {
                           ),
                         ),
                       ],
+                    ),
+                  ],
+                ),
+              ),
+              if (selected)
+                const Icon(Icons.check_circle, color: AppTokens.brandPrimary),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _CustomMenuCard extends StatelessWidget {
+  const _CustomMenuCard({required this.selected, required this.onTap});
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: selected
+                ? AppTokens.brandPrimary.withValues(alpha: 0.08)
+                : Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: selected ? AppTokens.brandPrimary : Colors.grey.shade200,
+              width: selected ? 2 : 1,
+            ),
+          ),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: selected ? AppTokens.brandPrimary : AppTokens.pageBg,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.edit_note_outlined,
+                  color: selected ? Colors.white : AppTokens.brandPrimary,
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: 12),
+              const Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Diseñar mi propio menú',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                    SizedBox(height: 4),
+                    Text(
+                      'El admin concertará una cita contigo para cerrar la propuesta.',
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(color: Colors.black54, fontSize: 13),
                     ),
                   ],
                 ),
@@ -531,16 +755,24 @@ class _CostEstimate extends StatelessWidget {
 class _ConfirmCard extends StatelessWidget {
   const _ConfirmCard({
     required this.menu,
+    required this.customMenu,
     required this.guests,
     required this.eventDate,
+    required this.eventType,
+    required this.phone,
     required this.location,
+    required this.customMenuDescription,
     required this.notes,
     required this.estimated,
   });
   final EventMenu? menu;
+  final bool customMenu;
   final int guests;
   final DateTime? eventDate;
+  final String eventType;
+  final String phone;
   final String location;
+  final String customMenuDescription;
   final String notes;
   final double estimated;
 
@@ -555,21 +787,30 @@ class _ConfirmCard extends StatelessWidget {
       ),
       child: Column(
         children: [
-          _SummaryRow(label: 'Menú', value: menu?.name ?? '—'),
+          _SummaryRow(
+            label: 'Menú',
+            value: customMenu ? 'Menú personalizado' : menu?.name ?? '—',
+          ),
+          _SummaryRow(label: 'Tipo de evento', value: eventType),
           _SummaryRow(label: 'Comensales', value: '$guests personas'),
           if (eventDate != null)
             _SummaryRow(label: 'Fecha', value: Formatters.date(eventDate!)),
+          _SummaryRow(label: 'Teléfono', value: phone.isNotEmpty ? phone : '—'),
           _SummaryRow(
             label: 'Lugar',
             value: location.isNotEmpty ? location : '—',
           ),
+          if (customMenuDescription.isNotEmpty)
+            _SummaryRow(label: 'Idea de menú', value: customMenuDescription),
           if (notes.isNotEmpty) _SummaryRow(label: 'Notas', value: notes),
-          const Divider(height: 20),
-          _SummaryRow(
-            label: 'Estimación',
-            value: Formatters.price(estimated),
-            bold: true,
-          ),
+          if (!customMenu) ...[
+            const Divider(height: 20),
+            _SummaryRow(
+              label: 'Estimación',
+              value: Formatters.price(estimated),
+              bold: true,
+            ),
+          ],
         ],
       ),
     );

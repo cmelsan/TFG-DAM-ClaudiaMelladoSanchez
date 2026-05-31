@@ -126,9 +126,12 @@ class _RequestCard extends StatelessWidget {
     final eventDate = request['event_date'] != null
         ? DateTime.tryParse(request['event_date'] as String)
         : null;
-    final menuName =
-        (request['event_menus'] as Map<String, dynamic>?)?['name'] as String? ??
-        'Menú';
+    final menuType = request['menu_type'] as String? ?? 'closed';
+    final menuName = menuType == 'custom'
+        ? 'Menú personalizado'
+        : (request['event_menus'] as Map<String, dynamic>?)?['name']
+                  as String? ??
+              'Menú';
     final pricePerPerson =
         (request['event_menus'] as Map<String, dynamic>?)?['price_per_person']
             as num?;
@@ -136,6 +139,13 @@ class _RequestCard extends StatelessWidget {
         ? DateTime.tryParse(request['created_at'] as String)
         : null;
     final notes = request['notes'] as String?;
+    final eventType = request['event_type'] as String?;
+    final quotedTotal = request['quoted_total'] as num?;
+    final adminNotes = request['admin_notes'] as String?;
+    final appointmentAt = request['appointment_at'] != null
+        ? DateTime.tryParse(request['appointment_at'] as String)
+        : null;
+    final appointmentNotes = request['appointment_notes'] as String?;
 
     final (label, color) = _statusInfo(status);
 
@@ -201,6 +211,10 @@ class _RequestCard extends StatelessWidget {
                   icon: Icons.people_outline,
                   text: '$guestCount personas',
                 ),
+                if (eventType != null && eventType.isNotEmpty) ...[
+                  const SizedBox(height: 8),
+                  _InfoRow(icon: Icons.celebration_outlined, text: eventType),
+                ],
                 if (eventDate != null) ...[
                   const SizedBox(height: 8),
                   _InfoRow(
@@ -213,13 +227,33 @@ class _RequestCard extends StatelessWidget {
                   const SizedBox(height: 8),
                   _InfoRow(icon: Icons.location_on_outlined, text: location),
                 ],
-                if (pricePerPerson != null) ...[
+                if (quotedTotal != null) ...[
+                  const SizedBox(height: 8),
+                  _InfoRow(
+                    icon: Icons.euro_outlined,
+                    text:
+                        'Presupuesto oficial: ${quotedTotal.toStringAsFixed(2)} €',
+                  ),
+                ] else if (pricePerPerson != null) ...[
                   const SizedBox(height: 8),
                   _InfoRow(
                     icon: Icons.euro_outlined,
                     text:
                         'Estimado: ${(guestCount * pricePerPerson).toStringAsFixed(2)} €',
                   ),
+                ],
+                if (appointmentAt != null) ...[
+                  const SizedBox(height: 8),
+                  _InfoRow(
+                    icon: Icons.event_available_outlined,
+                    text:
+                        'Cita: ${appointmentAt.day}/${appointmentAt.month}/${appointmentAt.year} ${appointmentAt.hour.toString().padLeft(2, '0')}:${appointmentAt.minute.toString().padLeft(2, '0')}',
+                  ),
+                ],
+                if (appointmentNotes != null &&
+                    appointmentNotes.trim().isNotEmpty) ...[
+                  const SizedBox(height: 8),
+                  _InfoRow(icon: Icons.chat_outlined, text: appointmentNotes),
                 ],
                 if (notes != null && notes.trim().isNotEmpty) ...[
                   const SizedBox(height: 12),
@@ -235,6 +269,24 @@ class _RequestCard extends StatelessWidget {
                       style: const TextStyle(
                         fontSize: 13,
                         color: Colors.black54,
+                      ),
+                    ),
+                  ),
+                ],
+                if (adminNotes != null && adminNotes.trim().isNotEmpty) ...[
+                  const SizedBox(height: 12),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: AppTokens.brandPrimary.withValues(alpha: 0.08),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Text(
+                      adminNotes,
+                      style: const TextStyle(
+                        fontSize: 13,
+                        color: Colors.black87,
                       ),
                     ),
                   ),
@@ -258,12 +310,18 @@ class _RequestCard extends StatelessWidget {
     switch (status) {
       case 'pending':
         return ('Pendiente', Colors.orange.shade700);
-      case 'presupuesto_enviado':
-        return ('Presupuesto enviado', Colors.blue.shade700);
+      case 'appointment':
+        return ('Cita propuesta', Colors.teal.shade700);
+      case 'quoted':
+        return ('Presupuestado', Colors.blue.shade700);
       case 'accepted':
         return ('Aceptado', AppTokens.brandPrimary);
       case 'rejected':
         return ('Rechazado', Colors.red.shade600);
+      case 'cancelled':
+        return ('Cancelado', Colors.grey.shade700);
+      case 'completed':
+        return ('Completado', Colors.purple.shade600);
       default:
         return (status, Colors.grey);
     }

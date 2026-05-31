@@ -11,15 +11,6 @@ class AppNotification {
     this.data,
   });
 
-  final String id;
-  final String userId;
-  final String title;
-  final String body;
-  final String type;
-  final bool isRead;
-  final DateTime createdAt;
-  final Map<String, dynamic>? data;
-
   factory AppNotification.fromJson(Map<String, dynamic> json) =>
       AppNotification(
         id: json['id'] as String,
@@ -31,6 +22,15 @@ class AppNotification {
         createdAt: DateTime.parse(json['created_at'] as String),
         data: json['data'] as Map<String, dynamic>?,
       );
+
+  final String id;
+  final String userId;
+  final String title;
+  final String body;
+  final String type;
+  final bool isRead;
+  final DateTime createdAt;
+  final Map<String, dynamic>? data;
 
   AppNotification copyWith({bool? isRead}) => AppNotification(
         id: id,

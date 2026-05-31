@@ -30,8 +30,7 @@ class _CateringScreenState extends ConsumerState<CateringScreen>
   late final ScrollController _scrollCtrl;
   bool _isScrolled = false;
 
-  bool get _isLoggedIn =>
-      Supabase.instance.client.auth.currentUser != null;
+  bool get _isLoggedIn => Supabase.instance.client.auth.currentUser != null;
 
   @override
   void initState() {
@@ -65,7 +64,10 @@ class _CateringScreenState extends ConsumerState<CateringScreen>
       backgroundColor: AppTokens.pageBg,
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(80),
-        child: WebNavbar(isScrolled: _isScrolled, activeRoute: RouteNames.catering),
+        child: WebNavbar(
+          isScrolled: _isScrolled,
+          activeRoute: RouteNames.catering,
+        ),
       ),
       body: SingleChildScrollView(
         controller: _scrollCtrl,
@@ -73,10 +75,7 @@ class _CateringScreenState extends ConsumerState<CateringScreen>
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             // ── Hero ────────────────────────────────────────────────
-            _CateringHero(
-              fadeCtrl: _heroFade,
-              isLoggedIn: _isLoggedIn,
-            ),
+            _CateringHero(fadeCtrl: _heroFade, isLoggedIn: _isLoggedIn),
 
             // ── Stats ────────────────────────────────────────────────
             _StatsSection(sidePad: sidePad),
@@ -88,7 +87,10 @@ class _CateringScreenState extends ConsumerState<CateringScreen>
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 5,
+                    ),
                     decoration: BoxDecoration(
                       color: AppTokens.brandPrimary.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(100),
@@ -131,7 +133,9 @@ class _CateringScreenState extends ConsumerState<CateringScreen>
               loading: () => const Padding(
                 padding: EdgeInsets.symmetric(vertical: 60),
                 child: Center(
-                  child: CircularProgressIndicator(color: AppTokens.brandPrimary),
+                  child: CircularProgressIndicator(
+                    color: AppTokens.brandPrimary,
+                  ),
                 ),
               ),
               error: (error, _) => Padding(
@@ -139,7 +143,11 @@ class _CateringScreenState extends ConsumerState<CateringScreen>
                 child: Center(
                   child: Column(
                     children: [
-                      const Icon(Icons.error_outline, size: 48, color: AppTokens.danger),
+                      const Icon(
+                        Icons.error_outline,
+                        size: 48,
+                        color: AppTokens.danger,
+                      ),
                       const SizedBox(height: 12),
                       Text(
                         'Error al cargar los menús',
@@ -160,7 +168,10 @@ class _CateringScreenState extends ConsumerState<CateringScreen>
               ),
               data: (menus) => menus.isEmpty
                   ? const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 60, horizontal: 40),
+                      padding: EdgeInsets.symmetric(
+                        vertical: 60,
+                        horizontal: 40,
+                      ),
                       child: Center(
                         child: Text(
                           'Próximamente dispondremos de menús de eventos.\nContacta con nosotros para más información.',
@@ -170,7 +181,12 @@ class _CateringScreenState extends ConsumerState<CateringScreen>
                       ),
                     )
                   : Padding(
-                      padding: EdgeInsets.fromLTRB(sidePad + 16, 24, sidePad + 16, 16),
+                      padding: EdgeInsets.fromLTRB(
+                        sidePad + 16,
+                        24,
+                        sidePad + 16,
+                        16,
+                      ),
                       child: screenW > 760
                           ? _MenuGrid(menus: menus)
                           : _MenuList(menus: menus),
@@ -204,14 +220,15 @@ class _MenuGrid extends StatelessWidget {
       runSpacing: 20,
       children: menus.map((m) {
         return SizedBox(
-          width: (MediaQuery.sizeOf(context).width -
+          width:
+              (MediaQuery.sizeOf(context).width -
                   (MediaQuery.sizeOf(context).width > 1200
                       ? (MediaQuery.sizeOf(context).width - 1200)
                       : 0) -
                   32 * 2 -
                   20) /
               2,
-          height: 340,
+          height: 460,
           child: _MenuCard(menu: m),
         );
       }).toList(),
@@ -227,19 +244,19 @@ class _MenuList extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: menus
-          .map((m) => Padding(
-                padding: const EdgeInsets.only(bottom: 20),
-                child: SizedBox(height: 340, child: _MenuCard(menu: m)),
-              ))
+          .map(
+            (m) => Padding(
+              padding: const EdgeInsets.only(bottom: 20),
+              child: SizedBox(height: 460, child: _MenuCard(menu: m)),
+            ),
+          )
           .toList(),
     );
   }
 }
+
 class _CateringHero extends StatelessWidget {
-  const _CateringHero({
-    required this.fadeCtrl,
-    required this.isLoggedIn,
-  });
+  const _CateringHero({required this.fadeCtrl, required this.isLoggedIn});
 
   final AnimationController fadeCtrl;
   final bool isLoggedIn;
@@ -291,16 +308,25 @@ class _CateringHero extends StatelessWidget {
                 children: [
                   // Badge
                   SlideTransition(
-                    position: Tween<Offset>(
-                      begin: const Offset(-0.1, 0),
-                      end: Offset.zero,
-                    ).animate(CurvedAnimation(
-                      parent: fadeCtrl,
-                      curve: const Interval(0, 0.6, curve: Curves.easeOut),
-                    )),
+                    position:
+                        Tween<Offset>(
+                          begin: const Offset(-0.1, 0),
+                          end: Offset.zero,
+                        ).animate(
+                          CurvedAnimation(
+                            parent: fadeCtrl,
+                            curve: const Interval(
+                              0,
+                              0.6,
+                              curve: Curves.easeOut,
+                            ),
+                          ),
+                        ),
                     child: Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 14, vertical: 6),
+                        horizontal: 14,
+                        vertical: 6,
+                      ),
                       decoration: BoxDecoration(
                         color: AppTokens.brandPrimary,
                         borderRadius: BorderRadius.circular(100),
@@ -321,14 +347,20 @@ class _CateringHero extends StatelessWidget {
 
                   // Título
                   SlideTransition(
-                    position: Tween<Offset>(
-                      begin: const Offset(-0.08, 0),
-                      end: Offset.zero,
-                    ).animate(CurvedAnimation(
-                      parent: fadeCtrl,
-                      curve:
-                          const Interval(0.1, 0.7, curve: Curves.easeOut),
-                    )),
+                    position:
+                        Tween<Offset>(
+                          begin: const Offset(-0.08, 0),
+                          end: Offset.zero,
+                        ).animate(
+                          CurvedAnimation(
+                            parent: fadeCtrl,
+                            curve: const Interval(
+                              0.1,
+                              0.7,
+                              curve: Curves.easeOut,
+                            ),
+                          ),
+                        ),
                     child: Text(
                       'Haz tu evento\ninolvidable',
                       style: GoogleFonts.inter(
@@ -345,14 +377,20 @@ class _CateringHero extends StatelessWidget {
 
                   // Subtítulo
                   SlideTransition(
-                    position: Tween<Offset>(
-                      begin: const Offset(-0.06, 0),
-                      end: Offset.zero,
-                    ).animate(CurvedAnimation(
-                      parent: fadeCtrl,
-                      curve:
-                          const Interval(0.2, 0.8, curve: Curves.easeOut),
-                    )),
+                    position:
+                        Tween<Offset>(
+                          begin: const Offset(-0.06, 0),
+                          end: Offset.zero,
+                        ).animate(
+                          CurvedAnimation(
+                            parent: fadeCtrl,
+                            curve: const Interval(
+                              0.2,
+                              0.8,
+                              curve: Curves.easeOut,
+                            ),
+                          ),
+                        ),
                     child: Text(
                       'Bodas, cumpleaños, reuniones de empresa\no cualquier celebración con sabor casero.',
                       style: GoogleFonts.inter(
@@ -369,8 +407,7 @@ class _CateringHero extends StatelessWidget {
                   FadeTransition(
                     opacity: CurvedAnimation(
                       parent: fadeCtrl,
-                      curve:
-                          const Interval(0.4, 1, curve: Curves.easeOut),
+                      curve: const Interval(0.4, 1, curve: Curves.easeOut),
                     ),
                     child: const Wrap(
                       spacing: 10,
@@ -402,8 +439,7 @@ class _CateringHero extends StatelessWidget {
                   FadeTransition(
                     opacity: CurvedAnimation(
                       parent: fadeCtrl,
-                      curve:
-                          const Interval(0.5, 1, curve: Curves.easeOut),
+                      curve: const Interval(0.5, 1, curve: Curves.easeOut),
                     ),
                     child: Wrap(
                       spacing: 12,
@@ -412,8 +448,7 @@ class _CateringHero extends StatelessWidget {
                         FilledButton.icon(
                           onPressed: () {
                             if (isLoggedIn) {
-                              context
-                                  .pushNamed(RouteNames.cateringRequest);
+                              context.pushNamed(RouteNames.cateringRequest);
                             } else {
                               context.pushNamed(RouteNames.login);
                             }
@@ -442,8 +477,9 @@ class _CateringHero extends StatelessWidget {
                         ),
                         if (isLoggedIn)
                           OutlinedButton.icon(
-                            onPressed: () => context
-                                .pushNamed(RouteNames.myCateringRequests),
+                            onPressed: () => context.pushNamed(
+                              RouteNames.myCateringRequests,
+                            ),
                             icon: const Icon(
                               Icons.list_alt_outlined,
                               size: 18,
@@ -495,9 +531,7 @@ class _HeroChip extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(100),
-        border: Border.all(
-          color: Colors.white.withValues(alpha: 0.25),
-        ),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.25)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -662,8 +696,7 @@ class _MenuCardState extends State<_MenuCard> {
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black
-                  .withValues(alpha: _hovered ? 0.10 : 0.04),
+              color: Colors.black.withValues(alpha: _hovered ? 0.10 : 0.04),
               blurRadius: _hovered ? 24 : 12,
               offset: Offset(0, _hovered ? 8 : 4),
             ),
@@ -716,7 +749,9 @@ class _MenuCardState extends State<_MenuCard> {
                       left: 14,
                       child: Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 5),
+                          horizontal: 12,
+                          vertical: 5,
+                        ),
                         decoration: BoxDecoration(
                           color: AppTokens.brandPrimary,
                           borderRadius: BorderRadius.circular(100),
@@ -760,9 +795,9 @@ class _MenuCardState extends State<_MenuCard> {
                           style: GoogleFonts.inter(
                             fontSize: 13,
                             color: Colors.black54,
-                            height: 1.5,
+                            height: 1.42,
                           ),
-                          maxLines: 2,
+                          maxLines: 8,
                           overflow: TextOverflow.ellipsis,
                         ),
                       const Spacer(),
@@ -825,10 +860,7 @@ class _CardImagePlaceholder extends StatelessWidget {
 // ── CTA Banner ────────────────────────────────────────────────────────────────
 
 class _CtaBanner extends StatelessWidget {
-  const _CtaBanner({
-    required this.sidePad,
-    required this.isLoggedIn,
-  });
+  const _CtaBanner({required this.sidePad, required this.isLoggedIn});
 
   final double sidePad;
   final bool isLoggedIn;
@@ -889,9 +921,7 @@ class _CtaBanner extends StatelessWidget {
               child: screenW > 700
                   ? Row(
                       children: [
-                        Expanded(
-                          child: _CtaContent(isLoggedIn: isLoggedIn),
-                        ),
+                        Expanded(child: _CtaContent(isLoggedIn: isLoggedIn)),
                         const SizedBox(width: 32),
                         IntrinsicWidth(
                           child: _CtaButtons(isLoggedIn: isLoggedIn),
@@ -968,18 +998,12 @@ class _CtaButtons extends StatelessWidget {
           icon: const Icon(Icons.request_quote_outlined, size: 18),
           label: Text(
             isLoggedIn ? 'Solicitar presupuesto' : 'Iniciar sesión',
-            style: GoogleFonts.inter(
-              fontWeight: FontWeight.w700,
-              fontSize: 14,
-            ),
+            style: GoogleFonts.inter(fontWeight: FontWeight.w700, fontSize: 14),
           ),
           style: FilledButton.styleFrom(
             backgroundColor: Colors.white,
             foregroundColor: AppTokens.brandDark,
-            padding: const EdgeInsets.symmetric(
-              horizontal: 24,
-              vertical: 14,
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
             ),
@@ -988,8 +1012,7 @@ class _CtaButtons extends StatelessWidget {
         if (isLoggedIn) ...[
           const SizedBox(height: 10),
           OutlinedButton.icon(
-            onPressed: () =>
-                context.pushNamed(RouteNames.myCateringRequests),
+            onPressed: () => context.pushNamed(RouteNames.myCateringRequests),
             icon: const Icon(
               Icons.list_alt_outlined,
               size: 16,
@@ -1004,13 +1027,8 @@ class _CtaButtons extends StatelessWidget {
               ),
             ),
             style: OutlinedButton.styleFrom(
-              side: BorderSide(
-                color: Colors.white.withValues(alpha: 0.5),
-              ),
-              padding: const EdgeInsets.symmetric(
-                horizontal: 20,
-                vertical: 12,
-              ),
+              side: BorderSide(color: Colors.white.withValues(alpha: 0.5)),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
@@ -1042,7 +1060,9 @@ class _HowItWorksSection extends StatelessWidget {
               children: [
                 Container(
                   padding: const EdgeInsets.symmetric(
-                      horizontal: 12, vertical: 5),
+                    horizontal: 12,
+                    vertical: 5,
+                  ),
                   decoration: BoxDecoration(
                     color: AppTokens.brandPrimary.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(100),
@@ -1071,10 +1091,7 @@ class _HowItWorksSection extends StatelessWidget {
                 const SizedBox(height: 8),
                 Text(
                   'Organizamos tu evento con la máxima sencillez.',
-                  style: GoogleFonts.inter(
-                    fontSize: 14,
-                    color: Colors.black54,
-                  ),
+                  style: GoogleFonts.inter(fontSize: 14, color: Colors.black54),
                   textAlign: TextAlign.center,
                 ),
               ],

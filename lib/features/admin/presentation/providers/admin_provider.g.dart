@@ -43,6 +43,41 @@ final adminOrdersProvider = AutoDisposeFutureProvider<List<Order>>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef AdminOrdersRef = AutoDisposeFutureProviderRef<List<Order>>;
+String _$adminOrdersTodayHash() => r'c0db83bfa466541bd309ed70da0e2c2c8fc60a7f';
+
+/// See also [adminOrdersToday].
+@ProviderFor(adminOrdersToday)
+final adminOrdersTodayProvider =
+    AutoDisposeFutureProvider<List<Order>>.internal(
+      adminOrdersToday,
+      name: r'adminOrdersTodayProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$adminOrdersTodayHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef AdminOrdersTodayRef = AutoDisposeFutureProviderRef<List<Order>>;
+String _$adminOrdersWeekHash() => r'38252571354a19d2b216f440aa6755877aebadd9';
+
+/// See also [adminOrdersWeek].
+@ProviderFor(adminOrdersWeek)
+final adminOrdersWeekProvider = AutoDisposeFutureProvider<List<Order>>.internal(
+  adminOrdersWeek,
+  name: r'adminOrdersWeekProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$adminOrdersWeekHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef AdminOrdersWeekRef = AutoDisposeFutureProviderRef<List<Order>>;
 String _$adminOrderItemsHash() => r'0ae925cd19b2dc97bfa8bdabcf06183413fbf9aa';
 
 /// Copied from Dart SDK
@@ -185,7 +220,7 @@ class _AdminOrderItemsProviderElement
   String get orderId => (origin as AdminOrderItemsProvider).orderId;
 }
 
-String _$adminUserProfileHash() => r'a7f4be9e1de78e169acc716eacff88b3ec4af24e';
+String _$adminUserProfileHash() => r'22c782e8159a78d413c9a400787a54fa3f41d776';
 
 /// See also [adminUserProfile].
 @ProviderFor(adminUserProfile)
@@ -548,7 +583,7 @@ final acceptingOrdersProvider = AutoDisposeFutureProvider<bool>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef AcceptingOrdersRef = AutoDisposeFutureProviderRef<bool>;
-String _$adminActionHash() => r'a2bcd53185720aedda9dc45e414affca23c05d3f';
+String _$adminActionHash() => r'377be3576feed75b996de3778d14c9eb473aba68';
 
 /// See also [AdminAction].
 @ProviderFor(AdminAction)

@@ -1084,6 +1084,7 @@ class _MobileDailyMenuSection extends ConsumerWidget {
                             onPressed: () => context.goNamed(RouteNames.menu),
                             style: FilledButton.styleFrom(
                               backgroundColor: _accent,
+                              minimumSize: const Size(0, 44),
                               shape: const StadiumBorder(),
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 22,

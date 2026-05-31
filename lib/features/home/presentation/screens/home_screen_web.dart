@@ -14,7 +14,6 @@ import 'package:sabor_de_casa/features/cart/domain/models/cart_item.dart';
 import 'package:sabor_de_casa/features/cart/presentation/providers/cart_provider.dart';
 import 'package:sabor_de_casa/features/home/presentation/providers/subscription_provider.dart';
 import 'package:sabor_de_casa/features/home/presentation/providers/testimonials_provider.dart';
-import 'package:sabor_de_casa/features/home/presentation/providers/testimonials_provider.dart';
 import 'package:sabor_de_casa/features/menu/domain/models/daily_special.dart';
 import 'package:sabor_de_casa/features/menu/domain/models/dish.dart';
 import 'package:sabor_de_casa/features/menu/presentation/providers/daily_special_notifier.dart';
@@ -295,7 +294,7 @@ class _WebSaborBanner extends ConsumerWidget {
       color: const Color(0xFF0D3B2E),
       child: LayoutBuilder(
         builder: (context, constraints) {
-          final narrow = constraints.maxWidth < 700;
+          final narrow = constraints.maxWidth < 900;
           final textContent = Padding(
             padding: EdgeInsets.symmetric(
               horizontal: narrow ? 24 : 64,
@@ -736,7 +735,8 @@ class _TopDishCard extends ConsumerWidget {
             ),
 
             // Info
-            Padding(
+            Expanded(
+              child: Padding(
               padding: const EdgeInsets.fromLTRB(14, 14, 14, 14),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -792,7 +792,7 @@ class _TopDishCard extends ConsumerWidget {
                       fontSize: 17,
                     ),
                   ),
-                  const SizedBox(height: 8),
+                  const Spacer(),
                   GestureDetector(
                     behavior: HitTestBehavior.opaque,
                     onTap: () {},
@@ -800,6 +800,7 @@ class _TopDishCard extends ConsumerWidget {
                   ),
                 ],
               ),
+            ),
             ),
           ],
         ),
@@ -1204,7 +1205,8 @@ class _OfferDishCard extends ConsumerWidget {
               ],
             ),
             // Info
-            Padding(
+            Expanded(
+              child: Padding(
               padding: const EdgeInsets.fromLTRB(14, 14, 14, 14),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -1279,13 +1281,14 @@ class _OfferDishCard extends ConsumerWidget {
                         fontSize: 17,
                       ),
                     ),
-                  const SizedBox(height: 8),
+                  const Spacer(),
                   GestureDetector(
                     behavior: HitTestBehavior.opaque,
                     onTap: () {},
                     child: CardAddToCart(dish: dish),
                   ),
                 ],
+              ),
               ),
             ),
           ],
@@ -1782,7 +1785,7 @@ class _WebHowItWorksSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final w = MediaQuery.sizeOf(context).width;
-    final isDesktop = w >= 860;
+    final isDesktop = w >= 1100;
 
     return ColoredBox(
       color: Colors.white,

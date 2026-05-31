@@ -1,4 +1,4 @@
-import 'package:cached_network_image/cached_network_image.dart';
+﻿import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lottie/lottie.dart';
@@ -12,6 +12,7 @@ import 'package:sabor_de_casa/core/widgets/error_view.dart';
 import 'package:sabor_de_casa/core/widgets/loading_indicator.dart';
 import 'package:sabor_de_casa/features/orders/data/repositories/orders_repository.dart';
 import 'package:sabor_de_casa/features/orders/domain/models/order.dart';
+import 'package:sabor_de_casa/features/orders/domain/models/order_extensions.dart';
 import 'package:sabor_de_casa/features/orders/domain/models/order_item.dart';
 import 'package:sabor_de_casa/features/orders/presentation/providers/orders_provider.dart';
 
@@ -79,7 +80,7 @@ class OrderDetailScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: AppTokens.pageBg,
       appBar: AppBar(
-        title: Text('Pedido #${order.id.substring(0, 6).toUpperCase()}'),
+        title: Text('Pedido #${order.shortId}'),
         centerTitle: true,
         actions: [
           IconButton(
@@ -223,7 +224,7 @@ class OrderDetailScreen extends ConsumerWidget {
     Order order,
     List<OrderItem> items,
   ) async {
-    final refId = '#${order.id.substring(0, 8).toUpperCase()}';
+    final refId = '#${order.shortId}';
     final fecha =
         '${order.createdAt.day.toString().padLeft(2, '0')}/${order.createdAt.month.toString().padLeft(2, '0')}/${order.createdAt.year}';
     final hora =
@@ -491,7 +492,7 @@ class OrderDetailScreen extends ConsumerWidget {
       );
     await Printing.layoutPdf(
       onLayout: (_) async => pdf.save(),
-      name: 'ticket_${order.id.substring(0, 8).toUpperCase()}.pdf',
+      name: 'ticket_${order.shortId}.pdf',
     );
   }
 

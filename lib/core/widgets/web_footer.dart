@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -15,6 +16,8 @@ class WebFooter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (!kIsWeb) return const SizedBox.shrink();
+
     return ColoredBox(
       color: _bg,
       child: Column(

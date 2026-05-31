@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -9,6 +9,7 @@ import 'package:sabor_de_casa/core/widgets/loading_indicator.dart';
 import 'package:sabor_de_casa/features/admin/presentation/providers/admin_provider.dart';
 import 'package:sabor_de_casa/features/admin/presentation/widgets/admin_shell.dart';
 import 'package:sabor_de_casa/features/orders/domain/models/order.dart';
+import 'package:sabor_de_casa/features/orders/domain/models/order_extensions.dart';
 
 // ── Paleta local ──────────────────────────────────────────────────────────────
 const _kTextPrimary   = Color(0xFF1B4332);
@@ -275,7 +276,7 @@ class _EncargoCard extends ConsumerWidget {
                     Row(
                       children: [
                         Text(
-                          '#${order.id.substring(0, 6).toUpperCase()}',
+                          '#${order.shortId}',
                           style: GoogleFonts.jetBrainsMono(
                             fontWeight: FontWeight.w700,
                             fontSize: 15,
@@ -315,7 +316,7 @@ class _EncargoCard extends ConsumerWidget {
                     ),
 
                     const SizedBox(height: 12),
-                    Divider(height: 1, color: _kDivider),
+                    const Divider(height: 1, color: _kDivider),
                     const SizedBox(height: 12),
 
                     // ── Fecha programada ──────────────────────────────────
@@ -429,7 +430,7 @@ class _EncargoCard extends ConsumerWidget {
                     // ── Botones acción (pendientes de aprobación) ─────────
                     if (showActions) ...[
                       const SizedBox(height: 14),
-                      Divider(height: 1, color: _kDivider),
+                      const Divider(height: 1, color: _kDivider),
                       const SizedBox(height: 12),
                       Row(
                         children: [
@@ -476,35 +477,39 @@ class _EncargoCard extends ConsumerWidget {
                       ),
                     ],
 
-                    // ── Botón Cobrar (encargo listo + pago pendiente) ─────
-                    if (!showActions &&
-                        order.status == 'ready' &&
-                        order.paymentStatus == 'pending' &&
-                        (order.paymentMethod == 'cash' ||
-                            order.paymentMethod == 'tpv')) ...[
+                    // ── Indicador: gestión en mostrador ──────────────────
+                    if (!showActions && order.status == 'ready') ...[
                       const SizedBox(height: 14),
-                      Divider(height: 1, color: _kDivider),
+                      const Divider(height: 1, color: _kDivider),
                       const SizedBox(height: 12),
-                      SizedBox(
+                      Container(
                         width: double.infinity,
-                        child: FilledButton.icon(
-                          onPressed: () => _cobrar(context, ref),
-                          icon: const Icon(Icons.payments_outlined, size: 18),
-                          label: Text(
-                            order.paymentMethod == 'tpv'
-                                ? 'Confirmar pago con TPV'
-                                : 'Confirmar cobro en efectivo',
-                            style: GoogleFonts.inter(
-                                fontWeight: FontWeight.w700, fontSize: 13),
-                          ),
-                          style: FilledButton.styleFrom(
-                            backgroundColor: AppTokens.success,
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(
-                                    AppTokens.radiusMd)),
-                            padding:
-                                const EdgeInsets.symmetric(vertical: 12),
-                          ),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 10),
+                        decoration: BoxDecoration(
+                          color: AppTokens.success.withValues(alpha: 0.08),
+                          borderRadius:
+                              BorderRadius.circular(AppTokens.radiusMd),
+                          border: Border.all(
+                              color:
+                                  AppTokens.success.withValues(alpha: 0.3)),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.storefront_outlined,
+                                size: 15, color: AppTokens.success),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                'Listo para recoger · Cobro y entrega en Mostrador',
+                                style: GoogleFonts.inter(
+                                  fontSize: 12,
+                                  color: AppTokens.success,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ],
@@ -525,7 +530,7 @@ class _EncargoCard extends ConsumerWidget {
         title: Text('Aceptar encargo',
             style: GoogleFonts.inter(fontWeight: FontWeight.w700)),
         content: Text(
-          '¿Confirmar el encargo #${order.id.substring(0, 6).toUpperCase()} '
+          '¿Confirmar el encargo #${order.shortId} '
           'y enviarlo a cocina?',
           style: GoogleFonts.inter(fontSize: 14),
         ),
@@ -557,7 +562,7 @@ class _EncargoCard extends ConsumerWidget {
         title: Text('Rechazar encargo',
             style: GoogleFonts.inter(fontWeight: FontWeight.w700)),
         content: Text(
-          '¿Rechazar el encargo #${order.id.substring(0, 6).toUpperCase()}? '
+          '¿Rechazar el encargo #${order.shortId}? '
           'El cliente será notificado.',
           style: GoogleFonts.inter(fontSize: 14),
         ),
@@ -581,43 +586,6 @@ class _EncargoCard extends ConsumerWidget {
     );
   }
 
-  void _cobrar(BuildContext context, WidgetRef ref) {
-    final metodoPago = order.paymentMethod == 'tpv'
-        ? 'TPV (tarjeta en tienda)'
-        : 'efectivo';
-    showDialog<void>(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: Text('Confirmar cobro',
-            style: GoogleFonts.inter(fontWeight: FontWeight.w700)),
-        content: Text(
-          '¿Confirmas que el cliente ha recogido el encargo '
-          '#${order.id.substring(0, 6).toUpperCase()} y ha pagado '
-          '${Formatters.price(order.total)} en $metodoPago?',
-          style: GoogleFonts.inter(fontSize: 14),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text('Cancelar',
-                style: GoogleFonts.inter(color: _kTextMuted)),
-          ),
-          FilledButton(
-            onPressed: () {
-              Navigator.pop(context);
-              ref
-                  .read(adminActionProvider.notifier)
-                  .markDeliveredAndPaid(order.id);
-            },
-            style:
-                FilledButton.styleFrom(backgroundColor: AppTokens.success),
-            child: Text('Sí, cobrado',
-                style: GoogleFonts.inter(fontWeight: FontWeight.w600)),
-          ),
-        ],
-      ),
-    );
-  }
 }
 
 // ── Chip de estado ────────────────────────────────────────────────────────────

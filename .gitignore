@@ -59,6 +59,11 @@ firebase_options.dart
 
 # Supabase CLI temp files
 supabase/.temp/
+supabase/supabase/.temp/
+
+# Local analyze outputs
+analyze_out*.txt
+stats_analyze.txt
 
 # Android build artifacts
 android/build/

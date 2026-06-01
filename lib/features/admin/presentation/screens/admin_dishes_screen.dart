@@ -2,8 +2,8 @@ import 'dart:typed_data';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:sabor_de_casa/core/theme/app_tokens.dart';
 import 'package:sabor_de_casa/core/widgets/allergen_chips.dart';
@@ -11,6 +11,14 @@ import 'package:sabor_de_casa/features/admin/presentation/providers/admin_provid
 import 'package:sabor_de_casa/features/admin/presentation/widgets/admin_shell.dart';
 import 'package:sabor_de_casa/features/menu/domain/models/category.dart';
 import 'package:sabor_de_casa/features/menu/domain/models/dish.dart';
+
+const _kPageBg = Color(0xFFF4F6F8);
+const _kCardBorder = Color(0xFFEEEEEE);
+const _kInk = Color(0xFF1A1A2E);
+const _kInkMuted = Color(0xFF6B7280);
+const _kInkSoft = Color(0xFF9CA3AF);
+
+enum _DishFilter { all, available, unavailable, offer, seasonal }
 
 class AdminDishesScreen extends ConsumerStatefulWidget {
   const AdminDishesScreen({super.key});
@@ -21,6 +29,8 @@ class AdminDishesScreen extends ConsumerStatefulWidget {
 
 class _AdminDishesScreenState extends ConsumerState<AdminDishesScreen> {
   String _search = '';
+  _DishFilter _filter = _DishFilter.all;
+  String? _catFilter; // null = todas
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +38,20 @@ class _AdminDishesScreenState extends ConsumerState<AdminDishesScreen> {
     final categoriesAsync = ref.watch(adminCategoriesProvider);
 
     return AdminShell(
-      title: 'Gestión de Platos',
+      title: 'Gestion de platos',
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.refresh_rounded,
+              color: AppTokens.brandPrimary),
+          tooltip: 'Actualizar',
+          onPressed: () {
+            ref
+              ..invalidate(adminDishesProvider)
+              ..invalidate(adminCategoriesProvider);
+          },
+        ),
+        const SizedBox(width: 8),
+      ],
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => categoriesAsync.whenData(
           (cats) => _openDishForm(context, null, cats),
@@ -37,113 +60,180 @@ class _AdminDishesScreenState extends ConsumerState<AdminDishesScreen> {
         icon: const Icon(Icons.add),
         label: const Text('Nuevo plato'),
       ),
-      child: Column(
-        children: [
-          Container(
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              border: Border(bottom: BorderSide(color: Color(0xFFEEEEEE))),
+      child: ColoredBox(
+        color: _kPageBg,
+        child: dishesAsync.when(
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (e, _) => Center(
+            child: Text(
+              'Error: $e',
+              style: GoogleFonts.inter(color: AppTokens.danger, fontSize: 13),
             ),
-            padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
-            child: Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    decoration: InputDecoration(
-                      hintText: 'Buscar platos…',
-                      prefixIcon: const Icon(Icons.search_rounded,
-                          color: Color(0xFF9E9E9E), size: 20),
-                      filled: true,
-                      fillColor: const Color(0xFFF8F8FA),
-                      contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 12),
-                      border: OutlineInputBorder(
-                        borderRadius:
-                            BorderRadius.circular(AppTokens.radiusMd),
-                        borderSide:
-                            const BorderSide(color: Color(0xFFEEEEEE)),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius:
-                            BorderRadius.circular(AppTokens.radiusMd),
-                        borderSide:
-                            const BorderSide(color: Color(0xFFEEEEEE)),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius:
-                            BorderRadius.circular(AppTokens.radiusMd),
-                        borderSide: const BorderSide(
-                            color: AppTokens.brandPrimary, width: 1.5),
-                      ),
+          ),
+          data: (dishes) {
+            final categories = categoriesAsync.valueOrNull ?? const <Category>[];
+            final catName = <String, String>{
+              for (final c in categories) c.id: c.name,
+            };
+
+            final total = dishes.length;
+            final available = dishes.where((d) => d.isAvailable).length;
+            final offers = dishes.where((d) => d.isOffer).length;
+            final seasonal = dishes.where((d) => d.isSeasonal).length;
+
+            // Aplicar filtros
+            final filtered = dishes.where((d) {
+              if (_catFilter != null && d.categoryId != _catFilter) return false;
+              switch (_filter) {
+                case _DishFilter.all:
+                  break;
+                case _DishFilter.available:
+                  if (!d.isAvailable) return false;
+                case _DishFilter.unavailable:
+                  if (d.isAvailable) return false;
+                case _DishFilter.offer:
+                  if (!d.isOffer) return false;
+                case _DishFilter.seasonal:
+                  if (!d.isSeasonal) return false;
+              }
+              if (_search.isNotEmpty &&
+                  !d.name.toLowerCase().contains(_search)) {
+                return false;
+              }
+              return true;
+            }).toList();
+
+            return CustomScrollView(
+              slivers: [
+                SliverPadding(
+                  padding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
+                  sliver: SliverToBoxAdapter(
+                    child: _KpiStrip(
+                      items: [
+                        _Kpi(
+                          icon: Icons.restaurant_menu_rounded,
+                          color: AppTokens.brandPrimary,
+                          label: 'Total platos',
+                          value: '$total',
+                        ),
+                        _Kpi(
+                          icon: Icons.check_circle_rounded,
+                          color: AppTokens.success,
+                          label: 'Disponibles',
+                          value: '$available',
+                          subtitle: '${total - available} agotados',
+                        ),
+                        _Kpi(
+                          icon: Icons.local_offer_rounded,
+                          color: AppTokens.warning,
+                          label: 'En oferta',
+                          value: '$offers',
+                        ),
+                        _Kpi(
+                          icon: Icons.eco_rounded,
+                          color: AppTokens.brandDark,
+                          label: 'De temporada',
+                          value: '$seasonal',
+                        ),
+                      ],
                     ),
-                    onChanged: (v) =>
-                        setState(() => _search = v.toLowerCase()),
                   ),
                 ),
-                const SizedBox(width: 10),
-                Tooltip(
-                  message: 'Restaurar disponibilidad de todos los platos',
-                  child: OutlinedButton.icon(
-                    onPressed: () => _confirmResetAvailability(context),
-                    icon: const Icon(Icons.restart_alt_rounded, size: 18),
-                    label: const Text('Restaurar todos'),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: AppTokens.brandPrimary,
-                      side: const BorderSide(color: AppTokens.brandPrimary),
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 14, vertical: 12),
-                      shape: RoundedRectangleBorder(
-                        borderRadius:
-                            BorderRadius.circular(AppTokens.radiusMd),
-                      ),
+                SliverPadding(
+                  padding: const EdgeInsets.fromLTRB(24, 20, 24, 12),
+                  sliver: SliverToBoxAdapter(
+                    child: _ToolbarCard(
+                      onSearchChanged: (v) =>
+                          setState(() => _search = v.toLowerCase()),
+                      filter: _filter,
+                      onFilterChanged: (f) => setState(() => _filter = f),
+                      categories: categories,
+                      selectedCat: _catFilter,
+                      onCatChanged: (id) => setState(() => _catFilter = id),
+                      onResetAvailability: () =>
+                          _confirmResetAvailability(context),
                     ),
                   ),
                 ),
+                SliverPadding(
+                  padding: const EdgeInsets.fromLTRB(24, 0, 24, 8),
+                  sliver: SliverToBoxAdapter(
+                    child: Row(
+                      children: [
+                        Text(
+                          '${filtered.length} ${filtered.length == 1 ? "plato" : "platos"}',
+                          style: GoogleFonts.inter(
+                            fontSize: 13,
+                            color: _kInkMuted,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        if (_search.isNotEmpty ||
+                            _filter != _DishFilter.all ||
+                            _catFilter != null) ...[
+                          const SizedBox(width: 10),
+                          TextButton.icon(
+                            onPressed: () => setState(() {
+                              _search = '';
+                              _filter = _DishFilter.all;
+                              _catFilter = null;
+                            }),
+                            icon: const Icon(Icons.close_rounded, size: 16),
+                            label: const Text('Limpiar filtros'),
+                            style: TextButton.styleFrom(
+                              foregroundColor: AppTokens.brandPrimary,
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 8),
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                ),
+                if (filtered.isEmpty)
+                  SliverFillRemaining(
+                    hasScrollBody: false,
+                    child: Padding(
+                      padding: const EdgeInsets.all(24),
+                      child: _EmptyState(
+                        icon: Icons.search_off_rounded,
+                        title: 'Sin resultados',
+                        subtitle: _search.isNotEmpty
+                            ? 'Ningun plato coincide con "$_search".'
+                            : 'No hay platos con estos filtros.',
+                      ),
+                    ),
+                  )
+                else
+                  SliverPadding(
+                    padding: const EdgeInsets.fromLTRB(24, 4, 24, 120),
+                    sliver: SliverGrid(
+                      gridDelegate:
+                          const SliverGridDelegateWithMaxCrossAxisExtent(
+                        maxCrossAxisExtent: 280,
+                        childAspectRatio: 0.78,
+                        crossAxisSpacing: 14,
+                        mainAxisSpacing: 14,
+                      ),
+                      delegate: SliverChildBuilderDelegate(
+                        (ctx, i) {
+                          final d = filtered[i];
+                          return _DishCard(
+                            dish: d,
+                            categoryName: catName[d.categoryId] ?? '—',
+                            onTap: () => _openDishForm(ctx, d, categories),
+                            onDelete: () => _confirmDelete(ctx, ref, d),
+                          );
+                        },
+                        childCount: filtered.length,
+                      ),
+                    ),
+                  ),
               ],
-            ),
-          ),
-          Expanded(
-            child: dishesAsync.when(
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (e, _) => Center(child: Text('Error: $e')),
-              data: (dishes) {
-                final filtered = _search.isEmpty
-                    ? dishes
-                    : dishes
-                          .where((d) => d.name.toLowerCase().contains(_search))
-                          .toList();
-
-                if (filtered.isEmpty) {
-                  return const Center(
-                    child: Text(
-                      'No se encontraron platos',
-                      style: TextStyle(color: Colors.grey),
-                    ),
-                  );
-                }
-
-                return GridView.builder(
-                  padding: const EdgeInsets.fromLTRB(16, 4, 16, 100),
-                  gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                    maxCrossAxisExtent: 300,
-                    childAspectRatio: 0.72,
-                    crossAxisSpacing: 12,
-                    mainAxisSpacing: 12,
-                  ),
-                  itemCount: filtered.length,
-                  itemBuilder: (ctx, i) => _DishCard(
-                    dish: filtered[i],
-                    index: i,
-                    onTap: () => categoriesAsync.whenData(
-                      (cats) => _openDishForm(ctx, filtered[i], cats),
-                    ),
-                    onDelete: () => _confirmDelete(ctx, ref, filtered[i]),
-                  ),
-                );
-              },
-            ),
-          ),
-        ],
+            );
+          },
+        ),
       ),
     );
   }
@@ -154,14 +244,14 @@ class _AdminDishesScreenState extends ConsumerState<AdminDishesScreen> {
       builder: (dialogCtx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: const Text('Eliminar plato'),
-        content: Text('¿Desactivar "${dish.name}"? No se mostrará al cliente.'),
+        content: Text('¿Desactivar "${dish.name}"? No se mostrara al cliente.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogCtx),
             child: const Text('Cancelar'),
           ),
           FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: Colors.red),
+            style: FilledButton.styleFrom(backgroundColor: AppTokens.danger),
             onPressed: () {
               Navigator.pop(dialogCtx);
               ref.read(adminActionProvider.notifier).deleteDish(dish.id);
@@ -179,8 +269,7 @@ class _AdminDishesScreenState extends ConsumerState<AdminDishesScreen> {
       builder: (_) => AlertDialog(
         title: const Text('Restaurar disponibilidad'),
         content: const Text(
-          '¿Marcar todos los platos como disponibles?\n\n'
-          'Útil al inicio del servicio para restablecer lo que se marcó como agotado.',
+          'Marcar todos los platos como disponibles. Util al inicio del servicio.',
         ),
         actions: [
           TextButton(
@@ -208,22 +297,250 @@ class _AdminDishesScreenState extends ConsumerState<AdminDishesScreen> {
   }
 }
 
+// ─── Toolbar (buscador + filtros) ────────────────────────────────────────────
+
+class _ToolbarCard extends StatelessWidget {
+  const _ToolbarCard({
+    required this.onSearchChanged,
+    required this.filter,
+    required this.onFilterChanged,
+    required this.categories,
+    required this.selectedCat,
+    required this.onCatChanged,
+    required this.onResetAvailability,
+  });
+
+  final ValueChanged<String> onSearchChanged;
+  final _DishFilter filter;
+  final ValueChanged<_DishFilter> onFilterChanged;
+  final List<Category> categories;
+  final String? selectedCat;
+  final ValueChanged<String?> onCatChanged;
+  final VoidCallback onResetAvailability;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(AppTokens.radiusLg),
+        border: Border.all(color: _kCardBorder),
+        boxShadow: [AppTokens.cardShadow],
+      ),
+      child: Column(
+        children: [
+          LayoutBuilder(
+            builder: (ctx, c) {
+              final wide = c.maxWidth >= 720;
+              final search = TextField(
+                decoration: InputDecoration(
+                  hintText: 'Buscar platos por nombre...',
+                  prefixIcon: const Icon(Icons.search_rounded,
+                      color: _kInkSoft, size: 20),
+                  filled: true,
+                  fillColor: const Color(0xFFF8F8FA),
+                  contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16, vertical: 12),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(color: _kCardBorder),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(color: _kCardBorder),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(
+                        color: AppTokens.brandPrimary, width: 1.5),
+                  ),
+                ),
+                onChanged: onSearchChanged,
+              );
+              final catDropdown = Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF8F8FA),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: _kCardBorder),
+                ),
+                child: DropdownButtonHideUnderline(
+                  child: DropdownButton<String?>(
+                    value: selectedCat,
+                    isExpanded: true,
+                    hint: Text(
+                      'Todas las categorias',
+                      style: GoogleFonts.inter(
+                        fontSize: 13,
+                        color: _kInkMuted,
+                      ),
+                    ),
+                    items: [
+                      DropdownMenuItem<String?>(
+                        child: Text(
+                          'Todas las categorias',
+                          style: GoogleFonts.inter(
+                            fontSize: 13,
+                            color: _kInk,
+                          ),
+                        ),
+                      ),
+                      for (final c in categories)
+                        DropdownMenuItem<String?>(
+                          value: c.id,
+                          child: Text(
+                            c.name,
+                            style: GoogleFonts.inter(
+                              fontSize: 13,
+                              color: _kInk,
+                            ),
+                          ),
+                        ),
+                    ],
+                    onChanged: onCatChanged,
+                  ),
+                ),
+              );
+              final resetBtn = OutlinedButton.icon(
+                onPressed: onResetAvailability,
+                icon: const Icon(Icons.restart_alt_rounded, size: 18),
+                label: const Text('Restaurar disp.'),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: AppTokens.brandPrimary,
+                  side:
+                      const BorderSide(color: AppTokens.brandPrimary),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 14, vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              );
+              if (wide) {
+                return Row(
+                  children: [
+                    Expanded(flex: 3, child: search),
+                    const SizedBox(width: 12),
+                    Expanded(flex: 2, child: catDropdown),
+                    const SizedBox(width: 12),
+                    resetBtn,
+                  ],
+                );
+              }
+              return Column(
+                children: [
+                  search,
+                  const SizedBox(height: 10),
+                  catDropdown,
+                  const SizedBox(height: 10),
+                  SizedBox(width: double.infinity, child: resetBtn),
+                ],
+              );
+            },
+          ),
+          const SizedBox(height: 14),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                _FilterChip(
+                  label: 'Todos',
+                  selected: filter == _DishFilter.all,
+                  onTap: () => onFilterChanged(_DishFilter.all),
+                ),
+                _FilterChip(
+                  label: 'Disponibles',
+                  selected: filter == _DishFilter.available,
+                  onTap: () => onFilterChanged(_DishFilter.available),
+                ),
+                _FilterChip(
+                  label: 'Agotados',
+                  selected: filter == _DishFilter.unavailable,
+                  color: AppTokens.danger,
+                  onTap: () => onFilterChanged(_DishFilter.unavailable),
+                ),
+                _FilterChip(
+                  label: 'En oferta',
+                  selected: filter == _DishFilter.offer,
+                  color: AppTokens.warning,
+                  onTap: () => onFilterChanged(_DishFilter.offer),
+                ),
+                _FilterChip(
+                  label: 'Temporada',
+                  selected: filter == _DishFilter.seasonal,
+                  color: AppTokens.brandDark,
+                  onTap: () => onFilterChanged(_DishFilter.seasonal),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _FilterChip extends StatelessWidget {
+  const _FilterChip({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+    this.color = AppTokens.brandPrimary,
+  });
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(999),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        decoration: BoxDecoration(
+          color: selected ? color : color.withValues(alpha: 0.08),
+          borderRadius: BorderRadius.circular(999),
+          border: Border.all(
+            color: selected ? color : color.withValues(alpha: 0.25),
+          ),
+        ),
+        child: Text(
+          label,
+          style: GoogleFonts.inter(
+            fontSize: 12.5,
+            fontWeight: FontWeight.w700,
+            color: selected ? Colors.white : color,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ─── Dish Card ──────────────────────────────────────────────────────────────
+
 class _DishCard extends ConsumerWidget {
   const _DishCard({
     required this.dish,
-    required this.index,
+    required this.categoryName,
     required this.onTap,
     required this.onDelete,
   });
 
   final Dish dish;
-  final int index;
+  final String categoryName;
   final VoidCallback onTap;
   final VoidCallback onDelete;
 
   Future<void> _quickToggleOffer(BuildContext context, WidgetRef ref) async {
     if (dish.isOffer) {
-      // Quitar de oferta directamente
       await ref
           .read(adminActionProvider.notifier)
           .toggleDishOffer(dishId: dish.id, isOffer: false);
@@ -235,275 +552,484 @@ class _DishCard extends ConsumerWidget {
           ),
         );
       }
-    } else {
-      // Pedir precio de oferta antes de activar
-      final priceCtrl = TextEditingController(
-        text: dish.offerPrice?.toString() ?? '',
-      );
-      final confirmed = await showDialog<double>(
-        context: context,
-        builder: (ctx) => AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          title: const Text('Poner en oferta'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Precio original: ${dish.price.toStringAsFixed(2)} €',
-                style: const TextStyle(color: Colors.grey, fontSize: 13),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: priceCtrl,
-                autofocus: true,
-                keyboardType: const TextInputType.numberWithOptions(
-                  decimal: true,
-                ),
-                decoration: InputDecoration(
-                  labelText: 'Precio de oferta (€)',
-                  suffixText: '€',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(ctx),
-              child: const Text('Cancelar'),
+      return;
+    }
+    final priceCtrl = TextEditingController(
+      text: dish.offerPrice?.toString() ?? '',
+    );
+    final confirmed = await showDialog<double>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text('Poner en oferta'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Precio original: ${dish.price.toStringAsFixed(2)} €',
+              style: const TextStyle(color: Colors.grey, fontSize: 13),
             ),
-            FilledButton(
-              onPressed: () {
-                final v = double.tryParse(priceCtrl.text.trim());
-                Navigator.pop(ctx, v);
-              },
-              child: const Text('Activar oferta'),
+            const SizedBox(height: 12),
+            TextField(
+              controller: priceCtrl,
+              autofocus: true,
+              keyboardType:
+                  const TextInputType.numberWithOptions(decimal: true),
+              decoration: InputDecoration(
+                labelText: 'Precio de oferta (€)',
+                suffixText: '€',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
             ),
           ],
         ),
-      );
-      if (confirmed == null || !context.mounted) return;
-      await ref
-          .read(adminActionProvider.notifier)
-          .toggleDishOffer(
-            dishId: dish.id,
-            isOffer: true,
-            offerPrice: confirmed,
-          );
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              '"${dish.name}" en oferta a ${confirmed.toStringAsFixed(2)} €',
-            ),
-            duration: const Duration(seconds: 2),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancelar'),
           ),
+          FilledButton(
+            onPressed: () {
+              final v = double.tryParse(priceCtrl.text.trim());
+              Navigator.pop(ctx, v);
+            },
+            child: const Text('Activar oferta'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == null || !context.mounted) return;
+    await ref.read(adminActionProvider.notifier).toggleDishOffer(
+          dishId: dish.id,
+          isOffer: true,
+          offerPrice: confirmed,
         );
-      }
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            '"${dish.name}" en oferta a ${confirmed.toStringAsFixed(2)} €',
+          ),
+          duration: const Duration(seconds: 2),
+        ),
+      );
     }
   }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return GestureDetector(
-      onTap: onTap,
-      onLongPress: onDelete,
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.06),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Stack(
-              children: [
-                ClipRRect(
-                  borderRadius: const BorderRadius.vertical(
-                    top: Radius.circular(16),
-                  ),
-                  child: AspectRatio(
-                    aspectRatio: 16 / 9,
-                    child: dish.imageUrl != null
-                        ? CachedNetworkImage(
-                            imageUrl: dish.imageUrl!,
-                            fit: BoxFit.cover,
-                          )
-                        : const ColoredBox(
-                            color: Color(0xFFE5E5E3),
-                            child: Center(
-                              child: Icon(
-                                Icons.restaurant,
+    return Material(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(AppTokens.radiusLg),
+      child: InkWell(
+        onTap: onTap,
+        onLongPress: onDelete,
+        borderRadius: BorderRadius.circular(AppTokens.radiusLg),
+        child: Ink(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(AppTokens.radiusLg),
+            border: Border.all(color: _kCardBorder),
+            boxShadow: [AppTokens.cardShadow],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Stack(
+                children: [
+                  ClipRRect(
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(AppTokens.radiusLg),
+                    ),
+                    child: AspectRatio(
+                      aspectRatio: 16 / 10,
+                      child: dish.imageUrl != null
+                          ? CachedNetworkImage(
+                              imageUrl: dish.imageUrl!,
+                              fit: BoxFit.cover,
+                              placeholder: (_, __) => Container(
+                                color: const Color(0xFFE5E5E3),
+                              ),
+                              errorWidget: (_, __, ___) => Container(
+                                color: const Color(0xFFE5E5E3),
+                                alignment: Alignment.center,
+                                child: const Icon(Icons.image_not_supported,
+                                    color: Colors.grey),
+                              ),
+                            )
+                          : Container(
+                              color: const Color(0xFFE5E5E3),
+                              alignment: Alignment.center,
+                              child: const Icon(
+                                Icons.restaurant_rounded,
                                 color: Colors.grey,
                                 size: 40,
                               ),
                             ),
-                          ),
+                    ),
                   ),
-                ),
-                // Botón rápido de oferta
-                Positioned(
-                  top: 6,
-                  right: 6,
-                  child: GestureDetector(
-                    onTap: () => _quickToggleOffer(context, ref),
+                  // Badge categoria
+                  Positioned(
+                    left: 8,
+                    top: 8,
                     child: Container(
-                      padding: const EdgeInsets.all(6),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
-                        color: dish.isOffer
-                            ? Colors.orange
-                            : Colors.white.withValues(alpha: 0.85),
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.12),
-                            blurRadius: 4,
-                          ),
-                        ],
+                        color: Colors.black.withValues(alpha: 0.55),
+                        borderRadius: BorderRadius.circular(999),
                       ),
-                      child: Icon(
-                        Icons.local_offer,
-                        size: 16,
-                        color: dish.isOffer ? Colors.white : Colors.grey,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            Padding(
-              padding: const EdgeInsets.all(10),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  if (dish.isOffer || dish.isSeasonal)
-                    Wrap(
-                      spacing: 4,
-                      children: [
-                        if (dish.isOffer)
-                          const _Badge(
-                            label: 'Oferta',
-                            color: Colors.orange,
-                          ),
-                        if (dish.isSeasonal)
-                          const _Badge(
-                            label: 'Temporada',
-                            color: Colors.green,
-                          ),
-                      ],
-                    ),
-                  const SizedBox(height: 4),
-                  Text(
-                    dish.name,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w700,
-                      fontSize: 14,
-                      color: Color(0xFF111111),
-                    ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 4),
-                  Row(
-                    children: [
-                      Text(
-                        '${dish.price.toStringAsFixed(2)} €',
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: dish.isOffer
-                              ? Colors.grey
-                              : AppTokens.brandPrimary,
-                          decoration: dish.isOffer
-                              ? TextDecoration.lineThrough
-                              : null,
+                      child: Text(
+                        categoryName,
+                        style: GoogleFonts.inter(
+                          fontSize: 10,
+                          color: Colors.white,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
-                      if (dish.isOffer && dish.offerPrice != null) ...[
-                        const SizedBox(width: 6),
-                        Text(
-                          '${dish.offerPrice!.toStringAsFixed(2)} €',
-                          style: const TextStyle(
-                            fontSize: 13,
-                            color: Colors.orange,
-                            fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  // Estado disponibilidad
+                  Positioned(
+                    left: 8,
+                    bottom: 8,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: dish.isAvailable
+                            ? AppTokens.success
+                            : AppTokens.danger,
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            dish.isAvailable
+                                ? Icons.check_circle_rounded
+                                : Icons.cancel_rounded,
+                            size: 12,
+                            color: Colors.white,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            dish.isAvailable ? 'Disponible' : 'Agotado',
+                            style: GoogleFonts.inter(
+                              fontSize: 10,
+                              color: Colors.white,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  // Toggle oferta
+                  Positioned(
+                    top: 6,
+                    right: 6,
+                    child: Material(
+                      color: dish.isOffer
+                          ? AppTokens.warning
+                          : Colors.white.withValues(alpha: 0.9),
+                      shape: const CircleBorder(),
+                      child: InkWell(
+                        customBorder: const CircleBorder(),
+                        onTap: () => _quickToggleOffer(context, ref),
+                        child: Padding(
+                          padding: const EdgeInsets.all(7),
+                          child: Icon(
+                            Icons.local_offer_rounded,
+                            size: 15,
+                            color: dish.isOffer ? Colors.white : _kInkMuted,
                           ),
                         ),
-                      ],
-                    ],
-                  ),
-                  const SizedBox(height: 6),
-                  Row(
-                    children: [
-                      Icon(
-                        dish.isAvailable ? Icons.check_circle : Icons.cancel,
-                        size: 14,
-                        color: dish.isAvailable ? Colors.green : Colors.red,
                       ),
-                      const SizedBox(width: 4),
-                      Text(
-                        dish.isAvailable ? 'Disponible' : 'No disponible',
-                        style: TextStyle(
-                          fontSize: 11,
-                          color: dish.isAvailable ? Colors.green : Colors.red,
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
                 ],
               ),
-            ),
-          ],
-        ),
-      )
-          .animate()
-          .fadeIn(duration: 300.ms, delay: (index * 40).ms)
-          .slideY(
-            begin: 0.1,
-            end: 0,
-            duration: 300.ms,
-            delay: (index * 40).ms,
+              Padding(
+                padding: const EdgeInsets.all(12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (dish.isOffer || dish.isSeasonal) ...[
+                      Wrap(
+                        spacing: 4,
+                        runSpacing: 4,
+                        children: [
+                          if (dish.isOffer)
+                            const _Pill(
+                              label: 'Oferta',
+                              color: AppTokens.warning,
+                            ),
+                          if (dish.isSeasonal)
+                            const _Pill(
+                              label: 'Temporada',
+                              color: AppTokens.brandDark,
+                            ),
+                        ],
+                      ),
+                      const SizedBox(height: 6),
+                    ],
+                    Text(
+                      dish.name,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.inter(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w800,
+                        color: _kInk,
+                        height: 1.2,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        if (dish.isOffer && dish.offerPrice != null) ...[
+                          Text(
+                            '${dish.offerPrice!.toStringAsFixed(2)} €',
+                            style: GoogleFonts.inter(
+                              fontSize: 15,
+                              color: AppTokens.warning,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            '${dish.price.toStringAsFixed(2)} €',
+                            style: GoogleFonts.inter(
+                              fontSize: 11,
+                              color: _kInkSoft,
+                              decoration: TextDecoration.lineThrough,
+                            ),
+                          ),
+                        ] else
+                          Text(
+                            '${dish.price.toStringAsFixed(2)} €',
+                            style: GoogleFonts.inter(
+                              fontSize: 15,
+                              color: AppTokens.brandPrimary,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                        const Spacer(),
+                        const Icon(Icons.timer_outlined,
+                            size: 12, color: _kInkSoft),
+                        const SizedBox(width: 3),
+                        Text(
+                          '${dish.prepTimeMin}m',
+                          style: GoogleFonts.inter(
+                            fontSize: 11,
+                            color: _kInkMuted,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
+        ),
+      ),
     );
   }
 }
 
-class _Badge extends StatelessWidget {
-  const _Badge({required this.label, required this.color});
+// ─── Helpers compartidos ────────────────────────────────────────────────────
+
+class _Kpi {
+  const _Kpi({
+    required this.icon,
+    required this.color,
+    required this.label,
+    required this.value,
+    this.subtitle,
+  });
+  final IconData icon;
+  final Color color;
+  final String label;
+  final String value;
+  final String? subtitle;
+}
+
+class _KpiStrip extends StatelessWidget {
+  const _KpiStrip({required this.items});
+  final List<_Kpi> items;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (ctx, c) {
+        final cols = c.maxWidth >= 900
+            ? 4
+            : c.maxWidth >= 560
+                ? 2
+                : 1;
+        const spacing = 14.0;
+        final w = cols == 1
+            ? c.maxWidth
+            : (c.maxWidth - spacing * (cols - 1)) / cols;
+        return Wrap(
+          spacing: spacing,
+          runSpacing: spacing,
+          children: [
+            for (final k in items)
+              SizedBox(width: w, child: _KpiTile(data: k)),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _KpiTile extends StatelessWidget {
+  const _KpiTile({required this.data});
+  final _Kpi data;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(AppTokens.radiusLg),
+        border: Border.all(color: _kCardBorder),
+        boxShadow: [AppTokens.cardShadow],
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 38,
+            height: 38,
+            decoration: BoxDecoration(
+              color: data.color.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(data.icon, color: data.color, size: 20),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  data.label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.inter(
+                    fontSize: 11.5,
+                    color: _kInkMuted,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  data.value,
+                  style: GoogleFonts.inter(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w800,
+                    color: _kInk,
+                    height: 1.05,
+                  ),
+                ),
+                if (data.subtitle != null)
+                  Text(
+                    data.subtitle!,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: GoogleFonts.inter(
+                      fontSize: 10.5,
+                      color: _kInkSoft,
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _Pill extends StatelessWidget {
+  const _Pill({required this.label, required this.color});
   final String label;
   final Color color;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(6),
+        borderRadius: BorderRadius.circular(999),
       ),
       child: Text(
         label,
-        style: TextStyle(
-          fontSize: 10,
+        style: GoogleFonts.inter(
+          fontSize: 9.5,
+          fontWeight: FontWeight.w800,
           color: color,
-          fontWeight: FontWeight.w700,
+          letterSpacing: 0.2,
         ),
       ),
     );
   }
 }
+
+class _EmptyState extends StatelessWidget {
+  const _EmptyState({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+  });
+  final IconData icon;
+  final String title;
+  final String subtitle;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 60, horizontal: 24),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(AppTokens.radiusLg),
+        border: Border.all(color: _kCardBorder),
+      ),
+      child: Column(
+        children: [
+          Icon(icon, size: 56, color: _kInkSoft),
+          const SizedBox(height: 12),
+          Text(
+            title,
+            style: GoogleFonts.inter(
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
+              color: _kInk,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            subtitle,
+            textAlign: TextAlign.center,
+            style: GoogleFonts.inter(fontSize: 13, color: _kInkMuted),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─── Form sheet (sin cambios funcionales, estilo conservado) ────────────────
 
 Future<void> _openDishForm(
   BuildContext context,
@@ -552,8 +1078,7 @@ class _DishFormSheetState extends ConsumerState<_DishFormSheet> {
     _offerPrice = TextEditingController(text: d?.offerPrice?.toString() ?? '');
     _description = TextEditingController(text: d?.description ?? '');
     _prepTime = TextEditingController(text: (d?.prepTimeMin ?? 15).toString());
-    _categoryId =
-        d?.categoryId ??
+    _categoryId = d?.categoryId ??
         (widget.categories.isNotEmpty ? widget.categories.first.id : '');
     _allergens = List<String>.from(d?.allergens ?? []);
     _isAvailable = d?.isAvailable ?? true;
@@ -632,7 +1157,7 @@ class _DishFormSheetState extends ConsumerState<_DishFormSheet> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Error al guardar: $e'),
-            backgroundColor: Colors.red,
+            backgroundColor: AppTokens.danger,
           ),
         );
       }
@@ -648,7 +1173,7 @@ class _DishFormSheetState extends ConsumerState<_DishFormSheet> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: const Text('Desactivar plato'),
         content: Text(
-          '"${widget.existing!.name}" dejará de mostrarse a los clientes. Puedes reactivarlo más tarde desde el formulario.',
+          '"${widget.existing!.name}" dejara de mostrarse a los clientes. Puedes reactivarlo mas tarde desde el formulario.',
         ),
         actions: [
           TextButton(
@@ -656,7 +1181,7 @@ class _DishFormSheetState extends ConsumerState<_DishFormSheet> {
             child: const Text('Cancelar'),
           ),
           FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: Colors.orange),
+            style: FilledButton.styleFrom(backgroundColor: AppTokens.warning),
             onPressed: () => Navigator.pop(ctx, true),
             child: const Text('Desactivar'),
           ),
@@ -666,9 +1191,7 @@ class _DishFormSheetState extends ConsumerState<_DishFormSheet> {
     if (!(confirmed ?? false) || !mounted) return;
     setState(() => _saving = true);
     try {
-      await ref
-          .read(adminActionProvider.notifier)
-          .updateDishAvailability(
+      await ref.read(adminActionProvider.notifier).updateDishAvailability(
             dishId: widget.existing!.id,
             isAvailable: false,
           );
@@ -678,7 +1201,7 @@ class _DishFormSheetState extends ConsumerState<_DishFormSheet> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Error al desactivar: $e'),
-            backgroundColor: Colors.red,
+            backgroundColor: AppTokens.danger,
           ),
         );
       }
@@ -694,7 +1217,7 @@ class _DishFormSheetState extends ConsumerState<_DishFormSheet> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: const Text('Eliminar permanentemente'),
         content: Text(
-          '¿Eliminar "${widget.existing!.name}" de la base de datos? Esta acción no se puede deshacer.',
+          '¿Eliminar "${widget.existing!.name}" de la base de datos? Esta accion no se puede deshacer.',
         ),
         actions: [
           TextButton(
@@ -702,7 +1225,7 @@ class _DishFormSheetState extends ConsumerState<_DishFormSheet> {
             child: const Text('Cancelar'),
           ),
           FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: Colors.red),
+            style: FilledButton.styleFrom(backgroundColor: AppTokens.danger),
             onPressed: () => Navigator.pop(ctx, true),
             child: const Text('Eliminar'),
           ),
@@ -721,7 +1244,7 @@ class _DishFormSheetState extends ConsumerState<_DishFormSheet> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Error al eliminar: $e'),
-            backgroundColor: Colors.red,
+            backgroundColor: AppTokens.danger,
           ),
         );
       }
@@ -766,10 +1289,10 @@ class _DishFormSheetState extends ConsumerState<_DishFormSheet> {
                       padding: const EdgeInsets.symmetric(horizontal: 20),
                       child: Text(
                         isEdit ? 'Editar plato' : 'Nuevo plato',
-                        style: const TextStyle(
+                        style: GoogleFonts.inter(
                           fontSize: 20,
-                          fontWeight: FontWeight.w700,
-                          color: Color(0xFF111111),
+                          fontWeight: FontWeight.w800,
+                          color: _kInk,
                         ),
                       ),
                     ),
@@ -793,28 +1316,28 @@ class _DishFormSheetState extends ConsumerState<_DishFormSheet> {
                                 width: double.infinity,
                               )
                             : widget.existing?.imageUrl != null
-                            ? CachedNetworkImage(
-                                imageUrl: widget.existing!.imageUrl!,
-                                fit: BoxFit.cover,
-                                width: double.infinity,
-                              )
-                            : const Center(
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(
-                                      Icons.add_photo_alternate_outlined,
-                                      size: 40,
-                                      color: Colors.grey,
+                                ? CachedNetworkImage(
+                                    imageUrl: widget.existing!.imageUrl!,
+                                    fit: BoxFit.cover,
+                                    width: double.infinity,
+                                  )
+                                : const Center(
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(
+                                          Icons.add_photo_alternate_outlined,
+                                          size: 40,
+                                          color: Colors.grey,
+                                        ),
+                                        SizedBox(height: 6),
+                                        Text(
+                                          'Toca para anadir imagen',
+                                          style: TextStyle(color: Colors.grey),
+                                        ),
+                                      ],
                                     ),
-                                    SizedBox(height: 6),
-                                    Text(
-                                      'Toca para añadir imagen',
-                                      style: TextStyle(color: Colors.grey),
-                                    ),
-                                  ],
-                                ),
-                              ),
+                                  ),
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -829,11 +1352,11 @@ class _DishFormSheetState extends ConsumerState<_DishFormSheet> {
                         textCapitalization: TextCapitalization.sentences,
                       ),
                     ),
-                    const _SectionLabel('Categoría *'),
+                    const _SectionLabel('Categoria *'),
                     _Pad(
                       DropdownButtonFormField<String>(
                         initialValue: _categoryId.isEmpty ? null : _categoryId,
-                        decoration: _inputDeco('Selecciona categoría'),
+                        decoration: _inputDeco('Selecciona categoria'),
                         items: widget.categories
                             .map<DropdownMenuItem<String>>(
                               (c) => DropdownMenuItem(
@@ -845,7 +1368,7 @@ class _DishFormSheetState extends ConsumerState<_DishFormSheet> {
                         onChanged: (v) =>
                             setState(() => _categoryId = v ?? _categoryId),
                         validator: (v) => (v == null || v.isEmpty)
-                            ? 'Selecciona una categoría'
+                            ? 'Selecciona una categoria'
                             : null,
                       ),
                     ),
@@ -860,14 +1383,14 @@ class _DishFormSheetState extends ConsumerState<_DishFormSheet> {
                               decoration: _inputDeco('Precio (€)'),
                               keyboardType:
                                   const TextInputType.numberWithOptions(
-                                    decimal: true,
-                                  ),
+                                decimal: true,
+                              ),
                               validator: (v) {
                                 if (v == null || v.trim().isEmpty) {
                                   return 'Obligatorio';
                                 }
                                 if (double.tryParse(v.trim()) == null) {
-                                  return 'Número inválido';
+                                  return 'Numero invalido';
                                 }
                                 return null;
                               },
@@ -903,15 +1426,15 @@ class _DishFormSheetState extends ConsumerState<_DishFormSheet> {
                               decoration: _inputDeco('Precio de oferta (€)'),
                               keyboardType:
                                   const TextInputType.numberWithOptions(
-                                    decimal: true,
-                                  ),
+                                decimal: true,
+                              ),
                               validator: (v) {
                                 if (!_isOffer) return null;
                                 if (v == null || v.trim().isEmpty) {
                                   return 'Introduce precio de oferta';
                                 }
                                 if (double.tryParse(v.trim()) == null) {
-                                  return 'Número inválido';
+                                  return 'Numero invalido';
                                 }
                                 return null;
                               },
@@ -938,16 +1461,16 @@ class _DishFormSheetState extends ConsumerState<_DishFormSheet> {
                         onChanged: (v) => setState(() => _isAvailable = v),
                       ),
                     ),
-                    const _SectionLabel('Descripción'),
+                    const _SectionLabel('Descripcion'),
                     _Pad(
                       TextFormField(
                         controller: _description,
-                        decoration: _inputDeco('Descripción del plato…'),
+                        decoration: _inputDeco('Descripcion del plato...'),
                         maxLines: 3,
                         textCapitalization: TextCapitalization.sentences,
                       ),
                     ),
-                    const _SectionLabel('Alérgenos'),
+                    const _SectionLabel('Alergenos'),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 20),
                       child: AllergenChips(
@@ -985,7 +1508,7 @@ class _DishFormSheetState extends ConsumerState<_DishFormSheet> {
                               )
                             : Text(
                                 isEdit ? 'Guardar cambios' : 'Crear plato',
-                                style: const TextStyle(
+                                style: GoogleFonts.inter(
                                   fontSize: 16,
                                   fontWeight: FontWeight.w700,
                                 ),
@@ -999,14 +1522,14 @@ class _DishFormSheetState extends ConsumerState<_DishFormSheet> {
                           onPressed: _saving ? null : _deactivateDish,
                           icon: const Icon(
                             Icons.visibility_off_outlined,
-                            color: Colors.orange,
+                            color: AppTokens.warning,
                           ),
                           label: const Text(
                             'Desactivar plato',
-                            style: TextStyle(color: Colors.orange),
+                            style: TextStyle(color: AppTokens.warning),
                           ),
                           style: OutlinedButton.styleFrom(
-                            side: const BorderSide(color: Colors.orange),
+                            side: const BorderSide(color: AppTokens.warning),
                             minimumSize: const Size.fromHeight(48),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(14),
@@ -1020,14 +1543,14 @@ class _DishFormSheetState extends ConsumerState<_DishFormSheet> {
                           onPressed: _saving ? null : _deleteDish,
                           icon: const Icon(
                             Icons.delete_forever_outlined,
-                            color: Colors.red,
+                            color: AppTokens.danger,
                           ),
                           label: const Text(
                             'Eliminar permanentemente',
-                            style: TextStyle(color: Colors.red),
+                            style: TextStyle(color: AppTokens.danger),
                           ),
                           style: OutlinedButton.styleFrom(
-                            side: const BorderSide(color: Colors.red),
+                            side: const BorderSide(color: AppTokens.danger),
                             minimumSize: const Size.fromHeight(48),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(14),
@@ -1051,23 +1574,24 @@ class _DishFormSheetState extends ConsumerState<_DishFormSheet> {
 }
 
 InputDecoration _inputDeco(String hint) => InputDecoration(
-  hintText: hint,
-  filled: true,
-  fillColor: const Color(0xFFF8F8FA),
-  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-  border: OutlineInputBorder(
-    borderRadius: BorderRadius.circular(AppTokens.radiusSm),
-    borderSide: const BorderSide(color: Color(0xFFEEEEEE)),
-  ),
-  enabledBorder: OutlineInputBorder(
-    borderRadius: BorderRadius.circular(AppTokens.radiusSm),
-    borderSide: const BorderSide(color: Color(0xFFEEEEEE)),
-  ),
-  focusedBorder: OutlineInputBorder(
-    borderRadius: BorderRadius.circular(AppTokens.radiusSm),
-    borderSide: const BorderSide(color: AppTokens.brandPrimary, width: 1.5),
-  ),
-);
+      hintText: hint,
+      filled: true,
+      fillColor: const Color(0xFFF8F8FA),
+      contentPadding:
+          const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(AppTokens.radiusSm),
+        borderSide: const BorderSide(color: _kCardBorder),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(AppTokens.radiusSm),
+        borderSide: const BorderSide(color: _kCardBorder),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(AppTokens.radiusSm),
+        borderSide: const BorderSide(color: AppTokens.brandPrimary, width: 1.5),
+      ),
+    );
 
 class _SectionLabel extends StatelessWidget {
   const _SectionLabel(this.text);
@@ -1075,17 +1599,17 @@ class _SectionLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.fromLTRB(20, 0, 20, 6),
-    child: Text(
-      text,
-      style: const TextStyle(
-        fontSize: 12,
-        fontWeight: FontWeight.w700,
-        color: Colors.grey,
-        letterSpacing: 0.5,
-      ),
-    ),
-  );
+        padding: const EdgeInsets.fromLTRB(20, 0, 20, 6),
+        child: Text(
+          text,
+          style: GoogleFonts.inter(
+            fontSize: 12,
+            fontWeight: FontWeight.w700,
+            color: _kInkMuted,
+            letterSpacing: 0.5,
+          ),
+        ),
+      );
 }
 
 class _Pad extends StatelessWidget {
@@ -1093,6 +1617,8 @@ class _Pad extends StatelessWidget {
   final Widget child;
 
   @override
-  Widget build(BuildContext context) =>
-      Padding(padding: const EdgeInsets.fromLTRB(20, 0, 20, 16), child: child);
+  Widget build(BuildContext context) => Padding(
+        padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+        child: child,
+      );
 }

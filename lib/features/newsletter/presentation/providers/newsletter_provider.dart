@@ -7,9 +7,8 @@ import 'package:sabor_de_casa/features/newsletter/domain/models/newsletter_subsc
 part 'newsletter_provider.g.dart';
 
 @riverpod
-// ignore: deprecated_member_use_from_same_package, Riverpod 2.x typed Ref
 Future<List<NewsletterSubscriber>> newsletterSubscribers(
-  NewsletterSubscribersRef ref,
+  NewsletterSubscribersRef ref, // ignore: deprecated_member_use_from_same_package
 ) {
   return ref.watch(newsletterRepositoryProvider).list();
 }

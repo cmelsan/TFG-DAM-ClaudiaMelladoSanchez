@@ -26,7 +26,9 @@ class TestimonialModel {
 /// Obtiene los testimonios destacados desde Supabase.
 /// Acceso público (SELECT policy sin auth).
 @riverpod
-Future<List<TestimonialModel>> testimonials(TestimonialsRef ref) async {
+Future<List<TestimonialModel>> testimonials(
+  TestimonialsRef ref, // ignore: deprecated_member_use_from_same_package
+) async {
   final data = await Supabase.instance.client
       .from('testimonials')
       .select('author_name, body, rating')

@@ -13,6 +13,7 @@ import 'package:sabor_de_casa/features/admin/presentation/screens/admin_encargos
 import 'package:sabor_de_casa/features/admin/presentation/screens/admin_orders_screen.dart';
 import 'package:sabor_de_casa/features/admin/presentation/screens/admin_schedule_screen.dart';
 import 'package:sabor_de_casa/features/admin/presentation/screens/admin_stats_screen.dart';
+import 'package:sabor_de_casa/features/admin/presentation/screens/admin_support_screen.dart';
 import 'package:sabor_de_casa/features/admin/presentation/screens/admin_users_screen.dart';
 import 'package:sabor_de_casa/features/auth/presentation/providers/auth_provider.dart';
 import 'package:sabor_de_casa/features/auth/presentation/providers/password_recovery_provider.dart';
@@ -330,6 +331,11 @@ GoRouter appRouter(AppRouterRef ref) {
         path: '/admin/stats',
         name: RouteNames.adminStats,
         builder: (_, __) => const AdminStatsScreen(),
+      ),
+      GoRoute(
+        path: '/admin/support',
+        name: RouteNames.adminSupport,
+        builder: (_, __) => const AdminSupportScreen(),
       ),
       GoRoute(
         path: '/admin/categories',

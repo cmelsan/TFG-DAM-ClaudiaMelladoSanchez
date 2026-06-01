@@ -160,7 +160,7 @@ class _AdminUsersScreenState extends ConsumerState<AdminUsersScreen> {
         ..write('${s?['orders_count'] ?? 0},')
         ..write('${(s?['total_spent'] as num?)?.toStringAsFixed(2) ?? '0'},')
         ..write('${last?.toIso8601String() ?? ''},')
-        ..write('${u.createdAt?.toIso8601String() ?? ''}')
+        ..write(u.createdAt?.toIso8601String() ?? '')
         ..writeln();
     }
     Clipboard.setData(ClipboardData(text: buffer.toString()));
@@ -189,7 +189,11 @@ class _UsersSummary extends StatelessWidget {
     required this.admins,
     required this.inactive,
   });
-  final int total, clients, employees, admins, inactive;
+  final int total;
+  final int clients;
+  final int employees;
+  final int admins;
+  final int inactive;
 
   @override
   Widget build(BuildContext context) {
@@ -334,7 +338,7 @@ class _FiltersBar extends StatelessWidget {
                 ),
                 filled: true,
                 fillColor: const Color(0xFFF4F6F8),
-                contentPadding: const EdgeInsets.symmetric(vertical: 0),
+                contentPadding: EdgeInsets.zero,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(AppTokens.radiusSm),
                   borderSide: BorderSide.none,
@@ -682,7 +686,7 @@ class _UserTile extends ConsumerWidget {
     AdminUser user,
     Map<String, dynamic>? stats,
   ) {
-    showModalBottomSheet(
+    showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.white,

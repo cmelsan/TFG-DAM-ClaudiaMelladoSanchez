@@ -433,7 +433,7 @@ class _SuggestionChips extends StatelessWidget {
             padding: EdgeInsets.only(left: 4, bottom: 6),
             child: Text(
               'Preguntas frecuentes',
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 11,
                 color: Colors.black45,
                 fontWeight: FontWeight.w600,

@@ -1,4 +1,4 @@
-﻿import 'package:cached_network_image/cached_network_image.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -556,9 +556,9 @@ class _DishCard extends StatelessWidget {
                           width: double.infinity,
                           fit: BoxFit.cover,
                           placeholder: (_, __) => const ColoredBox(color: _kDivider),
-                          errorWidget: (_, __, ___) => Container(
+                          errorWidget: (_, __, ___) => const ColoredBox(
                             color: _kDivider,
-                            child: const Icon(
+                            child: Icon(
                               Icons.restaurant,
                               color: _kTextMuted,
                               size: 28,
@@ -1612,4 +1612,3 @@ class _StatusBadge extends StatelessWidget {
     );
   }
 }
-

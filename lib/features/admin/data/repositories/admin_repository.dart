@@ -38,7 +38,7 @@ class AdminRepository {
       final startWeek = startToday.subtract(
         Duration(days: now.weekday - 1),
       ); // lunes
-      final startMonth = DateTime(now.year, now.month, 1);
+      final startMonth = DateTime(now.year, now.month);
 
       final ordersData = await _client
           .from(SupabaseConstants.orders)
@@ -70,15 +70,19 @@ class AdminRepository {
       }
 
       // Acumuladores
-      int ordersTotal = 0,
-          ordersToday = 0,
-          ordersWeek = 0,
-          ordersMonth = 0;
-      int pending = 0, confirmed = 0, preparing = 0, ready = 0, cancelled = 0;
-      double revenueTotal = 0,
-          revenueToday = 0,
-          revenueWeek = 0,
-          revenueMonth = 0;
+      var ordersTotal = 0;
+      var ordersToday = 0;
+      var ordersWeek = 0;
+      var ordersMonth = 0;
+      var pending = 0;
+      var confirmed = 0;
+      var preparing = 0;
+      var ready = 0;
+      var cancelled = 0;
+      double revenueTotal = 0;
+      double revenueToday = 0;
+      double revenueWeek = 0;
+      double revenueMonth = 0;
 
       for (final row in ordersData) {
         ordersTotal++;
@@ -98,19 +102,14 @@ class AdminRepository {
         switch (status) {
           case 'pending':
             pending++;
-            break;
           case 'confirmed':
             confirmed++;
-            break;
           case 'preparing':
             preparing++;
-            break;
           case 'ready':
             ready++;
-            break;
           case 'cancelled':
             cancelled++;
-            break;
         }
 
         // Sólo contabilizamos ingresos de pedidos no cancelados.

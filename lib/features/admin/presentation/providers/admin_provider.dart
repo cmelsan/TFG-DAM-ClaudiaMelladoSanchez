@@ -27,7 +27,7 @@ Future<Map<String, dynamic>> adminDashboardStats(AdminDashboardStatsRef ref) {
 @riverpod
 // ignore: deprecated_member_use_from_same_package, Riverpod 2.x typed Ref
 Future<List<Map<String, dynamic>>> adminRevenueLast7Days(
-  AdminRevenueLast7DaysRef ref,
+  AdminRevenueLast7DaysRef ref, // ignore: deprecated_member_use_from_same_package
 ) {
   return ref.watch(adminRepositoryProvider).getRevenueLastDays(7);
 }
@@ -36,7 +36,7 @@ Future<List<Map<String, dynamic>>> adminRevenueLast7Days(
 @riverpod
 // ignore: deprecated_member_use_from_same_package, Riverpod 2.x typed Ref
 Future<List<Map<String, dynamic>>> adminRevenueLast30Days(
-  AdminRevenueLast30DaysRef ref,
+  AdminRevenueLast30DaysRef ref, // ignore: deprecated_member_use_from_same_package
 ) {
   return ref.watch(adminRepositoryProvider).getRevenueLastDays(30);
 }
@@ -52,7 +52,7 @@ Future<List<Map<String, dynamic>>> adminTopDishes(AdminTopDishesRef ref) {
 @riverpod
 // ignore: deprecated_member_use_from_same_package, Riverpod 2.x typed Ref
 Future<Map<String, Map<String, dynamic>>> adminUsersStats(
-  AdminUsersStatsRef ref,
+  AdminUsersStatsRef ref, // ignore: deprecated_member_use_from_same_package
 ) {
   return ref.watch(adminRepositoryProvider).getUsersStats();
 }
@@ -78,7 +78,7 @@ Future<List<Order>> adminOrdersWeek(AdminOrdersWeekRef ref) {
 @riverpod
 // ignore: deprecated_member_use_from_same_package
 Future<List<OrderItem>> adminOrderItems(
-  AdminOrderItemsRef ref,
+  AdminOrderItemsRef ref, // ignore: deprecated_member_use_from_same_package
   String orderId,
 ) {
   return ref.watch(ordersRepositoryProvider).getOrderItems(orderId);

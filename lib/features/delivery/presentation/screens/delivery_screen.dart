@@ -64,9 +64,10 @@ class _DeliveryScreenState extends ConsumerState<DeliveryScreen>
   }
 
   void _refreshAll() {
-    ref.invalidate(deliveryDetailProvider);
-    ref.invalidate(deliveryHistoryTodayProvider);
-    ref.invalidate(deliveryHistoryWeekProvider);
+    ref
+      ..invalidate(deliveryDetailProvider)
+      ..invalidate(deliveryHistoryTodayProvider)
+      ..invalidate(deliveryHistoryWeekProvider);
   }
 
   @override

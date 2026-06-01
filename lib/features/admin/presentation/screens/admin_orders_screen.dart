@@ -1,4 +1,4 @@
-﻿import 'dart:async';
+import 'dart:async';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
@@ -18,6 +18,13 @@ import 'package:sabor_de_casa/features/orders/domain/models/order.dart';
 import 'package:sabor_de_casa/features/orders/domain/models/order_extensions.dart';
 import 'package:sabor_de_casa/services/supabase_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+
+// ─── Tokens visuales compartidos (estilo dashboard/stats) ───────────────────
+const _kPageBg = Color(0xFFF4F6F8);
+const _kCardBorder = Color(0xFFEEEEEE);
+const _kInk = Color(0xFF1A1A2E);
+const _kInkMuted = Color(0xFF6B7280);
+const _kInkSoft = Color(0xFF9CA3AF);
 
 // ── Constantes de mapeo ───────────────────────────────────────────────────────
 
@@ -77,6 +84,7 @@ class _AdminOrdersScreenState extends ConsumerState<AdminOrdersScreen>
   late TabController _tabCtrl;
   String _statusFilter = 'all';
   String _typeFilter = 'all';
+  String _search = '';
   Timer? _autoRefresh;
   RealtimeChannel? _realtimeChannel;
 
@@ -123,74 +131,283 @@ class _AdminOrdersScreenState extends ConsumerState<AdminOrdersScreen>
 
   @override
   Widget build(BuildContext context) {
+    final todayAsync = ref.watch(adminOrdersTodayProvider);
+
     return AdminShell(
       title: 'Pedidos',
       actions: [
         IconButton(
-          icon: const Icon(Icons.refresh_rounded, color: AppTokens.brandPrimary),
+          icon: const Icon(Icons.refresh_rounded,
+              color: AppTokens.brandPrimary),
           tooltip: 'Actualizar',
           onPressed: _refreshAll,
         ),
         const SizedBox(width: 8),
       ],
+      child: ColoredBox(
+        color: _kPageBg,
+        child: Column(
+          children: [
+            // ── KPI strip (siempre sobre los datos de hoy) ───────────
+            Padding(
+              padding: const EdgeInsets.fromLTRB(24, 20, 24, 8),
+              child: todayAsync.when(
+                loading: () => const _KpiStripSkeleton(),
+                error: (_, __) => const SizedBox.shrink(),
+                data: (orders) => _OrdersKpiStrip(orders: orders),
+              ),
+            ),
+            // ── Toolbar con búsqueda y filtros ────────────────────────
+            Padding(
+              padding: const EdgeInsets.fromLTRB(24, 4, 24, 8),
+              child: _ToolbarCard(
+                statusFilter: _statusFilter,
+                typeFilter: _typeFilter,
+                onStatusChanged: (v) => setState(() => _statusFilter = v),
+                onTypeChanged: (v) => setState(() => _typeFilter = v),
+                onSearchChanged: (v) =>
+                    setState(() => _search = v.toLowerCase().trim()),
+              ),
+            ),
+            // ── Tab bar ───────────────────────────────────────────────
+            Padding(
+              padding: const EdgeInsets.fromLTRB(24, 0, 24, 0),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(AppTokens.radiusLg)),
+                  border: Border.all(color: _kCardBorder),
+                ),
+                child: TabBar(
+                  controller: _tabCtrl,
+                  indicatorColor: AppTokens.brandPrimary,
+                  indicatorWeight: 3,
+                  labelColor: AppTokens.brandPrimary,
+                  unselectedLabelColor: _kInkMuted,
+                  labelStyle: GoogleFonts.inter(
+                      fontSize: 13, fontWeight: FontWeight.w700),
+                  unselectedLabelStyle: GoogleFonts.inter(
+                      fontSize: 13, fontWeight: FontWeight.w500),
+                  tabs: const [
+                    Tab(
+                      icon: Icon(Icons.today_rounded, size: 18),
+                      text: 'Hoy',
+                      iconMargin: EdgeInsets.only(bottom: 2),
+                    ),
+                    Tab(
+                      icon: Icon(Icons.date_range_rounded, size: 18),
+                      text: 'Semana',
+                      iconMargin: EdgeInsets.only(bottom: 2),
+                    ),
+                    Tab(
+                      icon: Icon(Icons.history_rounded, size: 18),
+                      text: 'Histórico',
+                      iconMargin: EdgeInsets.only(bottom: 2),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(24, 0, 24, 0),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: const BorderRadius.vertical(
+                        bottom: Radius.circular(AppTokens.radiusLg)),
+                    border: Border.all(color: _kCardBorder),
+                  ),
+                  margin: const EdgeInsets.only(bottom: 20),
+                  clipBehavior: Clip.antiAlias,
+                  child: TabBarView(
+                    controller: _tabCtrl,
+                    children: [
+                      _TodayTab(
+                        statusFilter: _statusFilter,
+                        typeFilter: _typeFilter,
+                        search: _search,
+                      ),
+                      _WeekTab(
+                        statusFilter: _statusFilter,
+                        typeFilter: _typeFilter,
+                        search: _search,
+                      ),
+                      _HistoricoTab(
+                        statusFilter: _statusFilter,
+                        typeFilter: _typeFilter,
+                        search: _search,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ─── KPI strip ──────────────────────────────────────────────────────────────
+
+class _OrdersKpiStrip extends StatelessWidget {
+  const _OrdersKpiStrip({required this.orders});
+  final List<Order> orders;
+
+  @override
+  Widget build(BuildContext context) {
+    final total = orders.length;
+    final pending = orders.where((o) => o.status == 'pending').length;
+    final preparing = orders
+        .where((o) => o.status == 'preparing' || o.status == 'confirmed')
+        .length;
+    final delivering = orders.where((o) => o.status == 'delivering').length;
+    final paid = orders.where((o) => o.paymentStatus == 'paid').toList();
+    final revenue = paid.fold<double>(0, (s, o) => s + o.total);
+    final ticket = paid.isEmpty ? 0.0 : revenue / paid.length;
+
+    return _KpiStrip(
+      items: [
+        _Kpi(
+          icon: Icons.receipt_long_rounded,
+          color: AppTokens.brandPrimary,
+          label: 'Pedidos hoy',
+          value: '$total',
+        ),
+        _Kpi(
+          icon: Icons.hourglass_top_rounded,
+          color: AppTokens.warning,
+          label: 'Pendientes',
+          value: '$pending',
+          subtitle: pending > 0 ? 'Requieren atención' : 'Sin pendientes',
+        ),
+        _Kpi(
+          icon: Icons.outdoor_grill_rounded,
+          color: AppTokens.info,
+          label: 'En cocina',
+          value: '$preparing',
+          subtitle: '$delivering en reparto',
+        ),
+        _Kpi(
+          icon: Icons.euro_rounded,
+          color: AppTokens.success,
+          label: 'Ingresos hoy',
+          value: Formatters.price(revenue),
+          subtitle: 'Tícket medio ${Formatters.price(ticket)}',
+        ),
+      ],
+    );
+  }
+}
+
+class _KpiStripSkeleton extends StatelessWidget {
+  const _KpiStripSkeleton();
+  @override
+  Widget build(BuildContext context) =>
+      const SizedBox(height: 84); // espacio reservado mientras carga
+}
+
+// ─── Toolbar (búsqueda + filtros) ───────────────────────────────────────────
+
+class _ToolbarCard extends StatelessWidget {
+  const _ToolbarCard({
+    required this.statusFilter,
+    required this.typeFilter,
+    required this.onStatusChanged,
+    required this.onTypeChanged,
+    required this.onSearchChanged,
+  });
+  final String statusFilter;
+  final String typeFilter;
+  final ValueChanged<String> onStatusChanged;
+  final ValueChanged<String> onTypeChanged;
+  final ValueChanged<String> onSearchChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(AppTokens.radiusLg),
+        border: Border.all(color: _kCardBorder),
+        boxShadow: [AppTokens.cardShadow],
+      ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ── Tab bar strip ─────────────────────────────────────────────
-          Container(
-            color: Colors.white,
-            child: TabBar(
-              controller: _tabCtrl,
-              indicatorColor: AppTokens.brandPrimary,
-              indicatorWeight: 3,
-              labelColor: AppTokens.brandPrimary,
-              unselectedLabelColor: const Color(0xFF6B7280),
-              labelStyle: GoogleFonts.inter(
-                  fontSize: 13, fontWeight: FontWeight.w600),
-              unselectedLabelStyle:
-                  GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w500),
-              tabs: const [
-                Tab(
-                  icon: Icon(Icons.today_rounded, size: 18),
-                  text: 'Hoy',
-                  iconMargin: EdgeInsets.only(bottom: 2),
+          TextField(
+            onChanged: onSearchChanged,
+            decoration: InputDecoration(
+              hintText: 'Buscar por #ID o notas...',
+              prefixIcon: const Icon(Icons.search_rounded,
+                  color: _kInkSoft, size: 20),
+              filled: true,
+              fillColor: const Color(0xFFF8F8FA),
+              isDense: true,
+              contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 16, vertical: 12),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: _kCardBorder),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: _kCardBorder),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(
+                    color: AppTokens.brandPrimary, width: 1.5),
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          // Estados
+          SizedBox(
+            height: 32,
+            child: ListView(
+              scrollDirection: Axis.horizontal,
+              children: [
+                _Pill(
+                  label: 'Todos',
+                  selected: statusFilter == 'all',
+                  color: _kInk,
+                  onTap: () => onStatusChanged('all'),
                 ),
-                Tab(
-                  icon: Icon(Icons.date_range_rounded, size: 18),
-                  text: 'Semana',
-                  iconMargin: EdgeInsets.only(bottom: 2),
-                ),
-                Tab(
-                  icon: Icon(Icons.history_rounded, size: 18),
-                  text: 'Histórico',
-                  iconMargin: EdgeInsets.only(bottom: 2),
-                ),
+                for (final s in _statusOptions)
+                  _Pill(
+                    label: _statusLabels[s]!,
+                    selected: statusFilter == s,
+                    color: _statusColor(s),
+                    onTap: () => onStatusChanged(s),
+                  ),
               ],
             ),
           ),
-          const Divider(height: 1, color: Color(0xFFEAEBF0)),
-          // ── Tab content ────────────────────────────────────────────────
-          Expanded(
-            child: TabBarView(
-              controller: _tabCtrl,
+          const SizedBox(height: 8),
+          // Tipos
+          SizedBox(
+            height: 30,
+            child: ListView(
+              scrollDirection: Axis.horizontal,
               children: [
-                _TodayTab(
-                  statusFilter: _statusFilter,
-                  typeFilter: _typeFilter,
-                  onStatusChanged: (v) => setState(() => _statusFilter = v),
-                  onTypeChanged: (v) => setState(() => _typeFilter = v),
+                _Pill(
+                  label: 'Todos los tipos',
+                  selected: typeFilter == 'all',
+                  color: _kInk,
+                  onTap: () => onTypeChanged('all'),
                 ),
-                _WeekTab(
-                  statusFilter: _statusFilter,
-                  typeFilter: _typeFilter,
-                  onStatusChanged: (v) => setState(() => _statusFilter = v),
-                  onTypeChanged: (v) => setState(() => _typeFilter = v),
-                ),
-                _HistoricoTab(
-                  statusFilter: _statusFilter,
-                  typeFilter: _typeFilter,
-                  onStatusChanged: (v) => setState(() => _statusFilter = v),
-                  onTypeChanged: (v) => setState(() => _typeFilter = v),
-                ),
+                for (final e in _typeLabels.entries)
+                  _Pill(
+                    label: e.value,
+                    selected: typeFilter == e.key,
+                    color: AppTokens.brandPrimary,
+                    onTap: () => onTypeChanged(e.key),
+                  ),
               ],
             ),
           ),
@@ -200,55 +417,90 @@ class _AdminOrdersScreenState extends ConsumerState<AdminOrdersScreen>
   }
 }
 
-// ── Tab Hoy ──────────────────────────────────────────────────────────────────────
-
-class _TodayTab extends ConsumerWidget {
-  const _TodayTab({
-    required this.statusFilter,
-    required this.typeFilter,
-    required this.onStatusChanged,
-    required this.onTypeChanged,
+class _Pill extends StatelessWidget {
+  const _Pill({
+    required this.label,
+    required this.selected,
+    required this.color,
+    required this.onTap,
   });
-  final String statusFilter;
-  final String typeFilter;
-  final ValueChanged<String> onStatusChanged;
-  final ValueChanged<String> onTypeChanged;
+  final String label;
+  final bool selected;
+  final Color color;
+  final VoidCallback onTap;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final ordersAsync = ref.watch(adminOrdersTodayProvider);
-    return ordersAsync.when(
-      loading: () => const Center(child: LoadingIndicator()),
-      error: (e, _) => Center(
-          child: ErrorView(
-              message: e.toString(),
-              onRetry: () => ref.invalidate(adminOrdersTodayProvider))),
-      data: (orders) => _OrdersTabContent(
-        orders: orders,
-        statusFilter: statusFilter,
-        typeFilter: typeFilter,
-        onStatusChanged: onStatusChanged,
-        onTypeChanged: onTypeChanged,
-        emptyLabel: 'Sin pedidos hoy',
-        emptyIcon: Icons.today_rounded,
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(right: 8),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(999),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          decoration: BoxDecoration(
+            color: selected ? color : color.withValues(alpha: 0.08),
+            borderRadius: BorderRadius.circular(999),
+            border: Border.all(
+              color: selected ? color : color.withValues(alpha: 0.25),
+            ),
+          ),
+          child: Text(
+            label,
+            style: GoogleFonts.inter(
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+              color: selected ? Colors.white : color,
+            ),
+          ),
+        ),
       ),
     );
   }
 }
 
-// ── Tab Semana ──────────────────────────────────────────────────────────────────
+// ── Tabs ────────────────────────────────────────────────────────────────────
+
+class _TodayTab extends ConsumerWidget {
+  const _TodayTab({
+    required this.statusFilter,
+    required this.typeFilter,
+    required this.search,
+  });
+  final String statusFilter;
+  final String typeFilter;
+  final String search;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return ref.watch(adminOrdersTodayProvider).when(
+          loading: () => const Center(child: LoadingIndicator()),
+          error: (e, _) => Center(
+              child: ErrorView(
+                  message: e.toString(),
+                  onRetry: () =>
+                      ref.invalidate(adminOrdersTodayProvider))),
+          data: (orders) => _OrdersList(
+            orders: _applyFilters(orders, statusFilter, typeFilter, search),
+            emptyIcon: Icons.today_rounded,
+            emptyLabel: search.isNotEmpty
+                ? 'Sin resultados para "$search"'
+                : 'Sin pedidos hoy con estos filtros',
+          ),
+        );
+  }
+}
 
 class _WeekTab extends ConsumerWidget {
   const _WeekTab({
     required this.statusFilter,
     required this.typeFilter,
-    required this.onStatusChanged,
-    required this.onTypeChanged,
+    required this.search,
   });
   final String statusFilter;
   final String typeFilter;
-  final ValueChanged<String> onStatusChanged;
-  final ValueChanged<String> onTypeChanged;
+  final String search;
 
   static const _dayNames = [
     'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo',
@@ -256,209 +508,171 @@ class _WeekTab extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final ordersAsync = ref.watch(adminOrdersWeekProvider);
-    return ordersAsync.when(
-      loading: () => const Center(child: LoadingIndicator()),
-      error: (e, _) => Center(
-          child: ErrorView(
-              message: e.toString(),
-              onRetry: () => ref.invalidate(adminOrdersWeekProvider))),
-      data: (allOrders) {
-        // Apply filters
-        final filtered = allOrders.where((o) {
-          final statusOk =
-              statusFilter == 'all' || o.status == statusFilter;
-          final typeOk = typeFilter == 'all' || o.orderType == typeFilter;
-          return statusOk && typeOk;
-        }).toList()
-          ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
-
-        // Group by date
-        final Map<String, List<Order>> grouped = {};
-        for (final o in filtered) {
-          final d = o.createdAt;
-          final key =
-              '${_dayNames[d.weekday - 1]} ${d.day}/${d.month}';
-          grouped.putIfAbsent(key, () => []).add(o);
-        }
-
-        return Column(
-          children: [
-            _FilterSection(
-              orders: allOrders,
-              statusFilter: statusFilter,
-              typeFilter: typeFilter,
-              onStatusChanged: onStatusChanged,
-              onTypeChanged: onTypeChanged,
-            ),
-            Expanded(
-              child: filtered.isEmpty
-                  ? _EmptyState(
-                      icon: Icons.date_range_rounded,
-                      label: 'Sin pedidos esta semana con estos filtros',
-                    )
-                  : ListView.builder(
-                      padding:
-                          const EdgeInsets.fromLTRB(20, 16, 20, 40),
-                      itemCount: grouped.length,
-                      itemBuilder: (_, gi) {
-                        final day = grouped.keys.elementAt(gi);
-                        final dayOrders = grouped[day]!;
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(vertical: 12),
-                              child: Row(
-                                children: [
-                                  const Icon(
-                                    Icons.calendar_today_rounded,
-                                    size: 14,
-                                    color: Color(0xFF6B7280),
-                                  ),
-                                  const SizedBox(width: 6),
-                                  Text(
-                                    day,
-                                    style: GoogleFonts.inter(
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w700,
-                                      color: const Color(0xFF6B7280),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 8, vertical: 2),
-                                    decoration: BoxDecoration(
-                                      color: AppTokens.brandPrimary
-                                          .withValues(alpha: 0.10),
-                                      borderRadius: BorderRadius.circular(
-                                          AppTokens.radiusPill),
-                                    ),
-                                    child: Text(
-                                      '${dayOrders.length}',
-                                      style: GoogleFonts.inter(
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.w700,
-                                        color: AppTokens.brandPrimary,
-                                      ),
-                                    ),
-                                  ),
-                                ],
+    return ref.watch(adminOrdersWeekProvider).when(
+          loading: () => const Center(child: LoadingIndicator()),
+          error: (e, _) => Center(
+              child: ErrorView(
+                  message: e.toString(),
+                  onRetry: () =>
+                      ref.invalidate(adminOrdersWeekProvider))),
+          data: (allOrders) {
+            final filtered =
+                _applyFilters(allOrders, statusFilter, typeFilter, search);
+            if (filtered.isEmpty) {
+              return const _EmptyState(
+                icon: Icons.date_range_rounded,
+                label: 'Sin pedidos esta semana',
+              );
+            }
+            final grouped = <String, List<Order>>{};
+            for (final o in filtered) {
+              final d = o.createdAt;
+              final key = '${_dayNames[d.weekday - 1]} ${d.day}/${d.month}';
+              grouped.putIfAbsent(key, () => []).add(o);
+            }
+            return ListView.builder(
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 40),
+              itemCount: grouped.length,
+              itemBuilder: (_, gi) {
+                final day = grouped.keys.elementAt(gi);
+                final dayOrders = grouped[day]!;
+                final dayTotal = dayOrders.fold<double>(
+                    0, (s, o) => s + o.total);
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.calendar_today_rounded,
+                              size: 14, color: _kInkMuted),
+                          const SizedBox(width: 6),
+                          Text(
+                            day,
+                            style: GoogleFonts.inter(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w700,
+                              color: _kInkMuted,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: AppTokens.brandPrimary
+                                  .withValues(alpha: 0.10),
+                              borderRadius: BorderRadius.circular(
+                                  AppTokens.radiusPill),
+                            ),
+                            child: Text(
+                              '${dayOrders.length}',
+                              style: GoogleFonts.inter(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w700,
+                                color: AppTokens.brandPrimary,
                               ),
                             ),
-                            ...dayOrders.asMap().entries.map((e) =>
-                                Padding(
-                                  padding: const EdgeInsets.only(bottom: 10),
-                                  child: _OrderCard(
-                                      order: e.value, index: e.key),
-                                )),
-                          ],
-                        );
-                      },
+                          ),
+                          const Spacer(),
+                          Text(
+                            Formatters.price(dayTotal),
+                            style: GoogleFonts.inter(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700,
+                              color: _kInk,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-            ),
-          ],
+                    ...dayOrders.asMap().entries.map((e) => Padding(
+                          padding: const EdgeInsets.only(bottom: 10),
+                          child: _OrderCard(
+                              order: e.value, index: e.key),
+                        )),
+                  ],
+                );
+              },
+            );
+          },
         );
-      },
-    );
   }
 }
-
-// ── Tab Histórico ───────────────────────────────────────────────────────────────
 
 class _HistoricoTab extends ConsumerWidget {
   const _HistoricoTab({
     required this.statusFilter,
     required this.typeFilter,
-    required this.onStatusChanged,
-    required this.onTypeChanged,
+    required this.search,
   });
   final String statusFilter;
   final String typeFilter;
-  final ValueChanged<String> onStatusChanged;
-  final ValueChanged<String> onTypeChanged;
+  final String search;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final ordersAsync = ref.watch(adminOrdersProvider);
-    return ordersAsync.when(
-      loading: () => const Center(child: LoadingIndicator()),
-      error: (e, _) => Center(
-          child: ErrorView(
-              message: e.toString(),
-              onRetry: () => ref.invalidate(adminOrdersProvider))),
-      data: (orders) => _OrdersTabContent(
-        orders: orders,
-        statusFilter: statusFilter,
-        typeFilter: typeFilter,
-        onStatusChanged: onStatusChanged,
-        onTypeChanged: onTypeChanged,
-        emptyLabel: 'No hay pedidos con estos filtros',
-        emptyIcon: Icons.inbox_rounded,
-      ),
-    );
+    return ref.watch(adminOrdersProvider).when(
+          loading: () => const Center(child: LoadingIndicator()),
+          error: (e, _) => Center(
+              child: ErrorView(
+                  message: e.toString(),
+                  onRetry: () =>
+                      ref.invalidate(adminOrdersProvider))),
+          data: (orders) => _OrdersList(
+            orders: _applyFilters(orders, statusFilter, typeFilter, search),
+            emptyIcon: Icons.inbox_rounded,
+            emptyLabel: 'Sin pedidos con estos filtros',
+          ),
+        );
   }
 }
 
-// ── Contenido de tab común ───────────────────────────────────────────────────
+// ─── Helpers de filtrado y lista ────────────────────────────────────────────
 
-class _OrdersTabContent extends StatelessWidget {
-  const _OrdersTabContent({
+List<Order> _applyFilters(
+  List<Order> orders,
+  String statusFilter,
+  String typeFilter,
+  String search,
+) {
+  return orders.where((o) {
+    if (statusFilter != 'all' && o.status != statusFilter) return false;
+    if (typeFilter != 'all' && o.orderType != typeFilter) return false;
+    if (search.isNotEmpty) {
+      final hay =
+          '${o.shortId} ${o.notes ?? ''} ${o.orderType}'.toLowerCase();
+      if (!hay.contains(search)) return false;
+    }
+    return true;
+  }).toList()
+    ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+}
+
+class _OrdersList extends StatelessWidget {
+  const _OrdersList({
     required this.orders,
-    required this.statusFilter,
-    required this.typeFilter,
-    required this.onStatusChanged,
-    required this.onTypeChanged,
-    required this.emptyLabel,
     required this.emptyIcon,
+    required this.emptyLabel,
   });
-
   final List<Order> orders;
-  final String statusFilter;
-  final String typeFilter;
-  final ValueChanged<String> onStatusChanged;
-  final ValueChanged<String> onTypeChanged;
-  final String emptyLabel;
   final IconData emptyIcon;
+  final String emptyLabel;
 
   @override
   Widget build(BuildContext context) {
-    final filtered = orders.where((o) {
-      final statusOk = statusFilter == 'all' || o.status == statusFilter;
-      final typeOk = typeFilter == 'all' || o.orderType == typeFilter;
-      return statusOk && typeOk;
-    }).toList()
-      ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        _FilterSection(
-          orders: orders,
-          statusFilter: statusFilter,
-          typeFilter: typeFilter,
-          onStatusChanged: onStatusChanged,
-          onTypeChanged: onTypeChanged,
-        ),
-        Expanded(
-          child: filtered.isEmpty
-              ? _EmptyState(icon: emptyIcon, label: emptyLabel)
-              : ListView.separated(
-                  padding: const EdgeInsets.fromLTRB(20, 16, 20, 40),
-                  itemCount: filtered.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 10),
-                  itemBuilder: (ctx, i) =>
-                      _OrderCard(order: filtered[i], index: i),
-                ),
-        ),
-      ],
+    if (orders.isEmpty) {
+      return _EmptyState(icon: emptyIcon, label: emptyLabel);
+    }
+    return ListView.separated(
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 40),
+      itemCount: orders.length,
+      separatorBuilder: (_, __) => const SizedBox(height: 10),
+      itemBuilder: (ctx, i) => _OrderCard(order: orders[i], index: i),
     );
   }
 }
-
-// ── Empty state ──────────────────────────────────────────────────────────────────
 
 class _EmptyState extends StatelessWidget {
   const _EmptyState({required this.icon, required this.label});
@@ -478,15 +692,12 @@ class _EmptyState extends StatelessWidget {
               color: Color(0xFFF0F0F0),
               shape: BoxShape.circle,
             ),
-            child: Icon(icon, size: 28, color: const Color(0xFF9E9E9E)),
+            child: Icon(icon, size: 28, color: _kInkSoft),
           ),
           const SizedBox(height: 12),
           Text(
             label,
-            style: GoogleFonts.inter(
-              color: const Color(0xFF9E9E9E),
-              fontSize: 14,
-            ),
+            style: GoogleFonts.inter(color: _kInkMuted, fontSize: 14),
           ),
         ],
       ),
@@ -494,153 +705,119 @@ class _EmptyState extends StatelessWidget {
   }
 }
 
-// ── Filtros ───────────────────────────────────────────────────────────────────
+// ─── KPI helpers (estilo dashboard) ─────────────────────────────────────────
 
-class _FilterSection extends StatelessWidget {
-  const _FilterSection({
-    required this.orders,
-    required this.statusFilter,
-    required this.typeFilter,
-    required this.onStatusChanged,
-    required this.onTypeChanged,
+class _Kpi {
+  const _Kpi({
+    required this.icon,
+    required this.color,
+    required this.label,
+    required this.value,
+    this.subtitle,
   });
+  final IconData icon;
+  final Color color;
+  final String label;
+  final String value;
+  final String? subtitle;
+}
 
-  final List<Order> orders;
-  final String statusFilter;
-  final String typeFilter;
-  final ValueChanged<String> onStatusChanged;
-  final ValueChanged<String> onTypeChanged;
+class _KpiStrip extends StatelessWidget {
+  const _KpiStrip({required this.items});
+  final List<_Kpi> items;
 
-  int _count(String status) => status == 'all'
-      ? orders.length
-      : orders.where((o) => o.status == status).length;
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (ctx, c) {
+        final cols = c.maxWidth >= 900
+            ? 4
+            : c.maxWidth >= 560
+                ? 2
+                : 1;
+        const spacing = 14.0;
+        final w = cols == 1
+            ? c.maxWidth
+            : (c.maxWidth - spacing * (cols - 1)) / cols;
+        return Wrap(
+          spacing: spacing,
+          runSpacing: spacing,
+          children: [
+            for (final k in items)
+              SizedBox(width: w, child: _KpiTile(data: k)),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _KpiTile extends StatelessWidget {
+  const _KpiTile({required this.data});
+  final _Kpi data;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: const BoxDecoration(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
         color: Colors.white,
-        border: Border(bottom: BorderSide(color: Color(0xFFEEEEEE))),
+        borderRadius: BorderRadius.circular(AppTokens.radiusLg),
+        border: Border.all(color: _kCardBorder),
+        boxShadow: [AppTokens.cardShadow],
       ),
-      padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
         children: [
-          // Status
-          SizedBox(
-            height: 36,
-            child: ListView(
-              scrollDirection: Axis.horizontal,
-              children: [
-                _PillChip(
-                  label: 'Todos',
-                  count: _count('all'),
-                  selected: statusFilter == 'all',
-                  color: const Color(0xFF1A1A2E),
-                  onTap: () => onStatusChanged('all'),
-                ),
-                for (final s in _statusOptions)
-                  _PillChip(
-                    label: _statusLabels[s]!,
-                    count: _count(s),
-                    selected: statusFilter == s,
-                    color: _statusColor(s),
-                    onTap: () => onStatusChanged(s),
-                  ),
-              ],
+          Container(
+            width: 38,
+            height: 38,
+            decoration: BoxDecoration(
+              color: data.color.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(10),
             ),
+            child: Icon(data.icon, color: data.color, size: 20),
           ),
-          const SizedBox(height: 8),
-          // Tipo
-          SizedBox(
-            height: 30,
-            child: ListView(
-              scrollDirection: Axis.horizontal,
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _PillChip(
-                  label: 'Todos los tipos',
-                  selected: typeFilter == 'all',
-                  color: const Color(0xFF1A1A2E),
-                  onTap: () => onTypeChanged('all'),
+                Text(
+                  data.label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.inter(
+                    fontSize: 11.5,
+                    color: _kInkMuted,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
-                for (final e in _typeLabels.entries)
-                  _PillChip(
-                    label: e.value,
-                    selected: typeFilter == e.key,
-                    color: AppTokens.brandPrimary,
-                    onTap: () => onTypeChanged(e.key),
+                const SizedBox(height: 2),
+                Text(
+                  data.value,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.inter(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w800,
+                    color: _kInk,
+                    height: 1.05,
+                  ),
+                ),
+                if (data.subtitle != null)
+                  Text(
+                    data.subtitle!,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: GoogleFonts.inter(
+                      fontSize: 10.5,
+                      color: _kInkSoft,
+                    ),
                   ),
               ],
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _PillChip extends StatelessWidget {
-  const _PillChip({
-    required this.label,
-    required this.selected,
-    required this.color,
-    required this.onTap,
-    this.count,
-  });
-
-  final String label;
-  final bool selected;
-  final Color color;
-  final VoidCallback onTap;
-  final int? count;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        margin: const EdgeInsets.only(right: 8),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
-        decoration: BoxDecoration(
-          color: selected ? color : Colors.transparent,
-          borderRadius: BorderRadius.circular(AppTokens.radiusPill),
-          border: Border.all(
-            color: selected ? color : const Color(0xFFDDDDDD),
-          ),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              label,
-              style: GoogleFonts.inter(
-                fontSize: 12,
-                fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
-                color: selected ? Colors.white : const Color(0xFF666680),
-              ),
-            ),
-            if (count != null && count! > 0) ...[
-              const SizedBox(width: 5),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
-                decoration: BoxDecoration(
-                  color: selected
-                      ? Colors.white.withValues(alpha: 0.25)
-                      : color.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(AppTokens.radiusPill),
-                ),
-                child: Text(
-                  '$count',
-                  style: GoogleFonts.inter(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w700,
-                    color: selected ? Colors.white : color,
-                  ),
-                ),
-              ),
-            ],
-          ],
-        ),
       ),
     );
   }

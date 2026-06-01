@@ -919,8 +919,9 @@ class _SparklinePainter extends CustomPainter {
       final p = pointAt(i);
       if (i == 0) {
         path.moveTo(p.dx, p.dy);
-        fill.moveTo(p.dx, size.height);
-        fill.lineTo(p.dx, p.dy);
+        fill
+          ..moveTo(p.dx, size.height)
+          ..lineTo(p.dx, p.dy);
       } else {
         final prev = pointAt(i - 1);
         final cx = (prev.dx + p.dx) / 2;
@@ -928,8 +929,9 @@ class _SparklinePainter extends CustomPainter {
         fill.cubicTo(cx, prev.dy, cx, p.dy, p.dx, p.dy);
       }
     }
-    fill.lineTo(size.width, size.height);
-    fill.close();
+    fill
+      ..lineTo(size.width, size.height)
+      ..close();
 
     final fillPaint = Paint()
       ..shader = LinearGradient(
@@ -937,7 +939,7 @@ class _SparklinePainter extends CustomPainter {
         end: Alignment.bottomCenter,
         colors: [
           Colors.white.withValues(alpha: 0.32),
-          Colors.white.withValues(alpha: 0.0),
+          Colors.white.withValues(alpha: 0),
         ],
       ).createShader(Rect.fromLTWH(0, 0, size.width, size.height));
     canvas.drawPath(fill, fillPaint);
@@ -952,9 +954,9 @@ class _SparklinePainter extends CustomPainter {
 
     // Punto final destacado
     final last = pointAt(series.length - 1);
-    canvas.drawCircle(last, 5, Paint()..color = Colors.white);
-    canvas.drawCircle(
-        last, 3, Paint()..color = const Color(0xFF0F6E56));
+    canvas
+      ..drawCircle(last, 5, Paint()..color = Colors.white)
+      ..drawCircle(last, 3, Paint()..color = const Color(0xFF0F6E56));
   }
 
   @override
@@ -1408,6 +1410,3 @@ class _SectionLabel extends StatelessWidget {
     );
   }
 }
-
-
-

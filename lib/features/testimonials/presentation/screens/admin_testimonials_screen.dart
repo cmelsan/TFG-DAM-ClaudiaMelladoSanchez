@@ -180,7 +180,8 @@ class _Summary extends StatelessWidget {
     required this.featured,
     required this.avgRating,
   });
-  final int total, featured;
+  final int total;
+  final int featured;
   final double avgRating;
 
   @override
@@ -272,7 +273,7 @@ class _FilterChips extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final opts = const [
+    const opts = [
       ('all', 'Todas'),
       ('featured', 'Destacadas'),
       ('hidden', 'Ocultas'),
@@ -314,7 +315,9 @@ class _TestimonialCard extends StatelessWidget {
     required this.onDelete,
   });
   final Testimonial item;
-  final VoidCallback onEdit, onToggle, onDelete;
+  final VoidCallback onEdit;
+  final VoidCallback onToggle;
+  final VoidCallback onDelete;
 
   @override
   Widget build(BuildContext context) {
@@ -613,7 +616,7 @@ class _TestimonialFormDialogState
                   Expanded(
                     child: SwitchListTile(
                       contentPadding: EdgeInsets.zero,
-                      activeColor: AppTokens.brandPrimary,
+                      activeColor: AppTokens.brandPrimary, // ignore: deprecated_member_use
                       value: _featured,
                       onChanged: (v) => setState(() => _featured = v),
                       title: Text(

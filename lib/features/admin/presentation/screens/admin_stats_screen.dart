@@ -205,7 +205,7 @@ class _StatsBody extends ConsumerWidget {
                   ],
                 ),
               );
-              final typesCard = const _SectionWithCard(
+              const typesCard = _SectionWithCard(
                 title: 'Pedidos por tipo',
                 child: _OrderTypeDonutCard(),
               );
@@ -215,7 +215,7 @@ class _StatsBody extends ConsumerWidget {
                   children: [
                     Expanded(child: statusCard),
                     const SizedBox(width: 20),
-                    Expanded(child: typesCard),
+                    const Expanded(child: typesCard),
                   ],
                 );
               }
@@ -829,7 +829,7 @@ class _RevenueChartCard extends ConsumerWidget {
             children: [
               Row(
                 children: [
-                  _LegendDot(color: AppTokens.brandPrimary, label: 'Ingresos'),
+                  const _LegendDot(color: AppTokens.brandPrimary, label: 'Ingresos'),
                   const SizedBox(width: 16),
                   _LegendDot(
                     color: AppTokens.brandDark.withValues(alpha: 0.55),
@@ -865,7 +865,6 @@ class _RevenueChartCard extends ConsumerWidget {
                       ],
                     ),
                     gridData: FlGridData(
-                      show: true,
                       drawVerticalLine: false,
                       getDrawingHorizontalLine: (_) => const FlLine(
                         color: Color(0xFFF0F0F0),
@@ -873,12 +872,8 @@ class _RevenueChartCard extends ConsumerWidget {
                       ),
                     ),
                     titlesData: FlTitlesData(
-                      rightTitles: const AxisTitles(
-                        sideTitles: SideTitles(showTitles: false),
-                      ),
-                      topTitles: const AxisTitles(
-                        sideTitles: SideTitles(showTitles: false),
-                      ),
+                      rightTitles: const AxisTitles(),
+                      topTitles: const AxisTitles(),
                       leftTitles: AxisTitles(
                         sideTitles: SideTitles(
                           showTitles: true,
@@ -1279,7 +1274,7 @@ class _DayOfWeekCard extends ConsumerWidget {
               ),
             );
           }
-          int bestIdx = 0;
+          var bestIdx = 0;
           for (var i = 1; i < counts.length; i++) {
             if (counts[i] > counts[bestIdx]) bestIdx = i;
           }
@@ -1424,7 +1419,7 @@ class _HourOfDayCard extends ConsumerWidget {
               ),
             );
           }
-          int peakHour = 0;
+          var peakHour = 0;
           for (var i = 1; i < 24; i++) {
             if (counts[i] > counts[peakHour]) peakHour = i;
           }
@@ -1477,7 +1472,7 @@ class _HourOfDayCard extends ConsumerWidget {
                                     const SizedBox(height: 4),
                                     if (i % 3 == 0)
                                       Text(
-                                        '${i.toString().padLeft(2, '0')}',
+                                        i.toString().padLeft(2, '0'),
                                         style: GoogleFonts.inter(
                                           fontSize: 9,
                                           color: i == peakHour
@@ -1669,7 +1664,7 @@ class _TopCustomersCard extends ConsumerWidget {
           String nameFor(String uid) {
             for (final u in users) {
               if (u.id == uid) {
-                return u.fullName?.trim().isNotEmpty == true
+                return u.fullName?.trim().isNotEmpty ?? false
                     ? u.fullName!
                     : u.email;
               }
@@ -1802,8 +1797,9 @@ class _SparklinePainter extends CustomPainter {
       final p = pointAt(i);
       if (i == 0) {
         path.moveTo(p.dx, p.dy);
-        fill.moveTo(p.dx, size.height);
-        fill.lineTo(p.dx, p.dy);
+        fill
+          ..moveTo(p.dx, size.height)
+          ..lineTo(p.dx, p.dy);
       } else {
         final prev = pointAt(i - 1);
         final cx = (prev.dx + p.dx) / 2;
@@ -1811,8 +1807,9 @@ class _SparklinePainter extends CustomPainter {
         fill.cubicTo(cx, prev.dy, cx, p.dy, p.dx, p.dy);
       }
     }
-    fill.lineTo(size.width, size.height);
-    fill.close();
+    fill
+      ..lineTo(size.width, size.height)
+      ..close();
 
     final fillPaint = Paint()
       ..shader = LinearGradient(
@@ -1820,7 +1817,7 @@ class _SparklinePainter extends CustomPainter {
         end: Alignment.bottomCenter,
         colors: [
           Colors.white.withValues(alpha: 0.32),
-          Colors.white.withValues(alpha: 0.0),
+          Colors.white.withValues(alpha: 0),
         ],
       ).createShader(Rect.fromLTWH(0, 0, size.width, size.height));
     canvas.drawPath(fill, fillPaint);
@@ -1834,8 +1831,9 @@ class _SparklinePainter extends CustomPainter {
     canvas.drawPath(path, linePaint);
 
     final last = pointAt(series.length - 1);
-    canvas.drawCircle(last, 5, Paint()..color = Colors.white);
-    canvas.drawCircle(last, 3, Paint()..color = const Color(0xFF0F6E56));
+    canvas
+      ..drawCircle(last, 5, Paint()..color = Colors.white)
+      ..drawCircle(last, 3, Paint()..color = const Color(0xFF0F6E56));
   }
 
   @override

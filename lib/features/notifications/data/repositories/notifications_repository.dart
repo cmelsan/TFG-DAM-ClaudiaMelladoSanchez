@@ -6,7 +6,7 @@ part 'notifications_repository.g.dart';
 
 @riverpod
 NotificationsRepository notificationsRepository(
-  NotificationsRepositoryRef ref,
+  NotificationsRepositoryRef ref, // ignore: deprecated_member_use_from_same_package
 ) =>
     NotificationsRepository(Supabase.instance.client);
 

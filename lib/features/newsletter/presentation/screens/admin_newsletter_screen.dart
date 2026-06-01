@@ -198,7 +198,9 @@ class _Summary extends StatelessWidget {
     required this.active,
     required this.unsubscribed,
   });
-  final int total, active, unsubscribed;
+  final int total;
+  final int active;
+  final int unsubscribed;
 
   @override
   Widget build(BuildContext context) {
@@ -322,7 +324,7 @@ class _FiltersBar extends StatelessWidget {
                 ),
                 filled: true,
                 fillColor: const Color(0xFFF4F6F8),
-                contentPadding: const EdgeInsets.symmetric(vertical: 0),
+                contentPadding: EdgeInsets.zero,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(AppTokens.radiusSm),
                   borderSide: BorderSide.none,

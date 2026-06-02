@@ -21,6 +21,7 @@ class _AdminSupportScreenState extends ConsumerState<AdminSupportScreen> {
   final _replyCtrl = TextEditingController();
   String? _selectedThreadId;
   String _filter = 'open';
+  String? _autoReadThreadId;
 
   @override
   void dispose() {
@@ -60,6 +61,21 @@ class _AdminSupportScreenState extends ConsumerState<AdminSupportScreen> {
                       if (selected != null && _selectedThreadId != selected.id) {
                         _selectedThreadId = selected.id;
                       }
+                      if (selected != null) {
+                        if (selected.unreadForAdmin > 0 &&
+                            _autoReadThreadId != selected.id) {
+                          _autoReadThreadId = selected.id;
+                          WidgetsBinding.instance.addPostFrameCallback((_) {
+                            if (!mounted) return;
+                            ref
+                                .read(supportActionProvider.notifier)
+                                .markRead(selected.id, asAdmin: true);
+                          });
+                        } else if (selected.unreadForAdmin == 0 &&
+                            _autoReadThreadId == selected.id) {
+                          _autoReadThreadId = null;
+                        }
+                      }
 
                       return LayoutBuilder(
                         builder: (context, constraints) {
@@ -70,10 +86,10 @@ class _AdminSupportScreenState extends ConsumerState<AdminSupportScreen> {
                             filter: _filter,
                             onFilterChanged: (value) => setState(() => _filter = value),
                             onSelected: (thread) {
-                              setState(() => _selectedThreadId = thread.id);
-                              ref
-                                  .read(supportActionProvider.notifier)
-                                  .markRead(thread.id, asAdmin: true);
+                              setState(() {
+                                _selectedThreadId = thread.id;
+                                _autoReadThreadId = null;
+                              });
                             },
                           );
                           final detail = selected == null

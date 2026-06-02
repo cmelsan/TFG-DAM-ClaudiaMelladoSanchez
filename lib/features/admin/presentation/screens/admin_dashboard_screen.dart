@@ -61,7 +61,6 @@ class _DashboardBody extends ConsumerWidget {
     final avgTicketToday = (stats['avg_ticket_today'] as num? ?? 0).toDouble();
     final clientsTotal = (stats['clients_total'] as num?)?.toInt() ?? 0;
     final usersNewWeek = (stats['users_new_week'] as num?)?.toInt() ?? 0;
-    final contactsUnread = (stats['contacts_unread'] as num?)?.toInt() ?? 0;
     final supportUnread = (stats['support_unread'] as num?)?.toInt() ?? 0;
     final eventsPending = (stats['events_pending'] as num?)?.toInt() ?? 0;
 
@@ -107,14 +106,12 @@ class _DashboardBody extends ConsumerWidget {
       ),
       _KpiData(
         label: 'Mensajes',
-        value: '${contactsUnread + supportUnread}',
+        value: '$supportUnread',
         icon: Icons.mark_email_unread_rounded,
-        color: (contactsUnread + supportUnread) > 0
+        color: supportUnread > 0
             ? AppTokens.danger
             : const Color(0xFF6B7280),
-        subtitle: supportUnread > 0
-            ? '$supportUnread soporte · $contactsUnread contacto'
-            : 'Bandeja al día',
+        subtitle: supportUnread > 0 ? 'Soporte sin leer' : 'Bandeja al día',
       ),
       _KpiData(
         label: 'Catering',
@@ -143,7 +140,7 @@ class _DashboardBody extends ConsumerWidget {
             child: _HeroBanner(
               onRefresh: onRefresh,
               ordersPending: ordersPending,
-              contactsUnread: contactsUnread + supportUnread,
+              contactsUnread: supportUnread,
             ).animate().fadeIn(duration: 350.ms),
           ),
 
@@ -157,7 +154,7 @@ class _DashboardBody extends ConsumerWidget {
               sliver: SliverToBoxAdapter(
                 child: _AlertsRow(
                   ordersPending: ordersPending,
-                  contactsUnread: contactsUnread + supportUnread,
+                  contactsUnread: supportUnread,
                   eventsPending: eventsPending,
                 ).animate().fadeIn(duration: 300.ms).slideY(begin: 0.1),
               ),

@@ -49,9 +49,6 @@ class AdminRepository {
       final eventData = await _client
           .from(SupabaseConstants.eventRequests)
           .select('id, status');
-      final contactsData = await _client
-          .from(SupabaseConstants.contactMessages)
-          .select('id, is_read');
 
       // Tolerante a esquema: si support_threads aún no existe en remoto,
       // no debe romper el dashboard ni las estadísticas.
@@ -140,10 +137,6 @@ class AdminRepository {
         return c != null && !c.isBefore(startWeek);
       }).length;
 
-      final contactsUnread = contactsData
-          .where((c) => (c['is_read'] as bool?) == false)
-          .length;
-
       final eventsPending = eventData
           .where((e) => (e['status'] as String?) == 'pending')
           .length;
@@ -174,7 +167,6 @@ class AdminRepository {
         'clients_total': clientsTotal,
         'users_new_week': usersNewWeek,
         // Alertas
-        'contacts_unread': contactsUnread,
         'support_unread': supportUnread.toInt(),
         'events_pending': eventsPending,
         'events_total': eventData.length,

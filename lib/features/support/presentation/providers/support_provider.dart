@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:sabor_de_casa/features/admin/presentation/providers/admin_provider.dart';
 import 'package:sabor_de_casa/features/support/data/repositories/support_repository.dart';
 import 'package:sabor_de_casa/features/support/domain/models/support_message.dart';
 import 'package:sabor_de_casa/features/support/domain/models/support_thread.dart';
@@ -47,7 +48,8 @@ class SupportAction extends _$SupportAction {
     });
     ref
       ..invalidate(mySupportThreadsProvider)
-      ..invalidate(adminSupportThreadsProvider);
+      ..invalidate(adminSupportThreadsProvider)
+      ..invalidate(adminDashboardStatsProvider);
     return threadId;
   }
 
@@ -65,7 +67,8 @@ class SupportAction extends _$SupportAction {
     ref
       ..invalidate(supportMessagesProvider(threadId))
       ..invalidate(mySupportThreadsProvider)
-      ..invalidate(adminSupportThreadsProvider);
+      ..invalidate(adminSupportThreadsProvider)
+      ..invalidate(adminDashboardStatsProvider);
   }
 
   Future<void> markRead(String threadId, {required bool asAdmin}) async {
@@ -74,7 +77,8 @@ class SupportAction extends _$SupportAction {
         .markRead(threadId, asAdmin: asAdmin);
     ref
       ..invalidate(mySupportThreadsProvider)
-      ..invalidate(adminSupportThreadsProvider);
+      ..invalidate(adminSupportThreadsProvider)
+      ..invalidate(adminDashboardStatsProvider);
   }
 
   Future<void> closeThread(String threadId) async {
@@ -84,6 +88,7 @@ class SupportAction extends _$SupportAction {
     );
     ref
       ..invalidate(mySupportThreadsProvider)
-      ..invalidate(adminSupportThreadsProvider);
+      ..invalidate(adminSupportThreadsProvider)
+      ..invalidate(adminDashboardStatsProvider);
   }
 }

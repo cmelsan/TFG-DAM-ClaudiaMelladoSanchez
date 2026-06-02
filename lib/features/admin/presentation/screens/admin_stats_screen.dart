@@ -88,7 +88,7 @@ class _StatsBody extends ConsumerWidget {
     final avgTicketToday = (stats['avg_ticket_today'] as num? ?? 0).toDouble();
     final usersNewWeek = (stats['users_new_week'] as num?)?.toInt() ?? 0;
     final clientsTotal = (stats['clients_total'] as num?)?.toInt() ?? 0;
-    final contactsUnread = (stats['contacts_unread'] as num?)?.toInt() ?? 0;
+    final supportUnread = (stats['support_unread'] as num?)?.toInt() ?? 0;
     final eventsPending = (stats['events_pending'] as num?)?.toInt() ?? 0;
 
     final cancelRate = ordersTotal == 0
@@ -176,7 +176,7 @@ class _StatsBody extends ConsumerWidget {
                 icon: Icons.mark_email_unread_rounded,
                 color: AppTokens.brandPrimary,
                 label: 'Mensajes pendientes',
-                value: '$contactsUnread',
+                value: '$supportUnread',
                 subtitle: '$eventsPending eventos',
               ),
             ],

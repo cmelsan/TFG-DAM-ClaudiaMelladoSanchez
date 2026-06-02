@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:sabor_de_casa/core/utils/formatters.dart';
 import 'package:sabor_de_casa/features/menu/domain/models/dish.dart';
+import 'package:sabor_de_casa/features/profile/presentation/providers/profile_provider.dart';
 
 class DishCard extends ConsumerWidget {
   const DishCard({
@@ -21,6 +22,12 @@ class DishCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     // Ya no usamos el Theme isFavAsync para pintar el icono de favorito tan en medio
     final theme = Theme.of(context);
+    final userAllergens = ref.watch(userAllergensProvider);
+    final hasAllergenMatch = dish.allergens.isNotEmpty &&
+        userAllergens.isNotEmpty &&
+        dish.allergens.any(
+          (a) => userAllergens.contains(a.toLowerCase()),
+        );
 
     return Card(
       clipBehavior: Clip.antiAlias,
@@ -67,6 +74,34 @@ class DishCard extends ConsumerWidget {
                             color: Colors.white,
                             fontSize: 12,
                             fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                  // Badge alérgeno: aviso si el plato contiene alérgenos del usuario
+                  if (hasAllergenMatch)
+                    Positioned(
+                      top: 8,
+                      right: 8,
+                      child: Tooltip(
+                        message: 'Contiene alérgenos que has declarado',
+                        child: Container(
+                          padding: const EdgeInsets.all(5),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFF59E0B),
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.25),
+                                blurRadius: 4,
+                                offset: const Offset(0, 1),
+                              ),
+                            ],
+                          ),
+                          child: const Icon(
+                            Icons.warning_amber_rounded,
+                            color: Colors.white,
+                            size: 16,
                           ),
                         ),
                       ),

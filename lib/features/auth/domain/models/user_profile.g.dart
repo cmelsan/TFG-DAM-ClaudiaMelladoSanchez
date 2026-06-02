@@ -16,6 +16,9 @@ _$UserProfileImpl _$$UserProfileImplFromJson(
   phone: json['phone'] as String?,
   avatarUrl: json['avatar_url'] as String?,
   isActive: json['is_active'] as bool? ?? true,
+  allergens:
+      (json['allergens'] as List<dynamic>?)?.map((e) => e as String).toList() ??
+      const [],
   createdAt: json['created_at'] == null
       ? null
       : DateTime.parse(json['created_at'] as String),
@@ -33,6 +36,7 @@ Map<String, dynamic> _$$UserProfileImplToJson(_$UserProfileImpl instance) =>
       'phone': instance.phone,
       'avatar_url': instance.avatarUrl,
       'is_active': instance.isActive,
+      'allergens': instance.allergens,
       'created_at': instance.createdAt?.toIso8601String(),
       'updated_at': instance.updatedAt?.toIso8601String(),
     };

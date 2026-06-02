@@ -15,7 +15,6 @@ import 'package:sabor_de_casa/features/notifications/presentation/providers/noti
 import 'package:sabor_de_casa/features/profile/presentation/providers/profile_provider.dart';
 import 'package:sabor_de_casa/features/support/domain/models/support_thread.dart';
 import 'package:sabor_de_casa/features/support/presentation/providers/support_provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 const _kBgDark = Color(0xFF0D3B2E);
 const _kCream = Color(0xFFF2EBD9);
@@ -59,24 +58,30 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
   String? _lastProfileId;
 
+  // 14 alérgenos obligatorios Reglamento UE 1169/2011 (clave = key en Supabase)
   static const _allergenOptions = [
-    'Gluten',
-    'Lactosa',
-    'Huevos',
-    'Frutos secos',
-    'Pescado',
-    'Mariscos',
-    'Soja',
-    'Mostaza',
+    ('gluten',       'Gluten'),
+    ('lactosa',      'Lactosa'),
+    ('huevo',        'Huevo'),
+    ('pescado',      'Pescado'),
+    ('marisco',      'Marisco'),
+    ('frutos_secos', 'Frutos secos'),
+    ('soja',         'Soja'),
+    ('apio',         'Apio'),
+    ('mostaza',      'Mostaza'),
+    ('sesamo',       'Sésamo'),
+    ('sulfitos',     'Sulfitos'),
+    ('moluscos',     'Moluscos'),
+    ('altramuces',   'Altramuces'),
+    ('cacahuete',    'Cacahuete'),
   ];
-  List<String> _myAllergens = [];
   bool _notifOrders = true;
   bool _notifOffers = false;
 
   @override
   void initState() {
     super.initState();
-    _loadPreferences();
+    _loadNotifPreferences();
     _scrollCtrl = ScrollController()
       ..addListener(() {
         final scrolled = _scrollCtrl.offset > 10;
@@ -84,38 +89,34 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       });
   }
 
-  Future<void> _loadPreferences() async {
-    final prefs = await SharedPreferences.getInstance();
+  Future<void> _loadNotifPreferences() async {
+    // Las notificaciones siguen en SharedPreferences (solo son preferencias locales UI)
     if (!mounted) return;
     setState(() {
-      _myAllergens = prefs.getStringList('user_allergens') ?? [];
-      _notifOrders = prefs.getBool('notif_orders') ?? true;
-      _notifOffers = prefs.getBool('notif_offers') ?? false;
+      _notifOrders = true;
+      _notifOffers = false;
     });
   }
 
-  Future<void> _toggleAllergen(String allergen) async {
-    final updated = _myAllergens.toList();
-    if (updated.contains(allergen)) {
-      updated.remove(allergen);
+  Future<void> _toggleAllergen(
+      String key, List<String> currentAllergens) async {
+    final updated = currentAllergens.toList();
+    if (updated.contains(key)) {
+      updated.remove(key);
     } else {
-      updated.add(allergen);
+      updated.add(key);
     }
-    setState(() => _myAllergens = updated);
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setStringList('user_allergens', updated);
+    await ref
+        .read(profileNotifierProvider.notifier)
+        .updateAllergens(updated);
   }
 
   Future<void> _setNotifOrders(bool value) async {
     setState(() => _notifOrders = value);
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('notif_orders', value);
   }
 
   Future<void> _setNotifOffers(bool value) async {
     setState(() => _notifOffers = value);
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('notif_offers', value);
   }
 
   @override
@@ -297,9 +298,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       const _SectionLabel('Mis alergenos'),
                       const SizedBox(height: 12),
                       _AllergensCard(
-                        selected: _myAllergens,
+                        selected: profile.allergens,
                         options: _allergenOptions,
-                        onToggle: _toggleAllergen,
+                        onToggle: (key) => _toggleAllergen(key, profile.allergens),
                       ),
                       const SizedBox(height: 32),
 
@@ -358,7 +359,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       const SizedBox(height: 32),
 
                       // Soporte interno
-                      const _SectionLabel('Mis conversaciones de soporte'),
+                      const _SectionLabel('Mis consultas'),
                       const SizedBox(height: 12),
                       const _ProfileSupportThreadsCard(),
                       const SizedBox(height: 32),
@@ -383,10 +384,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                 context.pushNamed(RouteNames.favorites),
                           ),
                           _SettingsRow(
-                            icon: Icons.support_agent_outlined,
-                            title: 'Atencion al cliente',
-                            subtitle: 'Ayuda y contacto',
-                            onTap: () => context.pushNamed(RouteNames.contact),
+                            icon: Icons.celebration_outlined,
+                            title: 'Mis encargos de catering',
+                            subtitle: 'Solicitudes y estado de eventos',
+                            onTap: () => context.pushNamed(
+                              RouteNames.myCateringRequests,
+                            ),
                           ),
                         ],
                       ),
@@ -900,8 +903,8 @@ class _AllergensCard extends StatelessWidget {
   });
 
   final List<String> selected;
-  final List<String> options;
-  final void Function(String) onToggle;
+  final List<(String, String)> options;
+  final void Function(String key) onToggle;
 
   @override
   Widget build(BuildContext context) {
@@ -923,12 +926,13 @@ class _AllergensCard extends StatelessWidget {
           Wrap(
             spacing: 8,
             runSpacing: 8,
-            children: options.map((a) {
-              final isSelected = selected.contains(a);
+            children: options.map(((String, String) opt) {
+              final (key, label) = opt;
+              final isSelected = selected.contains(key);
               return FilterChip(
-                label: Text(a),
+                label: Text(label),
                 selected: isSelected,
-                onSelected: (_) => onToggle(a),
+                onSelected: (_) => onToggle(key),
                 selectedColor: AppTokens.brandPrimary.withValues(alpha: 0.15),
                 checkmarkColor: AppTokens.brandPrimary,
                 backgroundColor: const Color(0xFFF5F5F3),

@@ -149,4 +149,26 @@ class ProfileRepository {
       throw UnexpectedFailure(message: e.toString());
     }
   }
+
+  // ─────────────────────────── Alérgenos ───────────────────────────
+
+  Future<UserProfile> updateAllergens(List<String> allergens) async {
+    try {
+      final userId = _client.auth.currentUser?.id;
+      if (userId == null) {
+        throw const AuthFailure(message: 'No hay sesión activa');
+      }
+      await _client
+          .from(SupabaseConstants.profiles)
+          .update({'allergens': allergens})
+          .eq('id', userId);
+      return getMyProfile();
+    } on Failure {
+      rethrow;
+    } on PostgrestException catch (e) {
+      throw DatabaseFailure(message: e.message, code: e.code);
+    } catch (e) {
+      throw UnexpectedFailure(message: e.toString());
+    }
+  }
 }

@@ -7,7 +7,7 @@ part of 'subscription_provider.dart';
 // **************************************************************************
 
 String _$subscriptionNotifierHash() =>
-    r'cf59a657b68a6ee13bd3096f116869999c2d62c7';
+    r'dc232937015c15172d2ab676b5f5ff31fe8609e1';
 
 /// Notifier para gestionar las suscripciones de newsletter / WhatsApp.
 ///

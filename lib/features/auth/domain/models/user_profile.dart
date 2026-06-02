@@ -25,6 +25,7 @@ class UserProfile with _$UserProfile {
     String? phone,
     String? avatarUrl,
     @Default(true) bool isActive,
+    @Default([]) List<String> allergens,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) = _UserProfile;

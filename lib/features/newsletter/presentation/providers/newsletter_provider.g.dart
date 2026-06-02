@@ -26,7 +26,7 @@ final newsletterSubscribersProvider =
 // ignore: unused_element
 typedef NewsletterSubscribersRef =
     AutoDisposeFutureProviderRef<List<NewsletterSubscriber>>;
-String _$newsletterActionHash() => r'd7cd52e0604e88640cae9b4ce0ef731661034684';
+String _$newsletterActionHash() => r'87aa9284372d6e7c67b20d4e5024e5fa52200e0d';
 
 /// See also [NewsletterAction].
 @ProviderFor(NewsletterAction)

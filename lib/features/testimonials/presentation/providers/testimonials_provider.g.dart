@@ -24,7 +24,7 @@ final adminTestimonialsProvider =
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef AdminTestimonialsRef = AutoDisposeFutureProviderRef<List<Testimonial>>;
-String _$testimonialActionHash() => r'7d15c9352ae39396d5ec452cc01661577879a4c0';
+String _$testimonialActionHash() => r'bcb85cdfe68f7335b034cb5a0ebe172c0e628d07';
 
 /// See also [TestimonialAction].
 @ProviderFor(TestimonialAction)

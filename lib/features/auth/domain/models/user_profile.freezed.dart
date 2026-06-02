@@ -28,6 +28,7 @@ mixin _$UserProfile {
   String? get phone => throw _privateConstructorUsedError;
   String? get avatarUrl => throw _privateConstructorUsedError;
   bool get isActive => throw _privateConstructorUsedError;
+  List<String> get allergens => throw _privateConstructorUsedError;
   DateTime? get createdAt => throw _privateConstructorUsedError;
   DateTime? get updatedAt => throw _privateConstructorUsedError;
 
@@ -56,6 +57,7 @@ abstract class $UserProfileCopyWith<$Res> {
     String? phone,
     String? avatarUrl,
     bool isActive,
+    List<String> allergens,
     DateTime? createdAt,
     DateTime? updatedAt,
   });
@@ -83,6 +85,7 @@ class _$UserProfileCopyWithImpl<$Res, $Val extends UserProfile>
     Object? phone = freezed,
     Object? avatarUrl = freezed,
     Object? isActive = null,
+    Object? allergens = null,
     Object? createdAt = freezed,
     Object? updatedAt = freezed,
   }) {
@@ -116,6 +119,10 @@ class _$UserProfileCopyWithImpl<$Res, $Val extends UserProfile>
                 ? _value.isActive
                 : isActive // ignore: cast_nullable_to_non_nullable
                       as bool,
+            allergens: null == allergens
+                ? _value.allergens
+                : allergens // ignore: cast_nullable_to_non_nullable
+                      as List<String>,
             createdAt: freezed == createdAt
                 ? _value.createdAt
                 : createdAt // ignore: cast_nullable_to_non_nullable
@@ -147,6 +154,7 @@ abstract class _$$UserProfileImplCopyWith<$Res>
     String? phone,
     String? avatarUrl,
     bool isActive,
+    List<String> allergens,
     DateTime? createdAt,
     DateTime? updatedAt,
   });
@@ -173,6 +181,7 @@ class __$$UserProfileImplCopyWithImpl<$Res>
     Object? phone = freezed,
     Object? avatarUrl = freezed,
     Object? isActive = null,
+    Object? allergens = null,
     Object? createdAt = freezed,
     Object? updatedAt = freezed,
   }) {
@@ -206,6 +215,10 @@ class __$$UserProfileImplCopyWithImpl<$Res>
             ? _value.isActive
             : isActive // ignore: cast_nullable_to_non_nullable
                   as bool,
+        allergens: null == allergens
+            ? _value._allergens
+            : allergens // ignore: cast_nullable_to_non_nullable
+                  as List<String>,
         createdAt: freezed == createdAt
             ? _value.createdAt
             : createdAt // ignore: cast_nullable_to_non_nullable
@@ -231,9 +244,10 @@ class _$UserProfileImpl implements _UserProfile {
     this.phone,
     this.avatarUrl,
     this.isActive = true,
+    final List<String> allergens = const [],
     this.createdAt,
     this.updatedAt,
-  });
+  }) : _allergens = allergens;
 
   factory _$UserProfileImpl.fromJson(Map<String, dynamic> json) =>
       _$$UserProfileImplFromJson(json);
@@ -254,6 +268,15 @@ class _$UserProfileImpl implements _UserProfile {
   @override
   @JsonKey()
   final bool isActive;
+  final List<String> _allergens;
+  @override
+  @JsonKey()
+  List<String> get allergens {
+    if (_allergens is EqualUnmodifiableListView) return _allergens;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_allergens);
+  }
+
   @override
   final DateTime? createdAt;
   @override
@@ -261,7 +284,7 @@ class _$UserProfileImpl implements _UserProfile {
 
   @override
   String toString() {
-    return 'UserProfile(id: $id, email: $email, role: $role, fullName: $fullName, phone: $phone, avatarUrl: $avatarUrl, isActive: $isActive, createdAt: $createdAt, updatedAt: $updatedAt)';
+    return 'UserProfile(id: $id, email: $email, role: $role, fullName: $fullName, phone: $phone, avatarUrl: $avatarUrl, isActive: $isActive, allergens: $allergens, createdAt: $createdAt, updatedAt: $updatedAt)';
   }
 
   @override
@@ -279,6 +302,10 @@ class _$UserProfileImpl implements _UserProfile {
                 other.avatarUrl == avatarUrl) &&
             (identical(other.isActive, isActive) ||
                 other.isActive == isActive) &&
+            const DeepCollectionEquality().equals(
+              other._allergens,
+              _allergens,
+            ) &&
             (identical(other.createdAt, createdAt) ||
                 other.createdAt == createdAt) &&
             (identical(other.updatedAt, updatedAt) ||
@@ -296,6 +323,7 @@ class _$UserProfileImpl implements _UserProfile {
     phone,
     avatarUrl,
     isActive,
+    const DeepCollectionEquality().hash(_allergens),
     createdAt,
     updatedAt,
   );
@@ -323,6 +351,7 @@ abstract class _UserProfile implements UserProfile {
     final String? phone,
     final String? avatarUrl,
     final bool isActive,
+    final List<String> allergens,
     final DateTime? createdAt,
     final DateTime? updatedAt,
   }) = _$UserProfileImpl;
@@ -344,6 +373,8 @@ abstract class _UserProfile implements UserProfile {
   String? get avatarUrl;
   @override
   bool get isActive;
+  @override
+  List<String> get allergens;
   @override
   DateTime? get createdAt;
   @override

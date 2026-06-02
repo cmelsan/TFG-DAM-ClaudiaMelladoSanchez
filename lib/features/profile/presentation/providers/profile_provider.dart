@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:sabor_de_casa/features/auth/domain/models/user_profile.dart';
 import 'package:sabor_de_casa/features/profile/data/repositories/profile_repository.dart';
@@ -63,4 +64,15 @@ class ProfileNotifier extends _$ProfileNotifier {
       () => _repo.updateMyProfile(fullName: fullName, phone: phone),
     );
   }
+
+  Future<void> updateAllergens(List<String> allergens) async {
+    state = await AsyncValue.guard(() => _repo.updateAllergens(allergens));
+  }
+}
+
+/// Devuelve los alérgenos del usuario autenticado (lista vacía si no hay sesión).
+@riverpod
+List<String> userAllergens(Ref ref) {
+  final profileAsync = ref.watch(profileNotifierProvider);
+  return profileAsync.valueOrNull?.allergens ?? const [];
 }

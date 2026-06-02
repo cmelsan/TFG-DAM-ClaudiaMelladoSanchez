@@ -45,6 +45,7 @@ import 'package:sabor_de_casa/features/orders/presentation/screens/order_detail_
 import 'package:sabor_de_casa/features/orders/presentation/screens/orders_screen.dart';
 import 'package:sabor_de_casa/features/pos/presentation/screens/pos_screen.dart';
 import 'package:sabor_de_casa/features/profile/presentation/screens/profile_screen.dart';
+import 'package:sabor_de_casa/features/profile/presentation/screens/my_consultations_screen.dart';
 import 'package:sabor_de_casa/features/splash/presentation/screens/onboarding_screen.dart';
 import 'package:sabor_de_casa/features/splash/presentation/screens/splash_screen.dart';
 import 'package:sabor_de_casa/features/testimonials/presentation/screens/admin_testimonials_screen.dart';
@@ -188,6 +189,13 @@ GoRouter appRouter(AppRouterRef ref) {
                 path: '/profile',
                 name: RouteNames.profile,
                 builder: (_, __) => const ProfileScreen(),
+                routes: [
+                  GoRoute(
+                    path: 'consultations',
+                    name: RouteNames.myConsultations,
+                    builder: (_, __) => const MyConsultationsScreen(),
+                  ),
+                ],
               ),
             ],
           ),

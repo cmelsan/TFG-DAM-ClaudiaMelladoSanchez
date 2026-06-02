@@ -358,12 +358,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       ),
                       const SizedBox(height: 32),
 
-                      // Soporte interno
-                      const _SectionLabel('Mis consultas'),
-                      const SizedBox(height: 12),
-                      const _ProfileSupportThreadsCard(),
-                      const SizedBox(height: 32),
-
                       // Mi cuenta
                       const _SectionLabel('Mi cuenta'),
                       const SizedBox(height: 12),
@@ -382,6 +376,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                             subtitle: 'Platos guardados',
                             onTap: () =>
                                 context.pushNamed(RouteNames.favorites),
+                          ),
+                          _SettingsRow(
+                            icon: Icons.forum_outlined,
+                            title: 'Mis consultas',
+                            subtitle: 'Mensajes y soporte interno',
+                            onTap: () =>
+                                context.pushNamed(RouteNames.myConsultations),
                           ),
                           _SettingsRow(
                             icon: Icons.celebration_outlined,
@@ -1195,9 +1196,9 @@ class _ProfileSupportThreadsCard extends ConsumerWidget {
                   ),
                   const SizedBox(height: 10),
                   TextButton.icon(
-                    onPressed: () => context.pushNamed(RouteNames.contact),
+                    onPressed: () => context.pushNamed(RouteNames.myConsultations),
                     icon: const Icon(Icons.add_comment_outlined, size: 16),
-                    label: const Text('Abrir conversación'),
+                    label: const Text('Abrir consulta'),
                     style: TextButton.styleFrom(
                       foregroundColor: AppTokens.brandPrimary,
                     ),
@@ -1224,9 +1225,9 @@ class _ProfileSupportThreadsCard extends ConsumerWidget {
                 Align(
                   alignment: Alignment.centerRight,
                   child: TextButton.icon(
-                    onPressed: () => context.pushNamed(RouteNames.contact),
+                    onPressed: () => context.pushNamed(RouteNames.myConsultations),
                     icon: const Icon(Icons.forum_outlined, size: 16),
-                    label: const Text('Ver todas en Contacto'),
+                    label: const Text('Ver todas mis consultas'),
                     style: TextButton.styleFrom(
                       foregroundColor: AppTokens.brandPrimary,
                     ),

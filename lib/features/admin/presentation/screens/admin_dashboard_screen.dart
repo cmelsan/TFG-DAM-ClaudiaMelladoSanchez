@@ -146,7 +146,6 @@ class _DashboardBody extends ConsumerWidget {
 
           // ── Alertas urgentes (solo si hay pendientes) ────────────────
           if (ordersPending > 0 ||
-              contactsUnread > 0 ||
               supportUnread > 0 ||
               eventsPending > 0)
             SliverPadding(

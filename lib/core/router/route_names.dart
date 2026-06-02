@@ -30,6 +30,7 @@ class RouteNames {
   static const orders = 'orders';
   static const orderDetail = 'order-detail';
   static const profile = 'profile';
+  static const myConsultations = 'my-consultations';
   static const favorites = 'favorites';
   static const cateringRequest = 'catering-request';
   static const myCateringRequests = 'my-catering-requests';

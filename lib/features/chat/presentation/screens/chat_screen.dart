@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:sabor_de_casa/core/router/route_names.dart';
 import 'package:sabor_de_casa/core/theme/app_tokens.dart';
 import 'package:sabor_de_casa/features/chat/domain/models/chat_message.dart';
 import 'package:sabor_de_casa/features/chat/presentation/providers/chat_provider.dart';
@@ -63,7 +64,13 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             _ChatHeader(
               onClear: () =>
                   ref.read(chatNotifierProvider.notifier).clear(),
-              onClose: widget.onClose ?? () => context.pop(),
+              onClose: widget.onClose ?? () {
+                if (context.canPop()) {
+                  context.pop();
+                } else {
+                  context.goNamed(RouteNames.home);
+                }
+              },
             ),
             Expanded(
               child: ListView.builder(

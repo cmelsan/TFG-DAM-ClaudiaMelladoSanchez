@@ -179,7 +179,7 @@ class OrderDetailScreen extends ConsumerWidget {
               pw.SizedBox(height: 2),
               pw.Center(
                 child: pw.Text(
-                  'Calle Principal 1 · 28001 Madrid · Tel: +34 910 000 000',
+                  'Calle Principal 1 - 28001 Madrid - Tel: +34 910 000 000',
                   style: const pw.TextStyle(
                     fontSize: 9,
                     color: PdfColors.grey600,
@@ -189,7 +189,7 @@ class OrderDetailScreen extends ConsumerWidget {
               pw.SizedBox(height: 6),
               pw.Center(
                 child: pw.Text(
-                  '— TICKET DE PEDIDO —',
+                  'TICKET DE PEDIDO',
                   style: pw.TextStyle(
                     fontSize: 11,
                     fontWeight: pw.FontWeight.bold,
@@ -299,7 +299,7 @@ class OrderDetailScreen extends ConsumerWidget {
                           pw.SizedBox(
                             width: 52,
                             child: pw.Text(
-                              Formatters.price(item.unitPrice),
+                              _ticketPrice(item.unitPrice),
                               style: const pw.TextStyle(fontSize: 12),
                               textAlign: pw.TextAlign.right,
                             ),
@@ -307,7 +307,7 @@ class OrderDetailScreen extends ConsumerWidget {
                           pw.SizedBox(
                             width: 52,
                             child: pw.Text(
-                              Formatters.price(item.subtotal),
+                              _ticketPrice(item.subtotal),
                               style: pw.TextStyle(
                                 fontSize: 12,
                                 fontWeight: pw.FontWeight.bold,
@@ -335,13 +335,13 @@ class OrderDetailScreen extends ConsumerWidget {
               ],
               pw.SizedBox(height: 6),
               // ── Desglose costes ──────────────────────────────────────
-              _pdfRow('Subtotal', Formatters.price(order.subtotal)),
+              _pdfRow('Subtotal', _ticketPrice(order.subtotal)),
               if (order.deliveryFee > 0)
-                _pdfRow('Gastos de envío', Formatters.price(order.deliveryFee)),
+                _pdfRow('Gastos de envio', _ticketPrice(order.deliveryFee)),
               if (order.discountAmount > 0)
                 _pdfRow(
-                  '− Descuento',
-                  '−${Formatters.price(order.discountAmount)}',
+                  'Descuento',
+                  '-${_ticketPrice(order.discountAmount)}',
                 ),
               pw.SizedBox(height: 4),
               pw.Divider(thickness: 1.5, color: PdfColors.black),
@@ -358,7 +358,7 @@ class OrderDetailScreen extends ConsumerWidget {
                       ),
                     ),
                     pw.Text(
-                      Formatters.price(order.total),
+                      _ticketPrice(order.total),
                       style: pw.TextStyle(
                         fontSize: 18,
                         fontWeight: pw.FontWeight.bold,
@@ -396,7 +396,7 @@ class OrderDetailScreen extends ConsumerWidget {
               pw.SizedBox(height: 12),
               pw.Center(
                 child: pw.Text(
-                  '¡Gracias por tu pedido!',
+                  'Gracias por tu pedido!',
                   style: pw.TextStyle(
                     fontSize: 13,
                     fontStyle: pw.FontStyle.italic,
@@ -439,6 +439,9 @@ class OrderDetailScreen extends ConsumerWidget {
       ],
     ),
   );
+
+  String _ticketPrice(double value) =>
+      Formatters.price(value).replaceAll('€', 'EUR');
 }
 
 class _OrderProductsCard extends StatelessWidget {

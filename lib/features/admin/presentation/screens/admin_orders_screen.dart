@@ -937,7 +937,7 @@ class _OrderCardState extends ConsumerState<_OrderCard> {
                       style: const pw.TextStyle(fontSize: 13),
                     ),
                     pw.Text(
-                      Formatters.price(item.subtotal),
+                      _ticketPrice(item.subtotal),
                       style: const pw.TextStyle(fontSize: 13),
                     ),
                   ],
@@ -946,9 +946,9 @@ class _OrderCardState extends ConsumerState<_OrderCard> {
               ],
               pw.Divider(thickness: 1, color: PdfColors.grey400),
               pw.SizedBox(height: 8),
-              _pdfRow('Subtotal', Formatters.price(o.subtotal)),
+              _pdfRow('Subtotal', _ticketPrice(o.subtotal)),
               if (o.deliveryFee > 0)
-                _pdfRow('Envío', Formatters.price(o.deliveryFee)),
+                _pdfRow('Envio', _ticketPrice(o.deliveryFee)),
               pw.SizedBox(height: 4),
               pw.Row(
                 mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
@@ -961,7 +961,7 @@ class _OrderCardState extends ConsumerState<_OrderCard> {
                     ),
                   ),
                   pw.Text(
-                    Formatters.price(o.total),
+                    _ticketPrice(o.total),
                     style: pw.TextStyle(
                       fontSize: 16,
                       fontWeight: pw.FontWeight.bold,
@@ -972,7 +972,7 @@ class _OrderCardState extends ConsumerState<_OrderCard> {
               pw.SizedBox(height: 20),
               pw.Center(
                 child: pw.Text(
-                  '¡Gracias por tu pedido!',
+                  'Gracias por tu pedido!',
                   style: pw.TextStyle(
                     fontSize: 13,
                     fontStyle: pw.FontStyle.italic,
@@ -1012,6 +1012,9 @@ class _OrderCardState extends ConsumerState<_OrderCard> {
           ],
         ),
       );
+
+  String _ticketPrice(double value) =>
+      Formatters.price(value).replaceAll('€', 'EUR');
 
   /// Genera la factura formal A4 con IVA desglosado para el admin.
   Future<void> _downloadFacturaPdf(BuildContext context) async {
@@ -1303,7 +1306,7 @@ class _OrderCardState extends ConsumerState<_OrderCard> {
                                 padding:
                                     const pw.EdgeInsets.only(top: 2),
                                 child: pw.Text(
-                                  '↳ ${items[i].notes}',
+                                  '- ${items[i].notes}',
                                   style: const pw.TextStyle(
                                     fontSize: 9,
                                     color: PdfColors.grey600,

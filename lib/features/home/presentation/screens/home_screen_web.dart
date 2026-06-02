@@ -2857,7 +2857,6 @@ class _WebSubscriptionSection extends ConsumerStatefulWidget {
 
 class _WebSubscriptionSectionState
     extends ConsumerState<_WebSubscriptionSection> {
-  bool _isWhatsApp = false;
   final _ctrl = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
@@ -2869,11 +2868,9 @@ class _WebSubscriptionSectionState
 
   Future<void> _subscribe() async {
     if (!(_formKey.currentState?.validate() ?? false)) return;
-    await ref.read(subscriptionNotifierProvider.notifier).subscribe(
-          type: _isWhatsApp ? 'whatsapp' : 'email',
-          email: _isWhatsApp ? null : _ctrl.text.trim(),
-          phone: _isWhatsApp ? _ctrl.text.trim() : null,
-        );
+      await ref
+      .read(subscriptionNotifierProvider.notifier)
+      .subscribe(email: _ctrl.text.trim());
   }
 
   @override
@@ -2938,7 +2935,7 @@ class _WebSubscriptionSectionState
                     // Descripción
                     Text(
                       'Suscríbete y recibe el menú, las ofertas especiales '
-                      'y las novedades directamente en tu correo o WhatsApp. '
+                      'y las novedades directamente en tu correo. '
                       'Sin spam, solo lo que importa.',
                       style: GoogleFonts.inter(
                         fontSize: 15,
@@ -3002,64 +2999,24 @@ class _WebSubscriptionSectionState
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Text(
-                                'Elige cómo quieres recibir las novedades',
+                                'Recibe novedades por correo',
                                 style: GoogleFonts.inter(
                                   fontSize: 15,
                                   fontWeight: FontWeight.w700,
                                   color: const Color(0xFF111111),
                                 ),
                               ),
-                              const SizedBox(height: 16),
-                              // Toggles Email / WhatsApp
-                              Container(
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFFF2F2F0),
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                padding: const EdgeInsets.all(4),
-                                child: Row(
-                                  children: [
-                                    Expanded(
-                                      child: _TypeToggle(
-                                        label: 'Email',
-                                        icon: Icons.email_outlined,
-                                        selected: !_isWhatsApp,
-                                        onTap: () => setState(() {
-                                          _isWhatsApp = false;
-                                          _ctrl.clear();
-                                        }),
-                                      ),
-                                    ),
-                                    const SizedBox(width: 4),
-                                    Expanded(
-                                      child: _TypeToggle(
-                                        label: 'WhatsApp',
-                                        icon: Icons.chat_bubble_outline,
-                                        selected: _isWhatsApp,
-                                        onTap: () => setState(() {
-                                          _isWhatsApp = true;
-                                          _ctrl.clear();
-                                        }),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
                               const SizedBox(height: 20),
                               // Campo de entrada
                               TextFormField(
                                 controller: _ctrl,
-                                keyboardType: _isWhatsApp
-                                    ? TextInputType.phone
-                                    : TextInputType.emailAddress,
+                                keyboardType: TextInputType.emailAddress,
                                 style: GoogleFonts.inter(
                                   fontSize: 15,
                                   color: const Color(0xFF111111),
                                 ),
                                 decoration: InputDecoration(
-                                  hintText: _isWhatsApp
-                                      ? 'Tu número de WhatsApp'
-                                      : 'Tu correo electrónico',
+                                  hintText: 'Tu correo electrónico',
                                   hintStyle: GoogleFonts.inter(
                                     color: const Color(0xFFAAAAAA),
                                     fontSize: 14,
@@ -3093,9 +3050,7 @@ class _WebSubscriptionSectionState
                                       right: 10,
                                     ),
                                     child: Icon(
-                                      _isWhatsApp
-                                          ? Icons.chat_bubble_outline
-                                          : Icons.email_outlined,
+                                      Icons.email_outlined,
                                       color: AppTokens.brandPrimary,
                                       size: 20,
                                     ),
@@ -3105,10 +3060,9 @@ class _WebSubscriptionSectionState
                                 ),
                                 validator: (v) {
                                   if (v == null || v.trim().isEmpty) {
-                                    return _isWhatsApp
-                                        ? 'Introduce tu número'
-                                        : 'Introduce tu correo';
+                                    return 'Introduce tu correo';
                                   }
+                                  if (!v.contains('@')) return 'Correo no válido';
                                   return null;
                                 },
                               ),
@@ -3141,6 +3095,17 @@ class _WebSubscriptionSectionState
                                         ),
                                       ),
                               ),
+                              if (status == SubscriptionStatus.duplicate) ...[
+                                const SizedBox(height: 10),
+                                const Text(
+                                  'Este correo ya esta suscrito.',
+                                  style: TextStyle(
+                                    color: Colors.orange,
+                                    fontSize: 13,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ],
                               if (status == SubscriptionStatus.error) ...[
                                 const SizedBox(height: 10),
                                 const Text(
@@ -3283,64 +3248,6 @@ class _SubscribedMessage extends StatelessWidget {
             textAlign: TextAlign.center,
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _TypeToggle extends StatelessWidget {
-  const _TypeToggle({
-    required this.label,
-    required this.icon,
-    required this.selected,
-    required this.onTap,
-  });
-
-  final String label;
-  final IconData icon;
-  final bool selected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
-        decoration: BoxDecoration(
-          color: selected ? AppTokens.brandPrimary : Colors.transparent,
-          borderRadius: BorderRadius.circular(9),
-          boxShadow: selected
-              ? [
-                  BoxShadow(
-                    color: AppTokens.brandPrimary.withValues(alpha: 0.25),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                  ),
-                ]
-              : null,
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              icon,
-              size: 17,
-              color: selected ? Colors.white : const Color(0xFF666666),
-            ),
-            const SizedBox(width: 7),
-            Text(
-              label,
-              style: GoogleFonts.inter(
-                color: selected ? Colors.white : const Color(0xFF666666),
-                fontWeight: FontWeight.w600,
-                fontSize: 14,
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }

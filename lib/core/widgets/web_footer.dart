@@ -221,15 +221,30 @@ class WebFooter extends StatelessWidget {
             builder: (context, lc) {
               final narrow = lc.maxWidth < 700;
               final hPad = narrow ? 20.0 : 48.0;
-              const links = Wrap(
+              final links = Wrap(
                 spacing: 24,
                 runSpacing: 8,
                 children: [
-                  _LegalLink(label: 'Aviso legal'),
-                  _LegalLink(label: 'Privacidad'),
-                  _LegalLink(label: 'Cookies'),
-                  _LegalLink(label: 'Términos y condiciones'),
-                  _LegalLink(label: 'Preguntas frecuentes'),
+                  _LegalLink(
+                    label: 'Aviso legal',
+                    onTap: () => context.goNamed(RouteNames.legalNotice),
+                  ),
+                  _LegalLink(
+                    label: 'Privacidad',
+                    onTap: () => context.goNamed(RouteNames.privacyPolicy),
+                  ),
+                  _LegalLink(
+                    label: 'Cookies',
+                    onTap: () => context.goNamed(RouteNames.cookiesPolicy),
+                  ),
+                  _LegalLink(
+                    label: 'Terminos y condiciones',
+                    onTap: () => context.goNamed(RouteNames.termsAndConditions),
+                  ),
+                  _LegalLink(
+                    label: 'Preguntas frecuentes',
+                    onTap: () => context.goNamed(RouteNames.faqLegal),
+                  ),
                 ],
               );
               final copyright = Text(
@@ -253,7 +268,7 @@ class WebFooter extends StatelessWidget {
                           )
                         : Row(
                             children: [
-                              const Expanded(child: links),
+                              Expanded(child: links),
                               copyright,
                             ],
                           ),
@@ -372,9 +387,10 @@ class _SocialCircleState extends State<_SocialCircle> {
 }
 
 class _LegalLink extends StatefulWidget {
-  const _LegalLink({required this.label});
+  const _LegalLink({required this.label, required this.onTap});
 
   final String label;
+  final VoidCallback onTap;
 
   @override
   State<_LegalLink> createState() => _LegalLinkState();
@@ -389,11 +405,14 @@ class _LegalLinkState extends State<_LegalLink> {
       cursor: SystemMouseCursors.click,
       onEnter: (_) => setState(() => _hover = true),
       onExit: (_) => setState(() => _hover = false),
-      child: Text(
-        widget.label,
-        style: GoogleFonts.inter(
-          fontSize: 12,
-          color: _hover ? Colors.white : const Color(0xFF8FBFB0),
+      child: GestureDetector(
+        onTap: widget.onTap,
+        child: Text(
+          widget.label,
+          style: GoogleFonts.inter(
+            fontSize: 12,
+            color: _hover ? Colors.white : const Color(0xFF8FBFB0),
+          ),
         ),
       ),
     );

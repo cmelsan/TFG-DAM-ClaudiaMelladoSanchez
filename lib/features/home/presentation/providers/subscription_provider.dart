@@ -1,10 +1,11 @@
 ﻿import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:sabor_de_casa/core/errors/failures.dart';
 import 'package:sabor_de_casa/features/home/data/repositories/subscription_repository.dart';
 
 part 'subscription_provider.g.dart';
 
 /// Estado de la suscripciÃ³n actual (idle / loading / done / error).
-enum SubscriptionStatus { idle, loading, done, error }
+enum SubscriptionStatus { idle, loading, done, duplicate, error }
 
 /// Notifier para gestionar las suscripciones de newsletter / WhatsApp.
 @riverpod
@@ -12,24 +13,21 @@ class SubscriptionNotifier extends _$SubscriptionNotifier {
   @override
   SubscriptionStatus build() => SubscriptionStatus.idle;
 
-  /// Inserta una suscripciÃ³n en Supabase via SubscriptionRepository.
-  /// [type] debe ser 'email' o 'whatsapp'.
+  /// Inserta suscripcion email en newsletter_subscribers.
   Future<void> subscribe({
-    required String type,
-    String? email,
-    String? phone,
+    required String email,
   }) async {
-    assert(
-      (type == 'email' && email != null) ||
-          (type == 'whatsapp' && phone != null),
-      'email requerido para type=email; phone para type=whatsapp',
-    );
-
     state = SubscriptionStatus.loading;
     try {
       final repo = ref.read(subscriptionRepositoryProvider);
-      await repo.subscribe(type: type, email: email, phone: phone);
+      await repo.subscribe(type: 'email', email: email);
       state = SubscriptionStatus.done;
+    } on DatabaseFailure catch (e) {
+      if (e.code == 'duplicate_email') {
+        state = SubscriptionStatus.duplicate;
+      } else {
+        state = SubscriptionStatus.error;
+      }
     } catch (_) {
       state = SubscriptionStatus.error;
     }

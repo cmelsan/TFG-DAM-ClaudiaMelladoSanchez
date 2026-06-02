@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:sabor_de_casa/core/errors/failures.dart';
 import 'package:sabor_de_casa/services/supabase_service.dart';
@@ -24,12 +26,36 @@ class SubscriptionRepository {
     String? phone,
   }) async {
     try {
-      await _client.from('subscriptions').insert({
-        'type': type,
-        if (email != null) 'email': email,
-        if (phone != null) 'phone': phone,
+      if (type != 'email' || email == null) {
+        throw ArgumentError('Solo se permite suscripcion por email');
+      }
+
+      final normalizedEmail = email.trim().toLowerCase();
+
+      await _client.from('newsletter_subscribers').insert({
+        'email': normalizedEmail,
+        'source': 'home',
+        'locale': 'es',
+        'status': 'active',
       });
+
+      unawaited(
+        _client.functions
+            .invoke(
+              'send-newsletter-welcome',
+              body: {
+                'email': normalizedEmail,
+              },
+            )
+            .then((_) {}, onError: (_) {}),
+      );
     } on PostgrestException catch (e) {
+      if (e.code == '23505') {
+        throw const DatabaseFailure(
+          message: 'Este correo ya esta suscrito',
+          code: 'duplicate_email',
+        );
+      }
       throw DatabaseFailure(message: e.message, code: e.code);
     } catch (e) {
       throw UnexpectedFailure(message: e.toString());

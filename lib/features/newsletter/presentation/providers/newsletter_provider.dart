@@ -53,4 +53,22 @@ class NewsletterAction extends _$NewsletterAction {
     );
     ref.invalidate(newsletterSubscribersProvider);
   }
+
+  Future<int> sendCampaign({
+    required String subject,
+    required String body,
+  }) async {
+    state = const AsyncLoading();
+    final result = await AsyncValue.guard(
+      () => ref
+          .read(newsletterRepositoryProvider)
+          .sendCampaign(subject: subject, body: body),
+    );
+    state = result.when(
+      data: (_) => const AsyncData(null),
+      loading: () => const AsyncLoading(),
+      error: (e, st) => AsyncError(e, st),
+    );
+    return result.value ?? 0;
+  }
 }

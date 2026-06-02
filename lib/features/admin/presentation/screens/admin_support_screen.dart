@@ -47,64 +47,64 @@ class _AdminSupportScreenState extends ConsumerState<AdminSupportScreen> {
         const SizedBox(width: 8),
       ],
       child: threadsAsync.when(
-        loading: () => const Center(child: LoadingIndicator()),
-        error: (error, _) => Center(
-          child: ErrorView(
-            message: error.toString(),
-            onRetry: () => ref.invalidate(adminSupportThreadsProvider),
-          ),
-        ),
-        data: (threads) {
-          final filtered = _filteredThreads(threads);
-          final selected = _selectedThread(filtered);
-          if (selected != null && _selectedThreadId != selected.id) {
-            _selectedThreadId = selected.id;
-          }
+                    loading: () => const Center(child: LoadingIndicator()),
+                    error: (error, _) => Center(
+                      child: ErrorView(
+                        message: error.toString(),
+                        onRetry: () => ref.invalidate(adminSupportThreadsProvider),
+                      ),
+                    ),
+                    data: (threads) {
+                      final filtered = _filteredThreads(threads);
+                      final selected = _selectedThread(filtered);
+                      if (selected != null && _selectedThreadId != selected.id) {
+                        _selectedThreadId = selected.id;
+                      }
 
-          return LayoutBuilder(
-            builder: (context, constraints) {
-              final wide = constraints.maxWidth >= 920;
-              final list = _ThreadList(
-                threads: filtered,
-                selectedId: selected?.id,
-                filter: _filter,
-                onFilterChanged: (value) => setState(() => _filter = value),
-                onSelected: (thread) {
-                  setState(() => _selectedThreadId = thread.id);
-                  ref
-                      .read(supportActionProvider.notifier)
-                      .markRead(thread.id, asAdmin: true);
-                },
-              );
-              final detail = selected == null
-                  ? const _EmptyDetail()
-                  : _ThreadDetail(
-                      thread: selected,
-                      replyCtrl: _replyCtrl,
-                      isSending: actionState.isLoading,
-                      onSend: () => _sendReply(selected),
-                      onClose: () => _closeThread(selected),
-                    );
+                      return LayoutBuilder(
+                        builder: (context, constraints) {
+                          final wide = constraints.maxWidth >= 920;
+                          final list = _ThreadList(
+                            threads: filtered,
+                            selectedId: selected?.id,
+                            filter: _filter,
+                            onFilterChanged: (value) => setState(() => _filter = value),
+                            onSelected: (thread) {
+                              setState(() => _selectedThreadId = thread.id);
+                              ref
+                                  .read(supportActionProvider.notifier)
+                                  .markRead(thread.id, asAdmin: true);
+                            },
+                          );
+                          final detail = selected == null
+                              ? const _EmptyDetail()
+                              : _ThreadDetail(
+                                  thread: selected,
+                                  replyCtrl: _replyCtrl,
+                                  isSending: actionState.isLoading,
+                                  onSend: () => _sendReply(selected),
+                                  onClose: () => _closeThread(selected),
+                                );
 
-              if (!wide) {
-                return Column(
-                  children: [
-                    SizedBox(height: 280, child: list),
-                    Expanded(child: detail),
-                  ],
-                );
-              }
-              return Row(
-                children: [
-                  SizedBox(width: 380, child: list),
-                  const VerticalDivider(width: 1, color: Color(0xFFE8E5E0)),
-                  Expanded(child: detail),
-                ],
-              );
-            },
-          );
-        },
-      ),
+                          if (!wide) {
+                            return Column(
+                              children: [
+                                SizedBox(height: 280, child: list),
+                                Expanded(child: detail),
+                              ],
+                            );
+                          }
+                          return Row(
+                            children: [
+                              SizedBox(width: 380, child: list),
+                              const VerticalDivider(width: 1, color: Color(0xFFE8E5E0)),
+                              Expanded(child: detail),
+                            ],
+                          );
+                        },
+                      );
+                    },
+                  ),
     );
   }
 

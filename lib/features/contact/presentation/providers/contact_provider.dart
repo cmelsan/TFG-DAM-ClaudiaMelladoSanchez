@@ -1,7 +1,9 @@
 import 'dart:async';
 
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:sabor_de_casa/features/contact/data/repositories/contact_repository.dart';
+import 'package:sabor_de_casa/features/contact/domain/models/contact_admin_message.dart';
 
 part 'contact_provider.g.dart';
 
@@ -31,3 +33,30 @@ class ContactSubmit extends _$ContactSubmit {
     );
   }
 }
+
+final adminContactMessagesProvider = FutureProvider<List<ContactAdminMessage>>((
+  ref,
+) async {
+  return ref.read(contactRepositoryProvider).getAdminMessages();
+});
+
+class ContactAdminActionNotifier extends StateNotifier<AsyncValue<void>> {
+  ContactAdminActionNotifier(this._ref) : super(const AsyncData(null));
+
+  final Ref _ref;
+
+  Future<void> markRead(String id, {required bool isRead}) async {
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(
+      () => _ref
+          .read(contactRepositoryProvider)
+          .markAdminMessageRead(id, isRead: isRead),
+    );
+    _ref.invalidate(adminContactMessagesProvider);
+  }
+}
+
+final contactAdminActionProvider =
+    StateNotifierProvider<ContactAdminActionNotifier, AsyncValue<void>>(
+      ContactAdminActionNotifier.new,
+    );

@@ -12,7 +12,6 @@ import 'package:sabor_de_casa/core/widgets/web_footer.dart';
 import 'package:sabor_de_casa/core/widgets/web_navbar.dart';
 import 'package:sabor_de_casa/features/auth/presentation/providers/auth_provider.dart';
 import 'package:sabor_de_casa/features/contact/presentation/providers/contact_provider.dart';
-import 'package:sabor_de_casa/features/newsletter/presentation/widgets/newsletter_opt_in.dart';
 import 'package:sabor_de_casa/features/support/domain/models/support_thread.dart';
 import 'package:sabor_de_casa/features/support/presentation/providers/support_provider.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -31,15 +30,16 @@ class _ContactScreenState extends ConsumerState<ContactScreen> {
   final _emailCtrl = TextEditingController();
   final _phoneCtrl = TextEditingController();
   final _messageCtrl = TextEditingController();
+  final _supportNameCtrl = TextEditingController();
+  final _supportEmailCtrl = TextEditingController();
   final _supportSubjectCtrl = TextEditingController();
   final _supportMessageCtrl = TextEditingController();
   late final ScrollController _scrollCtrl;
 
   String? _selectedType;
-  String _supportCategory = 'general';
   bool _isScrolled = false;
 
-  static const _whatsAppPhone = '34900123456';
+  static const _whatsAppPhone = '34658284920';
 
   @override
   void initState() {
@@ -57,6 +57,8 @@ class _ContactScreenState extends ConsumerState<ContactScreen> {
     _emailCtrl.dispose();
     _phoneCtrl.dispose();
     _messageCtrl.dispose();
+    _supportNameCtrl.dispose();
+    _supportEmailCtrl.dispose();
     _supportSubjectCtrl.dispose();
     _supportMessageCtrl.dispose();
     _scrollCtrl.dispose();
@@ -68,6 +70,10 @@ class _ContactScreenState extends ConsumerState<ContactScreen> {
     final submitState = ref.watch(contactSubmitProvider);
     final supportState = ref.watch(supportActionProvider);
     final profile = ref.watch(authNotifierProvider).valueOrNull;
+    if (profile != null) {
+      if (_supportNameCtrl.text.isEmpty) _supportNameCtrl.text = profile.fullName ?? '';
+      if (_supportEmailCtrl.text.isEmpty) _supportEmailCtrl.text = profile.email;
+    }
     final screenW = MediaQuery.sizeOf(context).width;
     const maxW = 1180.0;
     final sidePad = screenW > maxW ? (screenW - maxW) / 2 : 0.0;
@@ -75,7 +81,7 @@ class _ContactScreenState extends ConsumerState<ContactScreen> {
     ref
       ..listen(contactSubmitProvider, (prev, next) {
         if ((prev?.isLoading ?? false) && next.hasValue) {
-          _showSnack('Mensaje enviado. Lo revisaremos desde administracion.');
+          _showSnack('Correo enviado. Te responderemos en tu bandeja de entrada.');
           _formKey.currentState?.reset();
           _nameCtrl.clear();
           _emailCtrl.clear();
@@ -92,8 +98,7 @@ class _ContactScreenState extends ConsumerState<ContactScreen> {
           _supportFormKey.currentState?.reset();
           _supportSubjectCtrl.clear();
           _supportMessageCtrl.clear();
-          setState(() => _supportCategory = 'general');
-          _showSnack('Conversacion abierta. El equipo podra responderte aqui.');
+          _showSnack('Mensaje enviado. El equipo lo revisara y te respondera pronto.');
         }
         if ((prev?.isLoading ?? false) && next.hasError) {
           _showSnack('No se ha podido abrir la conversacion.', isError: true);
@@ -131,12 +136,11 @@ class _ContactScreenState extends ConsumerState<ContactScreen> {
               sidePad: sidePad,
               isLoggedIn: profile != null,
               formKey: _supportFormKey,
+              nameCtrl: _supportNameCtrl,
+              emailCtrl: _supportEmailCtrl,
               subjectCtrl: _supportSubjectCtrl,
               messageCtrl: _supportMessageCtrl,
-              category: _supportCategory,
               isLoading: supportState.isLoading,
-              onCategoryChanged: (value) =>
-                  setState(() => _supportCategory = value),
               onSubmit: _submitSupport,
               onLogin: () => context.goNamed(RouteNames.login),
             ),
@@ -156,7 +160,6 @@ class _ContactScreenState extends ConsumerState<ContactScreen> {
             ),
           ),
           SliverToBoxAdapter(child: _InfoSection(sidePad: sidePad)),
-          SliverToBoxAdapter(child: _NewsletterSection(sidePad: sidePad)),
           const SliverToBoxAdapter(child: WebFooter()),
         ],
       ),
@@ -189,7 +192,7 @@ class _ContactScreenState extends ConsumerState<ContactScreen> {
         .read(supportActionProvider.notifier)
         .createThread(
           subject: _supportSubjectCtrl.text,
-          category: _supportCategory,
+          category: 'general',
           message: _supportMessageCtrl.text,
         );
   }
@@ -428,9 +431,9 @@ class _ChannelSection extends StatelessWidget {
     final cards = [
       _ChannelData(
         Icons.forum_rounded,
-        'Mensajes internos',
-        'Crea un hilo privado y conserva la respuesta en tu cuenta.',
-        'Abrir soporte',
+        'Escríbenos un mensaje',
+        'Rellena el formulario con tu consulta y conserva la respuesta en tu cuenta.',
+        'Ir al formulario',
         onSupport,
       ),
       _ChannelData(
@@ -442,9 +445,9 @@ class _ChannelSection extends StatelessWidget {
       ),
       _ChannelData(
         Icons.mail_outline_rounded,
-        'Formulario publico',
-        'Consultas generales sin iniciar sesion.',
-        'Enviar formulario',
+        'Correo electronico',
+        'Contactanos por email sin cuenta. Te respondemos en tu bandeja de entrada.',
+        'Enviar correo',
         onForm,
       ),
       _ChannelData(
@@ -493,11 +496,11 @@ class _SupportSection extends ConsumerWidget {
     required this.sidePad,
     required this.isLoggedIn,
     required this.formKey,
+    required this.nameCtrl,
+    required this.emailCtrl,
     required this.subjectCtrl,
     required this.messageCtrl,
-    required this.category,
     required this.isLoading,
-    required this.onCategoryChanged,
     required this.onSubmit,
     required this.onLogin,
   });
@@ -505,11 +508,11 @@ class _SupportSection extends ConsumerWidget {
   final double sidePad;
   final bool isLoggedIn;
   final GlobalKey<FormState> formKey;
+  final TextEditingController nameCtrl;
+  final TextEditingController emailCtrl;
   final TextEditingController subjectCtrl;
   final TextEditingController messageCtrl;
-  final String category;
   final bool isLoading;
-  final ValueChanged<String> onCategoryChanged;
   final VoidCallback onSubmit;
   final VoidCallback onLogin;
 
@@ -538,12 +541,12 @@ class _SupportSection extends ConsumerWidget {
                   Expanded(
                     child: _SupportComposer(
                       formKey: formKey,
+                      nameCtrl: nameCtrl,
+                      emailCtrl: emailCtrl,
                       subjectCtrl: subjectCtrl,
                       messageCtrl: messageCtrl,
-                      category: category,
                       isLoggedIn: isLoggedIn,
                       isLoading: isLoading,
-                      onCategoryChanged: onCategoryChanged,
                       onSubmit: onSubmit,
                       onLogin: onLogin,
                     ),
@@ -558,12 +561,12 @@ class _SupportSection extends ConsumerWidget {
                   const SizedBox(height: 22),
                   _SupportComposer(
                     formKey: formKey,
+                    nameCtrl: nameCtrl,
+                    emailCtrl: emailCtrl,
                     subjectCtrl: subjectCtrl,
                     messageCtrl: messageCtrl,
-                    category: category,
                     isLoggedIn: isLoggedIn,
                     isLoading: isLoading,
-                    onCategoryChanged: onCategoryChanged,
                     onSubmit: onSubmit,
                     onLogin: onLogin,
                   ),
@@ -606,7 +609,7 @@ class _FormSection extends StatelessWidget {
     final width = MediaQuery.sizeOf(context).width;
     final twoCol = width >= 720;
     return ColoredBox(
-      color: const Color(0xFFF5F2EC),
+      color: Colors.white,
       child: Padding(
         padding: EdgeInsets.fromLTRB(sidePad + 24, 72, sidePad + 24, 72),
         child: Center(
@@ -625,10 +628,10 @@ class _FormSection extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const _TinyLabel(label: 'FORMULARIO PUBLICO'),
+                    const _TinyLabel(label: 'CORREO ELECTRONICO'),
                     const SizedBox(height: 12),
                     Text(
-                      'Tambien puedes escribirnos sin iniciar sesion',
+                      'Contactanos por correo',
                       style: GoogleFonts.inter(
                         fontSize: width < 620 ? 28 : 36,
                         fontWeight: FontWeight.w900,
@@ -637,7 +640,7 @@ class _FormSection extends StatelessWidget {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'Este mensaje llega al panel de administracion como consulta pendiente.',
+                      'Redacta tu mensaje y te respondemos directamente en tu bandeja de entrada. No necesitas tener cuenta.',
                       style: GoogleFonts.inter(
                         fontSize: 14,
                         color: const Color(0xFF77716B),
@@ -760,7 +763,7 @@ class _FormSection extends StatelessWidget {
                         label: Text(
                           submitState.isLoading
                               ? 'Enviando...'
-                              : 'Enviar consulta',
+                              : 'Enviar correo',
                           style: GoogleFonts.inter(fontWeight: FontWeight.w800),
                         ),
                       ),
@@ -782,28 +785,28 @@ class _InfoSection extends StatelessWidget {
 
   static const _faq = [
     (
-      '¿Cuando debo usar el soporte interno?',
-      'Cuando tengas cuenta y quieras conservar la conversacion dentro de la app. Es la mejor opcion para pedidos, cambios o seguimiento.',
+      '¿Que canal debo usar para cada caso?',
+      'Usa soporte interno si tienes cuenta y quieres seguimiento en app. Usa correo para consultas generales. Usa WhatsApp para urgencias del mismo dia.',
     ),
     (
-      '¿Cuando es mejor escribir por WhatsApp?',
-      'Para dudas urgentes del mismo dia: recogidas, retrasos, cambios de hora o incidencias que necesitan respuesta rapida.',
+      '¿Formulario por correo requiere cuenta?',
+      'No. Puedes escribir sin iniciar sesion y te responderemos en email que indiques.',
     ),
     (
-      '¿Puedo preguntar por catering desde aqui?',
-      'Si, pero para presupuestos completos recomendamos entrar en Catering porque recoge fecha, invitados, menu y preferencias del evento.',
+      '¿Donde recibo respuesta si uso formulario por correo?',
+      'Respuesta llega a bandeja de entrada del email que pongas en formulario. Revisa tambien spam o promociones.',
     ),
     (
-      '¿El formulario publico requiere iniciar sesion?',
-      'No. Sirve para consultas generales, colaboraciones, ofertas de trabajo o mensajes de personas que aun no tienen cuenta.',
+      '¿Donde veo respuesta del soporte interno?',
+      'Si abriste consulta interna, respuesta aparece en tus conversaciones dentro de perfil.',
     ),
     (
-      '¿Donde veo la respuesta del admin?',
-      'Las respuestas del soporte interno aparecen en tus hilos de contacto. Los mensajes del formulario publico se responden por email o telefono.',
+      '¿Puedo consultar catering desde contacto?',
+      'Si, pero para presupuesto completo usa seccion Catering: ahi pedimos fecha, invitados y detalles de menu.',
     ),
     (
-      '¿Cuanto tardais en responder?',
-      'Las consultas internas y formularios se revisan durante el horario de servicio. Las urgencias deben ir por WhatsApp.',
+      '¿Cuanto tarda respuesta?',
+      'Consultas se revisan en horario de servicio. Si incidencia urgente, escribe por WhatsApp.',
     ),
   ];
 
@@ -861,7 +864,7 @@ class _SupportIntro extends StatelessWidget {
         const _TinyLabel(label: 'SOPORTE INTERNO', dark: true),
         const SizedBox(height: 16),
         Text(
-          'Tu conversacion queda dentro de Sabor de Casa.',
+          'Escríbenos con tu consulta o incidencia.',
           style: GoogleFonts.inter(
             fontSize: 34,
             height: 1.04,
@@ -871,7 +874,7 @@ class _SupportIntro extends StatelessWidget {
         ),
         const SizedBox(height: 14),
         Text(
-          'Para clientes registrados: abre un hilo, consulta respuestas y evita perder datos entre emails o llamadas.',
+          'Para clientes registrados: rellena el formulario, el equipo lo revisara y podras ver la respuesta en tu perfil.',
           style: GoogleFonts.inter(
             fontSize: 15,
             height: 1.6,
@@ -899,23 +902,23 @@ class _SupportIntro extends StatelessWidget {
 class _SupportComposer extends StatelessWidget {
   const _SupportComposer({
     required this.formKey,
+    required this.nameCtrl,
+    required this.emailCtrl,
     required this.subjectCtrl,
     required this.messageCtrl,
-    required this.category,
     required this.isLoggedIn,
     required this.isLoading,
-    required this.onCategoryChanged,
     required this.onSubmit,
     required this.onLogin,
   });
 
   final GlobalKey<FormState> formKey;
+  final TextEditingController nameCtrl;
+  final TextEditingController emailCtrl;
   final TextEditingController subjectCtrl;
   final TextEditingController messageCtrl;
-  final String category;
   final bool isLoggedIn;
   final bool isLoading;
-  final ValueChanged<String> onCategoryChanged;
   final VoidCallback onSubmit;
   final VoidCallback onLogin;
 
@@ -933,7 +936,7 @@ class _SupportComposer extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Abrir nuevo hilo',
+              'Envianos tu mensaje',
               style: GoogleFonts.inter(
                 fontSize: 17,
                 fontWeight: FontWeight.w900,
@@ -941,9 +944,22 @@ class _SupportComposer extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 14),
-            _SupportCategoryPicker(
-              value: category,
-              onChanged: onCategoryChanged,
+            _Field(
+              controller: nameCtrl,
+              label: 'Nombre completo',
+              icon: Icons.person_outline,
+              readOnly: true,
+              validator: (v) =>
+                  Validators.required(v) ?? Validators.maxLength(v, 100),
+            ),
+            const SizedBox(height: 12),
+            _Field(
+              controller: emailCtrl,
+              label: 'Email',
+              icon: Icons.email_outlined,
+              readOnly: true,
+              keyboardType: TextInputType.emailAddress,
+              validator: Validators.email,
             ),
             const SizedBox(height: 12),
             _Field(
@@ -956,7 +972,7 @@ class _SupportComposer extends StatelessWidget {
             const SizedBox(height: 12),
             _Field(
               controller: messageCtrl,
-              label: 'Mensaje inicial',
+              label: 'Tu mensaje',
               icon: Icons.mode_comment_outlined,
               maxLines: 4,
               validator: (v) =>
@@ -985,12 +1001,12 @@ class _SupportComposer extends StatelessWidget {
                         ),
                       )
                     : Icon(
-                        isLoggedIn ? Icons.forum_rounded : Icons.login_rounded,
+                        isLoggedIn ? Icons.send_rounded : Icons.login_rounded,
                       ),
                 label: Text(
                   isLoggedIn
-                      ? 'Crear conversacion'
-                      : 'Entrar para usar soporte',
+                      ? 'Enviar mensaje'
+                      : 'Entrar para enviar',
                   style: GoogleFonts.inter(fontWeight: FontWeight.w800),
                 ),
               ),
@@ -1150,47 +1166,6 @@ class _TypeDropdown extends StatelessWidget {
   }
 }
 
-class _SupportCategoryPicker extends StatelessWidget {
-  const _SupportCategoryPicker({required this.value, required this.onChanged});
-  final String value;
-  final ValueChanged<String> onChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    const options = [
-      ('general', 'General', Icons.support_agent_rounded),
-      ('order', 'Pedido', Icons.receipt_long_rounded),
-      ('catering', 'Catering', Icons.celebration_rounded),
-      ('incident', 'Incidencia', Icons.report_problem_rounded),
-    ];
-    return Wrap(
-      spacing: 8,
-      runSpacing: 8,
-      children: options.map((option) {
-        final selected = value == option.$1;
-        return ChoiceChip(
-          selected: selected,
-          avatar: Icon(
-            option.$3,
-            size: 16,
-            color: selected ? Colors.white : AppTokens.brandPrimary,
-          ),
-          label: Text(option.$2),
-          labelStyle: GoogleFonts.inter(
-            color: selected ? Colors.white : AppTokens.surfaceDark,
-            fontWeight: FontWeight.w800,
-            fontSize: 12,
-          ),
-          selectedColor: AppTokens.brandPrimary,
-          backgroundColor: AppTokens.brandLight,
-          side: BorderSide.none,
-          onSelected: (_) => onChanged(option.$1),
-        );
-      }).toList(),
-    );
-  }
-}
-
 class _Field extends StatelessWidget {
   const _Field({
     required this.controller,
@@ -1199,6 +1174,7 @@ class _Field extends StatelessWidget {
     this.validator,
     this.keyboardType,
     this.maxLines = 1,
+    this.readOnly = false,
   });
   final TextEditingController controller;
   final String label;
@@ -1206,6 +1182,7 @@ class _Field extends StatelessWidget {
   final String? Function(String?)? validator;
   final TextInputType? keyboardType;
   final int maxLines;
+  final bool readOnly;
 
   @override
   Widget build(BuildContext context) {
@@ -1213,6 +1190,7 @@ class _Field extends StatelessWidget {
       controller: controller,
       keyboardType: keyboardType,
       maxLines: maxLines,
+      readOnly: readOnly,
       validator: validator,
       style: GoogleFonts.inter(fontSize: 14),
       decoration: _inputDecoration(label, icon),
@@ -1531,47 +1509,3 @@ IconData _categoryIcon(String category) => switch (category) {
   'incident' => Icons.report_problem_rounded,
   _ => Icons.support_agent_rounded,
 };
-
-class _NewsletterSection extends StatelessWidget {
-  const _NewsletterSection({required this.sidePad});
-  final double sidePad;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.fromLTRB(sidePad, 48, sidePad, 56),
-      color: AppTokens.brandLight,
-      child: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 720),
-          child: Column(
-            children: [
-              Text(
-                'Recibe nuestras novedades',
-                textAlign: TextAlign.center,
-                style: GoogleFonts.syne(
-                  fontSize: 26,
-                  fontWeight: FontWeight.w900,
-                  color: AppTokens.surfaceDark,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Menú del día, promociones y eventos directamente en tu email. Sin spam.',
-                textAlign: TextAlign.center,
-                style: GoogleFonts.inter(
-                  color: const Color(0xFF77716B),
-                  fontSize: 14,
-                  height: 1.5,
-                ),
-              ),
-              const SizedBox(height: 20),
-              const NewsletterOptIn(source: 'contact_page'),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}

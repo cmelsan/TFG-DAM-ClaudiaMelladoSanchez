@@ -13,6 +13,8 @@ import 'package:sabor_de_casa/core/widgets/web_navbar.dart';
 import 'package:sabor_de_casa/features/auth/presentation/providers/auth_provider.dart';
 import 'package:sabor_de_casa/features/notifications/presentation/providers/notifications_provider.dart';
 import 'package:sabor_de_casa/features/profile/presentation/providers/profile_provider.dart';
+import 'package:sabor_de_casa/features/support/domain/models/support_thread.dart';
+import 'package:sabor_de_casa/features/support/presentation/providers/support_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 const _kBgDark = Color(0xFF0D3B2E);
@@ -353,6 +355,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       _AddressesSection(
                         onAddNew: () => _showAddAddressSheet(context),
                       ),
+                      const SizedBox(height: 32),
+
+                      // Soporte interno
+                      const _SectionLabel('Mis conversaciones de soporte'),
+                      const SizedBox(height: 12),
+                      const _ProfileSupportThreadsCard(),
                       const SizedBox(height: 32),
 
                       // Mi cuenta
@@ -1139,6 +1147,383 @@ class _AddressesSection extends ConsumerWidget {
           }).toList(),
         );
       },
+    );
+  }
+}
+
+class _ProfileSupportThreadsCard extends ConsumerWidget {
+  const _ProfileSupportThreadsCard();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final threadsAsync = ref.watch(mySupportThreadsProvider);
+    return Container(
+      decoration: BoxDecoration(
+        color: _cardBg(context),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: _borderColor(context)),
+      ),
+      child: threadsAsync.when(
+        loading: () => const Padding(
+          padding: EdgeInsets.all(24),
+          child: Center(child: LoadingIndicator()),
+        ),
+        error: (error, _) => Padding(
+          padding: const EdgeInsets.all(18),
+          child: Text(
+            'No se han podido cargar tus conversaciones: $error',
+            style: TextStyle(color: _textMuted(context), fontSize: 13),
+          ),
+        ),
+        data: (threads) {
+          if (threads.isEmpty) {
+            return Padding(
+              padding: const EdgeInsets.all(18),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Aun no tienes conversaciones internas.',
+                    style: TextStyle(
+                      color: _textMuted(context),
+                      fontSize: 13,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  TextButton.icon(
+                    onPressed: () => context.pushNamed(RouteNames.contact),
+                    icon: const Icon(Icons.add_comment_outlined, size: 16),
+                    label: const Text('Abrir conversación'),
+                    style: TextButton.styleFrom(
+                      foregroundColor: AppTokens.brandPrimary,
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }
+
+          return Padding(
+            padding: const EdgeInsets.all(12),
+            child: Column(
+              children: [
+                for (final thread in threads.take(3))
+                  _SupportThreadTile(
+                    thread: thread,
+                    onTap: () => showModalBottomSheet<void>(
+                      context: context,
+                      isScrollControlled: true,
+                      backgroundColor: Colors.transparent,
+                      builder: (_) => _ThreadDetailSheet(thread: thread),
+                    ),
+                  ),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton.icon(
+                    onPressed: () => context.pushNamed(RouteNames.contact),
+                    icon: const Icon(Icons.forum_outlined, size: 16),
+                    label: const Text('Ver todas en Contacto'),
+                    style: TextButton.styleFrom(
+                      foregroundColor: AppTokens.brandPrimary,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _SupportThreadTile extends StatelessWidget {
+  const _SupportThreadTile({required this.thread, this.onTap});
+
+  final SupportThread thread;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final unread = thread.unreadForCustomer;
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 8),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: Theme.of(context).brightness == Brightness.dark
+              ? const Color(0xFF222222)
+              : const Color(0xFFFAF8F4),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: _borderColor(context)),
+        ),
+        child: Row(
+          children: [
+            const Icon(Icons.support_agent_outlined, color: AppTokens.brandPrimary),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    thread.subject,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: _textMain(context),
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 3),
+                  Text(
+                    thread.lastMessage ?? 'Sin mensajes',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(color: _textMuted(context), fontSize: 12),
+                  ),
+                ],
+              ),
+            ),
+            if (unread > 0)
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(
+                  color: AppTokens.brandPrimary,
+                  borderRadius: BorderRadius.circular(999),
+                ),
+                child: Text(
+                  '$unread',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            const SizedBox(width: 4),
+            const Icon(Icons.chevron_right_rounded, color: AppTokens.brandPrimary, size: 20),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ThreadDetailSheet extends ConsumerStatefulWidget {
+  const _ThreadDetailSheet({required this.thread});
+  final SupportThread thread;
+
+  @override
+  ConsumerState<_ThreadDetailSheet> createState() => _ThreadDetailSheetState();
+}
+
+class _ThreadDetailSheetState extends ConsumerState<_ThreadDetailSheet> {
+  final _replyCtrl = TextEditingController();
+  bool _sending = false;
+
+  @override
+  void dispose() {
+    _replyCtrl.dispose();
+    super.dispose();
+  }
+
+  Future<void> _sendReply() async {
+    final body = _replyCtrl.text.trim();
+    if (body.isEmpty) return;
+    setState(() => _sending = true);
+    try {
+      await ref
+          .read(supportActionProvider.notifier)
+          .sendMessage(threadId: widget.thread.id, body: body, asAdmin: false);
+      _replyCtrl.clear();
+    } finally {
+      if (mounted) setState(() => _sending = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final messagesAsync = ref.watch(supportMessagesProvider(widget.thread.id));
+    final closed = widget.thread.status == 'closed';
+    final maxH = MediaQuery.of(context).size.height * 0.85;
+
+    return Container(
+      constraints: BoxConstraints(maxHeight: maxH),
+      decoration: BoxDecoration(
+        color: _cardBg(context),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      child: Column(
+        children: [
+          // Handle
+          Center(
+            child: Container(
+              margin: const EdgeInsets.only(top: 12, bottom: 8),
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: _borderColor(context),
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+          ),
+          // Header
+          Padding(
+            padding: const EdgeInsets.fromLTRB(18, 4, 18, 10),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    widget.thread.subject,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                      color: _textMain(context),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: closed
+                        ? const Color(0xFFEDE8E1)
+                        : AppTokens.brandLight,
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                  child: Text(
+                    closed ? 'Cerrado' : 'Abierto',
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                      color: closed ? const Color(0xFF9A9188) : AppTokens.brandPrimary,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const Divider(height: 1),
+          // Messages
+          Expanded(
+            child: messagesAsync.when(
+              loading: () => const Center(child: LoadingIndicator()),
+              error: (e, _) => Center(
+                child: Text('Error al cargar mensajes', style: TextStyle(color: _textMuted(context))),
+              ),
+              data: (messages) {
+                if (messages.isEmpty) {
+                  return Center(
+                    child: Text(
+                      'No hay mensajes aún.',
+                      style: TextStyle(color: _textMuted(context), fontSize: 13),
+                    ),
+                  );
+                }
+                return ListView.builder(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  itemCount: messages.length,
+                  itemBuilder: (_, i) {
+                    final msg = messages[i];
+                    final fromAdmin = msg.senderRole == 'admin';
+                    return Align(
+                      alignment: fromAdmin ? Alignment.centerRight : Alignment.centerLeft,
+                      child: Container(
+                        constraints: const BoxConstraints(maxWidth: 320),
+                        margin: const EdgeInsets.only(bottom: 10),
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: fromAdmin ? AppTokens.brandPrimary : const Color(0xFFF3F0EC),
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              fromAdmin ? 'Admin' : 'Tú',
+                              style: TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w700,
+                                color: fromAdmin ? Colors.white70 : AppTokens.brandPrimary,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              msg.body,
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: fromAdmin ? Colors.white : _textMain(context),
+                                height: 1.4,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+          // Reply box or closed notice
+          if (closed)
+            Padding(
+              padding: EdgeInsets.fromLTRB(
+                16, 8, 16, MediaQuery.of(context).viewInsets.bottom + 16),
+              child: Text(
+                'Conversación cerrada · El equipo la ha marcado como resuelta.',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 12, color: _textMuted(context)),
+              ),
+            )
+          else
+            Padding(
+              padding: EdgeInsets.fromLTRB(
+                12, 8, 12, MediaQuery.of(context).viewInsets.bottom + 12),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _replyCtrl,
+                      textInputAction: TextInputAction.send,
+                      onSubmitted: (_) => _sendReply(),
+                      decoration: InputDecoration(
+                        hintText: 'Escribe tu respuesta...',
+                        hintStyle: TextStyle(color: _textMuted(context), fontSize: 13),
+                        filled: true,
+                        fillColor: Theme.of(context).brightness == Brightness.dark
+                            ? const Color(0xFF2A2A2A)
+                            : const Color(0xFFF5F2ED),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide.none,
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  IconButton.filled(
+                    onPressed: _sending ? null : _sendReply,
+                    style: IconButton.styleFrom(backgroundColor: AppTokens.brandPrimary),
+                    icon: _sending
+                        ? const SizedBox(
+                            width: 18,
+                            height: 18,
+                            child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                          )
+                        : const Icon(Icons.send_rounded, color: Colors.white, size: 18),
+                  ),
+                ],
+              ),
+            ),
+        ],
+      ),
     );
   }
 }

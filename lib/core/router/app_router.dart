@@ -34,6 +34,7 @@ import 'package:sabor_de_casa/features/group_order/presentation/screens/group_or
 import 'package:sabor_de_casa/features/home/presentation/screens/home_screen.dart';
 import 'package:sabor_de_casa/features/kitchen/presentation/screens/kitchen_screen.dart';
 import 'package:sabor_de_casa/features/kitchen/presentation/screens/pickup_screen.dart';
+import 'package:sabor_de_casa/features/legal/presentation/screens/legal_page_screen.dart';
 import 'package:sabor_de_casa/features/menu/presentation/screens/dish_detail_screen.dart';
 import 'package:sabor_de_casa/features/menu/presentation/screens/favorites_screen.dart';
 import 'package:sabor_de_casa/features/menu/presentation/screens/menu_screen.dart';
@@ -210,6 +211,31 @@ GoRouter appRouter(AppRouterRef ref) {
         path: '/catering',
         name: RouteNames.catering,
         builder: (_, __) => const CateringScreen(),
+      ),
+      GoRoute(
+        path: '/legal/aviso-legal',
+        name: RouteNames.legalNotice,
+        builder: (_, __) => const LegalPageScreen(type: LegalPageType.legalNotice),
+      ),
+      GoRoute(
+        path: '/legal/privacidad',
+        name: RouteNames.privacyPolicy,
+        builder: (_, __) => const LegalPageScreen(type: LegalPageType.privacy),
+      ),
+      GoRoute(
+        path: '/legal/cookies',
+        name: RouteNames.cookiesPolicy,
+        builder: (_, __) => const LegalPageScreen(type: LegalPageType.cookies),
+      ),
+      GoRoute(
+        path: '/legal/terminos-y-condiciones',
+        name: RouteNames.termsAndConditions,
+        builder: (_, __) => const LegalPageScreen(type: LegalPageType.terms),
+      ),
+      GoRoute(
+        path: '/legal/preguntas-frecuentes',
+        name: RouteNames.faqLegal,
+        builder: (_, __) => const LegalPageScreen(type: LegalPageType.faq),
       ),
       GoRoute(
         path: '/favorites',

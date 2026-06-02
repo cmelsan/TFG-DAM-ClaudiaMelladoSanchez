@@ -26,7 +26,7 @@ class NewsletterRepository {
           .order('created_at', ascending: false);
       return data.map(NewsletterSubscriber.fromJson).toList();
     } on PostgrestException catch (e) {
-      // Tabla aún no migrada: devuelve lista vacía en lugar de romper.
+      // Tabla aun no migrada: devuelve lista vacia en lugar de romper.
       if (e.code == 'PGRST205' || e.code == '42P01') return const [];
       throw DatabaseFailure(message: e.message, code: e.code);
     } catch (e) {
@@ -34,7 +34,6 @@ class NewsletterRepository {
     }
   }
 
-  /// Alta pública desde el footer / contacto.
   Future<void> subscribe({
     required String email,
     String? fullName,
@@ -42,20 +41,39 @@ class NewsletterRepository {
     String locale = 'es',
   }) async {
     try {
+      final normalizedEmail = email.trim().toLowerCase();
       await _client.from(_table).insert({
-        'email': email.trim().toLowerCase(),
+        'email': normalizedEmail,
         'full_name': fullName,
         'source': source,
         'locale': locale,
         'status': 'active',
       });
+
+      _sendWelcomeEmail(email: normalizedEmail, fullName: fullName);
     } on PostgrestException catch (e) {
-      // Email duplicado → tratamos como éxito silencioso.
-      if (e.code == '23505') return;
+      if (e.code == '23505') {
+        throw const DatabaseFailure(
+          message: 'Este correo ya esta suscrito',
+          code: 'duplicate_email',
+        );
+      }
       throw DatabaseFailure(message: e.message, code: e.code);
     } catch (e) {
       throw UnexpectedFailure(message: e.toString());
     }
+  }
+
+  void _sendWelcomeEmail({required String email, String? fullName}) {
+    _client.functions
+        .invoke(
+          'send-newsletter-welcome',
+          body: {
+            'email': email,
+            'full_name': fullName,
+          },
+        )
+        .then((_) {}, onError: (_) {});
   }
 
   Future<void> updateStatus({
@@ -81,6 +99,41 @@ class NewsletterRepository {
   Future<void> remove(String id) async {
     try {
       await _client.from(_table).delete().eq('id', id);
+    } on PostgrestException catch (e) {
+      throw DatabaseFailure(message: e.message, code: e.code);
+    } catch (e) {
+      throw UnexpectedFailure(message: e.toString());
+    }
+  }
+
+  Future<int> sendCampaign({
+    required String subject,
+    required String body,
+  }) async {
+    try {
+      final response = await _client.functions.invoke(
+        'send-newsletter-campaign',
+        body: {
+          'subject': subject,
+          'body': body,
+        },
+      );
+
+      if (response.status != 200) {
+        throw const UnexpectedFailure(message: 'Error enviando campana');
+      }
+
+      final data = response.data;
+      if (data is Map<String, dynamic>) {
+        final sent = data['sentCount'];
+        if (sent is int) return sent;
+        if (sent is num) return sent.toInt();
+      }
+      return 0;
+    } on FunctionException catch (e) {
+      throw UnexpectedFailure(
+        message: e.details?.toString() ?? e.reasonPhrase ?? 'Error en funcion',
+      );
     } on PostgrestException catch (e) {
       throw DatabaseFailure(message: e.message, code: e.code);
     } catch (e) {

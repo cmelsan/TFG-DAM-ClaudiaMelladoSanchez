@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:sabor_de_casa/core/errors/failures.dart';
 import 'package:sabor_de_casa/core/theme/app_tokens.dart';
 import 'package:sabor_de_casa/core/widgets/error_view.dart';
 import 'package:sabor_de_casa/core/widgets/loading_indicator.dart';
@@ -22,6 +23,16 @@ class _AdminNewsletterScreenState
     extends ConsumerState<AdminNewsletterScreen> {
   String _query = '';
   String _statusFilter = 'all';
+  final _subjectCtrl = TextEditingController();
+  final _bodyCtrl = TextEditingController();
+  bool _sendingCampaign = false;
+
+  @override
+  void dispose() {
+    _subjectCtrl.dispose();
+    _bodyCtrl.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -64,6 +75,13 @@ class _AdminNewsletterScreenState
                   active: active,
                   unsubscribed: unsubscribed,
                 ),
+                const SizedBox(height: 14),
+                _CampaignComposer(
+                  subjectCtrl: _subjectCtrl,
+                  bodyCtrl: _bodyCtrl,
+                  sending: _sendingCampaign,
+                  onSend: () => _sendCampaign(active),
+                ),
                 const SizedBox(height: 18),
                 _FiltersBar(
                   query: _query,
@@ -71,7 +89,7 @@ class _AdminNewsletterScreenState
                   onQuery: (v) => setState(() => _query = v),
                   onStatus: (v) => setState(() => _statusFilter = v),
                   onExport: () => _exportCsv(filtered),
-                  onAdd: () => _showAddDialog(context),
+                  onAdd: _showAddDialog,
                 ),
                 const SizedBox(height: 14),
                 if (filtered.isEmpty)
@@ -138,7 +156,7 @@ class _AdminNewsletterScreenState
     );
   }
 
-  Future<void> _showAddDialog(BuildContext context) async {
+  Future<void> _showAddDialog() async {
     final emailCtrl = TextEditingController();
     final nameCtrl = TextEditingController();
     final ok = await showDialog<bool>(
@@ -181,12 +199,175 @@ class _AdminNewsletterScreenState
     if (ok != true) return;
     final email = emailCtrl.text.trim();
     if (email.isEmpty || !email.contains('@')) return;
-    await ref.read(newsletterActionProvider.notifier).subscribe(
-          email: email,
-          fullName: nameCtrl.text.trim().isEmpty ? null : nameCtrl.text.trim(),
-          source: 'admin',
-        );
-    ref.invalidate(newsletterSubscribersProvider);
+    try {
+      await ref.read(newsletterActionProvider.notifier).subscribe(
+            email: email,
+            fullName: nameCtrl.text.trim().isEmpty
+                ? null
+                : nameCtrl.text.trim(),
+            source: 'admin',
+          );
+      ref.invalidate(newsletterSubscribersProvider);
+    } on DatabaseFailure catch (e) {
+      if (!mounted) return;
+      final isDuplicate = e.code == 'duplicate_email';
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            isDuplicate
+                ? 'Ese correo ya estaba suscrito.'
+                : 'No se pudo añadir suscriptor.',
+            style: GoogleFonts.inter(),
+          ),
+          backgroundColor: isDuplicate
+              ? AppTokens.warning
+              : AppTokens.danger,
+        ),
+      );
+    }
+  }
+
+  Future<void> _sendCampaign(int activeCount) async {
+    final subject = _subjectCtrl.text.trim();
+    final body = _bodyCtrl.text.trim();
+    if (subject.isEmpty || body.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Asunto y mensaje son obligatorios',
+            style: GoogleFonts.inter(),
+          ),
+          backgroundColor: AppTokens.danger,
+        ),
+      );
+      return;
+    }
+    if (activeCount == 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'No hay suscriptores activos',
+            style: GoogleFonts.inter(),
+          ),
+          backgroundColor: AppTokens.warning,
+        ),
+      );
+      return;
+    }
+
+    setState(() => _sendingCampaign = true);
+    try {
+      final sent = await ref
+          .read(newsletterActionProvider.notifier)
+          .sendCampaign(subject: subject, body: body);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Campaña enviada a $sent suscriptores',
+            style: GoogleFonts.inter(),
+          ),
+          backgroundColor: AppTokens.brandPrimary,
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Error enviando campaña: $e',
+            style: GoogleFonts.inter(),
+          ),
+          backgroundColor: AppTokens.danger,
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _sendingCampaign = false);
+    }
+  }
+}
+
+class _CampaignComposer extends StatelessWidget {
+  const _CampaignComposer({
+    required this.subjectCtrl,
+    required this.bodyCtrl,
+    required this.sending,
+    required this.onSend,
+  });
+
+  final TextEditingController subjectCtrl;
+  final TextEditingController bodyCtrl;
+  final bool sending;
+  final VoidCallback onSend;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(AppTokens.radiusLg),
+        border: Border.all(color: const Color(0xFFEEEEEE)),
+        boxShadow: [AppTokens.cardShadow],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Enviar campaña de newsletter',
+            style: GoogleFonts.inter(
+              fontSize: 15,
+              fontWeight: FontWeight.w800,
+              color: const Color(0xFF1A1A2E),
+            ),
+          ),
+          const SizedBox(height: 10),
+          TextField(
+            controller: subjectCtrl,
+            enabled: !sending,
+            decoration: const InputDecoration(
+              labelText: 'Asunto',
+              border: OutlineInputBorder(),
+            ),
+          ),
+          const SizedBox(height: 10),
+          TextField(
+            controller: bodyCtrl,
+            enabled: !sending,
+            minLines: 4,
+            maxLines: 8,
+            decoration: const InputDecoration(
+              labelText: 'Mensaje (texto plano)',
+              border: OutlineInputBorder(),
+            ),
+          ),
+          const SizedBox(height: 10),
+          Align(
+            alignment: Alignment.centerRight,
+            child: FilledButton.icon(
+              onPressed: sending ? null : onSend,
+              icon: sending
+                  ? const SizedBox(
+                      width: 14,
+                      height: 14,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
+                    )
+                  : const Icon(Icons.send_rounded, size: 16),
+              label: Text(
+                sending ? 'Enviando...' : 'Enviar a activos',
+                style: GoogleFonts.inter(fontWeight: FontWeight.w700),
+              ),
+              style: FilledButton.styleFrom(
+                backgroundColor: AppTokens.brandPrimary,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
 

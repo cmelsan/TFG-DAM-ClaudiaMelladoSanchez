@@ -14,6 +14,11 @@ class RouteNames {
   static const contact = 'contact';
   static const chat = 'chat';
   static const catering = 'catering';
+  static const legalNotice = 'legal-notice';
+  static const privacyPolicy = 'privacy-policy';
+  static const cookiesPolicy = 'cookies-policy';
+  static const termsAndConditions = 'terms-and-conditions';
+  static const faqLegal = 'faq-legal';
 
   // Auth
   static const login = 'login';

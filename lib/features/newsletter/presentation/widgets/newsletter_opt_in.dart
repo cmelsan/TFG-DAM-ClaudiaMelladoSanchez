@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:sabor_de_casa/core/errors/failures.dart';
 import 'package:sabor_de_casa/core/theme/app_tokens.dart';
 import 'package:sabor_de_casa/features/newsletter/presentation/providers/newsletter_provider.dart';
 
@@ -44,11 +45,19 @@ class _NewsletterOptInState extends ConsumerState<NewsletterOptIn> {
         _sending = false;
         _done = true;
       });
+    } on DatabaseFailure catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _sending = false;
+        _error = e.code == 'duplicate_email'
+            ? 'Este correo ya esta suscrito.'
+            : 'No hemos podido suscribirte. Intentalo de nuevo.';
+      });
     } catch (e) {
       if (!mounted) return;
       setState(() {
         _sending = false;
-        _error = 'No hemos podido suscribirte. Inténtalo de nuevo.';
+        _error = 'No hemos podido suscribirte. Intentalo de nuevo.';
       });
     }
   }
@@ -131,6 +140,7 @@ class _NewsletterOptInState extends ConsumerState<NewsletterOptIn> {
               onPressed: _sending ? null : _submit,
               style: FilledButton.styleFrom(
                 backgroundColor: AppTokens.brandPrimary,
+                minimumSize: const Size(0, 44),
                 padding: const EdgeInsets.symmetric(
                   horizontal: 18,
                   vertical: 14,

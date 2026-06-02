@@ -587,6 +587,7 @@ class _ActiveOrderCard extends StatelessWidget {
                 label: const Text('Seguir'),
                 style: FilledButton.styleFrom(
                   backgroundColor: AppTokens.brandPrimary,
+                  minimumSize: const Size(0, 40),
                   shape: const StadiumBorder(),
                 ),
               ),
@@ -1589,6 +1590,7 @@ class _EmptyState extends StatelessWidget {
                     onPressed: () => context.goNamed(RouteNames.menu),
                     style: FilledButton.styleFrom(
                       backgroundColor: AppTokens.brandPrimary,
+                      minimumSize: const Size(0, 44),
                       shape: const StadiumBorder(),
                       padding: const EdgeInsets.symmetric(horizontal: 28),
                     ),

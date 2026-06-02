@@ -1439,7 +1439,7 @@ class _HourOfDayCard extends ConsumerWidget {
                 Expanded(
                   child: LayoutBuilder(
                     builder: (ctx, c) {
-                      final barW = (c.maxWidth - 23 * 2) / 24;
+                      final barW = (c.maxWidth - 24 * 2) / 24;
                       return Row(
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [

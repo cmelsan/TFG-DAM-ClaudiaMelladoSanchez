@@ -64,10 +64,45 @@ class _AdminDishesScreenState extends ConsumerState<AdminDishesScreen> {
         color: _kPageBg,
         child: dishesAsync.when(
           loading: () => const Center(child: CircularProgressIndicator()),
-          error: (e, _) => Center(
-            child: Text(
-              'Error: $e',
-              style: GoogleFonts.inter(color: AppTokens.danger, fontSize: 13),
+          error: (e, st) => Center(
+            child: Padding(
+              padding: const EdgeInsets.all(32),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.cloud_off_rounded,
+                      size: 48, color: AppTokens.danger),
+                  const SizedBox(height: 12),
+                  Text(
+                    'Error al cargar platos',
+                    style: GoogleFonts.inter(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 16,
+                      color: _kInk,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    '$e',
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.inter(
+                        color: AppTokens.danger, fontSize: 12),
+                  ),
+                  const SizedBox(height: 16),
+                  FilledButton.icon(
+                    onPressed: () {
+                      ref
+                        ..invalidate(adminDishesProvider)
+                        ..invalidate(adminCategoriesProvider);
+                    },
+                    icon: const Icon(Icons.refresh_rounded),
+                    label: const Text('Reintentar'),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: AppTokens.brandPrimary,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
           data: (dishes) {
@@ -196,13 +231,20 @@ class _AdminDishesScreenState extends ConsumerState<AdminDishesScreen> {
                     hasScrollBody: false,
                     child: Padding(
                       padding: const EdgeInsets.all(24),
-                      child: _EmptyState(
-                        icon: Icons.search_off_rounded,
-                        title: 'Sin resultados',
-                        subtitle: _search.isNotEmpty
-                            ? 'Ningun plato coincide con "$_search".'
-                            : 'No hay platos con estos filtros.',
-                      ),
+                      child: dishes.isEmpty
+                          ? const _EmptyState(
+                              icon: Icons.restaurant_menu_outlined,
+                              title: 'No hay platos',
+                              subtitle:
+                                  'La base de datos no tiene platos registrados.\nPulsa "+ Nuevo plato" para añadir el primero.',
+                            )
+                          : _EmptyState(
+                              icon: Icons.search_off_rounded,
+                              title: 'Sin resultados',
+                              subtitle: _search.isNotEmpty
+                                  ? 'Ningun plato coincide con "$_search".'
+                                  : 'No hay platos con estos filtros.',
+                            ),
                     ),
                   )
                 else

@@ -1,6 +1,6 @@
 import 'dart:typed_data';
 
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/foundation.dart' show debugPrint, kIsWeb;
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:sabor_de_casa/core/constants/supabase_constants.dart';
@@ -425,10 +425,23 @@ class AdminRepository {
           .from(SupabaseConstants.dishes)
           .select()
           .order('name');
-      return data.map(Dish.fromJson).toList();
+      final dynamic rawData = data;
+      List<dynamic> resultList;
+      if (rawData is List) {
+        resultList = List<dynamic>.from(rawData);
+      } else {
+        resultList = [];
+      }
+      final dishes = resultList
+          .map((e) => Dish.fromJson(e as Map<String, dynamic>))
+          .toList();
+      debugPrint('[AdminRepo] getAllDishes → ${dishes.length} platos');
+      return dishes;
     } on PostgrestException catch (e) {
+      debugPrint('[AdminRepo] getAllDishes error: ${e.message} (code: ${e.code})');
       throw DatabaseFailure(message: e.message, code: e.code);
-    } catch (e) {
+    } catch (e, st) {
+      debugPrint('[AdminRepo] getAllDishes unexpected: $e\n$st');
       throw UnexpectedFailure(message: e.toString());
     }
   }

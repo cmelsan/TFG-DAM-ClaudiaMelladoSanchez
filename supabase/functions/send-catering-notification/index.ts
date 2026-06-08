@@ -101,8 +101,8 @@ serve(async (req: Request) => {
     const shortId = cateringRequest.display_id ?? requestId.substring(0, 8).toUpperCase();
     const statusLabel = STATUS_LABEL[status] ?? status;
     const menuName = cateringRequest.menu_type === "custom"
-      ? "Menu personalizado"
-      : cateringRequest.event_menus?.name ?? "Menu de catering";
+      ? "Menú personalizado"
+      : cateringRequest.event_menus?.name ?? "Menú de catering";
 
     const emailRes = await fetch("https://api.brevo.com/v3/smtp/email", {
       method: "POST",
@@ -157,17 +157,21 @@ function buildHtml({
       })
     : null;
 
+  const year = new Date().getFullYear();
+  const businessContactEmail =
+    Deno.env.get("BUSINESS_CONTACT_EMAIL") ?? "info@sabordecasa.es";
+
   return `
-    <div style="font-family: Arial, sans-serif; max-width: 640px; margin: 0 auto; color: #1f2933;">
-      <div style="background:#0f8f6b; color:white; padding:24px; border-radius:16px 16px 0 0;">
-        <h1 style="margin:0; font-size:24px;">Solicitud de catering #${shortId}</h1>
-        <p style="margin:8px 0 0; font-size:16px;">Estado: <strong>${statusLabel}</strong></p>
+    <div style="font-family:Arial,Helvetica,sans-serif;max-width:640px;margin:0 auto;color:#1f2933;background:#fff;border:1px solid #e5e7eb;border-radius:14px;overflow:hidden;">
+      <div style="background:#1a7a7a;color:white;padding:22px;">
+        <h1 style="margin:0;font-size:24px;">Solicitud de catering #${shortId}</h1>
+        <p style="margin:8px 0 0;font-size:16px;color:#d2f2ee;">Estado: <strong>${statusLabel}</strong></p>
       </div>
-      <div style="border:1px solid #e5e7eb; border-top:0; padding:24px; border-radius:0 0 16px 16px;">
+      <div style="padding:24px;">
         <p>Hola ${escapeHtml(userName)},</p>
         <p>Hemos actualizado tu solicitud de catering. Estos son los detalles actuales:</p>
-        <ul style="line-height:1.8; padding-left:18px;">
-          <li><strong>Menu:</strong> ${escapeHtml(menuName)}</li>
+        <ul style="line-height:1.8;padding-left:18px;">
+          <li><strong>Menú:</strong> ${escapeHtml(menuName)}</li>
           <li><strong>Evento:</strong> ${escapeHtml(String(cateringRequest.event_type ?? "Evento"))}</li>
           <li><strong>Fecha:</strong> ${escapeHtml(String(cateringRequest.event_date ?? "Pendiente"))}</li>
           <li><strong>Personas:</strong> ${escapeHtml(String(cateringRequest.guest_count ?? ""))}</li>
@@ -178,6 +182,10 @@ function buildHtml({
         ${cateringRequest.appointment_notes ? `<p><strong>Mensaje sobre la cita:</strong><br>${escapeHtml(String(cateringRequest.appointment_notes))}</p>` : ""}
         ${cateringRequest.admin_notes ? `<p><strong>Notas del equipo:</strong><br>${escapeHtml(String(cateringRequest.admin_notes))}</p>` : ""}
         <p style="margin-top:24px;">Gracias por confiar en Sabor de Casa.</p>
+      </div>
+      <div style="padding:14px 24px;background:#f9fafb;border-top:1px solid #e5e7eb;">
+        <p style="margin:0;font-size:12px;color:#6b7280;">Contacto: <a href="mailto:${businessContactEmail}" style="color:#1a7a7a;font-weight:600;">${businessContactEmail}</a></p>
+        <p style="margin:8px 0 0;font-size:12px;color:#9ca3af;">© ${year} Sabor de Casa</p>
       </div>
     </div>
   `;

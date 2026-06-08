@@ -161,8 +161,9 @@ class _HeroBanner extends StatelessWidget {
           fit: StackFit.expand,
           children: [
             Image.network(
-              'https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=800&auto=format&fit=crop',
+              'https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=800&fm=jpg&fit=crop',
               fit: BoxFit.cover,
+              errorBuilder: (_, __, ___) => const ColoredBox(color: Color(0xFF0D3B2E)),
             ),
             ColoredBox(
               color: const Color(0xFF0D3B2E).withValues(alpha: 0.84),
@@ -563,7 +564,7 @@ class _MobileCateringBanner extends StatelessWidget {
           borderRadius: BorderRadius.circular(20),
           image: const DecorationImage(
             image: NetworkImage(
-              'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?q=80&w=800&auto=format&fit=crop',
+              'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?q=80&w=800&fm=jpg&fit=crop',
             ),
             fit: BoxFit.cover,
             colorFilter: ColorFilter.mode(
@@ -646,7 +647,7 @@ class _MobileEncargosBanner extends StatelessWidget {
           borderRadius: BorderRadius.circular(20),
           image: const DecorationImage(
             image: NetworkImage(
-              'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?q=80&w=800&auto=format&fit=crop',
+              'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?q=80&w=800&fm=jpg&fit=crop',
             ),
             fit: BoxFit.cover,
             colorFilter: ColorFilter.mode(

@@ -35,6 +35,8 @@ serve(async (req: Request) => {
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
     const senderEmail =
       Deno.env.get("BREVO_SENDER_EMAIL") ?? "noreply@sabordecasa.com";
+    const businessContactEmail =
+      Deno.env.get("BUSINESS_CONTACT_EMAIL") ?? "info@sabordecasa.es";
 
     if (!brevoKey) {
       return new Response(
@@ -76,8 +78,8 @@ serve(async (req: Request) => {
           email: senderEmail,
         },
         to: [{ email, name: fullName }],
-        subject: "Bienvenido a newsletter de Sabor de Casa",
-        htmlContent: buildHtml(fullName, unsubscribeUrl),
+        subject: "Bienvenido a la newsletter de Sabor de Casa",
+        htmlContent: buildHtml(fullName, unsubscribeUrl, businessContactEmail),
       }),
     });
 
@@ -99,40 +101,48 @@ serve(async (req: Request) => {
   }
 });
 
-function buildHtml(name: string, unsubscribeUrl: string | null): string {
+function buildHtml(
+  name: string,
+  unsubscribeUrl: string | null,
+  businessContactEmail: string,
+): string {
   const safeName = escapeHtml(name);
   const unsubscribeBlock = unsubscribeUrl
     ? `
-    <p style="font-size:12px;color:#6b7280;margin:0;">
-      Si no quieres recibir mas correos, puedes darte de baja aqui:
-      <a href="${unsubscribeUrl}" style="color:#0d3b2e;">Cancelar suscripcion</a>
+    <p style="font-size:12px;color:#6b7280;margin:0;line-height:1.6;">
+      Si no quieres recibir más correos, puedes darte de baja aquí:
+      <a href="${unsubscribeUrl}" style="color:#1a7a7a;font-weight:600;">Cancelar suscripción</a>
     </p>`
     : "";
 
+  const year = new Date().getFullYear();
+
   return `
-  <div style="font-family:Arial,sans-serif;max-width:640px;margin:0 auto;line-height:1.6;color:#111827;background:#ffffff;border:1px solid #e5e7eb;border-radius:14px;overflow:hidden;">
-    <div style="background:#0d3b2e;padding:16px 20px;">
-      <h2 style="margin:0;color:#ffffff;font-size:20px;">Sabor de Casa</h2>
-      <p style="margin:4px 0 0 0;color:#a7f3d0;font-size:12px;">Newsletter oficial</p>
+  <div style="font-family:Arial,Helvetica,sans-serif;max-width:640px;margin:0 auto;line-height:1.6;color:#111827;background:#ffffff;border:1px solid #e5e7eb;border-radius:14px;overflow:hidden;">
+    <div style="background:#1a7a7a;padding:18px 22px;">
+      <h2 style="margin:0;color:#ffffff;font-size:21px;">Sabor de Casa</h2>
+      <p style="margin:4px 0 0 0;color:#d2f2ee;font-size:12px;">Newsletter oficial</p>
     </div>
 
-    <div style="padding:18px 20px;">
-      <h3 style="margin:0 0 10px 0;color:#0d3b2e;font-size:19px;">Bienvenido, ${safeName}</h3>
-      <p style="margin:0 0 10px 0;">Gracias por suscribirte. Ya estas dentro de nuestra newsletter.</p>
-      <p style="margin:0 0 12px 0;">Desde ahora recibiras:</p>
+    <div style="padding:20px 22px;">
+      <h3 style="margin:0 0 10px 0;color:#1a7a7a;font-size:20px;">Bienvenido, ${safeName}</h3>
+      <p style="margin:0 0 10px 0;">Gracias por suscribirte. Ya formas parte de nuestra newsletter.</p>
+      <p style="margin:0 0 12px 0;">A partir de ahora recibirás:</p>
       <ul style="margin:0 0 14px 18px;padding:0;">
-        <li>Menu del dia</li>
+        <li>Menú del día</li>
         <li>Ofertas especiales</li>
         <li>Novedades de temporada</li>
       </ul>
-      <p style="margin:0;">No hacemos spam. Solo contenido util sobre Sabor de Casa.</p>
+      <p style="margin:0;">No hacemos spam. Solo contenido útil sobre Sabor de Casa.</p>
+      <p style="margin:10px 0 0;">Contacto: <a href="mailto:${businessContactEmail}" style="color:#1a7a7a;font-weight:600;">${businessContactEmail}</a></p>
     </div>
 
-    <div style="padding:14px 20px;background:#f9fafb;border-top:1px solid #e5e7eb;">
+    <div style="padding:14px 22px;background:#f9fafb;border-top:1px solid #e5e7eb;">
       <p style="font-size:12px;color:#6b7280;margin:0 0 8px 0;">
-        Recibes este correo porque has confirmado suscripcion en nuestra web.
+        Recibes este correo porque has confirmado tu suscripción en nuestra web.
       </p>
       ${unsubscribeBlock}
+      <p style="font-size:12px;color:#9ca3af;margin:10px 0 0;">© ${year} Sabor de Casa</p>
     </div>
   </div>
   `;

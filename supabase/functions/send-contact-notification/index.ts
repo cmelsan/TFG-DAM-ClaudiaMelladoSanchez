@@ -115,13 +115,17 @@ function buildHtml({
       })
     : "Ahora";
 
+  const year = new Date().getFullYear();
+  const businessContactEmail =
+    Deno.env.get("BUSINESS_CONTACT_EMAIL") ?? "info@sabordecasa.es";
+
   return `
-    <div style="font-family:Arial,Helvetica,sans-serif;max-width:700px;margin:0 auto;color:#1f2937;">
-      <div style="background:#0f8f6b;color:white;padding:20px 24px;border-radius:12px 12px 0 0;">
-        <h1 style="margin:0;font-size:22px;">Nuevo mensaje de contacto</h1>
-        <p style="margin:8px 0 0;font-size:14px;opacity:.9;">Canal: formulario web</p>
+    <div style="font-family:Arial,Helvetica,sans-serif;max-width:700px;margin:0 auto;color:#1f2937;background:#fff;border:1px solid #e5e7eb;border-radius:14px;overflow:hidden;">
+      <div style="background:#1a7a7a;color:white;padding:20px 24px;">
+        <h1 style="margin:0;font-size:22px;">Sabor de Casa</h1>
+        <p style="margin:8px 0 0;font-size:14px;color:#d2f2ee;">Nuevo mensaje de contacto (formulario web)</p>
       </div>
-      <div style="border:1px solid #e5e7eb;border-top:0;padding:20px 24px;border-radius:0 0 12px 12px;">
+      <div style="padding:20px 24px;">
         <p style="margin:0 0 14px;"><strong>Asunto:</strong> ${escapeHtml(subject)}</p>
         <p style="margin:0 0 8px;"><strong>Nombre:</strong> ${escapeHtml(name)}</p>
         <p style="margin:0 0 8px;"><strong>Email:</strong> ${escapeHtml(email)}</p>
@@ -133,6 +137,10 @@ function buildHtml({
         <p style="margin:16px 0 0;color:#6b7280;font-size:12px;">
           Responde directamente a este email para contestar al cliente.
         </p>
+      </div>
+      <div style="padding:14px 24px;background:#f9fafb;border-top:1px solid #e5e7eb;">
+        <p style="margin:0;font-size:12px;color:#6b7280;">Contacto negocio: <a href="mailto:${businessContactEmail}" style="color:#1a7a7a;font-weight:600;">${businessContactEmail}</a></p>
+        <p style="margin:8px 0 0;font-size:12px;color:#9ca3af;">© ${year} Sabor de Casa</p>
       </div>
     </div>
   `;

@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -33,6 +34,10 @@ class WebNavbar extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    if (!kIsWeb) {
+      return const SizedBox.shrink();
+    }
+
     final cartCount = ref.watch(cartItemsCountProvider);
     final authState = ref.watch(authNotifierProvider);
     final profile = authState.valueOrNull;

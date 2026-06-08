@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sabor_de_casa/core/theme/app_tokens.dart';
 import 'package:sabor_de_casa/features/cart/presentation/providers/cart_provider.dart';
@@ -22,8 +23,13 @@ class _CardAddToCartState extends State<CardAddToCart> {
   Widget build(BuildContext context) {
     return Consumer(
       builder: (context, ref, _) {
+        final isWeb = kIsWeb;
+        final controlSize = isWeb ? 38.0 : 34.0;
+        final qtyWidth = isWeb ? 24.0 : 20.0;
+        final buttonLabel = isWeb ? 'AÑADIR AL CARRITO' : 'AÑADIR';
+
         return SizedBox(
-          height: 38,
+          height: controlSize,
           width: double.infinity,
           child: DecoratedBox(
             decoration: BoxDecoration(
@@ -41,15 +47,15 @@ class _CardAddToCartState extends State<CardAddToCart> {
                       if (_qty > 1) setState(() => _qty--);
                     },
                     customBorder: const CircleBorder(),
-                    child: const SizedBox(
-                      width: 38,
-                      height: 38,
-                      child: Icon(Icons.remove, color: Colors.white, size: 17),
+                    child: SizedBox(
+                      width: controlSize,
+                      height: controlSize,
+                      child: const Icon(Icons.remove, color: Colors.white, size: 17),
                     ),
                   ),
                   // ── Cantidad ────────────────────────────────────────────
                   SizedBox(
-                    width: 24,
+                    width: qtyWidth,
                     child: Text(
                       '$_qty',
                       textAlign: TextAlign.center,
@@ -64,10 +70,10 @@ class _CardAddToCartState extends State<CardAddToCart> {
                   InkWell(
                     onTap: () => setState(() => _qty++),
                     customBorder: const CircleBorder(),
-                    child: const SizedBox(
-                      width: 38,
-                      height: 38,
-                      child: Icon(Icons.add, color: Colors.white, size: 17),
+                    child: SizedBox(
+                      width: controlSize,
+                      height: controlSize,
+                      child: const Icon(Icons.add, color: Colors.white, size: 17),
                     ),
                   ),
                   // ── Separador vertical ─────────────────────────────────
@@ -102,16 +108,9 @@ class _CardAddToCartState extends State<CardAddToCart> {
                       borderRadius: const BorderRadius.horizontal(
                         right: Radius.circular(20),
                       ),
-                      child: const Center(
-                        child: Text(
-                          'AÑADIR AL CARRITO',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w700,
-                            fontSize: 11,
-                            letterSpacing: 0.5,
-                          ),
-                        ),
+                      child: _AddLabel(
+                        label: buttonLabel,
+                        isWeb: isWeb,
                       ),
                     ),
                   ),
@@ -121,6 +120,35 @@ class _CardAddToCartState extends State<CardAddToCart> {
           ),
         );
       },
+    );
+  }
+}
+
+class _AddLabel extends StatelessWidget {
+  const _AddLabel({required this.label, required this.isWeb});
+
+  final String label;
+  final bool isWeb;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 6),
+        child: FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Text(
+            label,
+            maxLines: 1,
+            style: TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.w700,
+              fontSize: isWeb ? 11 : 10,
+              letterSpacing: isWeb ? 0.5 : 0.2,
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

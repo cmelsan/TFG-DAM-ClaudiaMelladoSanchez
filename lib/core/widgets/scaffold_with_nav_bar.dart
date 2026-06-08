@@ -52,10 +52,6 @@ class _ScaffoldWithNavBarState extends ConsumerState<ScaffoldWithNavBar> {
 
     return Scaffold(
       body: widget.navigationShell,
-      floatingActionButton: AppFab(
-        onPressed: () => context.push('/chat'),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       bottomNavigationBar: _ModernNavBar(
         selectedIndex: widget.navigationShell.currentIndex,
         cartCount: cartCount,

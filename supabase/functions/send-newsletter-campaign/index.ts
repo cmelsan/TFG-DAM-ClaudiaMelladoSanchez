@@ -186,18 +186,30 @@ serve(async (req: Request) => {
 
 function buildHtml(messageBody: string, unsubscribeUrl: string): string {
   const escaped = escapeHtml(messageBody).replace(/\n/g, "<br>");
+  const year = new Date().getFullYear();
+  const businessContactEmail =
+    Deno.env.get("BUSINESS_CONTACT_EMAIL") ?? "info@sabordecasa.es";
+
   return `
-  <div style="font-family:Arial,sans-serif;max-width:640px;margin:0 auto;padding:16px;line-height:1.6;color:#111827;">
-    <h2 style="margin:0 0 12px 0;color:#0d3b2e;">Novedades de Sabor de Casa</h2>
-    <p style="margin:0 0 10px 0;">${escaped}</p>
-    <hr style="border:none;border-top:1px solid #e5e7eb;margin:18px 0;" />
-    <p style="font-size:12px;color:#6b7280;margin:0 0 8px 0;">
-      Recibes este correo porque estás suscrito a nuestra newsletter.
-    </p>
-    <p style="font-size:12px;color:#6b7280;margin:0;">
-      Si no quieres recibir más correos, puedes darte de baja aquí:
-      <a href="${unsubscribeUrl}" style="color:#0d3b2e;">Cancelar suscripción</a>
-    </p>
+  <div style="font-family:Arial,Helvetica,sans-serif;max-width:640px;margin:0 auto;line-height:1.6;color:#111827;background:#ffffff;border:1px solid #e5e7eb;border-radius:14px;overflow:hidden;">
+    <div style="background:#1a7a7a;padding:18px 22px;">
+      <h2 style="margin:0;color:#ffffff;font-size:21px;">Sabor de Casa</h2>
+      <p style="margin:4px 0 0;color:#d2f2ee;font-size:12px;">Novedades de la newsletter</p>
+    </div>
+    <div style="padding:20px 22px;">
+      <p style="margin:0 0 10px 0;">${escaped}</p>
+      <p style="margin:0;">Contacto: <a href="mailto:${businessContactEmail}" style="color:#1a7a7a;font-weight:600;">${businessContactEmail}</a></p>
+    </div>
+    <div style="padding:14px 22px;background:#f9fafb;border-top:1px solid #e5e7eb;">
+      <p style="font-size:12px;color:#6b7280;margin:0 0 8px 0;">
+        Recibes este correo porque estás suscrito a nuestra newsletter.
+      </p>
+      <p style="font-size:12px;color:#6b7280;margin:0;line-height:1.6;">
+        Si no quieres recibir más correos, puedes darte de baja aquí:
+        <a href="${unsubscribeUrl}" style="color:#1a7a7a;font-weight:600;">Cancelar suscripción</a>
+      </p>
+      <p style="font-size:12px;color:#9ca3af;margin:10px 0 0;">© ${year} Sabor de Casa</p>
+    </div>
   </div>
   `;
 }

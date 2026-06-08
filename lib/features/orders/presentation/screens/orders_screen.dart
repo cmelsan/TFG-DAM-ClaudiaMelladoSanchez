@@ -259,6 +259,15 @@ class _PageHeader extends StatelessWidget {
   final Order? activeOrder;
   final double hPad;
 
+  void _goBack(BuildContext context) {
+    final router = GoRouter.of(context);
+    if (router.canPop()) {
+      context.pop();
+      return;
+    }
+    context.goNamed(RouteNames.profile);
+  }
+
   @override
   Widget build(BuildContext context) {
     return DecoratedBox(
@@ -278,7 +287,7 @@ class _PageHeader extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     GestureDetector(
-                      onTap: () => context.pop(),
+                      onTap: () => _goBack(context),
                       child: MouseRegion(
                         cursor: SystemMouseCursors.click,
                         child: Row(

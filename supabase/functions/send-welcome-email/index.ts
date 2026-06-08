@@ -78,6 +78,8 @@ serve(async (req: Request) => {
 
 function buildWelcomeHtml(userName: string): string {
   const year = new Date().getFullYear();
+  const businessContactEmail =
+    Deno.env.get("BUSINESS_CONTACT_EMAIL") ?? "info@sabordecasa.es";
 
   return `<!DOCTYPE html>
 <html lang="es">
@@ -144,7 +146,7 @@ function buildWelcomeHtml(userName: string): string {
           <td style="padding:0 32px 36px;text-align:center;">
             <p style="margin:0 0 6px;font-size:14px;color:#6b7280;">¿Tienes alguna pregunta?</p>
             <p style="margin:0;font-size:14px;color:#374151;">
-              Escríbenos a <a href="mailto:sabordecasasanlucar@gmail.com" style="color:#1a7a7a;font-weight:bold;">sabordecasasanlucar@gmail.com</a>
+              Escríbenos a <a href="mailto:${businessContactEmail}" style="color:#1a7a7a;font-weight:bold;">${businessContactEmail}</a>
             </p>
           </td>
         </tr>

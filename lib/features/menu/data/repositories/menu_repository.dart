@@ -25,6 +25,36 @@ class MenuRepository {
 
   final SupabaseClient _client;
 
+  Map<String, dynamic> _normalizeImageFields(Map<String, dynamic> json) {
+    final normalized = Map<String, dynamic>.from(json);
+    for (final key in const ['image_url', 'dish_image_url']) {
+      final raw = normalized[key];
+      if (raw is String && raw.isNotEmpty) {
+        normalized[key] = _normalizeImageUrl(raw);
+      }
+    }
+    return normalized;
+  }
+
+  String _normalizeImageUrl(String url) {
+    final parsed = Uri.tryParse(url);
+    if (parsed == null || !parsed.hasAuthority) return url;
+
+    final query = Map<String, String>.from(parsed.queryParameters);
+
+    if (query['fm']?.toLowerCase() == 'avif') {
+      query['fm'] = 'jpg';
+    }
+
+    if (parsed.host.toLowerCase().contains('images.unsplash.com')) {
+      query.remove('auto');
+      query['fm'] = 'jpg';
+      query.putIfAbsent('fit', () => 'crop');
+    }
+
+    return parsed.replace(queryParameters: query).toString();
+  }
+
   // ──── Categorías ────
 
   Future<List<Category>> getCategories() async {
@@ -42,7 +72,7 @@ class MenuRepository {
       }
 
       return resultList
-          .map((e) => Category.fromJson(e as Map<String, dynamic>))
+          .map((e) => Category.fromJson(_normalizeImageFields(e as Map<String, dynamic>)))
           .toList();
     } on PostgrestException catch (e) {
       throw DatabaseFailure(message: e.message, code: e.code);
@@ -76,7 +106,7 @@ class MenuRepository {
       }
 
       return resultList
-          .map((e) => Dish.fromJson(e as Map<String, dynamic>))
+          .map((e) => Dish.fromJson(_normalizeImageFields(e as Map<String, dynamic>)))
           .toList();
     } on PostgrestException catch (e) {
       throw DatabaseFailure(message: e.message, code: e.code);
@@ -159,7 +189,7 @@ class MenuRepository {
         resultList = List<dynamic>.from(data);
       }
       return resultList
-          .map((e) => Dish.fromJson(e as Map<String, dynamic>))
+          .map((e) => Dish.fromJson(_normalizeImageFields(e as Map<String, dynamic>)))
           .toList();
     } on PostgrestException catch (e) {
       throw DatabaseFailure(message: e.message, code: e.code);
@@ -183,7 +213,7 @@ class MenuRepository {
         resultList = List<dynamic>.from(data);
       }
       return resultList
-          .map((e) => Dish.fromJson(e as Map<String, dynamic>))
+          .map((e) => Dish.fromJson(_normalizeImageFields(e as Map<String, dynamic>)))
           .toList();
     } on PostgrestException catch (e) {
       throw DatabaseFailure(message: e.message, code: e.code);
@@ -200,7 +230,7 @@ class MenuRepository {
           .eq('id', id)
           .single();
       final dynamic data = res;
-      return Dish.fromJson(data as Map<String, dynamic>);
+      return Dish.fromJson(_normalizeImageFields(data as Map<String, dynamic>));
     } on PostgrestException catch (e) {
       throw DatabaseFailure(message: e.message, code: e.code);
     } catch (e) {
@@ -268,7 +298,7 @@ class MenuRepository {
           .maybeSingle();
       final dynamic data = res;
       if (data == null) return null;
-      return DailySpecial.fromJson(data as Map<String, dynamic>);
+      return DailySpecial.fromJson(_normalizeImageFields(data as Map<String, dynamic>));
     } on PostgrestException catch (e) {
       throw DatabaseFailure(message: e.message, code: e.code);
     } catch (e) {
@@ -307,7 +337,7 @@ class MenuRepository {
           .select()
           .single();
       final dynamic data = res;
-      return DailySpecial.fromJson(data as Map<String, dynamic>);
+      return DailySpecial.fromJson(_normalizeImageFields(data as Map<String, dynamic>));
     } on PostgrestException catch (e) {
       throw DatabaseFailure(message: e.message, code: e.code);
     } catch (e) {
@@ -332,7 +362,7 @@ class MenuRepository {
       }
 
       return resultList
-          .map((e) => Favorite.fromJson(e as Map<String, dynamic>))
+          .map((e) => Favorite.fromJson(_normalizeImageFields(e as Map<String, dynamic>)))
           .toList();
     } on PostgrestException catch (e) {
       throw DatabaseFailure(message: e.message, code: e.code);

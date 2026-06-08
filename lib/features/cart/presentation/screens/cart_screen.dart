@@ -15,6 +15,24 @@ import 'package:sabor_de_casa/features/cart/presentation/providers/cart_provider
 const _kWebBreakpoint = 880.0;
 const _kMaxContent = 1160.0;
 
+String _normalizeImageUrl(String url) {
+  final parsed = Uri.tryParse(url);
+  if (parsed == null || !parsed.hasAuthority) return url;
+
+  final query = Map<String, String>.from(parsed.queryParameters);
+  if (query['fm']?.toLowerCase() == 'avif') {
+    query['fm'] = 'jpg';
+  }
+
+  if (parsed.host.toLowerCase().contains('images.unsplash.com')) {
+    query.remove('auto');
+    query['fm'] = 'jpg';
+    query.putIfAbsent('fit', () => 'crop');
+  }
+
+  return parsed.replace(queryParameters: query).toString();
+}
+
 class CartScreen extends ConsumerStatefulWidget {
   const CartScreen({super.key});
 
@@ -827,8 +845,28 @@ class _CartItemCard extends StatelessWidget {
               height: imgSize,
               child: item.imageUrl != null
                   ? CachedNetworkImage(
-                      imageUrl: item.imageUrl!,
+                      imageUrl: _normalizeImageUrl(item.imageUrl!),
                       fit: BoxFit.cover,
+                      placeholder: (_, __) => const ColoredBox(
+                        color: AppTokens.brandLight,
+                        child: Center(
+                          child: SizedBox(
+                            width: 22,
+                            height: 22,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          ),
+                        ),
+                      ),
+                      errorWidget: (_, __, ___) => const ColoredBox(
+                        color: AppTokens.brandLight,
+                        child: Center(
+                          child: Icon(
+                            Icons.restaurant,
+                            color: AppTokens.brandPrimary,
+                            size: 32,
+                          ),
+                        ),
+                      ),
                     )
                   : const ColoredBox(
                       color: AppTokens.brandLight,

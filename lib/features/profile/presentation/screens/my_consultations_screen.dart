@@ -102,45 +102,73 @@ class _ConsultationsHero extends StatelessWidget {
         borderRadius: BorderRadius.circular(18),
         border: Border.all(color: const Color(0xFFE3EFE7)),
       ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: AppTokens.brandLight,
-              borderRadius: BorderRadius.circular(14),
-            ),
-            child: const Icon(Icons.support_agent_rounded, color: AppTokens.brandPrimary),
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final compact = constraints.maxWidth < 340;
+          final content = Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Tus consultas internas',
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: GoogleFonts.inter(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w800,
+                  color: AppTokens.surfaceDark,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                total == 0
+                    ? 'Aun no has abierto ninguna conversación.'
+                    : unread > 0
+                        ? '$unread sin leer · $total en total'
+                        : '$total conversaciones · todo al dia',
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: GoogleFonts.inter(
+                  fontSize: 13,
+                  color: const Color(0xFF7C847E),
+                ),
+              ),
+            ],
+          );
+
+          if (compact) {
+            return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Tus consultas internas',
-                  style: GoogleFonts.inter(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w800,
-                    color: AppTokens.surfaceDark,
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: AppTokens.brandLight,
+                    borderRadius: BorderRadius.circular(14),
                   ),
+                  child: const Icon(Icons.support_agent_rounded, color: AppTokens.brandPrimary),
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  total == 0
-                      ? 'Aun no has abierto ninguna conversación.'
-                      : unread > 0
-                          ? '$unread sin leer · $total en total'
-                          : '$total conversaciones · todo al dia',
-                  style: GoogleFonts.inter(
-                    fontSize: 13,
-                    color: const Color(0xFF7C847E),
-                  ),
-                ),
+                const SizedBox(height: 10),
+                content,
               ],
-            ),
-          ),
-        ],
+            );
+          }
+
+          return Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: AppTokens.brandLight,
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: const Icon(Icons.support_agent_rounded, color: AppTokens.brandPrimary),
+              ),
+              const SizedBox(width: 14),
+              Expanded(child: content),
+            ],
+          );
+        },
       ),
     );
   }
@@ -236,63 +264,65 @@ class _NewConsultationSheetState extends ConsumerState<_NewConsultationSheet> {
         color: Colors.white,
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Center(
-            child: Container(
-              width: 40,
-              height: 4,
-              margin: const EdgeInsets.only(bottom: 14),
-              decoration: BoxDecoration(
-                color: const Color(0xFFE3DED7),
-                borderRadius: BorderRadius.circular(2),
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                margin: const EdgeInsets.only(bottom: 14),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFE3DED7),
+                  borderRadius: BorderRadius.circular(2),
+                ),
               ),
             ),
-          ),
-          Text(
-            'Nueva consulta',
-            style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.w800),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            'Escribe tu duda o incidencia. Se guardará dentro de tu cuenta.',
-            style: GoogleFonts.inter(fontSize: 13, color: const Color(0xFF7E776F)),
-          ),
-          const SizedBox(height: 16),
-          TextField(
-            controller: _subjectCtrl,
-            decoration: const InputDecoration(
-              labelText: 'Asunto',
-              hintText: 'Por ejemplo: Cambio de dirección',
+            Text(
+              'Nueva consulta',
+              style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.w800),
             ),
-          ),
-          const SizedBox(height: 12),
-          TextField(
-            controller: _messageCtrl,
-            minLines: 4,
-            maxLines: 6,
-            decoration: const InputDecoration(
-              labelText: 'Mensaje',
-              hintText: 'Cuéntanos qué necesitas',
+            const SizedBox(height: 6),
+            Text(
+              'Escribe tu duda o incidencia. Se guardará dentro de tu cuenta.',
+              style: GoogleFonts.inter(fontSize: 13, color: const Color(0xFF7E776F)),
             ),
-          ),
-          const SizedBox(height: 16),
-          SizedBox(
-            width: double.infinity,
-            child: FilledButton(
-              onPressed: _creating ? null : _create,
-              child: _creating
-                  ? const SizedBox(
-                      width: 18,
-                      height: 18,
-                      child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
-                    )
-                  : const Text('Crear consulta'),
+            const SizedBox(height: 16),
+            TextField(
+              controller: _subjectCtrl,
+              decoration: const InputDecoration(
+                labelText: 'Asunto',
+                hintText: 'Por ejemplo: Cambio de dirección',
+              ),
             ),
-          ),
-        ],
+            const SizedBox(height: 12),
+            TextField(
+              controller: _messageCtrl,
+              minLines: 4,
+              maxLines: 6,
+              decoration: const InputDecoration(
+                labelText: 'Mensaje',
+                hintText: 'Cuéntanos qué necesitas',
+              ),
+            ),
+            const SizedBox(height: 16),
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton(
+                onPressed: _creating ? null : _create,
+                child: _creating
+                    ? const SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                      )
+                    : const Text('Crear consulta'),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -35,6 +35,84 @@ Tu comportamiento:
 
 // ── Obtener contexto de menú real desde Supabase ──────────────────────────────
 
+const EXTRA_SYSTEM_PROMPT = `
+
+Reglas anti-invento:
+- Usa exclusivamente los datos reales adjuntos para menu del dia, carta, precios, horarios, contacto y disponibilidad.
+- No inventes platos, precios, horarios, promociones, direccion ni telefono.
+- Si los datos reales no contienen la respuesta, dilo claramente y sugiere contactar al local o revisar la app.`;
+
+// Datos públicos mostrados actualmente en la web (footer/contacto).
+const WEB_CONTACT_CONTEXT = `
+\n## Contacto público web
+- Ciudad: Sanlúcar de Barrameda, Cádiz
+- Teléfono: 956 36 30 09
+- Email: info@sabordecasa.es
+- Horario visible en web: Lun – Sáb: 12:00 – 16:00
+`;
+
+const DAY_NAMES = [
+  "Domingo",
+  "Lunes",
+  "Martes",
+  "Miercoles",
+  "Jueves",
+  "Viernes",
+  "Sabado",
+];
+
+function madridDate(): string {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Europe/Madrid",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(new Date());
+}
+
+function madridDayOfWeek(): number {
+  // JS: 0=Sunday ... 6=Saturday (mismo convenio usado en la tabla schedule)
+  const weekday = new Intl.DateTimeFormat("en-US", {
+    timeZone: "Europe/Madrid",
+    weekday: "short",
+  }).format(new Date());
+
+  const dayMap: Record<string, number> = {
+    Sun: 0,
+    Mon: 1,
+    Tue: 2,
+    Wed: 3,
+    Thu: 4,
+    Fri: 5,
+    Sat: 6,
+  };
+
+  return dayMap[weekday] ?? 0;
+}
+
+function euro(value: number | string | null | undefined): string {
+  const amount = Number(value);
+  if (!Number.isFinite(amount)) return "precio no disponible";
+  return `${amount.toFixed(2)} EUR`;
+}
+
+function unavailableContext(reason: string): string {
+  return `\n\n--- DATOS REALES NO DISPONIBLES ---\n${reason}\nNo inventes informacion de menu, horarios ni precios.\n--- FIN DATOS REALES ---\n`;
+}
+
+async function fetchJson<T>(
+  url: string,
+  headers: Record<string, string>,
+  fallback: T,
+): Promise<T> {
+  const res = await fetch(url, { headers });
+  if (!res.ok) {
+    console.error(`Supabase REST ${res.status} en ${url}:`, await res.text());
+    return fallback;
+  }
+  return await res.json();
+}
+
 async function fetchMenuContext(): Promise<string> {
   const supabaseUrl = Deno.env.get("SUPABASE_URL");
   const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
@@ -48,20 +126,13 @@ async function fetchMenuContext(): Promise<string> {
       "Content-Type": "application/json",
     };
 
-    // Categorías activas
-    const catRes = await fetch(
+    const categories = await fetchJson<Array<{ id: string; name: string }>>(
       `${supabaseUrl}/rest/v1/categories?is_active=eq.true&select=id,name&order=sort_order`,
-      { headers },
+      headers,
+      [],
     );
-    const categories: Array<{ id: string; name: string }> =
-      await catRes.json();
 
-    // Platos activos con categoría
-    const dishRes = await fetch(
-      `${supabaseUrl}/rest/v1/dishes?is_active=eq.true&select=name,price,description,allergens,is_available,is_offer,offer_price,category_id&order=name&limit=150`,
-      { headers },
-    );
-    const dishes: Array<{
+    const dishes = await fetchJson<Array<{
       name: string;
       price: number;
       description: string;
@@ -70,14 +141,101 @@ async function fetchMenuContext(): Promise<string> {
       is_offer: boolean;
       offer_price: number | null;
       category_id: string;
-    }> = await dishRes.json();
+      id?: string;
+    }>>(
+      `${supabaseUrl}/rest/v1/dishes?is_active=eq.true&select=id,name,price,description,allergens,is_available,is_offer,offer_price,category_id&order=name&limit=150`,
+      headers,
+      [],
+    );
 
-    if (!Array.isArray(categories) || !Array.isArray(dishes)) return "";
+    const specialRows = await fetchJson<Array<{
+      dish_id: string;
+      date: string;
+      primero_text: string | null;
+      segundo_text: string | null;
+      postre_text: string | null;
+      bebida_text: string | null;
+      menu_price: number | null;
+      note: string | null;
+      discount_percent: number | null;
+    }>>(
+      `${supabaseUrl}/rest/v1/daily_special?select=dish_id,date,primero_text,segundo_text,postre_text,bebida_text,menu_price,note,discount_percent&order=date.desc&limit=1`,
+      headers,
+      [],
+    );
+
+    const schedules = await fetchJson<Array<{
+      day_of_week: number;
+      open_time: string;
+      close_time: string;
+      is_open: boolean;
+    }>>(
+      `${supabaseUrl}/rest/v1/schedule?select=day_of_week,open_time,close_time,is_open&order=day_of_week.asc`,
+      headers,
+      [],
+    );
+
+    if (!Array.isArray(categories) || !Array.isArray(dishes)) {
+      return unavailableContext("No se pudieron leer categories/dishes desde Supabase.");
+    }
+
+    if (categories.length === 0 && dishes.length === 0) {
+      return unavailableContext("No hay datos de menu activos en la base de datos.");
+    }
 
     let menuText =
-      "\n\n--- MENÚ ACTUAL DE SABOR DE CASA (datos en tiempo real) ---\n";
+      "\n\n--- DATOS REALES DE SABOR DE CASA (tiempo real) ---\n";
+
+    // Menú del día real (tabla daily_special). Prioridad alta sobre textos genéricos.
+    const special = specialRows[0];
+    if (special) {
+      const specialDish = dishes.find((d) => d.id && d.id === special.dish_id);
+      menuText += "\n## Menú del día (real)\n";
+      if (special.menu_price != null) {
+        menuText += `- Precio menú del día: ${euro(special.menu_price)}\n`;
+      }
+      if (specialDish) {
+        const basePrice =
+          specialDish.is_offer && specialDish.offer_price != null
+            ? specialDish.offer_price
+            : specialDish.price;
+        menuText += `- Plato base asociado: ${specialDish.name} (${basePrice.toFixed(2)}€)\n`;
+      }
+      if (special.primero_text) menuText += `- Primero: ${special.primero_text}\n`;
+      if (special.segundo_text) menuText += `- Segundo: ${special.segundo_text}\n`;
+      if (special.postre_text) menuText += `- Postre: ${special.postre_text}\n`;
+      if (special.bebida_text) menuText += `- Bebida: ${special.bebida_text}\n`;
+      if (special.note) menuText += `- Nota: ${special.note}\n`;
+      if (special.discount_percent != null) {
+        menuText += `- Descuento: ${special.discount_percent}%\n`;
+      }
+      menuText += `- Fecha de vigencia: ${special.date}\n`;
+    } else {
+      menuText += "\n## Menú del día (real)\n- No hay menú del día publicado en la tabla daily_special.\n";
+    }
+
+    // Horario real desde schedule.
+    if (Array.isArray(schedules) && schedules.length > 0) {
+      const today = madridDayOfWeek();
+      menuText += "\n## Horarios (tabla schedule)\n";
+      for (const row of schedules) {
+        const day = DAY_NAMES[row.day_of_week] ?? `Día ${row.day_of_week}`;
+        const marker = row.day_of_week === today ? " [HOY]" : "";
+        const timeRange = row.is_open
+          ? `${(row.open_time ?? "").slice(0, 5)}-${(row.close_time ?? "").slice(0, 5)}`
+          : "CERRADO";
+        menuText += `- ${day}${marker}: ${timeRange}\n`;
+      }
+    }
+
+    menuText += "\n## Carta (categorías y platos activos)\n";
 
     for (const cat of categories) {
+      // Evitar duplicar menú del día legacy de la carta cuando existe daily_special real.
+      if (cat.name.toLowerCase() === "menú del día" || cat.name.toLowerCase() === "menu del dia") {
+        continue;
+      }
+
       const catDishes = dishes.filter(
         (d) => d.category_id === cat.id,
       );
@@ -106,11 +264,11 @@ async function fetchMenuContext(): Promise<string> {
       }
     }
 
-    menuText += "\n--- FIN DEL MENÚ ---\n";
-    return menuText;
+    menuText += "\n--- FIN DATOS REALES ---\n";
+    return menuText + WEB_CONTACT_CONTEXT;
   } catch (e) {
     console.error("Error obteniendo menú de Supabase:", e);
-    return "";
+    return unavailableContext(`Error obteniendo datos reales: ${String(e)}`) + WEB_CONTACT_CONTEXT;
   }
 }
 
@@ -149,7 +307,7 @@ serve(async (req: Request) => {
 
     // Construir system prompt enriquecido con menú real
     const menuContext = await fetchMenuContext();
-    const systemPrompt = BASE_SYSTEM_PROMPT + menuContext;
+    const systemPrompt = BASE_SYSTEM_PROMPT + EXTRA_SYSTEM_PROMPT + menuContext;
 
     // Groq usa la misma interfaz que OpenAI Chat Completions
     const groqRes = await fetch(

@@ -14,7 +14,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 const _heroImageUrl =
     'https://images.unsplash.com/photo-1514986888952-8cd320577b68'
-    '?q=80&w=1600&auto=format&fit=crop';
+  '?q=80&w=1600&fm=jpg&fit=crop';
 
 // ─────────────────────────────────────────────────────────────────────────────
 class CateringScreen extends ConsumerStatefulWidget {
@@ -264,7 +264,7 @@ class _CateringHero extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final screenW = MediaQuery.sizeOf(context).width;
-    final heroH = screenW < 600 ? 420.0 : 520.0;
+    final heroH = screenW < 600 ? 620.0 : 520.0;
     final sidePad = screenW > 1200 ? (screenW - 1200) / 2 : 24.0;
 
     return FadeTransition(
@@ -364,7 +364,7 @@ class _CateringHero extends StatelessWidget {
                     child: Text(
                       'Celebraciones\ncon sabor de casa',
                       style: GoogleFonts.inter(
-                        fontSize: screenW < 600 ? 40 : 54,
+                        fontSize: screenW < 600 ? 34 : 54,
                         fontWeight: FontWeight.w900,
                         color: Colors.white,
                         height: 1.05,

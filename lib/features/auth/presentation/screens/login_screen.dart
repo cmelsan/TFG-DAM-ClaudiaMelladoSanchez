@@ -426,7 +426,7 @@ class _WebBrandPanel extends StatelessWidget {
           // ── Foto de fondo
           Positioned.fill(
             child: Image.network(
-              'https://images.unsplash.com/photo-1547592180-85f173990554?q=80&w=1200&auto=format&fit=crop',
+              'https://images.unsplash.com/photo-1547592180-85f173990554?q=80&w=1200&fm=jpg&fit=crop',
               fit: BoxFit.cover,
             ),
           ),

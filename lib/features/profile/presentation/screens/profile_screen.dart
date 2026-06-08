@@ -771,6 +771,8 @@ class _SettingsRow extends StatelessWidget {
                 children: [
                   Text(
                     title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       fontWeight: FontWeight.w600,
                       fontSize: 15,
@@ -780,6 +782,8 @@ class _SettingsRow extends StatelessWidget {
                   if (subtitle != null)
                     Text(
                       subtitle!,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                         fontSize: 12,
                         color: _textMuted(context),
@@ -864,6 +868,8 @@ class _NotificationsRow extends ConsumerWidget {
                 children: [
                   Text(
                     'Notificaciones',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       fontWeight: FontWeight.w600,
                       fontSize: 15,
@@ -874,6 +880,8 @@ class _NotificationsRow extends ConsumerWidget {
                     unread > 0
                         ? '$unread sin leer'
                         : 'Al dia con tus avisos',
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       fontSize: 12,
                       color: _textMuted(context),
@@ -1061,18 +1069,22 @@ class _AddressesSection extends ConsumerWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Row(
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 6,
+                            crossAxisAlignment: WrapCrossAlignment.center,
                             children: [
                               Text(
                                 label,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                                 style: TextStyle(
                                   fontWeight: FontWeight.w600,
                                   fontSize: 15,
                                   color: _textMain(context),
                                 ),
                               ),
-                              if (isDefault) ...[
-                                const SizedBox(width: 8),
+                              if (isDefault)
                                 Container(
                                   padding: const EdgeInsets.symmetric(
                                     horizontal: 8,
@@ -1091,11 +1103,12 @@ class _AddressesSection extends ConsumerWidget {
                                     ),
                                   ),
                                 ),
-                              ],
                             ],
                           ),
                           Text(
                             '$street, $postalCode $city',
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
                             style: TextStyle(
                               color: _textMuted(context),
                               fontSize: 13,

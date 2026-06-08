@@ -39,7 +39,7 @@ serve(async (req) => {
     // ── 1. Obtener el pedido con sus ítems ────────────────────────────────────
     const { data: order, error: orderError } = await supabase
       .from("orders")
-      .select("*, order_items(*)")
+      .select("*, order_items(quantity, unit_price, subtotal, dish_id, dishes(name))")
       .eq("id", orderId)
       .single();
 
@@ -97,7 +97,7 @@ serve(async (req) => {
         (item: any) =>
           `<tr>
             <td style="padding: 6px 12px; border-bottom: 1px solid #E5E5E3;">${item.quantity}×</td>
-            <td style="padding: 6px 12px; border-bottom: 1px solid #E5E5E3;">${item.name ?? item.dish_id}</td>
+            <td style="padding: 6px 12px; border-bottom: 1px solid #E5E5E3;">${item.dishes?.name ?? item.dish_id}</td>
             <td style="padding: 6px 12px; border-bottom: 1px solid #E5E5E3; text-align: right;">${Number(item.subtotal ?? item.unit_price * item.quantity).toFixed(2)} €</td>
           </tr>`,
       )

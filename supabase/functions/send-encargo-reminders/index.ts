@@ -57,7 +57,7 @@ serve(async (req) => {
     // ── 2. Obtener encargos de hoy con estado relevante ───────────────────────
     const { data: orders, error } = await supabase
       .from("orders")
-      .select("*, order_items(*)")
+      .select("*, order_items(quantity, unit_price, subtotal, dish_id, dishes(name))")
       .eq("order_type", "encargo")
       .not("status", "in", '("cancelled","delivered")')
       .gte("scheduled_at", todayStart.toISOString())
@@ -73,7 +73,7 @@ serve(async (req) => {
 
     if (!orders || orders.length === 0) {
       return new Response(
-        JSON.stringify({ ok: true, sent: 0, message: "No encargos today" }),
+        JSON.stringify({ ok: true, sent: 0, message: "No hay encargos para hoy" }),
         { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
@@ -123,7 +123,7 @@ serve(async (req) => {
             (item: any) =>
               `<tr>
                 <td style="padding:5px 10px;border-bottom:1px solid #E5E5E3;">${item.quantity}×</td>
-                <td style="padding:5px 10px;border-bottom:1px solid #E5E5E3;">${item.name ?? item.dish_id}</td>
+                <td style="padding:5px 10px;border-bottom:1px solid #E5E5E3;">${item.dishes?.name ?? item.dish_id}</td>
               </tr>`,
           )
           .join("");
@@ -232,7 +232,7 @@ serve(async (req) => {
           body: JSON.stringify({
             sender: { email: BREVO_SENDER_EMAIL, name: "Sabor de Casa" },
             to: [{ email: userEmail, name: userName }],
-            subject: `🔔 Recordatorio: tu encargo de hoy #${orderRef} | Sabor de Casa`,
+            subject: `🔔 Recordatorio: tu encargo de hoy #${orderRef} · Sabor de Casa`,
             htmlContent,
           }),
         });

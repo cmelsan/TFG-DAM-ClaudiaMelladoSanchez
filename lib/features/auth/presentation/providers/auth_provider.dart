@@ -17,7 +17,7 @@ part 'auth_provider.g.dart';
 /// - AsyncError → error al comprobar sesión
 @Riverpod(keepAlive: true)
 class AuthNotifier extends _$AuthNotifier {
-  late final AuthRepository _repo;
+  AuthRepository? _repo;
 
   /// Evita que el stream interfiera mientras signIn/signUp están en curso.
   bool _isAuthOperationInProgress = false;
@@ -25,11 +25,11 @@ class AuthNotifier extends _$AuthNotifier {
   @override
   FutureOr<UserProfile?> build() async {
     // ignore: deprecated_member_use_from_same_package, Riverpod 2.x typed Ref
-    _repo = ref.watch(authRepositoryProvider);
+    _repo ??= ref.watch(authRepositoryProvider);
 
     // Escuchar cambios de auth (token refresh, logout, etc.)
     // Ignoramos signedIn durante operaciones explícitas para evitar condición de carrera.
-    final sub = _repo.watchAuthState().listen((event) {
+    final sub = _repo!.watchAuthState().listen((event) {
       switch (event.event) {
         case AuthChangeEvent.signedIn:
         case AuthChangeEvent.tokenRefreshed:
@@ -51,8 +51,8 @@ class AuthNotifier extends _$AuthNotifier {
     ref.onDispose(sub.cancel);
 
     // Comprobar sesión existente al arrancar (persistencia entre recargas)
-    if (_repo.currentSession != null) {
-      return _repo.getProfile();
+    if (_repo!.currentSession != null) {
+      return _repo!.getProfile();
     }
     return null;
   }
@@ -61,7 +61,7 @@ class AuthNotifier extends _$AuthNotifier {
     _isAuthOperationInProgress = true;
     state = const AsyncLoading();
     state = await AsyncValue.guard(
-      () => _repo.signIn(email: email, password: password),
+      () => _repo!.signIn(email: email, password: password),
     );
     _isAuthOperationInProgress = false;
   }
@@ -75,7 +75,7 @@ class AuthNotifier extends _$AuthNotifier {
     _isAuthOperationInProgress = true;
     state = const AsyncLoading();
     state = await AsyncValue.guard(
-      () => _repo.signUp(
+      () => _repo!.signUp(
         email: email,
         password: password,
         fullName: fullName,
@@ -86,20 +86,20 @@ class AuthNotifier extends _$AuthNotifier {
   }
 
   Future<void> signOut() async {
-    await _repo.signOut();
+    await _repo!.signOut();
     state = const AsyncData(null);
   }
 
   Future<void> _refreshProfile() async {
-    state = await AsyncValue.guard(() => _repo.getProfile());
+    state = await AsyncValue.guard(() => _repo!.getProfile());
   }
 
   /// Registra el token FCM del dispositivo en push_tokens (best-effort).
   Future<void> _saveFcmToken() async {
-    final userId = _repo.currentUser?.id;
+    final userId = _repo?.currentUser?.id;
     if (userId == null) return;
     final token = await FirebaseMessaging.instance.getToken();
     if (token == null) return;
-    await _repo.saveFcmToken(userId, token);
+    await _repo!.saveFcmToken(userId, token);
   }
 }

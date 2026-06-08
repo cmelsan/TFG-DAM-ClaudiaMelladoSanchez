@@ -314,6 +314,7 @@ class AdminRepository {
       final data = await _client
           .from(SupabaseConstants.orders)
           .select()
+          .neq('order_type', 'encargo')
           .order('created_at', ascending: false);
       return data.map(Order.fromJson).toList();
     } on PostgrestException catch (e) {
@@ -323,9 +324,7 @@ class AdminRepository {
     }
   }
 
-  /// Todos los pedidos del día actual.
-  /// Pedidos regulares → filtro por created_at.
-  /// Encargos → filtro por scheduled_at (fecha programada).
+  /// Pedidos regulares del día actual (excluye encargos).
   Future<List<Order>> getOrdersToday() async {
     try {
       final now = DateTime.now();
@@ -340,18 +339,7 @@ class AdminRepository {
           .lt('created_at', end.toIso8601String())
           .order('created_at', ascending: false);
 
-      final encargoData = await _client
-          .from(SupabaseConstants.orders)
-          .select()
-          .eq('order_type', 'encargo')
-          .gte('scheduled_at', start.toIso8601String())
-          .lt('scheduled_at', end.toIso8601String())
-          .order('scheduled_at', ascending: true);
-
-      final regular = regularData.map(Order.fromJson).toList();
-      final encargos = encargoData.map(Order.fromJson).toList();
-      return [...regular, ...encargos]
-        ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+      return regularData.map(Order.fromJson).toList();
     } on PostgrestException catch (e) {
       throw DatabaseFailure(message: e.message, code: e.code);
     } catch (e) {
@@ -359,8 +347,7 @@ class AdminRepository {
     }
   }
 
-  /// Todos los pedidos de la semana actual (lunes–domingo).
-  /// Pedidos regulares → created_at. Encargos → scheduled_at.
+  /// Pedidos regulares de la semana actual (lunes–domingo, excluye encargos).
   Future<List<Order>> getOrdersWeek() async {
     try {
       final now = DateTime.now();
@@ -375,18 +362,7 @@ class AdminRepository {
           .lt('created_at', sunday.toIso8601String())
           .order('created_at', ascending: false);
 
-      final encargoData = await _client
-          .from(SupabaseConstants.orders)
-          .select()
-          .eq('order_type', 'encargo')
-          .gte('scheduled_at', monday.toIso8601String())
-          .lt('scheduled_at', sunday.toIso8601String())
-          .order('scheduled_at', ascending: true);
-
-      final regular = regularData.map(Order.fromJson).toList();
-      final encargos = encargoData.map(Order.fromJson).toList();
-      return [...regular, ...encargos]
-        ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+        return regularData.map(Order.fromJson).toList();
     } on PostgrestException catch (e) {
       throw DatabaseFailure(message: e.message, code: e.code);
     } catch (e) {

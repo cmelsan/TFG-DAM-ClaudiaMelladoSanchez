@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:sabor_de_casa/core/router/route_names.dart';
 import 'package:sabor_de_casa/core/theme/app_tokens.dart';
+import 'package:sabor_de_casa/features/auth/presentation/providers/auth_provider.dart';
 
 // ── Modelo de ítem ────────────────────────────────────────────────────────────
 
@@ -102,7 +105,7 @@ const _kItems = [
 // ── Widget principal ──────────────────────────────────────────────────────────
 
 /// Sidebar fijo 260 px para la vista de escritorio/tablet del panel de admin.
-class AdminSidebar extends StatelessWidget {
+class AdminSidebar extends ConsumerWidget {
   const AdminSidebar({super.key});
 
   // Colores internos del sidebar (tema claro)
@@ -112,7 +115,7 @@ class AdminSidebar extends StatelessWidget {
   static const _textNormal = Color(0xFF374151);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final currentRoute = GoRouterState.of(context).matchedLocation;
 
     return Container(
@@ -240,7 +243,12 @@ class AdminSidebar extends StatelessWidget {
                 route: '',
               ),
               isActive: false,
-              onTap: () => context.go('/login'),
+              onTap: () async {
+                await ref.read(authNotifierProvider.notifier).signOut();
+                if (context.mounted) {
+                  context.goNamed(RouteNames.login);
+                }
+              },
               danger: true,
               textNormal: _textNormal,
             ),

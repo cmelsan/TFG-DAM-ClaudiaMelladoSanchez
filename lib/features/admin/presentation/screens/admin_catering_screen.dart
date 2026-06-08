@@ -330,11 +330,60 @@ class _DataChip extends StatelessWidget {
 }
 
 // ══════════════════════════════════════════════ TAB 2: SOLICITUDES ════════════
-class _RequestsTab extends ConsumerWidget {
+class _RequestsTab extends ConsumerStatefulWidget {
   const _RequestsTab();
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_RequestsTab> createState() => _RequestsTabState();
+}
+
+class _RequestsTabState extends ConsumerState<_RequestsTab> {
+  String _statusFilter = 'all';
+  String _menuTypeFilter = 'all';
+  String _search = '';
+
+  static const _statusOrder = [
+    'pending',
+    'appointment',
+    'quoted',
+    'accepted',
+    'rejected',
+    'cancelled',
+    'completed',
+  ];
+
+  static const _statusMeta = {
+    'pending': ('Pendiente', Colors.orange),
+    'appointment': ('Cita', Colors.teal),
+    'quoted': ('Presupuestado', Colors.blue),
+    'accepted': ('Aceptado', Color(0xFF1D9E75)),
+    'rejected': ('Rechazado', Colors.red),
+    'cancelled': ('Cancelado', Colors.grey),
+    'completed': ('Completado', Colors.purple),
+  };
+
+  bool _matches(AdminEventRequest r) {
+    final matchesStatus = _statusFilter == 'all' || r.status == _statusFilter;
+    final matchesMenuType =
+        _menuTypeFilter == 'all' || (r.menuType ?? 'closed') == _menuTypeFilter;
+
+    if (_search.isEmpty) return matchesStatus && matchesMenuType;
+
+    final haystack = [
+      r.shortId,
+      r.location,
+      r.eventType ?? '',
+      r.eventMenuName ?? '',
+      r.contactPhone ?? '',
+      r.customMenuDescription ?? '',
+      r.notes ?? '',
+    ].join(' ').toLowerCase();
+
+    return matchesStatus && matchesMenuType && haystack.contains(_search);
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final requestsAsync = ref.watch(adminEventRequestsProvider);
 
     return requestsAsync.when(
@@ -344,36 +393,214 @@ class _RequestsTab extends ConsumerWidget {
         onRetry: () => ref.invalidate(adminEventRequestsProvider),
       ),
       data: (requests) {
-        if (requests.isEmpty) {
-          return Center(
+        final filtered = requests.where(_matches).toList();
+
+        return ColoredBox(
+          color: const Color(0xFFF4F6F8),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
             child: Column(
-              mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(
-                  Icons.event_note_outlined,
-                  size: 56,
-                  color: Colors.grey.shade300,
+                // Toolbar estilo pedidos
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(AppTokens.radiusLg),
+                    border: Border.all(color: const Color(0xFFEEEEEE)),
+                    boxShadow: [AppTokens.cardShadow],
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      TextField(
+                        onChanged: (v) => setState(() {
+                          _search = v.toLowerCase().trim();
+                        }),
+                        decoration: InputDecoration(
+                          hintText: 'Buscar por #ID, evento, lugar, teléfono...',
+                          prefixIcon: const Icon(
+                            Icons.search_rounded,
+                            color: Color(0xFF9CA3AF),
+                            size: 20,
+                          ),
+                          filled: true,
+                          fillColor: const Color(0xFFF8F8FA),
+                          isDense: true,
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 12,
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: const BorderSide(color: Color(0xFFEEEEEE)),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: const BorderSide(color: Color(0xFFEEEEEE)),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: const BorderSide(
+                              color: AppTokens.brandPrimary,
+                              width: 1.5,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      SizedBox(
+                        height: 32,
+                        child: ListView(
+                          scrollDirection: Axis.horizontal,
+                          children: [
+                            _RequestFilterPill(
+                              label: 'Todos',
+                              selected: _statusFilter == 'all',
+                              color: const Color(0xFF1A1A2E),
+                              onTap: () => setState(() => _statusFilter = 'all'),
+                            ),
+                            for (final s in _statusOrder)
+                              _RequestFilterPill(
+                                label: _statusMeta[s]!.$1,
+                                selected: _statusFilter == s,
+                                color: _statusMeta[s]!.$2,
+                                onTap: () => setState(() => _statusFilter = s),
+                              ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      SizedBox(
+                        height: 30,
+                        child: ListView(
+                          scrollDirection: Axis.horizontal,
+                          children: [
+                            _RequestFilterPill(
+                              label: 'Todos los menús',
+                              selected: _menuTypeFilter == 'all',
+                              color: const Color(0xFF1A1A2E),
+                              onTap: () => setState(() => _menuTypeFilter = 'all'),
+                            ),
+                            _RequestFilterPill(
+                              label: 'Cerrado',
+                              selected: _menuTypeFilter == 'closed',
+                              color: AppTokens.brandPrimary,
+                              onTap: () => setState(() => _menuTypeFilter = 'closed'),
+                            ),
+                            _RequestFilterPill(
+                              label: 'Personalizado',
+                              selected: _menuTypeFilter == 'custom',
+                              color: AppTokens.brandPrimary,
+                              onTap: () => setState(() => _menuTypeFilter = 'custom'),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      Text(
+                        '${filtered.length} solicitudes mostradas',
+                        style: GoogleFonts.inter(
+                          fontSize: 12,
+                          color: Colors.black45,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-                const SizedBox(height: 16),
-                Text(
-                  'Sin solicitudes de catering',
-                  style: GoogleFonts.inter(
-                    fontSize: 16,
-                    color: Colors.black45,
-                    fontWeight: FontWeight.w600,
+                const SizedBox(height: 12),
+                Expanded(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(AppTokens.radiusLg),
+                      border: Border.all(color: const Color(0xFFEEEEEE)),
+                    ),
+                    child: filtered.isEmpty
+                        ? Center(
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.filter_alt_off_rounded,
+                                  size: 44,
+                                  color: Colors.grey.shade300,
+                                ),
+                                const SizedBox(height: 12),
+                                Text(
+                                  requests.isEmpty
+                                      ? 'Sin solicitudes de catering'
+                                      : 'No hay resultados con filtros actuales',
+                                  style: GoogleFonts.inter(
+                                    fontSize: 15,
+                                    color: Colors.black45,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          )
+                        : ListView.separated(
+                            padding: const EdgeInsets.fromLTRB(12, 12, 12, 20),
+                            itemCount: filtered.length,
+                            separatorBuilder: (_, __) =>
+                                const SizedBox(height: 12),
+                            itemBuilder: (ctx, i) =>
+                                _RequestAdminCard(request: filtered[i]),
+                          ),
                   ),
                 ),
               ],
             ),
-          );
-        }
-        return ListView.separated(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
-          itemCount: requests.length,
-          separatorBuilder: (_, __) => const SizedBox(height: 12),
-          itemBuilder: (ctx, i) => _RequestAdminCard(request: requests[i]),
+          ),
         );
       },
+    );
+  }
+}
+
+class _RequestFilterPill extends StatelessWidget {
+  const _RequestFilterPill({
+    required this.label,
+    required this.selected,
+    required this.color,
+    required this.onTap,
+  });
+
+  final String label;
+  final bool selected;
+  final Color color;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(right: 8),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(100),
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 160),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+          decoration: BoxDecoration(
+            color: selected ? color.withValues(alpha: 0.12) : Colors.white,
+            borderRadius: BorderRadius.circular(100),
+            border: Border.all(
+              color: selected ? color : const Color(0xFFE5E7EB),
+            ),
+          ),
+          child: Text(
+            label,
+            style: GoogleFonts.inter(
+              fontSize: 12.5,
+              fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+              color: selected ? color : const Color(0xFF6B7280),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

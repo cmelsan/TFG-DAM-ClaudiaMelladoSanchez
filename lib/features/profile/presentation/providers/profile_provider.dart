@@ -44,29 +44,29 @@ class AddressesNotifier extends _$AddressesNotifier {
 
 @Riverpod(keepAlive: true)
 class ProfileNotifier extends _$ProfileNotifier {
-  late final ProfileRepository _repo;
+  ProfileRepository? _repo;
 
   @override
   FutureOr<UserProfile> build() async {
     // ignore: deprecated_member_use_from_same_package, Riverpod 2.x typed Ref
-    _repo = ref.watch(profileRepositoryProvider);
-    return _repo.getMyProfile();
+    _repo ??= ref.watch(profileRepositoryProvider);
+    return _repo!.getMyProfile();
   }
 
   Future<void> refresh() async {
     state = const AsyncLoading();
-    state = await AsyncValue.guard(_repo.getMyProfile);
+    state = await AsyncValue.guard(() => _repo!.getMyProfile());
   }
 
   Future<void> updateProfile({required String fullName, String? phone}) async {
     state = const AsyncLoading();
     state = await AsyncValue.guard(
-      () => _repo.updateMyProfile(fullName: fullName, phone: phone),
+      () => _repo!.updateMyProfile(fullName: fullName, phone: phone),
     );
   }
 
   Future<void> updateAllergens(List<String> allergens) async {
-    state = await AsyncValue.guard(() => _repo.updateAllergens(allergens));
+    state = await AsyncValue.guard(() => _repo!.updateAllergens(allergens));
   }
 }
 

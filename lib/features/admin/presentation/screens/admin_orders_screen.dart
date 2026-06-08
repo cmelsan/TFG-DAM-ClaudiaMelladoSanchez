@@ -44,7 +44,6 @@ const _typeLabels = {
   'delivery': 'Reparto',
   'domicilio': 'Domicilio',
   'recogida': 'Recogida',
-  'encargo': 'Encargo',
   'mostrador': 'Mostrador',
 };
 
@@ -1279,8 +1278,7 @@ class _OrderCardState extends ConsumerState<_OrderCard> {
                                 pw.Expanded(
                                   flex: 2,
                                   child: pw.Text(
-                                    Formatters.price(
-                                        items[i].unitPrice),
+                                    _facturaMoney(items[i].unitPrice),
                                     style: const pw.TextStyle(
                                         fontSize: 11),
                                     textAlign: pw.TextAlign.right,
@@ -1289,8 +1287,7 @@ class _OrderCardState extends ConsumerState<_OrderCard> {
                                 pw.Expanded(
                                   flex: 2,
                                   child: pw.Text(
-                                    Formatters.price(
-                                        items[i].subtotal),
+                                    _facturaMoney(items[i].subtotal),
                                     style: pw.TextStyle(
                                       fontSize: 11,
                                       fontWeight: pw.FontWeight.bold,
@@ -1336,26 +1333,26 @@ class _OrderCardState extends ConsumerState<_OrderCard> {
                       children: [
                         _pdfAdminRow(
                             'Subtotal productos',
-                            Formatters.price(o.subtotal)),
+                            _facturaMoney(o.subtotal)),
                         if (o.deliveryFee > 0)
                           _pdfAdminRow(
                               'Gastos de envío',
-                              Formatters.price(o.deliveryFee)),
+                              _facturaMoney(o.deliveryFee)),
                         if (o.discountAmount > 0)
                           _pdfAdminRow(
                               'Descuento',
-                              '−${Formatters.price(o.discountAmount)}'),
+                              '-${_facturaMoney(o.discountAmount)}'),
                         pw.SizedBox(height: 4),
                         pw.Divider(
                             thickness: 1, color: PdfColors.grey400),
                         _pdfAdminRow(
                           'Base imponible (sin IVA)',
-                          Formatters.price(baseImponible),
+                          _facturaMoney(baseImponible),
                           muted: true,
                         ),
                         _pdfAdminRow(
                           'IVA 10% (Restauración)',
-                          Formatters.price(iva),
+                          _facturaMoney(iva),
                           muted: true,
                         ),
                         pw.Divider(
@@ -1375,7 +1372,7 @@ class _OrderCardState extends ConsumerState<_OrderCard> {
                                 ),
                               ),
                               pw.Text(
-                                Formatters.price(o.total),
+                                _facturaMoney(o.total),
                                 style: pw.TextStyle(
                                   fontSize: 14,
                                   fontWeight: pw.FontWeight.bold,
@@ -1453,6 +1450,9 @@ class _OrderCardState extends ConsumerState<_OrderCard> {
           ],
         ),
       );
+
+  String _facturaMoney(double value) =>
+      Formatters.price(value).replaceAll('€', 'EUR');
 
   @override
   Widget build(BuildContext context) {

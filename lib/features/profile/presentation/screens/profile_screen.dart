@@ -135,16 +135,22 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final screenW = MediaQuery.sizeOf(context).width;
     final hPad = screenW > 1200 ? (screenW - 1200) / 2 + 24.0 : 24.0;
 
-    ref.listen(profileNotifierProvider, (prev, next) {
-      final hadValue = prev?.hasValue ?? false;
-      if (hadValue && next.hasValue) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Perfil actualizado correctamente'),
-            backgroundColor: AppTokens.brandPrimary,
-          ),
-        );
-      }
+    // Si cambia usuario autenticado en runtime (logout/login sin recargar web),
+    // invalidar estado cacheado de secciones ligadas al usuario anterior.
+    ref.listen(authNotifierProvider, (prev, next) {
+      final prevUserId = prev?.valueOrNull?.id;
+      final nextUserId = next.valueOrNull?.id;
+
+      if (prevUserId == null || prevUserId == nextUserId) return;
+
+      _lastProfileId = null;
+      _fullNameCtrl.clear();
+      _phoneCtrl.clear();
+
+      ref.invalidate(profileNotifierProvider);
+      ref.invalidate(addressesNotifierProvider);
+      ref.invalidate(mySupportThreadsProvider);
+      ref.invalidate(unreadNotificationsCountProvider);
     });
 
     return Scaffold(
@@ -445,7 +451,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     await ref
         .read(profileNotifierProvider.notifier)
         .updateProfile(fullName: _fullNameCtrl.text, phone: _phoneCtrl.text);
-    ref.invalidate(authNotifierProvider);
   }
 
   Future<void> _signOut(BuildContext context) async {

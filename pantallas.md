@@ -45,7 +45,7 @@ orders.type = 'mostrador' | 'encargo' | 'domicilio' | 'recogida'
 | Acción | ¿Requiere registro? |
 |--------|---------------------|
 | Ver menú completo (platos, fotos, precios, alérgenos) | **No** |
-| Ver plato del día con countdown | **No** |
+| Ver menú del día con countdown | **No** |
 | Ver menús de catering/eventos | **No** |
 | Buscar platos (texto y voz) | **No** |
 | Ver horarios, dirección, info del negocio | **No** |
@@ -57,7 +57,7 @@ orders.type = 'mostrador' | 'encargo' | 'domicilio' | 'recogida'
 | Ver historial de pedidos | **Sí** |
 | Repetir pedido | **Sí** |
 | Solicitar catering | **Sí** |
-| Pedido grupal | **Sí** |
+| Pedido grupal | **No** (pantalla en modo "Próximamente") |
 | Configurar alérgenos en perfil | **Sí** |
 | Valorar pedido | **Sí** |
 
@@ -69,15 +69,15 @@ orders.type = 'mostrador' | 'encargo' | 'domicilio' | 'recogida'
 |---|----------|-------------|
 | 1.1 | **Splash / Onboarding** | Logo + 3 slides explicativos (solo primera vez) |
 | 1.2 | **Login / Registro** | Email+contraseña o Google. Supabase Auth |
-| 1.3 | **Home** | Plato del día con countdown, categorías, sección "Para ti" (recomendador IA), acceso rápido a repetir último pedido, banner de novedades |
+| 1.3 | **Home** | Menú del día con countdown, categorías, sección "Para ti" (recomendador IA), acceso rápido a repetir último pedido, banner de novedades |
 | 1.4 | **Catálogo / Menú** | Lista de categorías → platos con foto, precio, alérgenos, descripción. Filtros (sin gluten, vegetariano, etc.). Búsqueda por texto y por voz |
 | 1.5 | **Detalle de plato** | Foto grande, descripción, alérgenos destacados, precio, botón añadir al carrito con cantidad. Alerta si coincide con alérgenos del perfil |
 | 1.6 | **Carrito** | Lista de platos, cantidades, subtotales, total. Elegir tipo: Recogida (fecha/hora) o Domicilio (dirección + fecha/hora). Notas especiales |
 | 1.7 | **Checkout / Pago** | Resumen + pasarela Stripe (tarjeta) o "Pago en local" (solo recogida). Confirmación |
 | 1.8 | **Mis pedidos** | Historial con estado (pendiente → confirmado → preparando → listo → entregado). Filtro por estado |
-| 1.9 | **Detalle de pedido** | Estado con animación Lottie, productos, total, QR de recogida, descarga ticket PDF, valorar (estrellas + comentario) |
-| 1.10 | **Pedido grupal** | Crear sala compartida → genera enlace → invitados añaden platos → anfitrión confirma y paga |
-| 1.11 | **Catering / Eventos** | Menús de evento disponibles. Seleccionar → personalizar platos por curso → extras → nº comensales, fecha, lugar → enviar solicitud |
+| 1.9 | **Detalle de pedido** | Estado visual del pedido, productos, total, QR de recogida, descarga ticket PDF, valorar (estrellas + comentario) |
+| 1.10 | **Pedido grupal** | Pantalla publicada en modo "Próximamente" (flujo colaborativo planificado para siguiente iteración) |
+| 1.11 | **Catering / Eventos** | Landing de catering y acceso a solicitud de evento. Los menús públicos quedan pendientes de carga/activación en esta entrega |
 | 1.12 | **Mis solicitudes de catering** | Lista con estado (pendiente → presupuesto enviado → aceptado → rechazado). Ver presupuesto PDF, aceptar/rechazar |
 | 1.13 | **Chatbot IA** | Botón flotante → chat con IA. Preguntas sobre menú, alérgenos, horarios, estado pedido, recomendaciones |
 | 1.14 | **Contacto / Consultas** | Formulario: nombre, email, teléfono, tipo (consulta / propuesta evento / oferta trabajo / colaboración / otro), mensaje, adjuntar foto opcional |
@@ -99,14 +99,14 @@ orders.type = 'mostrador' | 'encargo' | 'domicilio' | 'recogida'
 
 ---
 
-## ROL 3: ADMIN (17 pantallas — Web + Android)
+## ROL 3: ADMIN (19 pantallas — Web + Android)
 
 | # | Pantalla | Descripción |
 |---|----------|-------------|
 | 3.1 | **Dashboard** | Resumen del día: pedidos hoy, ventas totales (online + mostrador), platos más vendidos, pedidos pendientes. Gráficas: ventas por día/semana/mes, por tipo de pedido |
 | 3.2 | **Gestión de Categorías** | CRUD: nombre, orden, icono/imagen, activo/inactivo |
 | 3.3 | **Gestión de Platos** | CRUD: nombre, descripción, precio, categoría, foto (Storage), alérgenos, disponible sí/no, tiempo estimado. IA opcional: foto → genera nombre y descripción |
-| 3.4 | **Plato del Día** | Seleccionar plato destacado, hora inicio y fin del countdown |
+| 3.4 | **Menú del Día** | Seleccionar plato destacado, hora inicio y fin del countdown |
 | 3.5 | **Gestión de Pedidos** | TODOS los pedidos (online + mostrador + domicilio). Filtros: estado, tipo, fecha. Detalle, cambiar estado, cancelar |
 | 3.6 | **Franjas horarias** | Slots para encargos/domicilio (ej: 13:00-13:30). Máx pedidos por franja. Días activos/inactivos |
 | 3.7 | **Gestión de Menús de Evento** | CRUD: nombre ("Menú Comunión Premium"), cursos (entrante, primero, segundo, postre), platos por curso, extras, precio base por comensal |
@@ -114,9 +114,9 @@ orders.type = 'mostrador' | 'encargo' | 'domicilio' | 'recogida'
 | 3.9 | **Calendario de Eventos** | Vista calendario de eventos confirmados. Detalle: fecha, lugar, menú, nº comensales |
 | 3.10 | **Buzón de Consultas** | Mensajes del formulario Contacto. Clasificados por tipo. Marcar leído, responder por email (Brevo), archivar |
 | 3.11 | **Soporte interno (chat)** | Bandeja de hilos `support_threads` por cliente. Conversación en tiempo real, contador de no leídos, estados (open / waiting_admin / waiting_customer / closed). Ruta `/admin/support` |
-| 3.12 | **Newsletter** | Suscriptores opt-in del formulario público (`/contacto`). KPI activos/bajas, búsqueda, filtros por estado, alta manual, export CSV. Ruta `/admin/newsletter` |
+| 3.12 | **Newsletter** | Suscriptores opt-in del formulario público (`/contact`). KPI activos/bajas, búsqueda, filtros por estado, alta manual, export CSV. Ruta `/admin/newsletter` |
 | 3.13 | **Reseñas / Testimonios** | CRUD de testimonios mostrados en la home. Toggle "destacar", rating interactivo 1-5★, orden visual. Ruta `/admin/testimonials` |
-| 3.14 | **Notificaciones admin** | Bandeja unificada de eventos (nuevos pedidos, mensajes contacto, hilos soporte, solicitudes catering). Ruta `/notifications` |
+| 3.14 | **Notificaciones admin** | Roadmap. Bandeja unificada prevista, pero sin pantalla ni ruta operativa en esta entrega |
 | 3.15 | **Gestión de Empleados** | CRUD: nombre, email, rol (cocinero/repartidor/ambos), activo/inactivo |
 | 3.16 | **Gestión de Usuarios** | Lista clientes registrados con KPIs por cliente (pedidos, gasto, último pedido), búsqueda, filtros por rol/estado, export CSV, bottom sheet de detalle |
 | 3.17 | **Estadísticas** | Resumen oscuro con KPIs por periodo, gráfica fl_chart de ingresos 30 días, barras por estado, top platos. Ruta `/admin/stats` |
@@ -130,15 +130,45 @@ orders.type = 'mostrador' | 'encargo' | 'domicilio' | 'recogida'
 | # | Feature | Tecnología |
 |---|---------|-----------|
 | 1 | Modo oscuro/claro automático | ThemeMode + sistema |
-| 2 | Pedido por voz | speech_to_text → búsqueda platos |
+| 2 | Búsqueda por voz | speech_to_text → búsqueda platos |
 | 3 | Estimación tiempo preparación | Algoritmo según carga cocina |
-| 4 | Pedido grupal compartido | Supabase Realtime |
-| 5 | Plato del día con countdown | Supabase Realtime |
+| 4 | Pedido grupal compartido (roadmap) | Planificado (pendiente implementación realtime) |
+| 5 | Menú del día con countdown | Supabase Realtime |
 | 6 | Repetir último pedido 1 tap | Consulta historial |
 | 7 | Alertas alérgenos personalizadas | Match perfil ↔ plato |
 | 8 | QR de recogida | qr_flutter + mobile_scanner |
 | 9 | Favoritos | Tabla favorites |
 | 10 | Ticket PDF descargable | pdf (dart) |
-| 11 | Animaciones Lottie estados pedido | lottie package |
+| 11 | Estados visuales del pedido | Flutter + Lottie en detalle de pedido |
 | 12 | Chatbot asistente IA | Gemini API via Edge Function |
 | 13 | Recomendador personalizado | Historial + IA via Edge Function |
+
+---
+
+## Actualización final (junio 2026)
+
+Correcciones de inventario para versión de defensa:
+
+1. Recogidas y mostrador quedan unificados operativamente.
+- El acceso `pickup` funciona como alias de `Mostrador` en pestaña de `Pedidos Hoy` filtrada para `recogida`.
+- Se evita mantener dos UIs separadas para misma acción de negocio (`entregar/cobrar`).
+
+2. Flujo de notificaciones legacy separado ya no es módulo funcional independiente en cliente.
+- El comportamiento de notificación permanece en backend (`send-order-notification`) y en eventos de pedido.
+- El inventario de pantallas debe considerarlo dentro de flujos de pedidos/perfil, no como producto aislado.
+
+3. Menú del día alineado con integridad de pedido.
+- El item comercial persiste siempre `dish_id` real de `dishes`.
+- Se elimina ambigüedad entre `daily_special.id` y `daily_special.dish_id` en documentación funcional.
+
+4. Criterio de conteo final.
+- El conteo por pantallas se mantiene como referencia académica de alcance.
+- Para mantenimiento técnico, la fuente de verdad de rutas es `lib/core/router/app_router.dart`.
+
+5. Pedido grupal en estado actual.
+- Existe ruta y pantalla de acceso, pero funcionalidad colaborativa está en modo "Próximamente".
+- No debe documentarse como flujo productivo completado en esta entrega.
+
+6. Animaciones de estado.
+- El producto final combina transiciones nativas y Lottie en detalle de pedido.
+- No debe afirmarse Lottie como recurso transversal en todas las pantallas de pedido.

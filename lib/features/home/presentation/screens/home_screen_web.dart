@@ -2338,7 +2338,7 @@ class _MenuPanel extends ConsumerWidget {
                     : () {
                         ref.read(cartNotifierProvider.notifier).addItem(
                           CartItem(
-                            dishId: special.id,
+                            dishId: special.dishId,
                             name: 'Menú del día',
                             unitPrice: special.menuPrice!,
                             quantity: 1,

@@ -39,7 +39,14 @@ enum _EncargosScope { today, week }
 // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class PosScreen extends ConsumerStatefulWidget {
-  const PosScreen({super.key});
+  const PosScreen({
+    super.key,
+    this.initialTabIndex = 0,
+    this.onlyPickupInTodayTab = false,
+  });
+
+  final int initialTabIndex;
+  final bool onlyPickupInTodayTab;
 
   @override
   ConsumerState<PosScreen> createState() => _PosScreenState();
@@ -52,7 +59,12 @@ class _PosScreenState extends ConsumerState<PosScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 4, vsync: this);
+    final clamped = widget.initialTabIndex.clamp(0, 3);
+    _tabController = TabController(
+      length: 4,
+      vsync: this,
+      initialIndex: clamped,
+    );
   }
 
   @override
@@ -111,11 +123,11 @@ class _PosScreenState extends ConsumerState<PosScreen>
       ),
       body: TabBarView(
         controller: _tabController,
-        children: const [
-          _NuevoPedidoTab(),
-          _EncargosListTab(scope: _EncargosScope.today),
-          _EncargosListTab(scope: _EncargosScope.week),
-          _PedidosHoyTab(),
+        children: [
+          const _NuevoPedidoTab(),
+          const _EncargosListTab(scope: _EncargosScope.today),
+          const _EncargosListTab(scope: _EncargosScope.week),
+          _PedidosHoyTab(onlyPickup: widget.onlyPickupInTodayTab),
         ],
       ),
     );
@@ -1264,7 +1276,9 @@ class _EncargoCard extends ConsumerWidget {
 // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class _PedidosHoyTab extends ConsumerWidget {
-  const _PedidosHoyTab();
+  const _PedidosHoyTab({this.onlyPickup = false});
+
+  final bool onlyPickup;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -1280,11 +1294,31 @@ class _PedidosHoyTab extends ConsumerWidget {
             children: [
               Expanded(
                 child: Text(
-                  'Pedidos de hoy',
+                  onlyPickup ? 'Recogidas listas de hoy' : 'Pedidos de hoy',
                   style: GoogleFonts.inter(
                       fontWeight: FontWeight.w600, fontSize: 14),
                 ),
               ),
+              if (onlyPickup)
+                FilledButton.icon(
+                  onPressed: () => context.goNamed(RouteNames.scanner),
+                  icon: const Icon(Icons.qr_code_scanner, size: 16),
+                  label: Text(
+                    'Escanear QR',
+                    style: GoogleFonts.inter(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 12,
+                    ),
+                  ),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: AppTokens.brandPrimary,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
+                  ),
+                ),
+              if (onlyPickup) const SizedBox(width: 6),
               IconButton(
                 onPressed: () =>
                     ref.invalidate(counterOrdersTodayProvider),
@@ -1298,7 +1332,11 @@ class _PedidosHoyTab extends ConsumerWidget {
         Expanded(
           child: async.when(
             data: (orders) {
-              if (orders.isEmpty) {
+              final visible = onlyPickup
+                  ? orders.where((o) => o.orderType == 'recogida').toList()
+                  : orders;
+
+              if (visible.isEmpty) {
                 return Center(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
@@ -1306,7 +1344,10 @@ class _PedidosHoyTab extends ConsumerWidget {
                       const Icon(Icons.receipt_long_outlined,
                           size: 56, color: _kDivider),
                       const SizedBox(height: 12),
-                      Text('Sin pedidos hoy',
+                      Text(
+                          onlyPickup
+                              ? 'Sin recogidas listas hoy'
+                              : 'Sin pedidos hoy',
                           style: GoogleFonts.inter(
                               color: _kTextMuted, fontSize: 15)),
                     ],
@@ -1318,11 +1359,11 @@ class _PedidosHoyTab extends ConsumerWidget {
                     ref.invalidate(counterOrdersTodayProvider),
                 child: ListView.separated(
                   padding: const EdgeInsets.all(16),
-                  itemCount: orders.length,
+                  itemCount: visible.length,
                   separatorBuilder: (_, __) =>
                       const SizedBox(height: 10),
                   itemBuilder: (_, i) =>
-                      _PedidoHoyCard(order: orders[i]),
+                      _PedidoHoyCard(order: visible[i]),
                 ),
               );
             },

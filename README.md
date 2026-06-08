@@ -64,7 +64,7 @@ Aplicación multiplataforma (Android + Web) para un local de comida preparada pa
 | Escáner QR | mobile_scanner | ^7.0.0 |
 | Lottie animations | lottie | ^3.3.1 |
 | PDF/Ticket | pdf + printing | ^3.11.2 / ^5.14.2 |
-| Voz (pedido por voz) | speech_to_text | ^7.0.0 |
+| Voz (búsqueda por voz) | speech_to_text | ^7.0.0 |
 | Conectividad | connectivity_plus | ^6.1.4 |
 | Preferencias locales | shared_preferences | ^2.5.3 |
 | Compresión imágenes | flutter_image_compress | ^2.3.0 |
@@ -137,7 +137,7 @@ lib/
 │   ├── splash/                      ← Pantalla de carga + onboarding
 │   ├── auth/                        ← Login, registro, estado global de auth
 │   ├── home/                        ← Pantalla principal (adaptativa web/móvil)
-│   ├── menu/                        ← Carta, detalle de plato, favoritos, plato del día
+│   ├── menu/                        ← Carta, detalle de plato, favoritos, menú del día
 │   ├── cart/                        ← Carrito, checkout, pantalla de pago web
 │   ├── orders/                      ← Historial de pedidos, detalle, confirmación
 │   ├── profile/                     ← Perfil de usuario, direcciones, preferencias
@@ -145,9 +145,9 @@ lib/
 │   ├── chat/                        ← Chat con IA (Gemini)
 │   ├── contact/                     ← Formulario de contacto
 │   ├── delivery/                    ← Pantalla del repartidor, escáner QR
-│   ├── group_order/                 ← Pedido grupal en tiempo real
+│   ├── group_order/                 ← Pedido grupal (pantalla "Próximamente")
 │   ├── kitchen/                     ← Panel de cocina para empleados
-│   ├── notifications/               ← Gestión de notificaciones push
+│   ├── newsletter/                  ← Gestión de campañas y suscriptores
 │   ├── pos/                         ← TPV para venta en mostrador
 │   └── admin/                       ← Panel de administración completo
 └── services/
@@ -164,7 +164,7 @@ supabase/
     └── send-order-notification/     ← Envía email (Brevo) + push (FCM) al cliente
 
 assets/
-├── animations/                      ← Archivos Lottie .json
+├── animations/                      ← Recursos visuales (no críticos en flujo principal)
 └── images/                          ← Imágenes estáticas
 
 android/
@@ -184,20 +184,20 @@ web/
 | Home | `HomeScreen` (adaptativa: web + móvil) | ✅ |
 | Menú / Carta | `MenuScreen`, `DishDetailScreen` | ✅ |
 | Favoritos | `FavoritesScreen` | ✅ |
-| Plato del día | `DailySpecialBanner` con countdown | ✅ |
+| Menú del día | `DailySpecialBanner` con countdown | ✅ |
 | Alertas de alérgenos | `AllergenBadge` en detalle de plato | ✅ |
 | Carrito | `CartScreen`, `CheckoutScreen` | ✅ |
 | Pago móvil | Stripe Payment Sheet (flutter_stripe) | ✅ |
 | Pago web | Stripe Checkout (redirección) | ✅ |
-| Confirmación de pedido | `OrderConfirmationScreen` (QR, Lottie, notif.) | ✅ |
+| Confirmación de pedido | `OrderConfirmationScreen` (QR, estado visual, notif.) | ✅ |
 | Historial de pedidos | `OrdersScreen`, `OrderDetailScreen` | ✅ |
 | QR de recogida/encargo | `QrImageView` en confirmación y detalle | ✅ |
 | Perfil de usuario | `ProfileScreen` | ✅ |
 | Catering / Eventos | `CateringScreen`, `CateringRequestScreen`, `MyCateringRequestsScreen` | ✅ |
 | Chat IA (Gemini) | `ChatScreen` | ✅ |
 | Contacto | `ContactScreen` | ✅ |
-| Pedido grupal | `GroupOrderScreen` (Realtime) | ✅ |
-| Pedido por voz | Integrado en `CheckoutScreen` (speech_to_text) | ✅ |
+| Pedido grupal | `GroupOrderScreen` (Próximamente) | 🟡 |
+| Búsqueda por voz | Integrada en `MenuScreen` (speech_to_text) | ✅ |
 
 ### Área Empleado / Admin
 
@@ -237,20 +237,21 @@ Implementado con **GoRouter 14** + hash routing en web (`/#/ruta`).
 | `/auth/login` | `login` | Pública |
 | `/auth/register` | `register` | Pública |
 | `/checkout` | `checkout` | Auth requerida |
-| `/payment-success` | `payment-success` | Auth requerida |
+| `/payment/success` | `payment-success` | Auth requerida |
 | `/order-confirmation/:orderId` | `order-confirmation` | Auth requerida |
 | `/orders` | `orders` | Auth requerida |
-| `/order-detail/:orderId` | `order-detail` | Auth requerida |
+| `/orders/:orderId` | `order-detail` | Auth requerida |
 | `/profile` | `profile` | Auth requerida |
 | `/favorites` | `favorites` | Auth requerida |
-| `/catering-request` | `catering-request` | Auth requerida |
-| `/my-catering-requests` | `my-catering-requests` | Auth requerida |
+| `/catering/request` | `catering-request` | Auth requerida |
+| `/catering/my-requests` | `my-catering-requests` | Auth requerida |
+| `/profile/consultations` | `my-consultations` | Auth requerida |
 | `/group-order` | `group-order` | Auth requerida |
 | `/employee/kitchen` | `kitchen` | Role: employee/admin |
 | `/employee/delivery` | `delivery` | Role: employee/admin |
-| `/employee/delivery/scanner` | `scanner` | Role: employee/admin |
+| `/employee/scanner` | `scanner` | Role: employee/admin |
 | `/employee/pos` | `pos` | Role: employee/admin |
-| `/admin` | `admin-dashboard` | Role: admin |
+| `/admin/dashboard` | `admin-dashboard` | Role: admin |
 | `/admin/dishes` | `admin-dishes` | Role: admin |
 | `/admin/orders` | `admin-orders` | Role: admin |
 | `/admin/catering` | `admin-catering` | Role: admin |
@@ -274,7 +275,7 @@ Implementado con **GoRouter 14** + hash routing en web (`/#/ruta`).
 | `addresses` | Direcciones de entrega por usuario |
 | `categories` | Categorías del menú |
 | `dishes` | Platos con precio, alérgenos, tiempo de preparación |
-| `daily_special` | Plato del día con descuento opcional |
+| `daily_special` | Menú del día con descuento opcional |
 | `schedule` | Horarios del local por día de la semana |
 | `orders` | Pedidos. Campos: `order_type`, `status`, `payment_method`, `payment_status`, `scheduled_at` |
 | `order_items` | Líneas de cada pedido (referencia a `dishes`) |
@@ -300,7 +301,7 @@ user_role:           client | employee | admin
 order_type:          mostrador | encargo | domicilio | recogida
 order_status:        pending | confirmed | preparing | ready | delivering | delivered | cancelled
 payment_status:      pending | paid | refunded
-payment_method:      card | cash | online
+payment_method:      card | cash | online | tpv
 event_request_status: pending | quoted | accepted | rejected | completed
 ```
 
@@ -360,7 +361,7 @@ event_request_status: pending | quoted | accepted | rejected | completed
 - Inicializado en `bootstrap.dart` con `if (!kIsWeb)` para excluir web
 
 ### Web
-- Flujo: `CheckoutScreen` → Stripe Checkout Session (redirección a `stripe.com`) → retorno a `/payment-success` → `PaymentSuccessScreen` crea el pedido → `OrderConfirmationScreen`
+- Flujo: `CheckoutScreen` → Stripe Checkout Session (redirección a `stripe.com`) → retorno a `/payment/success` → `PaymentSuccessScreen` crea el pedido → `OrderConfirmationScreen`
 - `PaymentSuccessScreen` usa `checkoutRepositoryProvider` directamente (keepAlive) para evitar el error "Bad state: Future already completed"
 
 ---
@@ -560,7 +561,7 @@ El QR se muestra en `OrderConfirmationScreen` y `OrderDetailScreen` para que el 
 - `PaymentSuccessScreen` con polling de sesión y creación de pedido
 
 ### v0.5 — Confirmación y pedidos
-- `OrderConfirmationScreen` con Lottie, QR, información de notificación
+- `OrderConfirmationScreen` con QR e información de notificación
 - `OrdersScreen` e `OrderDetailScreen` con historial completo
 - Generación de ticket PDF con `pdf` + `printing`
 
@@ -579,8 +580,8 @@ El QR se muestra en `OrderConfirmationScreen` y `OrderDetailScreen` para que el 
 
 ### v0.8 — Features avanzadas
 - Chat IA con Gemini (`ChatScreen`)
-- Pedido por voz (`speech_to_text`)
-- Pedido grupal en tiempo real (`GroupOrderScreen`)
+- Búsqueda por voz en carta (`speech_to_text`)
+- Pedido grupal en modo "Próximamente" (`GroupOrderScreen`)
 - Escáner QR en pantalla de reparto (`ScannerScreen`)
 - TPV para mostrador (`PosScreen`)
 
@@ -604,3 +605,41 @@ El QR se muestra en `OrderConfirmationScreen` y `OrderDetailScreen` para que el 
 - Añadidas tablas `support_threads` y `support_messages` para conversaciones cliente-admin con RLS por propietario/admin.
 - Nueva bandeja admin `/admin/support` para filtrar, leer, responder y cerrar conversaciones internas.
 - El contador de mensajes sin leer del dashboard admin suma formularios publicos y conversaciones internas pendientes.
+
+### v1.0 — Cierre final de documentación (junio 2026)
+- Corrección de flujo `Menú del día`: el carrito usa `daily_special.dish_id` como referencia canónica para `order_items.dish_id`.
+- Hardening en checkout: compatibilidad con carritos legacy que guardaban `daily_special.id`.
+- Unificación operativa recogidas/mostrador: ruta `pickup` pasa a alias de `PosScreen` (tab `Pedidos Hoy` con filtro solo recogida).
+- Eliminación de accesos duplicados a recogidas en navegación de perfil/navbar para evitar doble flujo.
+- Actualización de documentación funcional y técnica para defensa final.
+
+---
+
+## 17. Matriz de cumplimiento (guía Proyecto Final)
+
+| Requisito oficial | Evidencia en este repo | Estado |
+|---|---|---|
+| Análisis del contexto (3-5 páginas) | `analisis_contexto.html` | ✅ |
+| Diseño técnico (8-12 páginas) | `diseno_proyecto.html` + `docs/ARCHITECTURE.md` + `docs/SUPABASE.md` | ✅ |
+| Planificación (Gantt, recursos, riesgos) | `planificacion_proyecto.html` | ✅ |
+| Desarrollo e implementación | `desarrollo_proyecto.html` + `lib/` + `supabase/` | ✅ |
+| Seguimiento y evaluación | `evaluacion_proyecto.html` | ✅ |
+| Memoria principal | `memoria_proyecto.html` | ✅ |
+| Documentación técnica | `manual_tecnico.html` | ✅ |
+| Manual de usuario | `manual_usuario.html` | ✅ |
+| Presentación final | `presentacion_final.html` | ✅ |
+| Cronograma y diagrama temporal | Sección Gantt en `planificacion_proyecto.html` | ✅ |
+
+Notas de entrega:
+- Los documentos fuente se mantienen en HTML/Markdown para trazabilidad y versionado en Git.
+- La exportación a PDF se realiza desde navegador (`Imprimir` -> `Guardar como PDF`) para cada documento final.
+
+---
+
+## 18. Estado final del sistema
+
+- App cliente operativa en Android + Web con checkout, historial, catering, soporte y perfil.
+- Operativa de empleado consolidada: cocina, reparto, QR, y mostrador con recogidas integradas.
+- Operativa de admin consolidada: catálogo, pedidos, usuarios, soporte, newsletter y estadísticas.
+- Seguridad aplicada en DB con RLS por rol y ownership.
+- Backend serverless desplegable con migraciones SQL y Edge Functions.

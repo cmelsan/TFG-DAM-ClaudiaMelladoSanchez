@@ -33,7 +33,6 @@ import 'package:sabor_de_casa/features/delivery/presentation/screens/scanner_scr
 import 'package:sabor_de_casa/features/group_order/presentation/screens/group_order_screen.dart';
 import 'package:sabor_de_casa/features/home/presentation/screens/home_screen.dart';
 import 'package:sabor_de_casa/features/kitchen/presentation/screens/kitchen_screen.dart';
-import 'package:sabor_de_casa/features/kitchen/presentation/screens/pickup_screen.dart';
 import 'package:sabor_de_casa/features/legal/presentation/screens/legal_page_screen.dart';
 import 'package:sabor_de_casa/features/menu/presentation/screens/dish_detail_screen.dart';
 import 'package:sabor_de_casa/features/menu/presentation/screens/favorites_screen.dart';
@@ -316,7 +315,10 @@ GoRouter appRouter(AppRouterRef ref) {
       GoRoute(
         path: '/employee/pickup',
         name: RouteNames.pickup,
-        builder: (_, __) => const PickupScreen(),
+        builder: (_, __) => const PosScreen(
+          initialTabIndex: 3,
+          onlyPickupInTodayTab: true,
+        ),
       ),
 
       // --- Admin ---

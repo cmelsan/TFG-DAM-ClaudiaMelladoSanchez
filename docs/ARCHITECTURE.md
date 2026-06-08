@@ -336,3 +336,35 @@ dart run build_runner watch --delete-conflicting-outputs
 ```
 
 > Ejecutar siempre tras añadir o modificar un modelo `@freezed` o un provider `@riverpod`.
+
+---
+
+## 12. Decisiones Finales (Cierre)
+
+### 12.1 Unificación de recogidas y mostrador
+
+Decisión final de arquitectura operativa:
+- `PosScreen` es superficie única de operación en tienda.
+- Ruta `pickup` queda como alias de `PosScreen` en `Pedidos Hoy` con filtro `recogida`.
+- Se evita duplicidad de lógica entre `pickup_screen.dart` y `pos_screen.dart`.
+
+Beneficios:
+- Menor coste de mantenimiento.
+- Menos riesgo de regressions por cambios de estado/pago en un solo flujo.
+- UX más consistente para personal de sala.
+
+### 12.2 Integridad de `order_items.dish_id`
+
+Regla final:
+- Cualquier item comercial debe persistir `dish_id` de `dishes`.
+- En `Menú del día`, se usa `daily_special.dish_id` (nunca `daily_special.id`).
+
+Se añadió capa defensiva en checkout para resolver carritos legacy y evitar fallo FK en `order_items_dish_id_fkey`.
+
+### 12.3 Estrategia de documentación final
+
+La documentación de entrega se mantiene en dos capas:
+- Narrativa académica por fases (`analisis_contexto.html`, `diseno_proyecto.html`, `planificacion_proyecto.html`, `desarrollo_proyecto.html`, `evaluacion_proyecto.html`).
+- Trazabilidad técnica viva (`README.md`, `docs/ARCHITECTURE.md`, `docs/SUPABASE.md`, `pantallas.md`).
+
+Esta separación reduce deriva documental entre memoria y código real.

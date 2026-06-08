@@ -45,6 +45,14 @@ class CheckoutRepository {
         if (!accepting) throw const OrdersPausedFailure();
       }
 
+      // Compatibilidad: algunos carritos antiguos guardaron el id de
+      // daily_special en lugar de dishes.id para "Menú del día".
+      final resolvedDishIds = <String>[];
+      for (final item in items) {
+        final dishId = await _resolveDishId(item.dishId);
+        resolvedDishIds.add(dishId);
+      }
+
       final subtotal = items.fold<double>(
         0,
         (sum, item) => sum + (item.unitPrice * item.quantity),
@@ -80,17 +88,19 @@ class CheckoutRepository {
           .single();
 
       final orderId = order['id'] as String;
-      final orderItems = items
-          .map(
-            (item) => {
+      final orderItems = List.generate(
+        items.length,
+        (i) {
+          final item = items[i];
+          return {
               'order_id': orderId,
-              'dish_id': item.dishId,
+              'dish_id': resolvedDishIds[i],
               'quantity': item.quantity,
               'unit_price': item.unitPrice,
               'subtotal': item.unitPrice * item.quantity,
-            },
-          )
-          .toList();
+            };
+        },
+      );
 
       await _client.from(SupabaseConstants.orderItems).insert(orderItems);
 
@@ -110,6 +120,32 @@ class CheckoutRepository {
     } catch (e) {
       throw UnexpectedFailure(message: e.toString());
     }
+  }
+
+  Future<String> _resolveDishId(String rawDishId) async {
+    final dish = await _client
+        .from(SupabaseConstants.dishes)
+        .select('id')
+        .eq('id', rawDishId)
+        .maybeSingle();
+
+    if (dish != null) return rawDishId;
+
+    final special = await _client
+        .from(SupabaseConstants.dailySpecial)
+        .select('dish_id')
+        .eq('id', rawDishId)
+        .maybeSingle();
+
+    final specialDishId = special?['dish_id'] as String?;
+    if (specialDishId != null && specialDishId.isNotEmpty) {
+      return specialDishId;
+    }
+
+    throw const DatabaseFailure(
+      message:
+          'Uno de los productos del carrito ya no existe. Actualiza el carrito y vuelve a intentarlo.',
+    );
   }
 
   /// Devuelve el importe del descuento de primer pedido (30% del subtotal)

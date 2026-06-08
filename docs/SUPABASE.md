@@ -29,7 +29,7 @@ CREATE TYPE order_type          AS ENUM ('mostrador', 'encargo', 'domicilio', 'r
 CREATE TYPE order_status        AS ENUM ('pending', 'confirmed', 'preparing', 'ready',
                                          'delivering', 'delivered', 'cancelled');
 CREATE TYPE payment_status      AS ENUM ('pending', 'paid', 'refunded');
-CREATE TYPE payment_method      AS ENUM ('card', 'cash', 'online');
+CREATE TYPE payment_method      AS ENUM ('card', 'cash', 'online', 'tpv');
 CREATE TYPE event_request_status AS ENUM ('pending', 'quoted', 'accepted', 'rejected', 'completed');
 ```
 
@@ -107,7 +107,7 @@ Platos del menú.
 ---
 
 ### `daily_special`
-Plato del día con descuento opcional. Un único plato por fecha (`UNIQUE(date)`).
+Menú del día con descuento opcional. Un único plato por fecha (`UNIQUE(date)`).
 
 | Columna | Tipo | Descripción |
 |---------|------|-------------|
@@ -116,6 +116,12 @@ Plato del día con descuento opcional. Un único plato por fecha (`UNIQUE(date)`
 | `date` | DATE UNIQUE | |
 | `discount_percent` | INT | CHECK 0–100 |
 | `note` | TEXT | Mensaje especial del día |
+| `primero_text` | TEXT | Texto libre para menú de mediodía (primer plato) |
+| `segundo_text` | TEXT | Texto libre para menú de mediodía (segundo plato) |
+| `postre_text` | TEXT | Texto libre para menú de mediodía (postre) |
+| `bebida_text` | TEXT | Texto libre para bebida incluida |
+| `menu_price` | NUMERIC(8,2) | Precio menú del día |
+| `image_url` | TEXT | Imagen específica del menú del día |
 | `created_at` | TIMESTAMPTZ | |
 
 ---
@@ -143,7 +149,7 @@ Pedidos de clientes.
 | `order_type` | order_type | `mostrador | encargo | domicilio | recogida` |
 | `status` | order_status | DEFAULT `'pending'` |
 | `payment_status` | payment_status | DEFAULT `'pending'` |
-| `payment_method` | payment_method | `card | cash | online` |
+| `payment_method` | payment_method | `card | cash | online | tpv` |
 | `subtotal` | NUMERIC(10,2) | Sin gastos de envío |
 | `delivery_fee` | NUMERIC(6,2) | Gastos de envío |
 | `total` | NUMERIC(10,2) | Total final |
@@ -370,7 +376,7 @@ Definida en `00019_testimonials.sql`. Ampliada por usos del panel admin (`adminT
 ---
 
 ### `newsletter_subscribers`
-Suscriptores opt-in del formulario público de newsletter (pie de `/contacto`).
+Suscriptores opt-in del formulario público de newsletter (pie de `/contact`).
 
 | Columna | Tipo | Descripción |
 |---------|------|-------------|
@@ -754,6 +760,10 @@ Ejecutar en orden en el SQL Editor de Supabase (**Dashboard → SQL Editor**). E
 | 26 | `00026_catering_event_rules_and_menus.sql` | Reglas de eventos y menús asociados |
 | 27 | `00027_support_threads_messages.sql` | Tablas `support_threads` y `support_messages` |
 | 28 | `00028_newsletter_subscribers.sql` | Tabla `newsletter_subscribers` (opt-in público) |
+| 29 | `00029_contact_messages_email_webhook.sql` | Flujo de notificación por email para mensajes de contacto |
+| 30 | `00030_profiles_allergens.sql` | Campos de alérgenos/perfil en `profiles` |
+| 31 | `00031_rls_counters.sql` | Ajustes de contadores y endurecimiento de políticas RLS |
+| 32 | `00032_secure_counter_triggers.sql` | Triggers seguros para actualización de contadores |
 
 **Usuarios de prueba** (crear primero en Dashboard → Authentication → Add User con "Auto Confirm"):
 
@@ -771,11 +781,15 @@ Ejecutar en orden en el SQL Editor de Supabase (**Dashboard → SQL Editor**). E
 ### Desplegar Edge Functions
 ```bash
 supabase functions deploy create-payment-intent
+supabase functions deploy newsletter-unsubscribe
+supabase functions deploy send-contact-notification
 supabase functions deploy send-order-notification
 supabase functions deploy send-encargo-confirmation
 supabase functions deploy send-encargo-reminders
 supabase functions deploy send-catering-notification
 supabase functions deploy send-newsletter
+supabase functions deploy send-newsletter-campaign
+supabase functions deploy send-newsletter-welcome
 supabase functions deploy send-welcome-email
 supabase functions deploy chat-bot
 ```

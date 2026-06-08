@@ -482,13 +482,12 @@ class _FiltersBar extends StatelessWidget {
         border: Border.all(color: const Color(0xFFEEEEEE)),
         boxShadow: [AppTokens.cardShadow],
       ),
-      child: Wrap(
-        spacing: 12,
-        runSpacing: 12,
-        crossAxisAlignment: WrapCrossAlignment.center,
-        children: [
-          SizedBox(
-            width: 280,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final wide = constraints.maxWidth >= 980;
+
+          final searchField = SizedBox(
+            width: wide ? 320 : 280,
             child: TextField(
               onChanged: onQuery,
               style: GoogleFonts.inter(fontSize: 14),
@@ -512,8 +511,9 @@ class _FiltersBar extends StatelessWidget {
                 ),
               ),
             ),
-          ),
-          Container(
+          );
+
+          final statusDropdown = Container(
             padding: const EdgeInsets.symmetric(horizontal: 12),
             decoration: BoxDecoration(
               color: const Color(0xFFF4F6F8),
@@ -546,9 +546,9 @@ class _FiltersBar extends StatelessWidget {
                 },
               ),
             ),
-          ),
-          const Spacer(),
-          OutlinedButton.icon(
+          );
+
+          final exportButton = OutlinedButton.icon(
             onPressed: onExport,
             icon: const Icon(Icons.download_rounded, size: 16),
             label: const Text('Exportar CSV'),
@@ -563,9 +563,9 @@ class _FiltersBar extends StatelessWidget {
                 fontSize: 13,
               ),
             ),
-          ),
-          const SizedBox(width: 8),
-          FilledButton.icon(
+          );
+
+          final addButton = FilledButton.icon(
             onPressed: onAdd,
             icon: const Icon(Icons.person_add_rounded, size: 16),
             label: const Text('Añadir'),
@@ -579,8 +579,34 @@ class _FiltersBar extends StatelessWidget {
                 fontSize: 13,
               ),
             ),
-          ),
-        ],
+          );
+
+          if (wide) {
+            return Row(
+              children: [
+                searchField,
+                const SizedBox(width: 12),
+                statusDropdown,
+                const Spacer(),
+                exportButton,
+                const SizedBox(width: 8),
+                addButton,
+              ],
+            );
+          }
+
+          return Wrap(
+            spacing: 12,
+            runSpacing: 12,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              searchField,
+              statusDropdown,
+              exportButton,
+              addButton,
+            ],
+          );
+        },
       ),
     );
   }

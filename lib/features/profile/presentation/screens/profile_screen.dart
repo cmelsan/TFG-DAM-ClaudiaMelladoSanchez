@@ -11,7 +11,6 @@ import 'package:sabor_de_casa/core/widgets/loading_indicator.dart';
 import 'package:sabor_de_casa/core/widgets/web_footer.dart';
 import 'package:sabor_de_casa/core/widgets/web_navbar.dart';
 import 'package:sabor_de_casa/features/auth/presentation/providers/auth_provider.dart';
-import 'package:sabor_de_casa/features/notifications/presentation/providers/notifications_provider.dart';
 import 'package:sabor_de_casa/features/profile/presentation/providers/profile_provider.dart';
 import 'package:sabor_de_casa/features/support/domain/models/support_thread.dart';
 import 'package:sabor_de_casa/features/support/presentation/providers/support_provider.dart';
@@ -75,27 +74,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     ('altramuces',   'Altramuces'),
     ('cacahuete',    'Cacahuete'),
   ];
-  bool _notifOrders = true;
-  bool _notifOffers = false;
-
   @override
   void initState() {
     super.initState();
-    _loadNotifPreferences();
     _scrollCtrl = ScrollController()
       ..addListener(() {
         final scrolled = _scrollCtrl.offset > 10;
         if (scrolled != _isScrolled) setState(() => _isScrolled = scrolled);
       });
-  }
-
-  Future<void> _loadNotifPreferences() async {
-    // Las notificaciones siguen en SharedPreferences (solo son preferencias locales UI)
-    if (!mounted) return;
-    setState(() {
-      _notifOrders = true;
-      _notifOffers = false;
-    });
   }
 
   Future<void> _toggleAllergen(
@@ -109,14 +95,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     await ref
         .read(profileNotifierProvider.notifier)
         .updateAllergens(updated);
-  }
-
-  Future<void> _setNotifOrders(bool value) async {
-    setState(() => _notifOrders = value);
-  }
-
-  Future<void> _setNotifOffers(bool value) async {
-    setState(() => _notifOffers = value);
   }
 
   @override
@@ -150,7 +128,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       ref.invalidate(profileNotifierProvider);
       ref.invalidate(addressesNotifierProvider);
       ref.invalidate(mySupportThreadsProvider);
-      ref.invalidate(unreadNotificationsCountProvider);
     });
 
     return Scaffold(
@@ -310,35 +287,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       ),
                       const SizedBox(height: 32),
 
-                      // Notificaciones
-                      const _SectionLabel('Notificaciones'),
-                      const SizedBox(height: 12),
-                      _SettingsGroup(
-                        items: [
-                          _SettingsRow(
-                            icon: Icons.receipt_outlined,
-                            title: 'Estado de pedidos',
-                            subtitle: 'Confirmar, preparando, listo...',
-                            trailing: Switch(
-                              value: _notifOrders,
-                              activeThumbColor: AppTokens.brandPrimary,
-                              onChanged: _setNotifOrders,
-                            ),
-                          ),
-                          _SettingsRow(
-                            icon: Icons.local_offer_outlined,
-                            title: 'Ofertas y novedades',
-                            subtitle: 'Plato del dia, promociones especiales',
-                            trailing: Switch(
-                              value: _notifOffers,
-                              activeThumbColor: AppTokens.brandPrimary,
-                              onChanged: _setNotifOffers,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 32),
-
                       // Mis direcciones
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -369,7 +317,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       const SizedBox(height: 12),
                       _SettingsGroup(
                         items: [
-                          _NotificationsRow(),
                           _SettingsRow(
                             icon: Icons.receipt_long_outlined,
                             title: 'Mis pedidos',
@@ -805,101 +752,6 @@ class _SettingsRow extends StatelessWidget {
                 size: 14,
                 color: Color(0xFFBBBBB8),
               ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-// Notifications row with badge
-
-class _NotificationsRow extends ConsumerWidget {
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final unread = ref.watch(unreadNotificationsCountProvider);
-    return InkWell(
-      onTap: () => context.pushNamed(RouteNames.notifications),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
-        child: Row(
-          children: [
-            Container(
-              width: 36,
-              height: 36,
-              decoration: BoxDecoration(
-                color: AppTokens.brandLight,
-                borderRadius: BorderRadius.circular(10),
-              ),
-              alignment: Alignment.center,
-              child: Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  const Icon(
-                    Icons.notifications_outlined,
-                    color: AppTokens.brandPrimary,
-                    size: 20,
-                  ),
-                  if (unread > 0)
-                    Positioned(
-                      top: -4,
-                      right: -4,
-                      child: Container(
-                        width: 14,
-                        height: 14,
-                        decoration: const BoxDecoration(
-                          color: Colors.red,
-                          shape: BoxShape.circle,
-                        ),
-                        child: Center(
-                          child: Text(
-                            unread > 9 ? '9+' : '$unread',
-                            style: const TextStyle(
-                              fontSize: 8,
-                              color: Colors.white,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-            ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Notificaciones',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 15,
-                      color: _textMain(context),
-                    ),
-                  ),
-                  Text(
-                    unread > 0
-                        ? '$unread sin leer'
-                        : 'Al dia con tus avisos',
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: _textMuted(context),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const Icon(
-              Icons.arrow_forward_ios,
-              size: 14,
-              color: Color(0xFFBBBBB8),
-            ),
           ],
         ),
       ),

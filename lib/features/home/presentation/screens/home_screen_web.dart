@@ -30,6 +30,7 @@ class HomeScreenWeb extends ConsumerStatefulWidget {
 
 class _HomeScreenWebState extends ConsumerState<HomeScreenWeb> {
   late final ScrollController _scrollController;
+  final _scaffoldKey = GlobalKey<ScaffoldState>();
   bool _isScrolled = false;
 
   @override
@@ -53,6 +54,7 @@ class _HomeScreenWebState extends ConsumerState<HomeScreenWeb> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _scaffoldKey,
       endDrawer: const _WebCartDrawer(),
       body: Stack(
         children: [
@@ -101,7 +103,14 @@ class _HomeScreenWebState extends ConsumerState<HomeScreenWeb> {
             child: WebNavbar(
               isScrolled: _isScrolled,
               activeRoute: RouteNames.home,
-              onCartTap: () => Scaffold.of(context).openEndDrawer(),
+              onCartTap: () {
+                final opened = _scaffoldKey.currentState != null;
+                if (opened) {
+                  _scaffoldKey.currentState!.openEndDrawer();
+                  return;
+                }
+                context.goNamed(RouteNames.cart);
+              },
             ),
           ),
         ],

@@ -373,7 +373,7 @@ class _HeroVisual extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Image.asset('assets/images/logo_white.png', width: 122),
+                      Image.asset('assets/images/logo_bueno.png', width: 122),
                       const Spacer(),
                       const _ChatBubble(
                         label: 'Cliente',

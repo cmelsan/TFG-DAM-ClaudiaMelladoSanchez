@@ -1,5 +1,3 @@
-import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:sabor_de_casa/core/config/env_config.dart';
@@ -32,73 +30,5 @@ Future<void> bootstrap() async {
     } catch (e) {
       debugPrint('[bootstrap] Stripe no disponible: $e');
     }
-
-    // Firebase Messaging (solo Android/iOS; en web las notificaciones son email)
-    try {
-      await Firebase.initializeApp();
-      await _setupFcm();
-    } catch (e) {
-      // No interrumpir el arranque si Firebase no está configurado
-      debugPrint('[bootstrap] Firebase no disponible: $e');
-    }
   }
-}
-
-/// Solicita permisos de notificación y registra el token FCM en Supabase.
-Future<void> _setupFcm() async {
-  final messaging = FirebaseMessaging.instance;
-
-  final settings = await messaging.requestPermission();
-
-  if (settings.authorizationStatus == AuthorizationStatus.denied) {
-    debugPrint('[FCM] Notificaciones denegadas por el usuario');
-    return;
-  }
-
-  final token = await messaging.getToken();
-  if (token != null) {
-    await _saveFcmToken(token);
-  }
-
-  // Actualizar token si cambia (raro, pero puede ocurrir)
-  messaging.onTokenRefresh.listen(_saveFcmToken);
-
-  // Guardar notificaciones FCM recibidas en primer plano en la BD
-  FirebaseMessaging.onMessage.listen(_handleFcmMessage);
-}
-
-Future<void> _handleFcmMessage(RemoteMessage message) async {
-  final notification = message.notification;
-  if (notification == null) return;
-  final client = Supabase.instance.client;
-  final userId = client.auth.currentUser?.id;
-  if (userId == null) return;
-  await client
-      .from('notifications')
-      .insert({
-        'user_id': userId,
-        'title': notification.title ?? 'Notificacion',
-        'body': notification.body ?? '',
-        'type': message.data['type'] as String? ?? 'general',
-        if (message.data.isNotEmpty) 'data': message.data,
-      })
-      .catchError(
-        (Object e) => debugPrint('[FCM] Error guardando notificacion: $e'),
-      );
-}
-
-Future<void> _saveFcmToken(String token) async {
-  final client = Supabase.instance.client;
-  final userId = client.auth.currentUser?.id;
-  if (userId == null) return;
-
-  // Upsert en push_tokens (user_id + token como clave única)
-  await client
-      .from('push_tokens')
-      .upsert({
-        'user_id': userId,
-        'token': token,
-        'updated_at': DateTime.now().toIso8601String(),
-      }, onConflict: 'user_id,token')
-      .catchError((Object e) => debugPrint('[FCM] Error guardando token: $e'));
 }

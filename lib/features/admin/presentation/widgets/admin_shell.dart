@@ -1,8 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:sabor_de_casa/core/layout/responsive.dart';
+import 'package:sabor_de_casa/core/router/route_names.dart';
 import 'package:sabor_de_casa/core/theme/app_tokens.dart';
 import 'package:sabor_de_casa/features/admin/presentation/widgets/admin_sidebar.dart';
+
+void _goBack(BuildContext context) {
+  if (context.canPop()) {
+    context.pop();
+    return;
+  }
+  context.goNamed(RouteNames.profile);
+}
 
 /// Shell responsivo para el panel de administración.
 class AdminShell extends StatelessWidget {
@@ -107,13 +117,21 @@ class _MobileAdminShell extends StatelessWidget {
             color: const Color(0xFF1A1A2E),
           ),
         ),
-        leading: Builder(
-          builder: (ctx) => IconButton(
-            icon: const Icon(Icons.menu_rounded, color: Color(0xFF1A1A2E)),
-            onPressed: () => Scaffold.of(ctx).openDrawer(),
-          ),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_rounded, color: Color(0xFF1A1A2E)),
+          tooltip: 'Volver',
+          onPressed: () => _goBack(context),
         ),
-        actions: actions,
+        actions: [
+          Builder(
+            builder: (ctx) => IconButton(
+              icon: const Icon(Icons.menu_rounded, color: Color(0xFF1A1A2E)),
+              tooltip: 'Menú',
+              onPressed: () => Scaffold.of(ctx).openDrawer(),
+            ),
+          ),
+          if (actions != null) ...actions!,
+        ],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
           child: Container(height: 1, color: const Color(0xFFEEEEEE)),
@@ -149,6 +167,15 @@ class _ContentHeader extends StatelessWidget {
       ),
       child: Row(
         children: [
+          IconButton(
+            onPressed: () => _goBack(context),
+            tooltip: 'Volver',
+            icon: const Icon(
+              Icons.arrow_back_rounded,
+              color: Color(0xFF1A1A2E),
+            ),
+          ),
+          const SizedBox(width: 4),
           Text(
             title,
             style: GoogleFonts.inter(

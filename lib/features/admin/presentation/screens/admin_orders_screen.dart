@@ -26,6 +26,27 @@ const _kInk = Color(0xFF1A1A2E);
 const _kInkMuted = Color(0xFF6B7280);
 const _kInkSoft = Color(0xFF9CA3AF);
 
+bool _canRenderNetworkDishImage(String? rawUrl) {
+  final url = rawUrl?.trim();
+  if (url == null || url.isEmpty) return false;
+
+  final uri = Uri.tryParse(url);
+  if (uri == null || !uri.hasScheme) return false;
+  if (uri.scheme != 'http' && uri.scheme != 'https') return false;
+
+  final path = uri.path.toLowerCase();
+  if (path.endsWith('.svg') ||
+      path.endsWith('.avif') ||
+      path.endsWith('.heic') ||
+      path.endsWith('.heif') ||
+      path.endsWith('.tiff') ||
+      path.endsWith('.bmp')) {
+    return false;
+  }
+
+  return true;
+}
+
 // ── Constantes de mapeo ───────────────────────────────────────────────────────
 
 const _statusOptions = [
@@ -1482,20 +1503,20 @@ class _OrderCardState extends ConsumerState<_OrderCard> {
             onTap: () => setState(() => _expanded = !_expanded),
             child: Padding(
               padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
-              child: Row(
-                children: [
-                  // ID
-                  Text(
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final compact = constraints.maxWidth < 430;
+
+                  final idText = Text(
                     '#${o.shortId}',
                     style: GoogleFonts.jetBrainsMono(
                       fontSize: 14,
                       fontWeight: FontWeight.w700,
                       color: const Color(0xFF1A1A2E),
                     ),
-                  ),
-                  const SizedBox(width: 10),
-                  // Tipo badge
-                  Container(
+                  );
+
+                  final typeBadge = Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                     decoration: BoxDecoration(
                       color: const Color(0xFFF0F0F0),
@@ -1504,14 +1525,14 @@ class _OrderCardState extends ConsumerState<_OrderCard> {
                     child: Text(
                       _typeLabels[o.orderType] ?? o.orderType,
                       style: GoogleFonts.inter(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w600,
-                          color: const Color(0xFF555570)),
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: const Color(0xFF555570),
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 8),
-                  // Status badge
-                  Container(
+                  );
+
+                  final statusBadge = Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                     decoration: BoxDecoration(
                       color: sbg,
@@ -1520,37 +1541,81 @@ class _OrderCardState extends ConsumerState<_OrderCard> {
                     child: Text(
                       _statusLabels[o.status] ?? o.status,
                       style: GoogleFonts.inter(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w700,
-                          color: sc),
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                        color: sc,
+                      ),
                     ),
-                  ),
-                  const Spacer(),
-                  // Fecha
-                  Text(
+                  );
+
+                  final dateText = Text(
                     Formatters.dateTime(o.createdAt),
                     style: GoogleFonts.inter(
-                        fontSize: 11, color: const Color(0xFF8A8FA8)),
-                  ),
-                  const SizedBox(width: 12),
-                  // Total
-                  Text(
+                      fontSize: 11,
+                      color: const Color(0xFF8A8FA8),
+                    ),
+                  );
+
+                  final totalText = Text(
                     Formatters.price(o.total),
                     style: GoogleFonts.inter(
                       fontSize: 16,
                       fontWeight: FontWeight.w800,
                       color: const Color(0xFF1A1A2E),
                     ),
-                  ),
-                  const SizedBox(width: 8),
-                  Icon(
+                  );
+
+                  final expandIcon = Icon(
                     _expanded
                         ? Icons.keyboard_arrow_up_rounded
                         : Icons.keyboard_arrow_down_rounded,
                     color: const Color(0xFF9E9E9E),
                     size: 20,
-                  ),
-                ],
+                  );
+
+                  if (!compact) {
+                    return Row(
+                      children: [
+                        idText,
+                        const SizedBox(width: 10),
+                        typeBadge,
+                        const SizedBox(width: 8),
+                        statusBadge,
+                        const Spacer(),
+                        dateText,
+                        const SizedBox(width: 12),
+                        totalText,
+                        const SizedBox(width: 8),
+                        expandIcon,
+                      ],
+                    );
+                  }
+
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(child: idText),
+                          expandIcon,
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: [typeBadge, statusBadge],
+                      ),
+                      const SizedBox(height: 10),
+                      Row(
+                        children: [
+                          Expanded(child: dateText),
+                          totalText,
+                        ],
+                      ),
+                    ],
+                  );
+                },
               ),
             ),
           ),
@@ -1825,8 +1890,9 @@ class _OrderItemsSection extends ConsumerWidget {
                               // Imagen del plato
                               ClipRRect(
                                 borderRadius: BorderRadius.circular(6),
-                                child: items[i].dishImageUrl != null &&
-                                        items[i].dishImageUrl!.isNotEmpty
+                                child: _canRenderNetworkDishImage(
+                                        items[i].dishImageUrl,
+                                      )
                                     ? CachedNetworkImage(
                                         imageUrl: items[i].dishImageUrl!,
                                         width: 44,

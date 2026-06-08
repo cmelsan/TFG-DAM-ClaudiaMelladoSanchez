@@ -315,13 +315,12 @@ class _FiltersBar extends StatelessWidget {
         border: Border.all(color: const Color(0xFFEEEEEE)),
         boxShadow: [AppTokens.cardShadow],
       ),
-      child: Wrap(
-        spacing: 12,
-        runSpacing: 12,
-        crossAxisAlignment: WrapCrossAlignment.center,
-        children: [
-          SizedBox(
-            width: 280,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final wide = constraints.maxWidth >= 980;
+
+          final searchField = SizedBox(
+            width: wide ? 320 : 280,
             child: TextField(
               onChanged: onQuery,
               style: GoogleFonts.inter(fontSize: 14),
@@ -345,8 +344,9 @@ class _FiltersBar extends StatelessWidget {
                 ),
               ),
             ),
-          ),
-          _FilterDropdown(
+          );
+
+          final roleDropdown = _FilterDropdown(
             value: roleFilter,
             onChanged: onRole,
             items: const {
@@ -355,8 +355,9 @@ class _FiltersBar extends StatelessWidget {
               'employee': 'Empleados',
               'admin': 'Admins',
             },
-          ),
-          _FilterDropdown(
+          );
+
+          final stateDropdown = _FilterDropdown(
             value: stateFilter,
             onChanged: onState,
             items: const {
@@ -364,9 +365,9 @@ class _FiltersBar extends StatelessWidget {
               'active': 'Activos',
               'inactive': 'Inactivos',
             },
-          ),
-          const Spacer(),
-          OutlinedButton.icon(
+          );
+
+          final exportButton = OutlinedButton.icon(
             onPressed: onExport,
             icon: const Icon(Icons.download_rounded, size: 16),
             label: const Text('Exportar CSV'),
@@ -381,8 +382,34 @@ class _FiltersBar extends StatelessWidget {
                 fontSize: 13,
               ),
             ),
-          ),
-        ],
+          );
+
+          if (wide) {
+            return Row(
+              children: [
+                searchField,
+                const SizedBox(width: 12),
+                roleDropdown,
+                const SizedBox(width: 12),
+                stateDropdown,
+                const Spacer(),
+                exportButton,
+              ],
+            );
+          }
+
+          return Wrap(
+            spacing: 12,
+            runSpacing: 12,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              searchField,
+              roleDropdown,
+              stateDropdown,
+              exportButton,
+            ],
+          );
+        },
       ),
     );
   }

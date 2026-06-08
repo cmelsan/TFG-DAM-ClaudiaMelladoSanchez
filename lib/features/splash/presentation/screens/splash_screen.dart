@@ -70,8 +70,8 @@ class _SplashScreenState extends State<SplashScreen>
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Image.asset(
-                  'assets/images/logo_white.png',
+                  Image.asset(
+                    'assets/images/logo_bueno.png',
                   width: 300,
                   height: 300,
                 ),

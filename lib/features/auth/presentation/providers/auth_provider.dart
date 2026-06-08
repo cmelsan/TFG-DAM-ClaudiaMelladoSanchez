@@ -1,8 +1,7 @@
 import 'dart:async';
 
-import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:sabor_de_casa/core/errors/failures.dart';
 import 'package:sabor_de_casa/features/auth/data/repositories/auth_repository.dart';
 import 'package:sabor_de_casa/features/auth/domain/models/user_profile.dart';
 import 'package:sabor_de_casa/features/auth/presentation/providers/password_recovery_provider.dart';
@@ -22,6 +21,14 @@ class AuthNotifier extends _$AuthNotifier {
   /// Evita que el stream interfiera mientras signIn/signUp están en curso.
   bool _isAuthOperationInProgress = false;
 
+  Future<UserProfile?> _loadProfileOrNull() async {
+    try {
+      return await _repo!.getProfile();
+    } on AuthFailure {
+      return null;
+    }
+  }
+
   @override
   FutureOr<UserProfile?> build() async {
     // ignore: deprecated_member_use_from_same_package, Riverpod 2.x typed Ref
@@ -35,8 +42,6 @@ class AuthNotifier extends _$AuthNotifier {
         case AuthChangeEvent.tokenRefreshed:
         case AuthChangeEvent.userUpdated:
           if (!_isAuthOperationInProgress) _refreshProfile();
-          // Registrar token FCM tras autenticación (solo nativo)
-          if (!kIsWeb) _saveFcmToken();
         case AuthChangeEvent.passwordRecovery:
           // El usuario llegó desde el enlace de recuperación de contraseña.
           // Activar modo recuperación para que el router redirija a /auth/reset-password.
@@ -51,9 +56,7 @@ class AuthNotifier extends _$AuthNotifier {
     ref.onDispose(sub.cancel);
 
     // Comprobar sesión existente al arrancar (persistencia entre recargas)
-    if (_repo!.currentSession != null) {
-      return _repo!.getProfile();
-    }
+    if (_repo!.currentSession != null) return _loadProfileOrNull();
     return null;
   }
 
@@ -91,15 +94,8 @@ class AuthNotifier extends _$AuthNotifier {
   }
 
   Future<void> _refreshProfile() async {
-    state = await AsyncValue.guard(() => _repo!.getProfile());
-  }
-
-  /// Registra el token FCM del dispositivo en push_tokens (best-effort).
-  Future<void> _saveFcmToken() async {
-    final userId = _repo?.currentUser?.id;
-    if (userId == null) return;
-    final token = await FirebaseMessaging.instance.getToken();
-    if (token == null) return;
-    await _repo!.saveFcmToken(userId, token);
+    state = const AsyncLoading();
+    final profile = await _loadProfileOrNull();
+    state = AsyncData(profile);
   }
 }

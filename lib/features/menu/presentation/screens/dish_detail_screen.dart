@@ -10,7 +10,9 @@ import 'package:sabor_de_casa/core/widgets/error_view.dart';
 import 'package:sabor_de_casa/core/widgets/loading_indicator.dart';
 import 'package:sabor_de_casa/features/auth/presentation/providers/auth_provider.dart';
 import 'package:sabor_de_casa/features/cart/presentation/providers/cart_provider.dart';
+import 'package:sabor_de_casa/features/menu/domain/models/daily_special.dart';
 import 'package:sabor_de_casa/features/menu/domain/models/dish.dart';
+import 'package:sabor_de_casa/features/menu/presentation/providers/daily_special_provider.dart';
 import 'package:sabor_de_casa/features/menu/presentation/providers/favorites_provider.dart';
 import 'package:sabor_de_casa/features/menu/presentation/providers/menu_provider.dart';
 import 'package:sabor_de_casa/features/menu/presentation/widgets/allergen_badge.dart';
@@ -52,6 +54,54 @@ void _tapFavorite(BuildContext context, WidgetRef ref, String dishId) {
   ref.read(favoriteToggleProvider.notifier).toggle(dishId);
 }
 
+double _effectiveDishPrice(Dish dish) {
+  if (dish.offerPrice != null &&
+      dish.offerPrice! > 0 &&
+      dish.offerPrice! < dish.price) {
+    return dish.offerPrice!;
+  }
+  return dish.price;
+}
+
+Dish _applyTodaySpecialToDish(
+  Dish dish,
+  ({DailySpecial special, Dish dish})? todaySpecial,
+) {
+  if (todaySpecial == null) return dish;
+  if (dish.id != todaySpecial.special.dishId) return dish;
+
+  final discount = todaySpecial.special.discountPercent;
+  final menuPrice = todaySpecial.special.menuPrice;
+  final hasDiscountPercent = discount != null && discount > 0;
+  final hasMenuPrice = menuPrice != null && menuPrice > 0 && menuPrice < dish.price;
+  if (!hasDiscountPercent && !hasMenuPrice) return dish;
+
+  final discountedBySpecial = hasDiscountPercent
+      ? double.parse((dish.price * (1 - discount / 100)).toStringAsFixed(2))
+      : dish.price;
+    final pricedBySpecial = hasMenuPrice ? menuPrice : dish.price;
+
+    final hasBaseOffer =
+      dish.offerPrice != null &&
+      dish.offerPrice! > 0 &&
+      dish.offerPrice! < dish.price;
+
+  final effectiveOffer = hasBaseOffer
+      ? [dish.offerPrice!, discountedBySpecial, pricedBySpecial]
+        .where((p) => p > 0 && p < dish.price)
+        .fold<double>(dish.offerPrice!, (min, p) => p < min ? p : min)
+      : [discountedBySpecial, pricedBySpecial]
+        .where((p) => p > 0 && p < dish.price)
+        .fold<double>(dish.price, (min, p) => p < min ? p : min);
+
+  if (effectiveOffer <= 0 || effectiveOffer >= dish.price) return dish;
+
+  return dish.copyWith(
+    isOffer: true,
+    offerPrice: effectiveOffer,
+  );
+}
+
 class DishDetailScreen extends ConsumerStatefulWidget {
   const DishDetailScreen({required this.dishId, super.key});
 
@@ -67,6 +117,7 @@ class _DishDetailScreenState extends ConsumerState<DishDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final dishAsync = ref.watch(dishDetailProvider(widget.dishId));
+    final todaySpecial = ref.watch(todaySpecialProvider).valueOrNull;
     final isFavAsync = ref.watch(isFavoriteProvider(widget.dishId));
     final screenWidth = MediaQuery.sizeOf(context).width;
     final isWide = kIsWeb && screenWidth >= 800;
@@ -74,23 +125,26 @@ class _DishDetailScreenState extends ConsumerState<DishDetailScreen> {
     return Scaffold(
       backgroundColor: isWide ? Colors.white : const Color(0xFFF4F6F2),
       body: dishAsync.when(
-        data: (dish) => isWide
+        data: (dish) {
+          final dishWithSpecial = _applyTodaySpecialToDish(dish, todaySpecial);
+          return isWide
             ? _WebLayout(
-                dish: dish,
+                dish: dishWithSpecial,
                 isFavAsync: isFavAsync,
                 quantity: _quantity,
                 onQuantityChanged: (v) => setState(() => _quantity = v),
-                onAddToCart: () => _addToCart(context, dish),
+                onAddToCart: () => _addToCart(context, dishWithSpecial),
                 dishId: widget.dishId,
               )
             : _MobileLayout(
-                dish: dish,
+                dish: dishWithSpecial,
                 isFavAsync: isFavAsync,
                 quantity: _quantity,
                 onQuantityChanged: (v) => setState(() => _quantity = v),
-                onAddToCart: () => _addToCart(context, dish),
+                onAddToCart: () => _addToCart(context, dishWithSpecial),
                 dishId: widget.dishId,
-              ),
+              );
+        },
         loading: () => const LoadingIndicator(),
         error: (error, _) => ErrorView(
           message: error.toString(),
@@ -148,6 +202,13 @@ class _WebLayout extends ConsumerWidget {
           icon: const Icon(Icons.arrow_back, color: Color(0xFF111111)),
           onPressed: () => context.pop(),
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.shopping_bag_outlined,
+                color: Color(0xFF111111)),
+            onPressed: () => context.goNamed(RouteNames.cart),
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(48, 8, 48, 48),
@@ -275,6 +336,19 @@ class _MobileLayout extends ConsumerWidget {
                 padding: const EdgeInsets.all(8),
                 child: CircleAvatar(
                   backgroundColor: Colors.white.withValues(alpha: 0.8),
+                  child: IconButton(
+                    icon: const Icon(
+                      Icons.shopping_bag_outlined,
+                      color: Color(0xFF111111),
+                    ),
+                    onPressed: () => context.goNamed(RouteNames.cart),
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8),
+                child: CircleAvatar(
+                  backgroundColor: Colors.white.withValues(alpha: 0.8),
                   child: isFavAsync.when(
                     data: (isFav) => IconButton(
                       icon: Icon(
@@ -335,7 +409,7 @@ class _MobileLayout extends ConsumerWidget {
                       child: FilledButton(
                         onPressed: onAddToCart,
                         child: Text(
-                          'Añadir  ·  ${Formatters.price(dish.price * quantity)}',
+                          'Añadir  ·  ${Formatters.price(_effectiveDishPrice(dish) * quantity)}',
                         ),
                       ),
                     ),
@@ -448,13 +522,48 @@ class _DishInfo extends StatelessWidget {
           // Precio + tiempo / agotado
           Row(
             children: [
-              Text(
-                Formatters.price(dish.price),
-                style: theme.textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w800,
-                  color: AppTokens.brandPrimary,
+                if (dish.offerPrice != null &&
+                  dish.offerPrice! > 0 &&
+                  dish.offerPrice! < dish.price) ...[
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: AppTokens.warning.withValues(alpha: 0.14),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    'Oferta',
+                    style: theme.textTheme.labelMedium?.copyWith(
+                      color: AppTokens.warning,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
                 ),
-              ),
+                const SizedBox(width: 10),
+                Text(
+                  Formatters.price(_effectiveDishPrice(dish)),
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.w800,
+                    color: AppTokens.brandPrimary,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  Formatters.price(dish.price),
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: Colors.black45,
+                    decoration: TextDecoration.lineThrough,
+                  ),
+                ),
+              ] else
+                Text(
+                  Formatters.price(dish.price),
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.w800,
+                    color: AppTokens.brandPrimary,
+                  ),
+                ),
               const SizedBox(width: 16),
               if (!dish.isAvailable)
                 Container(
@@ -559,7 +668,7 @@ class _DishInfo extends StatelessWidget {
                         ),
                       ),
                       child: Text(
-                        'Añadir  ·  ${Formatters.price(dish.price * quantity)}',
+                        'Añadir  ·  ${Formatters.price(_effectiveDishPrice(dish) * quantity)}',
                         style: const TextStyle(
                             fontSize: 15, fontWeight: FontWeight.w700),
                       ),
@@ -656,6 +765,20 @@ class _DishDetailModalState extends ConsumerState<_DishDetailModal> {
                     Center(child: ErrorView(message: e.toString())),
               ),
               // ── Botón cerrar ────────────────────────────────────────
+              Positioned(
+                top: 10,
+                right: 52,
+                child: IconButton(
+                  icon: const Icon(Icons.shopping_bag_outlined, size: 18),
+                  style: IconButton.styleFrom(
+                    backgroundColor: Colors.black12,
+                    foregroundColor: const Color(0xFF333333),
+                    minimumSize: const Size(36, 36),
+                    padding: EdgeInsets.zero,
+                  ),
+                  onPressed: () => context.goNamed(RouteNames.cart),
+                ),
+              ),
               Positioned(
                 top: 10,
                 right: 10,

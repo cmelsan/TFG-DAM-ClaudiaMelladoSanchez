@@ -18,6 +18,28 @@ const _kInk = Color(0xFF1A1A2E);
 const _kInkMuted = Color(0xFF6B7280);
 const _kInkSoft = Color(0xFF9CA3AF);
 
+bool _canRenderNetworkDishImage(String? rawUrl) {
+  final url = rawUrl?.trim();
+  if (url == null || url.isEmpty) return false;
+
+  final uri = Uri.tryParse(url);
+  if (uri == null || !uri.hasScheme) return false;
+  if (uri.scheme != 'http' && uri.scheme != 'https') return false;
+
+  final path = uri.path.toLowerCase();
+  // Evita formatos que suelen romper en Android/ImageDecoder en runtime.
+  if (path.endsWith('.svg') ||
+      path.endsWith('.avif') ||
+      path.endsWith('.heic') ||
+      path.endsWith('.heif') ||
+      path.endsWith('.tiff') ||
+      path.endsWith('.bmp')) {
+    return false;
+  }
+
+  return true;
+}
+
 enum _DishFilter { all, available, unavailable, offer, seasonal }
 
 class AdminDishesScreen extends ConsumerStatefulWidget {
@@ -688,7 +710,7 @@ class _DishCard extends ConsumerWidget {
                     ),
                     child: AspectRatio(
                       aspectRatio: 16 / 10,
-                      child: dish.imageUrl != null
+                        child: _canRenderNetworkDishImage(dish.imageUrl)
                           ? CachedNetworkImage(
                               imageUrl: dish.imageUrl!,
                               fit: BoxFit.cover,
@@ -1357,11 +1379,18 @@ class _DishFormSheetState extends ConsumerState<_DishFormSheet> {
                                 fit: BoxFit.cover,
                                 width: double.infinity,
                               )
-                            : widget.existing?.imageUrl != null
+                            : _canRenderNetworkDishImage(widget.existing?.imageUrl)
                                 ? CachedNetworkImage(
                                     imageUrl: widget.existing!.imageUrl!,
                                     fit: BoxFit.cover,
                                     width: double.infinity,
+                                    errorWidget: (_, __, ___) => const Center(
+                                      child: Icon(
+                                        Icons.image_not_supported,
+                                        size: 40,
+                                        color: Colors.grey,
+                                      ),
+                                    ),
                                   )
                                 : const Center(
                                     child: Column(

@@ -52,6 +52,12 @@ class CartNotifier extends _$CartNotifier {
   void addDish(Dish dish) {
     final items = _itemsFromState();
     final index = items.indexWhere((item) => item.dishId == dish.id);
+    final effectivePrice =
+      dish.offerPrice != null &&
+          dish.offerPrice! > 0 &&
+          dish.offerPrice! < dish.price
+        ? dish.offerPrice!
+        : dish.price;
 
     if (index >= 0) {
       final current = items[index];
@@ -61,7 +67,7 @@ class CartNotifier extends _$CartNotifier {
         CartItem(
           dishId: dish.id,
           name: dish.name,
-          unitPrice: dish.price,
+          unitPrice: effectivePrice,
           quantity: 1,
           imageUrl: dish.imageUrl,
           allergens: dish.allergens,
